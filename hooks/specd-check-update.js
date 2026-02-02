@@ -45,8 +45,13 @@ const child = spawn(process.execPath, ['-e', `
     latest = execSync('npm view specdacular version', { encoding: 'utf8', timeout: 10000, windowsHide: true }).trim();
   } catch (e) {}
 
+  // Only show update if we have both a real installed version and a newer latest
+  // Don't show if installed is default (0.0.0) - means VERSION file missing
+  const hasRealInstall = installed !== '0.0.0';
+  const isNewer = latest && installed !== latest && latest > installed;
+
   const result = {
-    update_available: latest && installed !== latest,
+    update_available: hasRealInstall && isNewer,
     installed,
     latest: latest || 'unknown',
     checked: Math.floor(Date.now() / 1000)
