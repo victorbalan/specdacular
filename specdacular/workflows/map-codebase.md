@@ -1,23 +1,25 @@
 <purpose>
-Orchestrate parallel codebase mapper agents to analyze codebase and produce structured documents in .specd/codebase/
+Orchestrate parallel codebase mapper agents to analyze codebase and produce 4 AI-optimized documents in .specd/codebase/
 
-Each agent has fresh context, explores a specific focus area, and **writes documents directly**. The orchestrator only receives confirmation + line counts, then writes a summary.
+Each agent has fresh context, explores a specific focus area, and **writes documents directly**. The orchestrator only receives confirmation + line counts.
 
-Output: .specd/codebase/ folder with 7 structured documents about the codebase state.
+Output: .specd/codebase/ folder with 4 documents optimized for Claude consumption.
 </purpose>
 
 <philosophy>
+**These documents are FOR CLAUDE, not humans.**
+
+The 4 documents answer questions Claude can't get from reading code:
+- **MAP.md** — "Where is X? What functions exist?"
+- **PATTERNS.md** — "How do I write code that fits?"
+- **STRUCTURE.md** — "Where do I put new code?"
+- **CONCERNS.md** — "What will bite me?"
+
 **Why dedicated mapper agents:**
 - Fresh context per domain (no token contamination)
 - Agents write documents directly (no context transfer back to orchestrator)
 - Orchestrator only summarizes what was created (minimal context usage)
-- Faster execution (agents run simultaneously)
-
-**Document quality over length:**
-Include enough detail to be useful as reference. Prioritize practical examples (especially code patterns) over arbitrary brevity.
-
-**Always include file paths:**
-Documents are reference material for Claude when planning/executing. Always include actual file paths formatted with backticks: `src/services/user.ts`.
+- Parallel execution (faster)
 </philosophy>
 
 <process>
@@ -35,16 +37,14 @@ ls -la .specd/codebase/ 2>/dev/null
 .specd/codebase/ already exists with these documents:
 [List files found]
 
-What's next?
+Options:
 1. Refresh - Delete existing and remap codebase
-2. Update - Keep existing, only update specific documents
-3. Skip - Use existing codebase map as-is
+2. Skip - Use existing codebase map as-is
 ```
 
 Wait for user response.
 
 If "Refresh": Delete .specd/codebase/, continue to create_structure
-If "Update": Ask which documents to update, continue to spawn_agents (filtered)
 If "Skip": Exit workflow
 
 **If doesn't exist:**
@@ -55,17 +55,14 @@ Continue to create_structure.
 Create .specd/codebase/ directory:
 
 ```bash
-mkdir -p .specd
+mkdir -p .specd/codebase
 ```
 
-**Expected output files:**
-- STACK.md (from tech mapper)
-- INTEGRATIONS.md (from tech mapper)
-- ARCHITECTURE.md (from arch mapper)
-- STRUCTURE.md (from arch mapper)
-- CONVENTIONS.md (from quality mapper)
-- TESTING.md (from quality mapper)
-- CONCERNS.md (from concerns mapper)
+**Documents to be created:**
+- MAP.md (from map mapper) — Navigation: function signatures, entry points, modules
+- PATTERNS.md (from patterns mapper) — Code examples: services, error handling, testing
+- STRUCTURE.md (from structure mapper) — Organization: where to put new code
+- CONCERNS.md (from concerns mapper) — Warnings: gotchas, anti-patterns, tech debt
 
 Continue to spawn_agents.
 </step>
@@ -75,75 +72,86 @@ Spawn 4 parallel specd-codebase-mapper agents.
 
 Use Task tool with `subagent_type="specd-codebase-mapper"` and `run_in_background=true` for parallel execution.
 
-**CRITICAL:** Use the dedicated `specd-codebase-mapper` agent, NOT `Explore`. The mapper agent writes documents directly.
+**CRITICAL:** Use the dedicated `specd-codebase-mapper` agent, NOT `Explore`.
 
-**Agent 1: Tech Focus**
-
-Task tool parameters:
-```
-subagent_type: "specd-codebase-mapper"
-model: "haiku"
-run_in_background: true
-description: "Map codebase tech stack"
-```
-
-Prompt:
-```
-Focus: tech
-
-Analyze this codebase for technology stack and external integrations.
-
-Write these documents to .specd/codebase/:
-- STACK.md - Languages, runtime, frameworks, dependencies, configuration
-- INTEGRATIONS.md - External APIs, databases, auth providers, webhooks
-
-Explore thoroughly. Write documents directly using templates. Return confirmation only.
-```
-
-**Agent 2: Architecture Focus**
+**Agent 1: Map Focus**
 
 Task tool parameters:
 ```
 subagent_type: "specd-codebase-mapper"
-model: "haiku"
+model: "sonnet"
 run_in_background: true
-description: "Map codebase architecture"
+description: "Map codebase navigation"
 ```
 
 Prompt:
 ```
-Focus: arch
+Focus: map
 
-Analyze this codebase architecture and directory structure.
+Create a navigation map of this codebase for Claude.
 
-Write these documents to .specd/codebase/:
-- ARCHITECTURE.md - Pattern, layers, data flow, abstractions, entry points
-- STRUCTURE.md - Directory layout, key locations, naming conventions
+Write MAP.md to .specd/codebase/ containing:
+- Entry points (where execution starts)
+- Core modules with function signatures
+- External integrations (services, env vars)
+- Key type definitions
 
-Explore thoroughly. Write documents directly using templates. Return confirmation only.
+Extract ACTUAL function signatures from the code. Include file paths everywhere.
+Return confirmation only when done.
 ```
 
-**Agent 3: Quality Focus**
+**Agent 2: Patterns Focus**
 
 Task tool parameters:
 ```
 subagent_type: "specd-codebase-mapper"
-model: "haiku"
+model: "sonnet"
 run_in_background: true
-description: "Map codebase conventions"
+description: "Map codebase patterns"
 ```
 
 Prompt:
 ```
-Focus: quality
+Focus: patterns
 
-Analyze this codebase for coding conventions and testing patterns.
+Extract code patterns from this codebase for Claude to follow.
 
-Write these documents to .specd/codebase/:
-- CONVENTIONS.md - Code style, naming, patterns, error handling
-- TESTING.md - Framework, structure, mocking, coverage
+Write PATTERNS.md to .specd/codebase/ containing:
+- Service/handler patterns (with real code examples)
+- Error handling patterns (with real code examples)
+- Testing patterns (with real code examples)
+- Mocking patterns (with real code examples)
+- Import conventions
 
-Explore thoroughly. Write documents directly using templates. Return confirmation only.
+Use ACTUAL code from the codebase, not generic examples. Include file paths and line numbers.
+Return confirmation only when done.
+```
+
+**Agent 3: Structure Focus**
+
+Task tool parameters:
+```
+subagent_type: "specd-codebase-mapper"
+model: "sonnet"
+run_in_background: true
+description: "Map codebase structure"
+```
+
+Prompt:
+```
+Focus: structure
+
+Document where to put new code in this codebase.
+
+Write STRUCTURE.md to .specd/codebase/ containing:
+- Quick reference table: "I want to add X → put it in Y"
+- Directory purposes (what goes where)
+- Naming conventions
+- Where NOT to put code
+- Active migrations (if any)
+
+Be prescriptive: "Put new services in X" not "Services are in X".
+Return confirmation only when done.
 ```
 
 **Agent 4: Concerns Focus**
@@ -151,7 +159,7 @@ Explore thoroughly. Write documents directly using templates. Return confirmatio
 Task tool parameters:
 ```
 subagent_type: "specd-codebase-mapper"
-model: "haiku"
+model: "sonnet"
 run_in_background: true
 description: "Map codebase concerns"
 ```
@@ -160,12 +168,18 @@ Prompt:
 ```
 Focus: concerns
 
-Analyze this codebase for technical debt, known issues, and areas of concern.
+Find gotchas and problems in this codebase that Claude needs to know.
 
-Write this document to .specd/codebase/:
-- CONCERNS.md - Tech debt, bugs, security, performance, fragile areas
+Write CONCERNS.md to .specd/codebase/ containing:
+- Gotchas (surprising but intentional behaviors)
+- Anti-patterns (what NOT to do, with examples)
+- Tech debt (with guidance on working around it)
+- Fragile areas (with safe modification guidance)
+- Dependency notes (pinned versions, upgrade blockers)
+- Performance notes
 
-Explore thoroughly. Write document directly using template. Return confirmation only.
+Gotchas section is MOST IMPORTANT. Include file paths for everything.
+Return confirmation only when done.
 ```
 
 Continue to collect_confirmations.
@@ -181,14 +195,11 @@ Read each agent's output file to collect confirmations.
 ## Mapping Complete
 
 **Focus:** {focus}
-**Documents written:**
-- `.specd/codebase/{DOC1}.md` ({N} lines)
-- `.specd/codebase/{DOC2}.md` ({N} lines)
+**Document written:** `.specd/codebase/{DOC}.md` ({N} lines)
 
-Ready for orchestrator summary.
+Key findings:
+- {summary}
 ```
-
-**What you receive:** Just file paths and line counts. NOT document contents.
 
 If any agent failed, note the failure and continue with successful documents.
 
@@ -204,7 +215,7 @@ wc -l .specd/codebase/*.md
 ```
 
 **Verification checklist:**
-- All 7 documents exist
+- All 4 documents exist (MAP.md, PATTERNS.md, STRUCTURE.md, CONCERNS.md)
 - No empty documents (each should have >20 lines)
 
 If any documents missing or empty, note which agents may have failed.
@@ -218,24 +229,23 @@ Commit the codebase map:
 ```bash
 git add .specd/codebase/*.md
 git commit -m "$(cat <<'EOF'
-docs: map existing codebase
+docs: map codebase for Claude
 
-- STACK.md - Technologies and dependencies
-- ARCHITECTURE.md - System design and patterns
-- STRUCTURE.md - Directory layout
-- CONVENTIONS.md - Code style and patterns
-- TESTING.md - Test structure
-- INTEGRATIONS.md - External services
-- CONCERNS.md - Technical debt and issues
+- MAP.md - Navigation: modules, functions, integrations
+- PATTERNS.md - Code examples: services, errors, testing
+- STRUCTURE.md - Organization: where to put new code
+- CONCERNS.md - Warnings: gotchas, anti-patterns, debt
+
+Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
 ```
 
-Continue to offer_next.
+Continue to completion.
 </step>
 
-<step name="offer_next">
-Present completion summary and next steps.
+<step name="completion">
+Present completion summary.
 
 **Get line counts:**
 ```bash
@@ -245,29 +255,17 @@ wc -l .specd/codebase/*.md
 **Output format:**
 
 ```
-Codebase mapping complete.
+Codebase mapped for Claude.
 
 Created .specd/codebase/:
-- STACK.md ([N] lines) - Technologies and dependencies
-- ARCHITECTURE.md ([N] lines) - System design and patterns
-- STRUCTURE.md ([N] lines) - Directory layout and organization
-- CONVENTIONS.md ([N] lines) - Code style and patterns
-- TESTING.md ([N] lines) - Test structure and practices
-- INTEGRATIONS.md ([N] lines) - External services and APIs
-- CONCERNS.md ([N] lines) - Technical debt and issues
+- MAP.md ([N] lines) — Navigation: modules, functions, entry points
+- PATTERNS.md ([N] lines) — Code examples to follow
+- STRUCTURE.md ([N] lines) — Where to put new code
+- CONCERNS.md ([N] lines) — Gotchas and anti-patterns
 
+These docs help Claude understand your codebase. They'll be referenced during planning and implementation.
 
----
-
-## What's Next
-
-Your codebase is now documented. You can:
-
-- Review documents: `cat .specd/codebase/STACK.md`
-- Edit any document to add details
-- Use these docs when planning features
-
----
+To review: `cat .specd/codebase/MAP.md`
 ```
 
 End workflow.
@@ -279,7 +277,7 @@ End workflow.
 - .specd/codebase/ directory created
 - 4 parallel specd-codebase-mapper agents spawned with run_in_background=true
 - Agents write documents directly (orchestrator doesn't receive document contents)
-- Read agent output files to collect confirmations
-- All 7 codebase documents exist
+- All 4 documents exist: MAP.md, PATTERNS.md, STRUCTURE.md, CONCERNS.md
+- Documents contain real code examples (not placeholders)
 - Clear completion summary with line counts
 </success_criteria>

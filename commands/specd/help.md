@@ -12,47 +12,47 @@ Display available specdacular commands and usage guidance.
 <output>
 # Specdacular
 
-**Feature planning for existing codebases.**
+**AI-optimized codebase documentation for Claude.**
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/specd:map-codebase` | Analyze codebase and generate documentation |
+| `/specd:map-codebase` | Analyze codebase → produce 4 AI-optimized docs |
 | `/specd:new-feature` | Initialize a feature with requirements and roadmap |
 | `/specd:update` | Update Specdacular to the latest version |
 | `/specd:help` | Show this help |
 
 ## Quick Start
 
-1. **Map your codebase first:**
-   ```
-   /specd:map-codebase
-   ```
-   This spawns 4 parallel agents to analyze your codebase and creates 7 documents in `.specd/codebase/`.
+```
+/specd:map-codebase
+```
 
-2. **Review the generated docs:**
-   - `STACK.md` - Technologies and dependencies
-   - `ARCHITECTURE.md` - System design and patterns
-   - `STRUCTURE.md` - Directory layout
-   - `CONVENTIONS.md` - Code style and patterns
-   - `TESTING.md` - Test structure
-   - `INTEGRATIONS.md` - External services
-   - `CONCERNS.md` - Technical debt and issues
+This spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`:
 
-3. **Plan a new feature:**
-   ```
-   /specd:new-feature user-dashboard
-   ```
-   This starts a conversational workflow to define your feature, creating:
-   - `FEATURE.md` - What this feature does
-   - `REQUIREMENTS.md` - Scoped requirements with REQ-IDs
-   - `ROADMAP.md` - Phases with success criteria
-   - `STATE.md` - Progress tracking
+| Document | What it contains |
+|----------|------------------|
+| **MAP.md** | Navigation: modules, functions, entry points |
+| **PATTERNS.md** | Code examples: services, errors, testing |
+| **STRUCTURE.md** | Organization: where to put new code |
+| **CONCERNS.md** | Warnings: gotchas, anti-patterns, debt |
+
+## Philosophy
+
+These docs are **for Claude, not humans**.
+
+Each document answers a question Claude can't get from reading code:
+- MAP.md → "Where is X? What functions exist?"
+- PATTERNS.md → "How do I write code that fits?"
+- STRUCTURE.md → "Where do I put new code?"
+- CONCERNS.md → "What will bite me?"
+
+**Principle:** Don't document what Claude can grep. Document tribal knowledge, gotchas, and patterns.
 
 ## Updating
 
-When an update is available, you'll see a yellow `⬆ /specd:update` in your statusline. Run:
+When an update is available, you'll see `⬆ /specd:update` in your statusline. Run:
 ```
 /specd:update
 ```
@@ -60,5 +60,5 @@ Or manually: `npx specdacular@latest`
 
 ---
 
-*More commands coming soon for phase planning and execution.*
+GitHub: https://github.com/vlad-ds/specdacular
 </output>
