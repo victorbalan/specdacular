@@ -19,6 +19,7 @@ Display available specdacular commands and usage guidance.
 | Command | Description |
 |---------|-------------|
 | `/specd:map-codebase` | Analyze codebase and generate documentation |
+| `/specd:update` | Update Specdacular to the latest version |
 | `/specd:help` | Show this help |
 
 ## Quick Start
@@ -40,9 +41,11 @@ Display available specdacular commands and usage guidance.
 
 ## Updating
 
-```bash
-npx specdacular@latest
+When an update is available, you'll see a yellow `⬆ /specd:update` in your statusline. Run:
 ```
+/specd:update
+```
+Or manually: `npx specdacular@latest`
 
 ---
 

@@ -199,6 +199,75 @@ function uninstall(isGlobal) {
     }
   }
 
+  // Remove specd hooks
+  const hooksDir = path.join(targetDir, 'hooks');
+  if (fs.existsSync(hooksDir)) {
+    const specdHooks = ['specd-check-update.js', 'specd-statusline.js'];
+    let hookCount = 0;
+    for (const hook of specdHooks) {
+      const hookPath = path.join(hooksDir, hook);
+      if (fs.existsSync(hookPath)) {
+        fs.unlinkSync(hookPath);
+        hookCount++;
+      }
+    }
+    if (hookCount > 0) {
+      removedCount++;
+      console.log(`  ${green}✓${reset} Removed ${hookCount} specd hooks`);
+    }
+  }
+
+  // Clean up settings.json
+  const settingsPath = path.join(targetDir, 'settings.json');
+  if (fs.existsSync(settingsPath)) {
+    let settings = readSettings(settingsPath);
+    let settingsModified = false;
+
+    // Remove specd statusline
+    if (settings.statusLine && settings.statusLine.command &&
+        settings.statusLine.command.includes('specd-statusline')) {
+      delete settings.statusLine;
+      settingsModified = true;
+      console.log(`  ${green}✓${reset} Removed specd statusline from settings`);
+    }
+
+    // Remove specd hooks from SessionStart
+    if (settings.hooks && settings.hooks.SessionStart) {
+      const before = settings.hooks.SessionStart.length;
+      settings.hooks.SessionStart = settings.hooks.SessionStart.filter(entry => {
+        if (entry.hooks && Array.isArray(entry.hooks)) {
+          const hasSpecdHook = entry.hooks.some(h =>
+            h.command && h.command.includes('specd-check-update')
+          );
+          return !hasSpecdHook;
+        }
+        return true;
+      });
+      if (settings.hooks.SessionStart.length < before) {
+        settingsModified = true;
+        console.log(`  ${green}✓${reset} Removed specd hooks from settings`);
+      }
+      if (settings.hooks.SessionStart.length === 0) {
+        delete settings.hooks.SessionStart;
+      }
+      if (Object.keys(settings.hooks).length === 0) {
+        delete settings.hooks;
+      }
+    }
+
+    if (settingsModified) {
+      writeSettings(settingsPath, settings);
+      removedCount++;
+    }
+  }
+
+  // Remove update cache
+  const cacheFile = path.join(os.homedir(), '.claude', 'cache', 'specd-update-check.json');
+  if (fs.existsSync(cacheFile)) {
+    fs.unlinkSync(cacheFile);
+    console.log(`  ${green}✓${reset} Removed update cache`);
+  }
+
   if (removedCount === 0) {
     console.log(`  ${yellow}⚠${reset} No specdacular files found to remove.`);
   } else {
@@ -283,6 +352,78 @@ function install(isGlobal) {
   fs.writeFileSync(versionDest, pkg.version);
   console.log(`  ${green}✓${reset} Wrote VERSION (${pkg.version})`);
 
+  // Install hooks
+  const hooksSrc = path.join(src, 'hooks');
+  if (fs.existsSync(hooksSrc)) {
+    const hooksDest = path.join(targetDir, 'hooks');
+    fs.mkdirSync(hooksDest, { recursive: true });
+
+    // Remove old specd hooks
+    if (fs.existsSync(hooksDest)) {
+      for (const file of fs.readdirSync(hooksDest)) {
+        if (file.startsWith('specd-')) {
+          fs.unlinkSync(path.join(hooksDest, file));
+        }
+      }
+    }
+
+    // Copy new hooks
+    const hookEntries = fs.readdirSync(hooksSrc);
+    for (const entry of hookEntries) {
+      const srcFile = path.join(hooksSrc, entry);
+      if (fs.statSync(srcFile).isFile()) {
+        fs.copyFileSync(srcFile, path.join(hooksDest, entry));
+      }
+    }
+    console.log(`  ${green}✓${reset} Installed hooks`);
+  }
+
+  // Configure settings.json for hooks and statusline
+  const settingsPath = path.join(targetDir, 'settings.json');
+  const settings = readSettings(settingsPath);
+
+  // Build hook command paths
+  const hooksPath = isGlobal ? targetDir.replace(/\\/g, '/') + '/hooks/' : '.claude/hooks/';
+  const updateCheckCommand = `node "${hooksPath}specd-check-update.js"`;
+  const statuslineCommand = `node "${hooksPath}specd-statusline.js"`;
+
+  // Configure SessionStart hook for update checking
+  if (!settings.hooks) {
+    settings.hooks = {};
+  }
+  if (!settings.hooks.SessionStart) {
+    settings.hooks.SessionStart = [];
+  }
+
+  // Check if specd hook already exists
+  const hasSpecdHook = settings.hooks.SessionStart.some(entry =>
+    entry.hooks && entry.hooks.some(h => h.command && h.command.includes('specd-check-update'))
+  );
+
+  if (!hasSpecdHook) {
+    settings.hooks.SessionStart.push({
+      hooks: [
+        {
+          type: 'command',
+          command: updateCheckCommand
+        }
+      ]
+    });
+    console.log(`  ${green}✓${reset} Configured update check hook`);
+  }
+
+  // Configure statusline (only if not already set)
+  if (!settings.statusLine) {
+    settings.statusLine = {
+      type: 'command',
+      command: statuslineCommand
+    };
+    console.log(`  ${green}✓${reset} Configured statusline`);
+  }
+
+  // Write settings
+  writeSettings(settingsPath, settings);
+
   if (failures.length > 0) {
     console.error(`\n  ${yellow}Installation incomplete!${reset} Failed: ${failures.join(', ')}`);
     process.exit(1);
@@ -293,6 +434,7 @@ function install(isGlobal) {
 
   ${yellow}Commands:${reset}
     /specd:map-codebase  - Analyze and document your codebase
+    /specd:update        - Update to latest version
     /specd:help          - Show all commands
 `);
 }
