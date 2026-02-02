@@ -1,0 +1,31 @@
+{
+  "name": "specdacular",
+  "version": "0.1.0",
+  "description": "Feature planning system for existing codebases. Map, understand, and plan features in large projects.",
+  "bin": {
+    "specdacular": "bin/install.js"
+  },
+  "files": [
+    "bin",
+    "commands",
+    "agents",
+    "specdacular"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "codebase-analysis",
+    "feature-planning",
+    "spec-driven-development"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=16.7.0"
+  }
+}
