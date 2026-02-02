@@ -27,7 +27,7 @@ Display available specdacular commands and usage guidance.
    ```
    /specd:map-codebase
    ```
-   This spawns 4 parallel agents to analyze your codebase and creates 7 documents in `.planning/codebase/`.
+   This spawns 4 parallel agents to analyze your codebase and creates 7 documents in `.specd/codebase/`.
 
 2. **Review the generated docs:**
    - `STACK.md` - Technologies and dependencies

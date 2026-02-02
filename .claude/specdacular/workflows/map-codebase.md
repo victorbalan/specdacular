@@ -1,9 +1,9 @@
 <purpose>
-Orchestrate parallel codebase mapper agents to analyze codebase and produce structured documents in .planning/codebase/
+Orchestrate parallel codebase mapper agents to analyze codebase and produce structured documents in .specd/codebase/
 
 Each agent has fresh context, explores a specific focus area, and **writes documents directly**. The orchestrator only receives confirmation + line counts, then writes a summary.
 
-Output: .planning/codebase/ folder with 7 structured documents about the codebase state.
+Output: .specd/codebase/ folder with 7 structured documents about the codebase state.
 </purpose>
 
 <philosophy>
@@ -23,16 +23,16 @@ Documents are reference material for Claude when planning/executing. Always incl
 <process>
 
 <step name="check_existing">
-Check if .planning/codebase/ already exists:
+Check if .specd/codebase/ already exists:
 
 ```bash
-ls -la .planning/codebase/ 2>/dev/null
+ls -la .specd/codebase/ 2>/dev/null
 ```
 
 **If exists:**
 
 ```
-.planning/codebase/ already exists with these documents:
+.specd/codebase/ already exists with these documents:
 [List files found]
 
 What's next?
@@ -43,7 +43,7 @@ What's next?
 
 Wait for user response.
 
-If "Refresh": Delete .planning/codebase/, continue to create_structure
+If "Refresh": Delete .specd/codebase/, continue to create_structure
 If "Update": Ask which documents to update, continue to spawn_agents (filtered)
 If "Skip": Exit workflow
 
@@ -52,10 +52,10 @@ Continue to create_structure.
 </step>
 
 <step name="create_structure">
-Create .planning/codebase/ directory:
+Create .specd/codebase/ directory:
 
 ```bash
-mkdir -p .planning/codebase
+mkdir -p .specd
 ```
 
 **Expected output files:**
@@ -93,7 +93,7 @@ Focus: tech
 
 Analyze this codebase for technology stack and external integrations.
 
-Write these documents to .planning/codebase/:
+Write these documents to .specd/codebase/:
 - STACK.md - Languages, runtime, frameworks, dependencies, configuration
 - INTEGRATIONS.md - External APIs, databases, auth providers, webhooks
 
@@ -116,7 +116,7 @@ Focus: arch
 
 Analyze this codebase architecture and directory structure.
 
-Write these documents to .planning/codebase/:
+Write these documents to .specd/codebase/:
 - ARCHITECTURE.md - Pattern, layers, data flow, abstractions, entry points
 - STRUCTURE.md - Directory layout, key locations, naming conventions
 
@@ -139,7 +139,7 @@ Focus: quality
 
 Analyze this codebase for coding conventions and testing patterns.
 
-Write these documents to .planning/codebase/:
+Write these documents to .specd/codebase/:
 - CONVENTIONS.md - Code style, naming, patterns, error handling
 - TESTING.md - Framework, structure, mocking, coverage
 
@@ -162,7 +162,7 @@ Focus: concerns
 
 Analyze this codebase for technical debt, known issues, and areas of concern.
 
-Write this document to .planning/codebase/:
+Write this document to .specd/codebase/:
 - CONCERNS.md - Tech debt, bugs, security, performance, fragile areas
 
 Explore thoroughly. Write document directly using template. Return confirmation only.
@@ -182,8 +182,8 @@ Read each agent's output file to collect confirmations.
 
 **Focus:** {focus}
 **Documents written:**
-- `.planning/codebase/{DOC1}.md` ({N} lines)
-- `.planning/codebase/{DOC2}.md` ({N} lines)
+- `.specd/codebase/{DOC1}.md` ({N} lines)
+- `.specd/codebase/{DOC2}.md` ({N} lines)
 
 Ready for orchestrator summary.
 ```
@@ -199,8 +199,8 @@ Continue to verify_output.
 Verify all documents created successfully:
 
 ```bash
-ls -la .planning/codebase/
-wc -l .planning/codebase/*.md
+ls -la .specd/codebase/
+wc -l .specd/codebase/*.md
 ```
 
 **Verification checklist:**
@@ -216,7 +216,7 @@ Continue to commit_codebase_map.
 Commit the codebase map:
 
 ```bash
-git add .planning/codebase/*.md
+git add .specd/codebase/*.md
 git commit -m "$(cat <<'EOF'
 docs: map existing codebase
 
@@ -239,7 +239,7 @@ Present completion summary and next steps.
 
 **Get line counts:**
 ```bash
-wc -l .planning/codebase/*.md
+wc -l .specd/codebase/*.md
 ```
 
 **Output format:**
@@ -247,7 +247,7 @@ wc -l .planning/codebase/*.md
 ```
 Codebase mapping complete.
 
-Created .planning/codebase/:
+Created .specd/codebase/:
 - STACK.md ([N] lines) - Technologies and dependencies
 - ARCHITECTURE.md ([N] lines) - System design and patterns
 - STRUCTURE.md ([N] lines) - Directory layout and organization
@@ -263,7 +263,7 @@ Created .planning/codebase/:
 
 Your codebase is now documented. You can:
 
-- Review documents: `cat .planning/codebase/STACK.md`
+- Review documents: `cat .specd/codebase/STACK.md`
 - Edit any document to add details
 - Use these docs when planning features
 
@@ -276,7 +276,7 @@ End workflow.
 </process>
 
 <success_criteria>
-- .planning/codebase/ directory created
+- .specd/codebase/ directory created
 - 4 parallel specd-codebase-mapper agents spawned with run_in_background=true
 - Agents write documents directly (orchestrator doesn't receive document contents)
 - Read agent output files to collect confirmations
