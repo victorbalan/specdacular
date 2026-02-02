@@ -33,16 +33,27 @@ ls -la .specd/codebase/ 2>/dev/null
 
 **If exists:**
 
-```
-.specd/codebase/ already exists with these documents:
-[List files found]
+Use the AskUserQuestion tool:
 
-Options:
-1. Refresh - Delete existing and remap codebase
-2. Skip - Use existing codebase map as-is
+```json
+{
+  "questions": [{
+    "question": "Codebase map already exists. What would you like to do?",
+    "header": "Existing map",
+    "options": [
+      {
+        "label": "Refresh - remap codebase",
+        "description": "Delete existing docs and generate fresh analysis"
+      },
+      {
+        "label": "Skip - use existing",
+        "description": "Keep current codebase map, no changes"
+      }
+    ],
+    "multiSelect": false
+  }]
+}
 ```
-
-Wait for user response.
 
 If "Refresh": Delete .specd/codebase/, continue to check_existing_docs
 If "Skip": Exit workflow
@@ -62,22 +73,32 @@ find . -maxdepth 2 -name "*.md" -not -path "./node_modules/*" -not -path "./.git
 
 **If documentation found:**
 
-Ask the user using AskUserQuestion:
+Use the AskUserQuestion tool:
 
+```json
+{
+  "questions": [{
+    "question": "I found existing documentation. Should I incorporate it into the codebase map?",
+    "header": "Existing docs",
+    "options": [
+      {
+        "label": "Yes - incorporate docs (Recommended)",
+        "description": "Read existing docs and include relevant architectural decisions, gotchas, conventions"
+      },
+      {
+        "label": "No - analyze code only",
+        "description": "Generate fresh from code analysis, ignore existing documentation"
+      }
+    ],
+    "multiSelect": false
+  }]
+}
 ```
-I found existing documentation in your codebase:
-[List files found]
 
-Do you want me to incorporate this into the codebase map?
-
-1. Yes - Read existing docs and incorporate relevant info (recommended)
-2. No - Generate fresh from code analysis only
-```
-
-**If user says Yes:**
+**If user selects "Yes":**
 Read the key documentation files (README, ARCHITECTURE, CONTRIBUTING, etc.) and store the content as context to pass to mapper agents.
 
-**If user says No or no docs found:**
+**If user selects "No" or no docs found:**
 Continue to create_structure with no additional context.
 
 Continue to create_structure.
