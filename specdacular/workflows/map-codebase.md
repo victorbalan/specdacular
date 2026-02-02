@@ -44,10 +44,42 @@ Options:
 
 Wait for user response.
 
-If "Refresh": Delete .specd/codebase/, continue to create_structure
+If "Refresh": Delete .specd/codebase/, continue to check_existing_docs
 If "Skip": Exit workflow
 
 **If doesn't exist:**
+Continue to check_existing_docs.
+</step>
+
+<step name="check_existing_docs">
+Check for existing documentation in the codebase:
+
+```bash
+# Find common documentation files
+ls README* CONTRIBUTING* ARCHITECTURE* docs/ doc/ wiki/ 2>/dev/null
+find . -maxdepth 2 -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" 2>/dev/null | head -20
+```
+
+**If documentation found:**
+
+Ask the user using AskUserQuestion:
+
+```
+I found existing documentation in your codebase:
+[List files found]
+
+Do you want me to incorporate this into the codebase map?
+
+1. Yes - Read existing docs and incorporate relevant info (recommended)
+2. No - Generate fresh from code analysis only
+```
+
+**If user says Yes:**
+Read the key documentation files (README, ARCHITECTURE, CONTRIBUTING, etc.) and store the content as context to pass to mapper agents.
+
+**If user says No or no docs found:**
+Continue to create_structure with no additional context.
+
 Continue to create_structure.
 </step>
 
@@ -73,6 +105,15 @@ Spawn 4 parallel specd-codebase-mapper agents.
 Use Task tool with `subagent_type="specd-codebase-mapper"` and `run_in_background=true` for parallel execution.
 
 **CRITICAL:** Use the dedicated `specd-codebase-mapper` agent, NOT `Explore`.
+
+**If existing documentation was found and user said to incorporate it:**
+Include a summary of the existing docs in each agent's prompt:
+```
+Existing documentation context:
+{summary of README, ARCHITECTURE, CONTRIBUTING, etc.}
+
+Use this context to inform your analysis. Incorporate relevant architectural decisions, gotchas, and conventions mentioned in the docs.
+```
 
 **Agent 1: Map Focus**
 
