@@ -71,23 +71,25 @@ ls README* CONTRIBUTING* ARCHITECTURE* docs/ doc/ wiki/ 2>/dev/null
 find . -maxdepth 2 -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" 2>/dev/null | head -20
 ```
 
-**If documentation found:**
+**Always read and incorporate any docs found.** This is automatic - existing documentation contains tribal knowledge we want to capture.
+
+**Then ask user if there's more we missed:**
 
 Use the AskUserQuestion tool:
 
 ```json
 {
   "questions": [{
-    "question": "I found existing documentation. Should I incorporate it into the codebase map?",
-    "header": "Existing docs",
+    "question": "Do you have any other documentation I should incorporate? (wiki, Notion, external docs, etc.)",
+    "header": "More docs?",
     "options": [
       {
-        "label": "Yes - incorporate docs (Recommended)",
-        "description": "Read existing docs and include relevant architectural decisions, gotchas, conventions"
+        "label": "No - that's everything",
+        "description": "Proceed with what was found in the repo"
       },
       {
-        "label": "No - analyze code only",
-        "description": "Generate fresh from code analysis, ignore existing documentation"
+        "label": "Yes - I have more",
+        "description": "I'll share additional documentation or context"
       }
     ],
     "multiSelect": false
@@ -95,13 +97,11 @@ Use the AskUserQuestion tool:
 }
 ```
 
-**If user selects "Yes":**
-Read the key documentation files (README, ARCHITECTURE, CONTRIBUTING, etc.) and store the content as context to pass to mapper agents.
+**If user selects "Yes - I have more":**
+Wait for user to provide additional context (paste docs, share links, explain architecture).
+Incorporate this into the context for mapper agents.
 
-**If user selects "No" or no docs found:**
-Continue to create_structure with no additional context.
-
-Continue to create_structure.
+**Then continue to create_structure.**
 </step>
 
 <step name="create_structure">
