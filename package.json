@@ -23,7 +23,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+ssh://git@github.com/victorbalan/specdacular.git"
+  },
+  "homepage": "https://github.com/victorbalan/specdacular",
+  "bugs": {
+    "url": "https://github.com/victorbalan/specdacular/issues"
   },
   "engines": {
     "node": ">=16.7.0"
