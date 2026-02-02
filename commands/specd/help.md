@@ -19,6 +19,7 @@ Display available specdacular commands and usage guidance.
 | Command | Description |
 |---------|-------------|
 | `/specd:map-codebase` | Analyze codebase and generate documentation |
+| `/specd:new-feature` | Initialize a feature with requirements and roadmap |
 | `/specd:update` | Update Specdacular to the latest version |
 | `/specd:help` | Show this help |
 
@@ -39,6 +40,16 @@ Display available specdacular commands and usage guidance.
    - `INTEGRATIONS.md` - External services
    - `CONCERNS.md` - Technical debt and issues
 
+3. **Plan a new feature:**
+   ```
+   /specd:new-feature user-dashboard
+   ```
+   This starts a conversational workflow to define your feature, creating:
+   - `FEATURE.md` - What this feature does
+   - `REQUIREMENTS.md` - Scoped requirements with REQ-IDs
+   - `ROADMAP.md` - Phases with success criteria
+   - `STATE.md` - Progress tracking
+
 ## Updating
 
 When an update is available, you'll see a yellow `⬆ /specd:update` in your statusline. Run:
@@ -49,5 +60,5 @@ Or manually: `npx specdacular@latest`
 
 ---
 
-*More commands coming soon for feature planning workflows.*
+*More commands coming soon for phase planning and execution.*
 </output>
