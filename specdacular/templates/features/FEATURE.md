@@ -1,44 +1,63 @@
-# {Feature Name}
+# Feature: {feature-name}
 
-## What This Feature Does
+## What This Is
 
-{2-3 sentences describing what the feature enables and how users interact with it.}
+{1-2 sentences: what capability this adds. Technical focus, not marketing.}
 
-## Core Value
+## Technical Requirements
 
-{The ONE thing that must work for this feature to be useful. This is the non-negotiable success criterion.}
+### Must Create
 
-## Context
+{Files and components that must be created for this feature to work.}
 
-### Existing Code Integration
+- [ ] `{path/to/file.ts}` — {What it does}
+- [ ] `{path/to/file.tsx}` — {What it does}
+- [ ] `{path/to/file.ts}` — {What it does}
 
-- **Affected Areas:** {List of existing code areas that will be modified or extended}
-- **Dependencies:** {External services, libraries, or internal modules this feature depends on}
-- **Entry Points:** {Where users will access this feature from}
+### Must Integrate With
 
-### User Context
+{Existing code this feature connects to. Include paths.}
 
-- **Primary Users:** {Who will use this feature}
-- **User Goal:** {What users are trying to accomplish}
-- **Current Workaround:** {How users solve this problem today, if applicable}
+- `{path/to/existing.ts}` — {How it integrates}
+- `{path/to/existing.ts}` — {How it integrates}
 
-## Constraints
+### Constraints
 
-{List constraints that shape the implementation. Format: [Type]: [What] — [Why]}
+{Technical constraints that shape implementation.}
 
-- **Technical:** {Constraint} — {Rationale}
-- **Timeline:** {Constraint} — {Rationale}
-- **Scope:** {Constraint} — {Rationale}
+- {Constraint 1} — {Rationale}
+- {Constraint 2} — {Rationale}
 
-## Key Decisions
+---
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| {What was decided} | {Why this choice} | {Impact on implementation} |
+## Success Criteria
 
-## Open Questions
+{Specific, testable conditions. Each should be verifiable.}
 
-{Questions that still need answers before or during implementation. Remove this section when all questions are resolved.}
+- [ ] {Observable behavior or command that proves it works}
+- [ ] {Observable behavior or command that proves it works}
+- [ ] {Observable behavior or command that proves it works}
 
-- [ ] {Question 1}
-- [ ] {Question 2}
+---
+
+## Out of Scope
+
+{Explicitly excluded. Prevents scope creep.}
+
+- [X] {What's excluded} — {Why}
+- [X] {What's excluded} — {Why}
+
+---
+
+## Initial Context
+
+{Context from initial discussion. Brief notes that inform the requirements.}
+
+### User Need
+{What problem this solves}
+
+### Integration Points
+{Key existing code areas this touches}
+
+### Key Constraints
+{Most important constraints to remember}

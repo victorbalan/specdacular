@@ -1,54 +1,83 @@
-# State: {Feature Name}
+# State: {feature-name}
 
 ## Current Position
 
-**Phase:** 1 - {Phase Name}
-**Status:** Not Started
-**Last Updated:** {Date}
+**Stage:** {discussion | research | planning | execution}
+**Last Updated:** {YYYY-MM-DD}
 
-## Progress Summary
+---
 
-### Completed
-{Nothing yet}
+## Stage Progress
 
-### In Progress
-{Nothing yet}
+### Discussion
+- [x] Initial discussion complete
+- [ ] Gray areas identified
+- [ ] All gray areas resolved
 
-### Blocked
-{Nothing yet}
+### Research
+- [ ] Research conducted
+- [ ] Findings documented in RESEARCH.md
 
-## Accumulated Decisions
+### Planning
+- [ ] Phases derived
+- [ ] Plans created
 
-{Decisions made during planning and implementation. Add new decisions as they're made.}
+### Execution
+- [ ] Phase 1 complete
+- [ ] Phase 2 complete
 
-| Date | Decision | Context | Impact |
-|------|----------|---------|--------|
-| {Date} | {What was decided} | {Why it came up} | {How it affects implementation} |
+---
 
-## Session History
+## Discussion Sessions
 
-| Date | Activity | Outcome |
-|------|----------|---------|
-| {Date} | Feature initialized | Created planning documents |
+| Date | Focus | Outcome |
+|------|-------|---------|
+| {YYYY-MM-DD} | Initial discussion | FEATURE.md created |
 
-## Phase Progress
+---
 
-### Phase 1: {Name}
+## Documents Status
 
-**Status:** Not Started
+| Document | Status | Last Updated |
+|----------|--------|--------------|
+| FEATURE.md | Created | {date} |
+| CONTEXT.md | Created | {date} |
+| DECISIONS.md | {N} decisions | {date} |
+| RESEARCH.md | Not started | — |
+| ROADMAP.md | Not started | — |
+| plans/ | Not started | — |
 
-**Requirements Progress:**
-- [ ] {FEAT}-UI-01: Not started
-- [ ] {FEAT}-API-01: Not started
+---
 
-**Notes:**
-{Implementation notes, blockers, discoveries}
+## Decision Count
+
+- **Active:** {N}
+- **Superseded:** {N}
+- **Total:** {N}
+
+---
+
+## Next Steps
+
+{What the user should do next based on current state.}
+
+**Options:**
+- `/specd:discuss-feature {feature-name}` — Continue refining understanding
+- `/specd:research-feature {feature-name}` — Research implementation approach
+- `/specd:plan-feature {feature-name}` — Create executable plans (when ready)
+
+---
+
+## Session Notes
+
+{Space for notes during sessions. Cleared or archived as appropriate.}
 
 ---
 
 ## Quick Reference
 
 - **Feature:** `.specd/features/{feature-name}/FEATURE.md`
-- **Requirements:** `.specd/features/{feature-name}/REQUIREMENTS.md`
+- **Context:** `.specd/features/{feature-name}/CONTEXT.md`
+- **Decisions:** `.specd/features/{feature-name}/DECISIONS.md`
+- **Research:** `.specd/features/{feature-name}/RESEARCH.md`
 - **Roadmap:** `.specd/features/{feature-name}/ROADMAP.md`
-- **Config:** `.specd/features/{feature-name}/config.json`

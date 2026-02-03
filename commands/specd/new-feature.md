@@ -1,6 +1,6 @@
 ---
 name: specd:new-feature
-description: Initialize a new feature with deep questioning, requirements, and roadmap
+description: Initialize a new feature with technical questioning and start the first discussion
 argument-hint: "[feature-name]"
 allowed-tools:
   - Read
@@ -12,14 +12,16 @@ allowed-tools:
 ---
 
 <objective>
-Initialize a feature folder with structured planning documents through a conversational workflow.
+Initialize a feature folder and start the first discussion. Creates structure, asks initial questions about what's being built, and writes technical requirements.
 
-Creates `.specd/features/{feature-name}/` with:
-- FEATURE.md - What this feature does, core value, constraints
-- REQUIREMENTS.md - Scoped requirements with REQ-IDs (v1/v2/out-of-scope)
-- ROADMAP.md - Phases with success criteria and requirement mapping
-- STATE.md - Project memory, current position, decisions
-- config.json - Mode (yolo/interactive), depth (quick/standard/comprehensive)
+**Creates:**
+- `.specd/features/{name}/FEATURE.md` — Technical requirements from discussion
+- `.specd/features/{name}/CONTEXT.md` — Discussion context (accumulates over time)
+- `.specd/features/{name}/DECISIONS.md` — Memory file for decisions with rationale
+- `.specd/features/{name}/STATE.md` — Progress tracking
+- `.specd/features/{name}/config.json` — Feature configuration
+
+**This is the entry point.** After this, user controls the loop with discuss/research/plan.
 </objective>
 
 <execution_context>
@@ -30,46 +32,36 @@ Creates `.specd/features/{feature-name}/` with:
 Feature name: $ARGUMENTS
 
 **Codebase context discovery:**
-1. Check for `.specd/config.json` - if exists, read `codebase_docs` path
+1. Check for `.specd/config.json` — if exists, read `codebase_docs` path
 2. If no config, check for `.specd/codebase/` (default location)
-3. If neither found, ask user for custom location or suggest `/specd:map-codebase`
+3. If neither found, offer `/specd:map-codebase`
 
 **Referenced docs (when available):**
-- `ARCHITECTURE.md` - Understand existing patterns for integration
-- `CONVENTIONS.md` - Ensure requirements follow coding standards
-- `STRUCTURE.md` - Know where new code should go
+- `ARCHITECTURE.md` or `MAP.md` — System structure
+- `CONVENTIONS.md` or `PATTERNS.md` — Code patterns
+- `STRUCTURE.md` — Directory layout
 </context>
 
-<when_to_use>
-**Use new-feature for:**
-- Starting a new feature or enhancement
-- When you need structured planning documents
-- Before implementing non-trivial functionality
-- When multiple people will work on a feature
-
-**Skip new-feature for:**
-- Bug fixes (just fix them)
-- Trivial changes (<1 hour of work)
-- Exploratory spikes
-</when_to_use>
-
 <process>
-1. Setup - Get feature name, check if exists
-2. Codebase Context - Look for codebase docs
-3. Complexity Assessment - Ask light/moderate/complicated
-4. Deep Questioning - Adaptive depth based on complexity
-5. Write FEATURE.md - Capture context from conversation
-6. Configuration - Ask mode/depth preferences
-7. Define Requirements - Scope v1/v2/out-of-scope
-8. Create Roadmap - Derive phases, map requirements
-9. Initialize State - Create STATE.md
-10. Completion - Summary and next steps
+1. **Validate** — Check name, check if exists
+2. **Codebase Context** — Look for codebase docs (offer map-codebase if missing)
+3. **First Discussion** — "What are you building?"
+4. **Follow the Thread** — Collaborative, not interrogative
+5. **Probe Until Clear** — What creates, what integrates with, constraints
+6. **Write FEATURE.md** — Technical requirements
+7. **Write CONTEXT.md** — Initial discussion state
+8. **Initialize DECISIONS.md** — With any decisions made so far
+9. **Initialize STATE.md** — Feature created, ready for more discussion
+10. **Commit and Present Options**
 </process>
 
 <success_criteria>
 - [ ] Feature folder created at `.specd/features/{name}/`
-- [ ] All 5 files created (FEATURE.md, REQUIREMENTS.md, ROADMAP.md, STATE.md, config.json)
-- [ ] Requirements have REQ-IDs in format `{FEAT}-{CAT}-{NUM}`
-- [ ] Roadmap phases map to requirements
-- [ ] Commits made at key milestones
+- [ ] FEATURE.md captures technical requirements
+- [ ] CONTEXT.md initialized with discussion context
+- [ ] DECISIONS.md initialized (possibly with initial decisions)
+- [ ] STATE.md tracks current position
+- [ ] config.json created
+- [ ] Committed to git
+- [ ] User knows next options: discuss-feature, research-feature, or continue talking
 </success_criteria>

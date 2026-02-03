@@ -1,0 +1,388 @@
+<purpose>
+Continue or deepen understanding of a feature through targeted discussion. Can be called **many times** — context accumulates across sessions.
+
+**Key behaviors:**
+- Idempotent: calling multiple times builds on previous discussions
+- Shows what's already been discussed to avoid repetition
+- Gray areas are feature-specific, not generic categories
+- Scope guardrail: clarify HOW, not whether to add more
+- Deferred ideas captured but not acted on
+
+**Output:** Updated CONTEXT.md and DECISIONS.md with new resolutions and decisions.
+</purpose>
+
+<philosophy>
+
+## Accumulating Context
+
+Each discussion session adds to the shared understanding. CONTEXT.md grows with resolved questions. DECISIONS.md grows with new decisions. Nothing is lost between sessions.
+
+## Feature-Specific Gray Areas
+
+Don't use generic categories like "UI" or "API". Identify actual unclear aspects of THIS feature:
+- "How should the validation feedback appear?"
+- "What happens when the connection drops mid-operation?"
+- "Should this support bulk operations?"
+
+## Scope Guardrail
+
+The feature scope was defined in FEATURE.md. Discussion clarifies HOW to build what's scoped, not whether to add more scope.
+
+**Good:** "For the error handling you mentioned, should we use toasts or inline messages?"
+**Bad:** "Should we also add a feature for X?" (unless user brings it up)
+
+If user suggests scope changes, capture in DECISIONS.md with rationale rather than expanding FEATURE.md automatically.
+
+## Four Questions Then Check
+
+When probing a gray area:
+1. Ask up to 4 clarifying questions
+2. Summarize understanding
+3. Confirm or continue
+
+Don't interrogate endlessly. Get enough clarity to implement, then move on.
+
+</philosophy>
+
+<process>
+
+<step name="validate">
+Validate feature exists and has required files.
+
+```bash
+# Check feature exists
+[ -d ".specd/features/$ARGUMENTS" ] || { echo "Feature not found"; exit 1; }
+
+# Check required files
+[ -f ".specd/features/$ARGUMENTS/FEATURE.md" ] || { echo "Missing FEATURE.md"; exit 1; }
+[ -f ".specd/features/$ARGUMENTS/CONTEXT.md" ] || { echo "Missing CONTEXT.md"; exit 1; }
+[ -f ".specd/features/$ARGUMENTS/DECISIONS.md" ] || { echo "Missing DECISIONS.md"; exit 1; }
+```
+
+**If feature not found:**
+```
+Feature '{name}' not found.
+
+Did you mean to run /specd:new-feature {name} first?
+```
+
+Continue to load_context.
+</step>
+
+<step name="load_context">
+Load all existing context.
+
+**Read:**
+- `FEATURE.md` — What the feature does, technical requirements
+- `CONTEXT.md` — Previous discussion resolutions
+- `DECISIONS.md` — Previous decisions
+- `STATE.md` — Current stage and progress
+- `RESEARCH.md` — If exists, research findings
+
+**Parse:**
+- Extract resolved questions from CONTEXT.md
+- Extract active decisions from DECISIONS.md
+- Extract gray areas remaining from CONTEXT.md
+- Count discussion sessions from STATE.md
+
+Continue to show_state.
+</step>
+
+<step name="show_state">
+Present current understanding to user.
+
+```
+## Discussion: {feature-name}
+
+**Session {N+1}** (previous sessions: {N})
+
+### What We've Established
+
+{Summary from FEATURE.md — 2-3 sentences on what this builds}
+
+### Previous Discussions Resolved
+
+{List of resolved questions from CONTEXT.md, grouped by topic}
+
+- **{Topic}:** {Resolution summary}
+- **{Topic}:** {Resolution summary}
+
+### Active Decisions
+
+{Count} decisions recorded:
+- DEC-XXX: {Title} — {One-liner}
+- DEC-YYY: {Title} — {One-liner}
+
+{If RESEARCH.md exists:}
+### Research Findings
+
+Research has been conducted. Key findings:
+- {Finding 1}
+- {Finding 2}
+```
+
+Continue to identify_gray_areas.
+</step>
+
+<step name="identify_gray_areas">
+Identify areas that need discussion based on feature type and current state.
+
+**Derive gray areas from:**
+1. Explicit "Gray Areas Remaining" in CONTEXT.md
+2. Implicit gaps in FEATURE.md (vague requirements, unclear integrations)
+3. Feature-type-specific concerns (see below)
+4. Questions raised but not resolved in previous discussions
+
+**Feature-type-specific gray areas:**
+
+*If feature involves UI:*
+- Error state presentation
+- Loading state behavior
+- Empty state content
+- Responsive breakpoints
+- Accessibility requirements
+
+*If feature involves API:*
+- Error response format
+- Pagination approach
+- Authentication requirements
+- Rate limiting
+- Versioning
+
+*If feature involves data:*
+- Validation rules
+- Default values
+- Migration approach
+- Backup/recovery
+
+*If feature involves integration:*
+- Failure handling
+- Retry logic
+- Timeout behavior
+- Fallback behavior
+
+**Present to user:**
+```
+### Areas to Discuss
+
+Based on the feature and what we've covered, these areas could use more clarity:
+
+1. **{Gray area}** — {Why it matters}
+2. **{Gray area}** — {Why it matters}
+3. **{Gray area}** — {Why it matters}
+4. **{Gray area}** — {Why it matters}
+
+Which would you like to discuss? (Or describe something else)
+```
+
+Use AskUserQuestion:
+- header: "Discussion Focus"
+- question: "Which area would you like to discuss first?"
+- options: List the identified gray areas (up to 4)
+- Add "Something else" as final option
+
+Continue to probe_area.
+</step>
+
+<step name="probe_area">
+Probe the selected gray area until clear.
+
+**For each selected area:**
+
+**Question 1:** Open-ended exploration
+"Tell me more about how you see {area} working..."
+
+**Question 2:** Clarify based on response
+"When you say X, do you mean Y or Z?"
+
+**Question 3:** Edge cases
+"What should happen when {edge case}?"
+
+**Question 4:** Confirm approach
+"So the approach would be {summary}. Is that right?"
+
+**After 4 questions (or earlier if clear):**
+```
+Let me capture what we've resolved:
+
+**{Area}:**
+- {Key point 1}
+- {Key point 2}
+- {Any code pattern implied}
+
+Does that capture it correctly?
+```
+
+**If user confirms:** Record in CONTEXT.md
+**If user corrects:** Continue probing, then record
+
+**If user wants to discuss another area:**
+Return to identify_gray_areas step with updated context.
+
+Continue to record_decisions.
+</step>
+
+<step name="record_decisions">
+Record any NEW decisions made during this session.
+
+**Identify decisions from discussion:**
+- Technology/library choices
+- Approach choices between alternatives
+- Scope inclusions/exclusions
+- Pattern choices
+
+**For each new decision:**
+
+Get the next decision number from DECISIONS.md.
+
+Add to DECISIONS.md:
+```markdown
+### DEC-{NNN}: {Title}
+
+**Date:** {today}
+**Status:** Active
+**Context:** {What situation required this decision — from discussion}
+**Decision:** {What was decided}
+**Rationale:**
+- {Why this choice}
+**Implications:**
+- {What this means for implementation}
+**References:**
+- {Any code paths or docs referenced}
+```
+
+Continue to update_context.
+</step>
+
+<step name="update_context">
+Update CONTEXT.md with newly resolved questions.
+
+**Add to Resolved Questions section:**
+
+```markdown
+### {Question title}
+
+**Question:** {What was unclear}
+
+**Resolution:** {The answer/decision}
+
+**Details:**
+- {Detail 1}
+- {Detail 2}
+
+**Code Pattern:** (if applicable)
+```{language}
+{code example}
+```
+
+**Related Decisions:** DEC-XXX
+```
+
+**Update Gray Areas Remaining:**
+Remove any areas that were resolved.
+Add any new areas that were identified.
+
+**Update Discussion History:**
+```markdown
+| {today} | {Topics covered} | {Key outcomes} |
+```
+
+Continue to update_state.
+</step>
+
+<step name="update_state">
+Update STATE.md with session information.
+
+**Update:**
+- Last Updated: today
+- Discussion sessions: increment
+- Gray areas remaining count
+
+**Update config.json:**
+```json
+{
+  "discussion_sessions": {N+1},
+  "decisions_count": {new count}
+}
+```
+
+Continue to commit.
+</step>
+
+<step name="commit">
+Commit the discussion updates.
+
+```bash
+git add .specd/features/{feature-name}/CONTEXT.md .specd/features/{feature-name}/DECISIONS.md .specd/features/{feature-name}/STATE.md .specd/features/{feature-name}/config.json
+git commit -m "docs({feature-name}): discussion session {N}
+
+Resolved:
+- {Area 1}
+- {Area 2}
+
+New decisions: {count}
+- DEC-XXX: {title}"
+```
+
+Continue to completion.
+</step>
+
+<step name="completion">
+Present session summary and next options.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ DISCUSSION SESSION COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Feature:** {feature-name}
+**Session:** {N}
+
+## Resolved This Session
+
+- **{Area 1}:** {Brief resolution}
+- **{Area 2}:** {Brief resolution}
+
+## New Decisions
+
+- DEC-XXX: {Title}
+- DEC-YYY: {Title}
+
+{If gray areas remain:}
+## Still to Discuss
+
+- {Remaining area 1}
+- {Remaining area 2}
+
+───────────────────────────────────────────────────────
+
+## What's Next
+
+**/specd:discuss-feature {feature-name}** — Continue discussing
+  {Recommended if gray areas remain}
+
+**/specd:research-feature {feature-name}** — Research implementation
+  {Recommended if technical questions need investigation}
+
+**/specd:plan-feature {feature-name}** — Create executable plans
+  {Recommended when discussion is sufficient}
+
+Or just **keep talking** — this conversation continues naturally.
+```
+
+End workflow.
+</step>
+
+</process>
+
+<success_criteria>
+- Feature validated and context loaded
+- Current state shown to user (previous resolutions, decisions)
+- Gray areas identified specific to this feature
+- User-selected areas probed (4 questions, then check)
+- Decisions recorded with full context (date, rationale, implications)
+- CONTEXT.md updated with resolved questions
+- STATE.md updated with session info
+- Committed to git
+- User knows next options
+</success_criteria>

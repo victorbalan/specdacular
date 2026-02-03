@@ -1,19 +1,21 @@
-# Roadmap: {Feature Name}
+# Roadmap: {feature-name}
 
 ## Overview
 
 | Metric | Value |
 |--------|-------|
 | Total Phases | {N} |
-| v1 Requirements | {N} |
-| v2 Requirements | {N} |
+| Total Plans | {N} |
 | Current Phase | 1 |
+| Status | Not Started |
+
+---
 
 ## Phases
 
-- [ ] **Phase 1: {Name}** - {Brief description}
-- [ ] **Phase 2: {Name}** - {Brief description}
-- [ ] **Phase 3: {Name}** - {Brief description}
+- [ ] **Phase 1: {Name}** — {One-liner description}
+- [ ] **Phase 2: {Name}** — {One-liner description}
+- [ ] **Phase 3: {Name}** — {One-liner description}
 
 ---
 
@@ -21,18 +23,25 @@
 
 ### Phase 1: {Name}
 
-**Goal:** {What this phase achieves - the outcome, not the tasks}
+**Goal:** {What this phase achieves — the outcome, not the tasks}
 
-**Requirements:**
-- {FEAT}-UI-01
-- {FEAT}-API-01
+**Creates:**
+- `{path/to/file}` — {Purpose}
+- `{path/to/file}` — {Purpose}
+
+**Modifies:**
+- `{path/to/file}` — {What change}
+
+**Plans:**
+1. `plans/phase-01/01-PLAN.md` — {Plan summary}
+2. `plans/phase-01/02-PLAN.md` — {Plan summary}
 
 **Success Criteria:**
 1. {Observable behavior that proves the phase is complete}
-2. {Observable behavior that proves the phase is complete}
-3. {Observable behavior that proves the phase is complete}
+2. {Observable behavior}
+3. {Observable behavior}
 
-**Dependencies:** {What must exist before this phase can start}
+**Dependencies:** None (first phase)
 
 ---
 
@@ -40,9 +49,14 @@
 
 **Goal:** {What this phase achieves}
 
-**Requirements:**
-- {FEAT}-UI-02
-- {FEAT}-DATA-01
+**Creates:**
+- `{path/to/file}` — {Purpose}
+
+**Modifies:**
+- `{path/to/file}` — {What change}
+
+**Plans:**
+1. `plans/phase-02/01-PLAN.md` — {Plan summary}
 
 **Success Criteria:**
 1. {Observable behavior}
@@ -56,8 +70,11 @@
 
 **Goal:** {What this phase achieves}
 
-**Requirements:**
-- {FEAT}-INT-01
+**Creates:**
+- `{path/to/file}` — {Purpose}
+
+**Plans:**
+1. `plans/phase-03/01-PLAN.md` — {Plan summary}
 
 **Success Criteria:**
 1. {Observable behavior}
@@ -67,16 +84,32 @@
 
 ---
 
-## v2 Phases (Future)
+## Execution Order
 
-{Phases for v2 requirements, planned but not scheduled.}
+The recommended execution order respects dependencies:
 
-### Future: {Name}
+```
+Phase 1: {Name}
+├── 01-PLAN.md: {summary}
+└── 02-PLAN.md: {summary}
+    ↓
+Phase 2: {Name}
+└── 01-PLAN.md: {summary}
+    ↓
+Phase 3: {Name}
+└── 01-PLAN.md: {summary}
+```
 
-**Goal:** {What this phase would achieve}
+---
 
-**Requirements:**
-- {FEAT}-UI-03
-- {FEAT}-API-02
+## Key Decisions Affecting Roadmap
 
-**Trigger:** {When to revisit this phase}
+| Decision | Impact on Phases |
+|----------|------------------|
+| DEC-XXX: {title} | {How it affects phase ordering or content} |
+
+---
+
+## Notes
+
+{Space for notes about the roadmap — why phases are ordered this way, alternatives considered, etc.}

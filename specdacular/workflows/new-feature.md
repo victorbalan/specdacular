@@ -1,65 +1,82 @@
 <purpose>
-Initialize a new feature folder with structured planning documents through a conversational workflow.
+Initialize a new feature folder and start the first discussion. Creates structure, asks initial questions, and writes technical requirements.
 
-Uses adaptive questioning depth based on feature complexity to gather requirements, then creates:
-- FEATURE.md - What this feature does, core value, constraints
-- REQUIREMENTS.md - Scoped requirements with REQ-IDs (v1/v2/out-of-scope)
-- ROADMAP.md - Phases with success criteria and requirement mapping
-- STATE.md - Project memory, current position, decisions
-- config.json - Mode, depth, tracking metadata
+**Core flow:**
+```
+new-feature → (discuss ↔ research)* → plan-feature
+```
 
-Output: `.specd/features/{feature-name}/` folder with all planning documents.
+The user controls the rhythm after initialization. This command is just the entry point.
+
+**Output:** `.specd/features/{feature-name}/` folder with FEATURE.md, CONTEXT.md, DECISIONS.md, STATE.md, config.json
 </purpose>
 
 <philosophy>
-**Conversational, not interrogative:**
-Build understanding through natural dialogue. Ask follow-up questions that build on previous answers.
 
-**User-driven scoping:**
-The user decides what's v1 vs v2 vs out-of-scope. Present options, don't prescribe.
+## Collaborative, Not Interrogative
 
-**Complexity-adaptive:**
-Light features need 2-3 questions. Complicated features need thorough probing until all gray areas are resolved.
+Follow the thread. Build understanding through natural dialogue. When the user says something interesting, explore it. Don't march through a checklist.
 
-**Traceable requirements:**
-Every requirement gets an ID. Phases map to requirements. Progress is trackable.
+**Bad:** "Question 1: What's the feature? Question 2: What's the scope? Question 3: ..."
+**Good:** "Tell me about what you're building... [response] ...Interesting, when you say X, do you mean Y or Z?"
+
+## Technical Focus
+
+This is about technical requirements, not product specs. Focus on:
+- What code needs to exist
+- What existing code it integrates with
+- Technical constraints
+
+## Probe Until Initial Understanding
+
+Keep asking until you understand:
+1. What this creates (files, components, APIs)
+2. What it integrates with (existing code)
+3. Key constraints (technical, timeline, scope)
+
+You don't need to resolve everything — that's what `discuss-feature` is for.
+
+## Decisions Get Recorded
+
+Any decision made during this initial discussion goes into DECISIONS.md with date and rationale.
+
 </philosophy>
 
 <process>
 
-<step name="setup">
+<step name="validate">
 Get feature name and validate.
 
 **If $ARGUMENTS provided:**
 Use as feature name. Normalize to kebab-case (lowercase, hyphens).
 
 **If no arguments:**
-Ask: "What's the name of this feature? (e.g., user-dashboard, auth-flow, payment-integration)"
+Ask: "What's the name of this feature?"
 
 **Validate:**
 - Feature name should be kebab-case
 - Check if `.specd/features/{name}/` already exists
 
+```bash
+# Check if feature exists
+[ -d ".specd/features/$FEATURE_NAME" ] && echo "exists"
+```
+
 **If feature exists:**
-```
-Feature '{name}' already exists at .specd/features/{name}/
-
-Options:
-1. Resume - Continue working with existing feature
-2. Reset - Delete and start fresh
-3. Different name - Use a different feature name
-```
-
-Wait for user response.
+Use AskUserQuestion:
+- header: "Feature Exists"
+- question: "Feature '{name}' already exists. What would you like to do?"
+- options:
+  - "Resume" — Continue with existing feature (suggest /specd:discuss-feature)
+  - "Reset" — Delete and start fresh
+  - "Different name" — Use a different name
 
 **If new feature:**
-Create feature abbreviation for REQ-IDs (e.g., "user-dashboard" → "DASH", "auth-flow" → "AUTH")
-
 Continue to codebase_context.
 </step>
 
 <step name="codebase_context">
-Look for codebase documentation to inform feature planning.
+Look for codebase documentation.
 
 **Check for existing config:**
 ```bash
@@ -75,105 +92,85 @@ ls .specd/codebase/*.md 2>/dev/null
 ```
 
 **If codebase docs found:**
-Note available context:
 ```
-Found codebase documentation:
-- ARCHITECTURE.md - System design and patterns
-- CONVENTIONS.md - Code style and patterns
-- STRUCTURE.md - Directory layout
-[etc.]
-
-I'll reference these when defining requirements and integration points.
+Found codebase documentation. I'll reference these when defining requirements.
 ```
 
-Continue to complexity_assessment.
+Read the available docs to understand:
+- Project structure (where new code goes)
+- Code patterns (how things are done here)
+- Architecture (how systems connect)
+
+Continue to first_discussion.
 
 **If no codebase docs found:**
-Ask user:
-```
-I didn't find codebase documentation at .specd/codebase/
-
-Do you have codebase specs elsewhere?
-1. Yes, at a custom location
-2. No, proceed without (I can run /specd:map-codebase later)
-```
+Use AskUserQuestion:
+- header: "No Codebase Docs"
+- question: "I didn't find codebase documentation. How should we proceed?"
+- options:
+  - "Run map-codebase first" — Creates AI-optimized docs
+  - "Continue without" — Proceed without codebase context
+  - "Custom location" — Docs are elsewhere
 
 **If custom location:**
-Ask for path, then save to `.specd/config.json`:
-```json
-{
-  "codebase_docs": "{user-specified-path}",
-  "created": "{date}"
-}
-```
+Ask for path, then save to `.specd/config.json`.
 
-Continue to complexity_assessment.
+Continue to first_discussion.
 </step>
 
-<step name="complexity_assessment">
-Ask user to assess feature complexity.
+<step name="first_discussion">
+Start the conversation.
 
+**Opening:**
 ```
-How complex is this feature?
+Let's talk about what you're building.
 
-1. Light - Simple addition, straightforward scope
-   (I'll ask 2-3 follow-up questions)
-
-2. Moderate - Multi-part feature, some decisions to make
-   (I'll ask 4-6 follow-up questions)
-
-3. Complicated - Major feature, many moving parts
-   (I'll probe thoroughly until all gray areas are resolved)
+What's the {feature-name} feature? Give me the quick version — what problem does it solve and roughly how?
 ```
 
-Wait for user response. Store complexity level (1, 2, or 3).
+Wait for response.
 
-Continue to deep_questioning.
-</step>
+**Follow the thread:**
+Based on their response, ask follow-up questions that:
+- Clarify what they said ("When you say X, do you mean...?")
+- Explore interesting aspects ("Tell me more about how that would work...")
+- Identify technical implications ("So that would mean creating a...")
 
-<step name="deep_questioning">
-Gather feature understanding through adaptive conversation.
+**Questions to answer (not in order — follow the conversation):**
+1. What does this create? (new files, components, APIs, data)
+2. What does it integrate with? (existing code, external services)
+3. What are the key constraints? (technical, timeline, scope)
+4. What's explicitly out of scope? (scope boundaries)
 
-**Opening question (all complexity levels):**
-"Tell me about this feature. What problem does it solve and who benefits from it?"
+**Conversational probes:**
+- "Walk me through how someone would use this..."
+- "What existing code does this touch?"
+- "What's the simplest version that would be useful?"
+- "Is there anything you've already decided on how to build this?"
+- "What definitely should NOT be part of this?"
 
-**Light complexity (level 1):**
-After initial response, ask 2-3 targeted questions:
-- "What's the ONE thing that must work for this to be useful?"
-- "Are there any constraints I should know about? (tech, timeline, dependencies)"
+**Check understanding:**
+After 4-6 exchanges, summarize:
+```
+So if I understand correctly:
+- This feature [does X]
+- It needs to create [files/components]
+- It integrates with [existing code]
+- Key constraint: [constraint]
 
-**Moderate complexity (level 2):**
-After initial response, ask 4-6 questions covering:
-- Core value and success criteria
-- User interactions and flows
-- Integration with existing code
-- Edge cases and error handling
-- Any constraints or non-negotiables
+Does that capture it, or should we dig into anything more?
+```
 
-**Complicated complexity (level 3):**
-Thorough probing until clarity achieved:
-- All moderate questions plus:
-- Data models and state management
-- Performance considerations
-- Security implications
-- Rollback/migration concerns
-- Dependencies and sequencing
-- Continue asking until no ambiguity remains
-
-**Question style:**
-- Build on previous answers
-- Ask "what about..." to explore edges
-- Confirm understanding before moving on
-- Use "So if I understand correctly..." to validate
-
-**When done:**
-"I think I have a good understanding. Let me capture this in FEATURE.md."
+**When to move on:**
+- User confirms understanding is correct
+- You have enough for initial FEATURE.md
+- Further details can be discussed later with /specd:discuss-feature
 
 Continue to write_feature.
 </step>
 
 <step name="write_feature">
-Create FEATURE.md from conversation.
+Create feature directory and FEATURE.md.
 
 **Create feature directory:**
 ```bash
@@ -181,206 +178,147 @@ mkdir -p .specd/features/{feature-name}
 ```
 
 **Write FEATURE.md:**
-Use template at `~/.claude/specdacular/templates/features/FEATURE.md` as structure.
+Use template at `~/.claude/specdacular/templates/features/FEATURE.md`
 
 Fill in based on conversation:
-- Feature name and description
-- Core value (the ONE thing)
-- Context from codebase docs (if available)
-- Constraints mentioned
-- Key decisions from discussion
+- **What This Is:** 1-2 sentences from discussion
+- **Must Create:** Files/components identified
+- **Must Integrate With:** Existing code mentioned
+- **Constraints:** Any constraints identified
+- **Success Criteria:** Observable behaviors
+- **Out of Scope:** Explicit exclusions
+- **Initial Context:** Notes from discussion
 
-**Commit:**
-```bash
-git add .specd/features/{feature-name}/FEATURE.md
-git commit -m "docs(feature): initialize {feature-name}"
-```
-
-Continue to configuration.
+Continue to write_context.
 </step>
 
-<step name="configuration">
-Ask user preferences for workflow mode and depth.
+<step name="write_context">
+Write CONTEXT.md with initial discussion state.
 
-```
-How do you want to work on this feature?
+**Write CONTEXT.md:**
+Use template at `~/.claude/specdacular/templates/features/CONTEXT.md`
 
-**Mode:**
-1. Interactive (recommended) - I'll check in at each phase
-2. YOLO - I'll execute phases autonomously, checking in only when blocked
+Fill in:
+- **Discussion Summary:** Brief summary of what was discussed
+- **Resolved Questions:** Questions that were answered in this session
+- **Deferred Questions:** Things that came up but weren't resolved
+- **Gray Areas Remaining:** Areas that need more discussion
 
-**Depth:**
-1. Quick - Minimal docs, fast execution
-2. Standard (recommended) - Balanced documentation and execution
-3. Comprehensive - Thorough docs, detailed planning
-```
-
-Wait for user response. Store mode and depth.
-
-Continue to define_requirements.
+Continue to initialize_decisions.
 </step>
 
-<step name="define_requirements">
-Present requirements and let user scope them.
+<step name="initialize_decisions">
+Initialize DECISIONS.md with any decisions made.
 
-**Generate requirements from conversation:**
-Derive requirements from the feature discussion. Group by category:
-- UI - User interface requirements
-- API - Backend/API requirements
-- DATA - Data model requirements
-- INT - Integration requirements
-- SEC - Security requirements
-- PERF - Performance requirements
+**Write DECISIONS.md:**
+Use template at `~/.claude/specdacular/templates/features/DECISIONS.md`
 
-**REQ-ID format:** `{FEAT}-{CAT}-{NUM}`
-Example: `DASH-UI-01`, `DASH-API-02`
+If any decisions were made during discussion (technology choices, scope decisions, approach decisions), record them:
 
-**Present to user:**
-```
-Based on our discussion, here are the requirements I identified:
-
-**UI Requirements:**
-- DASH-UI-01: [Requirement description]
-- DASH-UI-02: [Requirement description]
-
-**API Requirements:**
-- DASH-API-01: [Requirement description]
-
-[etc.]
-
-For each requirement, please indicate:
-- v1 (must have for initial release)
-- v2 (deferred to later)
-- out (out of scope entirely)
-
-You can respond like: "UI-01 v1, UI-02 v2, API-01 out" or we can go through them one by one.
+```markdown
+### DEC-001: {Decision}
+**Date:** {today}
+**Status:** Active
+**Context:** Identified during initial feature discussion
+**Decision:** {What was decided}
+**Rationale:**
+- {Why}
+**Implications:**
+- {What this means}
 ```
 
-**Iterate until scoped:**
-Continue discussion until all requirements are categorized.
-
-**Write REQUIREMENTS.md:**
-Use template at `~/.claude/specdacular/templates/features/REQUIREMENTS.md`
-
-**Commit:**
-```bash
-git add .specd/features/{feature-name}/REQUIREMENTS.md
-git commit -m "docs(feature): define requirements for {feature-name}"
-```
-
-Continue to create_roadmap.
-</step>
-
-<step name="create_roadmap">
-Derive phases from scoped requirements.
-
-**Phase creation rules:**
-- Each phase should be independently shippable
-- Phase 1 contains core v1 requirements (the minimum viable feature)
-- Subsequent phases add v1 requirements in logical order
-- Final phases contain v2 requirements
-- Each phase has clear success criteria
-
-**Present roadmap:**
-```
-Based on the v1 requirements, here's the proposed roadmap:
-
-**Phase 1: {Name}** - {Description}
-Requirements: {REQ-IDs}
-Success criteria:
-  1. [Observable behavior]
-  2. [Observable behavior]
-
-**Phase 2: {Name}** - {Description}
-Requirements: {REQ-IDs}
-Success criteria:
-  1. [Observable behavior]
-
-[etc.]
-
-Does this phasing make sense? Any adjustments needed?
-```
-
-**Iterate until approved.**
-
-**Write ROADMAP.md:**
-Use template at `~/.claude/specdacular/templates/features/ROADMAP.md`
+If no decisions yet, leave with just the template structure.
 
 Continue to initialize_state.
 </step>
 
 <step name="initialize_state">
-Create STATE.md and config.json for tracking.
+Create STATE.md and config.json.
 
 **Write STATE.md:**
 Use template at `~/.claude/specdacular/templates/features/STATE.md`
 
 Initialize with:
-- Current position: Phase 1 (not started)
-- Progress summary: empty
-- Accumulated decisions: from conversation
-- Session history: creation date
+- Stage: discussion
+- Initial discussion complete: yes
+- Gray areas identified: based on deferred questions
 
 **Write config.json:**
 ```json
 {
   "feature_name": "{name}",
-  "feature_abbrev": "{ABBREV}",
   "created": "{date}",
-  "mode": "{interactive|yolo}",
-  "depth": "{quick|standard|comprehensive}",
-  "phases": {
-    "total": {N},
-    "completed": 0,
-    "current": 1
-  },
-  "requirements": {
-    "v1_count": {N},
-    "v2_count": {N},
-    "completed": 0
-  }
+  "stage": "discussion",
+  "discussion_sessions": 1,
+  "decisions_count": {N}
 }
 ```
 
-**Commit:**
+Continue to commit.
+</step>
+
+<step name="commit">
+Commit the feature initialization.
+
 ```bash
-git add .specd/features/{feature-name}/ROADMAP.md .specd/features/{feature-name}/STATE.md .specd/features/{feature-name}/config.json
-git commit -m "docs(feature): create roadmap for {feature-name}"
+git add .specd/features/{feature-name}/
+git commit -m "docs({feature-name}): initialize feature
+
+Creates feature structure with:
+- FEATURE.md: Technical requirements
+- CONTEXT.md: Discussion context
+- DECISIONS.md: Decision log ({N} decisions)
+- STATE.md: Progress tracking
+- config.json: Configuration"
 ```
 
 Continue to completion.
 </step>
 
 <step name="completion">
-Summarize what was created and suggest next steps.
+Present what was created and next options.
 
 **Output:**
 ```
-Feature '{feature-name}' initialized.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ FEATURE INITIALIZED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Created .specd/features/{feature-name}/:
-- FEATURE.md - Feature definition and context
-- REQUIREMENTS.md - {v1_count} v1 requirements, {v2_count} v2 requirements
-- ROADMAP.md - {phase_count} phases planned
-- STATE.md - Progress tracking initialized
-- config.json - Configuration saved
+**Feature:** {feature-name}
 
-Mode: {interactive|yolo}
-Depth: {quick|standard|comprehensive}
+## Created
 
----
+- `.specd/features/{feature-name}/FEATURE.md` — Technical requirements
+- `.specd/features/{feature-name}/CONTEXT.md` — Discussion context
+- `.specd/features/{feature-name}/DECISIONS.md` — {N} decisions recorded
+- `.specd/features/{feature-name}/STATE.md` — Progress tracking
+- `.specd/features/{feature-name}/config.json` — Configuration
+
+## Summary
+
+{2-3 sentence summary of what this feature does}
+
+{If gray areas remain:}
+**Open areas to discuss:**
+- {Gray area 1}
+- {Gray area 2}
+
+───────────────────────────────────────────────────────
 
 ## What's Next
 
-Ready to start Phase 1: {phase_1_name}
+You control the rhythm. Options:
 
-When you're ready, ask me to plan or execute Phase 1:
-- "Plan phase 1" - I'll create a detailed implementation plan
-- "Execute phase 1" - I'll implement the phase (in {mode} mode)
+**/specd:discuss-feature {feature-name}** — Dive deeper into specific areas
+  {Suggested if gray areas remain}
 
-Or review the artifacts:
-- `cat .specd/features/{feature-name}/REQUIREMENTS.md`
-- `cat .specd/features/{feature-name}/ROADMAP.md`
+**/specd:research-feature {feature-name}** — Research implementation approach
+  {Suggested if technology choices are unclear}
+
+**/specd:plan-feature {feature-name}** — Create executable task plans
+  {Only when discussion + research are sufficient}
+
+Or just **keep talking** — this conversation continues naturally.
 ```
 
 End workflow.
@@ -390,10 +328,11 @@ End workflow.
 
 <success_criteria>
 - Feature folder created at `.specd/features/{name}/`
-- All 5 files created with appropriate content
-- Requirements have unique REQ-IDs
-- Phases map to requirements via REQ-IDs
-- Commits made at: FEATURE.md, REQUIREMENTS.md, ROADMAP.md+STATE.md
-- User approved requirements scoping
-- User approved roadmap phasing
+- FEATURE.md has specific technical requirements (files to create, integrations)
+- CONTEXT.md captures the discussion state
+- DECISIONS.md initialized (with any decisions made)
+- STATE.md tracks current stage
+- config.json created
+- Committed to git
+- User presented with clear next options
 </success_criteria>
