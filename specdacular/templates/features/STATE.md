@@ -28,6 +28,19 @@
 
 ---
 
+## Execution Progress
+
+### Current Plan
+- Plan: none
+- Task: —
+- Started: —
+
+### Completed Plans
+| Plan | Completed | Tasks | Deviations |
+|------|-----------|-------|------------|
+
+---
+
 ## Discussion Sessions
 
 | Date | Focus | Outcome |
@@ -65,6 +78,7 @@
 - `/specd:discuss-feature {feature-name}` — Continue refining understanding
 - `/specd:research-feature {feature-name}` — Research implementation approach
 - `/specd:plan-feature {feature-name}` — Create executable plans (when ready)
+- `/specd:execute-plan {feature-name}` — Execute plans with progress tracking
 
 ---
 
