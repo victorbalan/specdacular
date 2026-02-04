@@ -8,7 +8,7 @@ new-feature → (discuss ↔ research)* → plan-feature
 
 The user controls the rhythm after initialization. This command is just the entry point.
 
-**Output:** `.specd/features/{feature-name}/` folder with FEATURE.md, CONTEXT.md, DECISIONS.md, STATE.md, config.json
+**Output:** `.specd/features/{feature-name}/` folder with FEATURE.md, CONTEXT.md, DECISIONS.md, CHANGELOG.md, STATE.md, config.json
 </purpose>
 
 <philosophy>
@@ -229,6 +229,17 @@ If any decisions were made during discussion (technology choices, scope decision
 
 If no decisions yet, leave with just the template structure.
 
+Continue to initialize_changelog.
+</step>
+
+<step name="initialize_changelog">
+Initialize CHANGELOG.md (empty, ready for implementation).
+
+**Write CHANGELOG.md:**
+Use template at `~/.claude/specdacular/templates/features/CHANGELOG.md`
+
+Replace `{feature-name}` with actual feature name. Leave the rest as template structure — entries will be added during plan execution.
+
 Continue to initialize_state.
 </step>
 
@@ -268,6 +279,7 @@ Creates feature structure with:
 - FEATURE.md: Technical requirements
 - CONTEXT.md: Discussion context
 - DECISIONS.md: Decision log ({N} decisions)
+- CHANGELOG.md: Implementation log (empty)
 - STATE.md: Progress tracking
 - config.json: Configuration"
 ```
@@ -291,6 +303,7 @@ Present what was created and next options.
 - `.specd/features/{feature-name}/FEATURE.md` — Technical requirements
 - `.specd/features/{feature-name}/CONTEXT.md` — Discussion context
 - `.specd/features/{feature-name}/DECISIONS.md` — {N} decisions recorded
+- `.specd/features/{feature-name}/CHANGELOG.md` — Implementation log (empty)
 - `.specd/features/{feature-name}/STATE.md` — Progress tracking
 - `.specd/features/{feature-name}/config.json` — Configuration
 
@@ -331,6 +344,7 @@ End workflow.
 - FEATURE.md has specific technical requirements (files to create, integrations)
 - CONTEXT.md captures the discussion state
 - DECISIONS.md initialized (with any decisions made)
+- CHANGELOG.md initialized (empty, ready for implementation)
 - STATE.md tracks current stage
 - config.json created
 - Committed to git

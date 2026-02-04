@@ -148,6 +148,33 @@ When this plan is complete:
 
 ---
 
+## Implementation Log
+
+During implementation, capture decisions and deviations to `.specd/features/{feature-name}/CHANGELOG.md`.
+
+**When to log:**
+- Choosing a different approach than specified
+- Adding functionality not in the plan
+- Skipping or modifying a task
+- Discovering issues that change the approach
+
+**Format:**
+```markdown
+### {YYYY-MM-DD} - Plan {NN}
+
+**{Brief title}**
+- **What:** {What you decided/changed}
+- **Why:** {Reason for the change}
+- **Files:** `{affected files}`
+```
+
+**Don't log:**
+- Minor implementation details
+- Standard coding patterns
+- Things working as planned
+
+---
+
 ## Notes
 
 {Space for the implementing agent to record discoveries, blockers, or decisions made during implementation. Leave empty in template.}

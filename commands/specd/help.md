@@ -63,7 +63,8 @@ new-feature → (discuss ↔ research)* → plan-feature
 This creates `.specd/features/user-dashboard/` with:
 - `FEATURE.md` — Technical requirements
 - `CONTEXT.md` — Discussion context (accumulates)
-- `DECISIONS.md` — Decisions with dates and rationale
+- `DECISIONS.md` — User-driven decisions with dates and rationale
+- `CHANGELOG.md` — Auto-captured implementation decisions during execution
 - `STATE.md` — Progress tracking
 
 After initialization, refine with discussion and research, then create plans:
