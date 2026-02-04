@@ -117,6 +117,60 @@
 
 ---
 
+### DEC-007: Phase tabs within sections for navigation
+
+**Date:** 2026-02-04
+**Status:** Active
+**Context:** Need to make decisions, context, and plans discoverable per phase, not just aggregated.
+**Decision:** Use phase tabs within each section (Decisions, Context, Plans) rather than nested phase groups or a global filter.
+**Rationale:**
+- Preserves familiar flat structure
+- "All" tab maintains current behavior
+- Easy to drill into specific phase OR see everything
+- Less visual clutter than nested phases
+**Implications:**
+- Decisions section gets tabs: [All] [Phase 1] [Phase 2] ...
+- Context section gets tabs: [All] [Phase 1] [Phase 2] ...
+- Plans section shows phases directly (inherently per-phase)
+- Template needs updated HTML/CSS for tabbed sub-navigation
+
+---
+
+### DEC-008: Explicit Phase field in decisions
+
+**Date:** 2026-02-04
+**Status:** Active
+**Context:** Need to associate decisions with their phase for filtering.
+**Decision:** Add `**Phase:** N` field to each decision in DECISIONS.md.
+**Rationale:**
+- Unambiguous — no guessing from dates or references
+- Easy to parse
+- Pre-planning decisions use `**Phase:** 0`
+**Implications:**
+- Update decision template to include Phase field
+- Blueprint workflow parses Phase field when grouping decisions
+- All new decisions must include Phase
+
+---
+
+### DEC-009: Wireframes scope prompt
+
+**Date:** 2026-02-04
+**Status:** Active
+**Context:** User wants option for per-phase wireframes, not just per-feature.
+**Decision:** Always prompt when running wireframes subcommand. Default recommendation is per-feature, per-phase is optional.
+**Rationale:**
+- Per-feature is more common use case
+- Per-phase useful for complex multi-phase features
+- Explicit choice avoids assumptions
+**Implications:**
+- Prompt: "Per feature (recommended) or Per phase?"
+- Per feature → single `wireframes.html`
+- Per phase → `wireframes-phase-01.html`, `wireframes-phase-02.html`, etc.
+- Phases without UI → generate diagrams instead
+
+---
+
 ## Superseded Decisions
 
 (none)
@@ -139,3 +193,6 @@
 | DEC-004 | 2026-02-04 | Sidebar layout with accordion decisions | Active |
 | DEC-005 | 2026-02-04 | HTML/CSS wireframes, combined view | Active |
 | DEC-006 | 2026-02-04 | High-level happy-path diagrams | Active |
+| DEC-007 | 2026-02-04 | Phase tabs within sections for navigation | Active |
+| DEC-008 | 2026-02-04 | Explicit Phase field in decisions | Active |
+| DEC-009 | 2026-02-04 | Wireframes scope prompt | Active |

@@ -1,7 +1,7 @@
 # Context: visual-blueprint-tool
 
 **Last Updated:** 2026-02-04
-**Sessions:** 2
+**Sessions:** 3
 
 ## Discussion Summary
 
@@ -132,6 +132,53 @@ Discussed creating a visual system for exploring Specdacular feature artifacts. 
 
 ---
 
+### Phase-centric navigation
+
+**Question:** How should decisions, context, and plans be organized by phase in the blueprint?
+
+**Resolution:** Use phase tabs within each section, not nested groups or global filter.
+
+**Details:**
+- Decisions section: [All] [Phase 1] [Phase 2] ... tabs
+- Context section: [All] [Phase 1] [Phase 2] ... tabs
+- Plans section: Shows phases directly (inherently per-phase)
+- "All" tab shows aggregated view
+
+**Related Decisions:** DEC-007
+
+---
+
+### Phase association for decisions
+
+**Question:** How to know which phase a decision belongs to?
+
+**Resolution:** Explicit `**Phase:** N` field in each decision.
+
+**Details:**
+- Add Phase field to decision template
+- Pre-planning decisions use `**Phase:** 0`
+- Blueprint workflow parses this field for grouping
+
+**Related Decisions:** DEC-008
+
+---
+
+### Wireframes per-phase option
+
+**Question:** Should wireframes be per-feature or per-phase? How to decide?
+
+**Resolution:** Always prompt user. Per-feature is default/recommended, per-phase is optional.
+
+**Details:**
+- Prompt appears when running `/specd:blueprint {feature} wireframes`
+- Per feature → single `wireframes.html`
+- Per phase → `wireframes-phase-01.html`, `wireframes-phase-02.html`, etc.
+- Phases without UI → generate diagrams for that phase instead
+
+**Related Decisions:** DEC-009
+
+---
+
 ## Deferred Questions
 
 ### Template customization
@@ -148,6 +195,7 @@ Discussed creating a visual system for exploring Specdacular feature artifacts. 
 |------|----------------|--------------|
 | 2026-02-04 | Command name, serving approach, auto-generation, diagram types | Named `/specd:blueprint`, static HTML, auto-gen with refinement, Mermaid diagrams |
 | 2026-02-04 | Hub layout, decisions view, wireframe format, diagram detail | Sidebar nav, accordion decisions, HTML/CSS wireframes, high-level diagrams |
+| 2026-02-04 | Phase-centric enhancement | Phase tabs in sections, explicit Phase field, wireframes scope prompt |
 
 ---
 
