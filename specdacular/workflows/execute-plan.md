@@ -87,6 +87,10 @@ Load ALL context needed for execution.
 - `RESEARCH.md` — Implementation notes, pitfalls (if exists)
 - `ROADMAP.md` — Phase overview, plan order
 
+**Read phase context (if available):**
+- `plans/phase-{NN}/CONTEXT.md` — Phase-specific discussion resolutions
+- `plans/phase-{NN}/RESEARCH.md` — Phase-specific research findings
+
 **Read codebase context (if available):**
 - `PATTERNS.md` — Code patterns to follow
 - `STRUCTURE.md` — Where files go
@@ -97,6 +101,7 @@ Load ALL context needed for execution.
 - Which phase we're in
 - Key decisions affecting implementation
 - Patterns to follow
+- Phase-specific context and research (if discuss-phase/research-phase were run)
 
 Continue to find_plan.
 </step>
@@ -135,6 +140,10 @@ Feature execution finished. Review:
 - STATE.md: {phase X, N plans executed}
 - DECISIONS.md: {N} decisions
 - ROADMAP.md: {N} phases, {M} plans total
+{If phase CONTEXT.md exists:}
+- Phase CONTEXT.md: {N} gray areas resolved
+{If phase RESEARCH.md exists:}
+- Phase RESEARCH.md: patterns identified
 
 **Settings:**
 - Auto-commit: {yes | no} (from config.json)

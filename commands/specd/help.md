@@ -30,6 +30,8 @@ Display available specdacular commands and usage guidance.
 | `/specd:discuss-feature [name]` | Continue/deepen feature discussion (can call many times) |
 | `/specd:research-feature [name]` | Research implementation with parallel agents |
 | `/specd:plan-feature [name]` | Create executable task plans for agents |
+| `/specd:discuss-phase [feature] [phase]` | Discuss a phase before execution |
+| `/specd:research-phase [feature] [phase]` | Research patterns for a phase |
 | `/specd:execute-plan [feature] [plan]` | Execute a plan with progress tracking |
 
 ### Utilities
@@ -46,7 +48,8 @@ Display available specdacular commands and usage guidance.
 The feature flow helps you plan features specific enough that an agent can implement without asking questions.
 
 ```
-new-feature → (discuss ↔ research)* → plan-feature → execute-plan*
+new-feature → discuss-feature → plan-feature →
+  (discuss-phase? → research-phase? → execute-plan)* per phase
 ```
 
 **You control the rhythm:**
@@ -54,6 +57,8 @@ new-feature → (discuss ↔ research)* → plan-feature → execute-plan*
 - `discuss-feature` — Can be called **many times** to refine understanding
 - `research-feature` — Can be called **many times** to investigate
 - `plan-feature` — When satisfied, creates executable plans for an agent
+- `discuss-phase` — Optional: dive deeper into phase specifics before execution
+- `research-phase` — Optional: research patterns for a specific phase
 - `execute-plan` — Execute plans with progress tracking and deviation logging
 
 ### Quick Start

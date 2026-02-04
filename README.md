@@ -28,7 +28,8 @@ Spawns 4 parallel agents to analyze your codebase and generate AI-optimized docu
 A structured flow for planning features with enough detail for agent implementation:
 
 ```
-new-feature → (discuss ↔ research)* → plan-feature
+new-feature → discuss-feature → plan-feature →
+  (discuss-phase? → research-phase? → execute-plan)* per phase
 ```
 
 **You control the rhythm:**
@@ -36,6 +37,9 @@ new-feature → (discuss ↔ research)* → plan-feature
 - `discuss-feature` — Refine understanding (call many times)
 - `research-feature` — Investigate implementation approaches
 - `plan-feature` — Create executable task plans
+- `discuss-phase` — Optional: dive into phase specifics before execution
+- `research-phase` — Optional: research patterns for a specific phase
+- `execute-plan` — Execute plans with progress tracking
 
 ---
 
@@ -74,6 +78,9 @@ In Claude Code:
 | `/specd:discuss-feature [name]` | Continue/deepen discussion (iterative) |
 | `/specd:research-feature [name]` | Research implementation with parallel agents |
 | `/specd:plan-feature [name]` | Create executable task plans |
+| `/specd:discuss-phase [feature] [phase]` | Discuss a phase before execution |
+| `/specd:research-phase [feature] [phase]` | Research patterns for a phase |
+| `/specd:execute-plan [feature]` | Execute plans with progress tracking |
 
 ### Utilities
 
@@ -111,6 +118,13 @@ Then refine and plan:
 /specd:discuss-feature user-dashboard    # Clarify gray areas
 /specd:research-feature user-dashboard   # Research implementation
 /specd:plan-feature user-dashboard       # Create executable plans
+```
+
+Optionally, before executing each phase:
+```
+/specd:discuss-phase user-dashboard 1    # Discuss phase 1 specifics
+/specd:research-phase user-dashboard 1   # Research phase 1 patterns
+/specd:execute-plan user-dashboard       # Execute with phase context
 ```
 
 ---
@@ -155,17 +169,31 @@ The feature planning flow accumulates context over multiple sessions:
                             ▼
                      ┌──────────────┐
                      │ plan-feature │
-                     │              │
                      └──────────────┘
                             │
                             ▼
-                     Executable PLAN.md
-                     files for agents
+              ┌─────────────────────────────┐
+              │     For each phase:         │
+              │  ┌─────────┐   ┌─────────┐  │
+              │  │ discuss │ → │research │  │
+              │  │  phase  │   │  phase  │  │
+              │  └─────────┘   └─────────┘  │
+              │         │           │       │
+              │         └─────┬─────┘       │
+              │               ▼             │
+              │        ┌────────────┐       │
+              │        │execute-plan│       │
+              │        └────────────┘       │
+              └─────────────────────────────┘
 ```
 
 Each session updates:
 - `CONTEXT.md` — Resolved questions accumulate
 - `DECISIONS.md` — Decisions with rationale accumulate
+
+**Phase-level commands** (optional but powerful):
+- `discuss-phase` — Just-in-time clarification for a specific phase
+- `research-phase` — Focused research for phase-specific patterns
 
 Plans are prompts for implementing agents with:
 - Specific file paths
@@ -191,16 +219,20 @@ your-project/
 │   └── features/              # From feature commands
 │       └── user-dashboard/
 │           ├── FEATURE.md     # Technical requirements
-│           ├── CONTEXT.md     # Discussion context
-│           ├── DECISIONS.md   # Decision log
+│           ├── CONTEXT.md     # Feature-level discussion
+│           ├── DECISIONS.md   # Decision log (feature + phase)
 │           ├── STATE.md       # Progress tracking
-│           ├── RESEARCH.md    # Research findings
+│           ├── RESEARCH.md    # Feature-level research
 │           ├── ROADMAP.md     # Phase overview
 │           └── plans/         # Executable plans
 │               ├── phase-01/
+│               │   ├── CONTEXT.md   # Phase discussion (optional)
+│               │   ├── RESEARCH.md  # Phase research (optional)
 │               │   ├── 01-PLAN.md
 │               │   └── 02-PLAN.md
 │               └── phase-02/
+│                   ├── CONTEXT.md
+│                   ├── RESEARCH.md
 │                   └── 01-PLAN.md
 └── ...
 ```
