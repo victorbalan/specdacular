@@ -2,8 +2,8 @@
 
 **Created:** 2026-02-04
 **Feature:** Visual Blueprint Tool for Specdacular features
-**Total Phases:** 3
-**Total Plans:** 5
+**Total Phases:** 4
+**Total Plans:** 8
 
 ---
 
@@ -72,6 +72,26 @@ This roadmap outlines the implementation of the visual blueprint tool, which gen
 
 ---
 
+## Phase 4: Phase-Centric Enhancement
+
+**Goal:** Make content discoverable per phase, not just per feature
+
+| Plan | Title | Modifies | Status |
+|------|-------|----------|--------|
+| 4.01 | Add Phase Tab Navigation to Template | `specdacular/templates/blueprint/` | Pending |
+| 4.02 | Update Workflow to Group Content by Phase | `specdacular/workflows/blueprint.md` | Pending |
+| 4.03 | Add Wireframes Scope Prompt | `specdacular/workflows/blueprint-wireframes.md` | Pending |
+
+**Dependencies:** Phase 3 complete (wireframes/diagrams workflows exist)
+
+**Deliverables:**
+- Phase tabs within Decisions, Context, and Plans sections
+- Decisions grouped by explicit `**Phase:** N` field
+- Wireframes scope prompt (per-feature or per-phase)
+- Per-phase wireframe files when requested
+
+---
+
 ## Execution Order
 
 ```
@@ -85,6 +105,11 @@ Phase 2 ────────────────────────
 Phase 3 ──────────────────────────────────────────────────────────
   ├── Plan 3.01: Wireframes (depends on 2.01)
   └── Plan 3.02: Diagrams (depends on 2.01)
+
+Phase 4 ──────────────────────────────────────────────────────────
+  ├── Plan 4.01: Phase tab navigation (depends on 1.01)
+  ├── Plan 4.02: Workflow phase grouping (depends on 4.01)
+  └── Plan 4.03: Wireframes scope prompt (depends on 3.01)
 ```
 
 **Note:** Within each phase, plans without dependencies on each other can be executed in parallel.
@@ -101,6 +126,9 @@ Phase 3 ────────────────────────
 | DEC-004 | Sidebar with accordion | Template structure in Plan 1.01 |
 | DEC-005 | HTML/CSS wireframes | Wireframes plan generates visual mockups |
 | DEC-006 | High-level diagrams | Diagrams plan focuses on happy path |
+| DEC-007 | Phase tabs within sections | Phase 4 template and workflow changes |
+| DEC-008 | Explicit Phase field in decisions | Workflow parses Phase for grouping |
+| DEC-009 | Wireframes scope prompt | Phase 4 wireframes workflow changes |
 
 ---
 
@@ -114,6 +142,9 @@ When all phases complete:
 - [ ] Wireframes tab shows HTML/CSS mockups (when generated)
 - [ ] Diagrams tab shows Mermaid diagrams (when generated)
 - [ ] File:// protocol works without issues
+- [ ] Phase tabs filter content by phase in each section
+- [ ] Decisions grouped by Phase field
+- [ ] Wireframes scope prompt offers per-feature/per-phase choice
 
 ---
 
