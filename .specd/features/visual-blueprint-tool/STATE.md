@@ -15,8 +15,8 @@
 - [x] All gray areas resolved
 
 ### Research
-- [ ] Research conducted
-- [ ] Findings documented in RESEARCH.md
+- [x] Research conducted
+- [x] Findings documented in RESEARCH.md
 
 ### Planning
 - [ ] Phases derived
@@ -56,7 +56,7 @@
 | FEATURE.md | Created | 2026-02-04 |
 | CONTEXT.md | Updated | 2026-02-04 |
 | DECISIONS.md | 6 decisions | 2026-02-04 |
-| RESEARCH.md | Not started | — |
+| RESEARCH.md | Complete | 2026-02-04 |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
 
