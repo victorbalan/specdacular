@@ -62,6 +62,61 @@
 
 ---
 
+### DEC-004: Sidebar layout with accordion decisions
+
+**Date:** 2026-02-04
+**Status:** Active
+**Context:** Needed to design the hub page layout and navigation approach.
+**Decision:** Use sidebar navigation with custom CSS. Decisions view uses accordion pattern.
+**Rationale:**
+- Sidebar keeps navigation always visible
+- Custom CSS avoids framework dependencies
+- Accordion allows scanning decision list while showing details on demand
+- Tabs: Overview, Decisions, Context, Plans, Wireframes, Diagrams
+- Wireframes/Diagrams always visible, greyed out if not generated
+**Implications:**
+- Default view is Overview (feature description, stats, activity timeline)
+- Decisions show ID, title, date, status collapsed; click to expand full details
+- No Tailwind or other framework — just clean custom CSS
+
+---
+
+### DEC-005: HTML/CSS wireframes, combined view
+
+**Date:** 2026-02-04
+**Status:** Active
+**Context:** Needed to decide wireframe format and level of detail.
+**Decision:** Generate HTML/CSS mockups (not ASCII). One combined view per feature, PM-friendly.
+**Rationale:**
+- HTML/CSS is more visual and easier to understand than ASCII boxes
+- Combined view shows overall layout and flow in one place
+- PM-friendly: shows "what we're building" without developer details
+- Easy for Claude to generate
+**Implications:**
+- Wireframes show layout, button positions, general flow
+- Not pixel-perfect or component-specific
+- Colored divs, placeholder boxes, annotations
+
+---
+
+### DEC-006: High-level happy-path diagrams
+
+**Date:** 2026-02-04
+**Status:** Active
+**Context:** Needed to decide diagram detail level and scope.
+**Decision:** Generate high-level diagrams focused on happy path. Feature-scoped, refinable through discussion.
+**Rationale:**
+- High-level is more useful for understanding than granular details
+- Happy path covers the main flow; error flows only if significant
+- Feature-scoped keeps diagrams focused and readable
+- Can refine through follow-up discussion
+**Implications:**
+- Flow diagrams: key steps and decision points, not every detail
+- ER diagrams: entities from FEATURE.md with key relationships
+- User can request additions: "add cache layer", "show auth failure"
+
+---
+
 ## Superseded Decisions
 
 (none)
@@ -81,3 +136,6 @@
 | DEC-001 | 2026-02-04 | Command name is `/specd:blueprint` | Active |
 | DEC-002 | 2026-02-04 | Static HTML, no server required | Active |
 | DEC-003 | 2026-02-04 | Mermaid.js for diagrams | Active |
+| DEC-004 | 2026-02-04 | Sidebar layout with accordion decisions | Active |
+| DEC-005 | 2026-02-04 | HTML/CSS wireframes, combined view | Active |
+| DEC-006 | 2026-02-04 | High-level happy-path diagrams | Active |

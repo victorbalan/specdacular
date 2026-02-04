@@ -1,7 +1,7 @@
 # Context: visual-blueprint-tool
 
 **Last Updated:** 2026-02-04
-**Sessions:** 1
+**Sessions:** 2
 
 ## Discussion Summary
 
@@ -68,6 +68,70 @@ Discussed creating a visual system for exploring Specdacular feature artifacts. 
 
 ---
 
+### Hub layout and navigation
+
+**Question:** How should the hub page be structured? Tabs, sidebar, default view?
+
+**Resolution:** Sidebar navigation with custom CSS. Default view is Overview.
+
+**Details:**
+- Sidebar with tabs: Overview, Decisions, Context, Plans, Wireframes, Diagrams
+- Wireframes/Diagrams always visible, greyed out if not yet generated
+- Overview shows: feature description, stats (decisions, sessions, plans), activity timeline, status
+- No framework (Tailwind etc.) — just clean custom CSS
+
+**Related Decisions:** DEC-004
+
+---
+
+### Decisions view design
+
+**Question:** How to display decisions in the viewer?
+
+**Resolution:** Accordion style with expandable details.
+
+**Details:**
+- Collapsed view shows: ID, title, date, status
+- Click to expand: full context, rationale, implications
+- Parse from markdown: `### DEC-XXX:`, `**Date:**`, `**Status:**`
+
+**Related Decisions:** DEC-004
+
+---
+
+### Wireframe format and detail level
+
+**Question:** What format for wireframes? How detailed?
+
+**Resolution:** HTML/CSS mockups (not ASCII). One combined view per feature, PM-friendly.
+
+**Details:**
+- Visual HTML/CSS instead of ASCII boxes
+- One combined view showing overall layout and flow
+- Shows layout, button positions, general flow
+- PM-friendly: "what we're building" without developer details
+- Colored divs, placeholder boxes, annotations
+
+**Related Decisions:** DEC-005
+
+---
+
+### Diagram detail level
+
+**Question:** How detailed should flow and ER diagrams be?
+
+**Resolution:** High-level, happy-path focus. Feature-scoped, refinable through discussion.
+
+**Details:**
+- Flow diagrams: key steps and decision points, not granular
+- ER diagrams: entities from FEATURE.md with key relationships
+- Only include error flows if significant to understanding
+- Can refine: "add cache layer", "show auth failure"
+
+**Related Decisions:** DEC-006
+
+---
+
 ## Deferred Questions
 
 ### Template customization
@@ -83,15 +147,13 @@ Discussed creating a visual system for exploring Specdacular feature artifacts. 
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
 | 2026-02-04 | Command name, serving approach, auto-generation, diagram types | Named `/specd:blueprint`, static HTML, auto-gen with refinement, Mermaid diagrams |
+| 2026-02-04 | Hub layout, decisions view, wireframe format, diagram detail | Sidebar nav, accordion decisions, HTML/CSS wireframes, high-level diagrams |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Exact HTML template structure — Need to design hub layout, tab navigation
-- [ ] How to parse DECISIONS.md for timeline — Need to extract dates and structure
-- [ ] Wireframe generation prompting — What Claude needs to generate good wireframes
-- [ ] Mermaid diagram prompting — What Claude needs to generate good ER/flow diagrams
+(none — all areas resolved)
 
 ---
 

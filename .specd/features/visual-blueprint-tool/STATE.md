@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -45,6 +45,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-02-04 | Initial discussion | FEATURE.md created, command named, approach decided |
+| 2026-02-04 | Layout, wireframes, diagrams | All gray areas resolved, 3 new decisions |
 
 ---
 
@@ -53,8 +54,8 @@
 | Document | Status | Last Updated |
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-04 |
-| CONTEXT.md | Created | 2026-02-04 |
-| DECISIONS.md | 3 decisions | 2026-02-04 |
+| CONTEXT.md | Updated | 2026-02-04 |
+| DECISIONS.md | 6 decisions | 2026-02-04 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
@@ -63,15 +64,15 @@
 
 ## Decision Count
 
-- **Active:** 3
+- **Active:** 6
 - **Superseded:** 0
-- **Total:** 3
+- **Total:** 6
 
 ---
 
 ## Next Steps
 
-Gray areas remain around HTML template design, MD parsing, and generation prompting. Consider:
+All discussion gray areas resolved. Ready for:
 
 **Options:**
 - `/specd:discuss-feature visual-blueprint-tool` — Dive into template design, parsing approach
