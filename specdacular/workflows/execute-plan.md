@@ -81,6 +81,7 @@ Continue to load_context.
 Load ALL context needed for execution.
 
 **Read feature context:**
+- `config.json` — Feature settings (check `execution.auto_commit`)
 - `STATE.md` — Current progress, completed plans
 - `DECISIONS.md` — Constraints to follow during implementation
 - `RESEARCH.md` — Implementation notes, pitfalls (if exists)
@@ -134,6 +135,9 @@ Feature execution finished. Review:
 - STATE.md: {phase X, N plans executed}
 - DECISIONS.md: {N} decisions
 - ROADMAP.md: {N} phases, {M} plans total
+
+**Settings:**
+- Auto-commit: {yes | no} (from config.json)
 
 **Next plan:** {plans/phase-XX/YY-PLAN.md}
 **Objective:** {one-line from plan}
@@ -279,10 +283,25 @@ Use AskUserQuestion:
 - **Files:** `{affected files}`
 ```
 
-### 5. Commit task
+### 5. Commit task (if auto_commit enabled)
+
+**Check config.json `execution.auto_commit`:**
+
+**If auto_commit is true:**
 ```bash
 git add {files from task}
 git commit -m "feat({feature}): {task description}"
+```
+
+**If auto_commit is false:**
+- Do NOT commit
+- Show message:
+```
+Task {N} complete. Changes ready for review.
+Files modified: {file list}
+
+Commit when ready:
+git add {files} && git commit -m "feat({feature}): {task description}"
 ```
 
 ### 6. Update STATE.md
@@ -319,11 +338,17 @@ Mark plan complete and suggest next.
 
 3. Update stage progress checkboxes
 
-**Commit STATE.md update:**
+**Commit STATE.md update (if auto_commit enabled):**
+
+**If auto_commit is true:**
 ```bash
 git add .specd/features/{feature}/STATE.md
 git commit -m "docs({feature}): complete plan {phase-XX/YY}"
 ```
+
+**If auto_commit is false:**
+- Do NOT commit
+- Include STATE.md in the list of modified files for user to review
 
 **Find next plan:**
 - Check ROADMAP.md for next plan in sequence

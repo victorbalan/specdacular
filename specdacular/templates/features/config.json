@@ -13,5 +13,8 @@
     "v1_count": 0,
     "v2_count": 0,
     "completed": 0
+  },
+  "execution": {
+    "auto_commit": false
   }
 }
