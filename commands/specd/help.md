@@ -33,6 +33,8 @@ Display available specdacular commands and usage guidance.
 | `/specd:discuss-phase [feature] [phase]` | Discuss a phase before execution |
 | `/specd:research-phase [feature] [phase]` | Research patterns for a phase |
 | `/specd:execute-plan [feature] [plan]` | Execute a plan with progress tracking |
+| `/specd:insert-phase [feature] [after] [desc]` | Insert a new phase after an existing one |
+| `/specd:renumber-phases [feature]` | Renumber phases to clean integer sequence |
 | `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
 
 ### Utilities
@@ -51,6 +53,7 @@ The feature flow helps you plan features specific enough that an agent can imple
 ```
 new-feature → discuss-feature → plan-feature →
   (discuss-phase? → research-phase? → execute-plan)* per phase
+  insert-phase? → renumber-phases?   ← mid-flight adjustments
 ```
 
 **You control the rhythm:**
@@ -61,6 +64,8 @@ new-feature → discuss-feature → plan-feature →
 - `discuss-phase` — Optional: dive deeper into phase specifics before execution
 - `research-phase` — Optional: research patterns for a specific phase
 - `execute-plan` — Execute plans with progress tracking and deviation logging
+- `insert-phase` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
+- `renumber-phases` — Clean up decimal phases to sequential integers
 
 ### Quick Start
 

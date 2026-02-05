@@ -1,0 +1,223 @@
+<purpose>
+Insert a new phase after an existing one using decimal numbering (e.g., Phase 03.1).
+
+**Key principles:**
+- Decimal numbering preserves existing phase sequence
+- Never renumber existing phases — that's what renumber-phases is for
+- Create directory structure but don't create plans — user decides how to plan
+- Mark inserted phases with `(INSERTED)` in ROADMAP.md
+
+**Output:** New phase directory, updated ROADMAP.md, STATE.md, config.json
+</purpose>
+
+<process>
+
+<step name="parse_arguments">
+Parse the command arguments:
+- First argument: feature name
+- Second argument: integer phase number to insert after
+- Remaining arguments: phase description
+
+Example: `/specd:insert-phase visual-blueprint-tool 3 Architecture Update`
+→ feature = "visual-blueprint-tool"
+→ after = 3
+→ description = "Architecture Update"
+
+**Validation:**
+- All three parts are required (feature, phase number, description)
+- Phase number must be a positive integer
+- Cannot insert before Phase 1 (no Phase 0.x)
+
+**If arguments missing:**
+```
+ERROR: Missing arguments.
+
+Usage: /specd:insert-phase [feature-name] [after-phase] [description...]
+Example: /specd:insert-phase visual-blueprint-tool 3 Architecture Update
+```
+</step>
+
+<step name="validate">
+Validate the feature and target phase exist.
+
+1. Check feature directory exists:
+```bash
+[ -d ".specd/features/$feature" ] || { echo "Feature not found"; exit 1; }
+```
+
+2. Check ROADMAP.md exists:
+```bash
+[ -f ".specd/features/$feature/ROADMAP.md" ] || { echo "No ROADMAP.md"; exit 1; }
+```
+
+3. Check target phase exists in ROADMAP.md:
+   - Search for phase heading matching the target number (e.g., `## Phase 3:` or `### Phase 3:`)
+   - If not found, list available phases and exit
+
+4. Check config.json exists:
+```bash
+[ -f ".specd/features/$feature/config.json" ] || { echo "No config.json"; exit 1; }
+```
+
+**If feature not found:**
+```
+Feature '{name}' not found.
+
+Available features:
+{list .specd/features/*/}
+
+Run /specd:new-feature {name} to create it.
+```
+
+**If target phase not found:**
+```
+Phase {N} not found in ROADMAP.md.
+
+Available phases: {list phase numbers from ROADMAP.md}
+```
+</step>
+
+<step name="find_next_decimal">
+Scan for existing decimal phases after the target phase.
+
+1. List all `phase-*` directories under `plans/`:
+```bash
+ls -d .specd/features/$feature/plans/phase-* 2>/dev/null
+```
+
+2. Filter for directories matching `phase-{NN}.{M}` where NN matches the target phase (zero-padded to 2 digits):
+   - Format target phase as two digits: `printf "%02d" $after_phase`
+   - Look for `phase-{NN}.1/`, `phase-{NN}.2/`, etc.
+
+3. Find the highest existing decimal suffix M
+
+4. Calculate next decimal: M + 1 (or 1 if no decimals exist)
+
+Examples:
+- Phase 03 with no decimals → next is 03.1
+- Phase 03 with 03.1 → next is 03.2
+- Phase 03 with 03.1, 03.2 → next is 03.3
+
+Store the new phase number as: `new_phase = "{NN}.{next_decimal}"`
+(e.g., "03.1")
+</step>
+
+<step name="create_phase_directory">
+Create the phase directory under the feature's plans folder.
+
+```bash
+mkdir -p ".specd/features/$feature/plans/phase-${new_phase}"
+```
+
+Confirm: "Created directory: plans/phase-{new_phase}/"
+</step>
+
+<step name="update_roadmap">
+Insert the new phase into ROADMAP.md immediately after the target phase's section.
+
+1. Read ROADMAP.md
+2. Find the target phase section (heading and all content until the next phase heading)
+3. Insert new phase section after the target phase's content:
+
+```markdown
+## Phase {new_phase}: {Description} (INSERTED)
+
+**Goal:** {Description}
+**Plans:** TBD — discuss and plan this phase
+
+- [ ] Phase {new_phase} plans created
+```
+
+4. Write updated ROADMAP.md
+
+**Important:**
+- Preserve all existing content exactly (formatting, spacing, other phases)
+- The `(INSERTED)` marker identifies decimal phases as mid-flight insertions
+- Don't modify the target phase content
+- Insert before the next integer phase heading
+</step>
+
+<step name="update_state">
+Update STATE.md with the insertion.
+
+1. Read STATE.md
+
+2. Add roadmap evolution note. Find or create "### Roadmap Evolution" section under accumulated context:
+```markdown
+- Phase {new_phase} inserted after Phase {after_phase}: {description}
+```
+
+3. Add the new phase to the execution tracking section. Find the phase completion checkboxes and insert the new phase after the target phase:
+```markdown
+- [ ] Phase {new_phase} complete
+```
+
+Insert this line after `Phase {after_phase}` checkbox and before `Phase {after_phase + 1}` checkbox.
+
+4. Write updated STATE.md
+</step>
+
+<step name="update_config">
+Update config.json to reflect the new phase count.
+
+1. Read config.json
+2. Increment `phases_count` by 1
+3. Write updated config.json
+</step>
+
+<step name="completion">
+Present completion summary:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ PHASE INSERTED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Phase {new_phase}: {description}**
+- Directory: plans/phase-{new_phase}/
+- Inserted after: Phase {after_phase}
+- Marker: (INSERTED)
+
+**Updated:**
+- ROADMAP.md — New phase section added
+- STATE.md — Evolution note + unchecked checkbox
+- config.json — phases_count incremented
+
+───────────────────────────────────────────────────────
+
+## Next Steps
+
+- `/specd:discuss-phase {feature} {new_phase}` — Discuss the new phase
+- `/specd:research-phase {feature} {new_phase}` — Research the phase
+- Manually create plan files in `plans/phase-{new_phase}/`
+- `/specd:execute-plan {feature}` — Execute when plans exist
+- `/specd:renumber-phases {feature}` — Clean up to integer sequence when ready
+```
+
+End workflow.
+</step>
+
+</process>
+
+<anti_patterns>
+- Don't insert before Phase 1 (Phase 0.x makes no sense)
+- Don't renumber existing phases (that's /specd:renumber-phases)
+- Don't modify the target phase content
+- Don't create plans yet — user decides how to plan (discuss, research, or manual)
+- Don't commit changes — user decides when to commit
+</anti_patterns>
+
+<success_criteria>
+Phase insertion is complete when:
+
+- [ ] Arguments parsed: feature name, after-phase number, description
+- [ ] Feature validated: exists with ROADMAP.md
+- [ ] Target phase validated: exists in ROADMAP.md
+- [ ] Decimal number calculated correctly (based on existing decimals)
+- [ ] Phase directory created: `plans/phase-{NN.M}/`
+- [ ] ROADMAP.md updated with new phase entry (includes `(INSERTED)` marker)
+- [ ] Phase inserted in correct position (after target phase, before next integer phase)
+- [ ] STATE.md updated with roadmap evolution note and unchecked checkbox
+- [ ] config.json `phases_count` incremented
+- [ ] User informed of next steps
+</success_criteria>
