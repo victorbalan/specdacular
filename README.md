@@ -30,6 +30,7 @@ A structured flow for planning features with enough detail for agent implementat
 ```
 new-feature → discuss-feature → plan-feature →
   (discuss-phase? → research-phase? → execute-plan)* per phase
+  insert-phase? → renumber-phases?   ← mid-flight adjustments
 ```
 
 **You control the rhythm:**
@@ -40,6 +41,8 @@ new-feature → discuss-feature → plan-feature →
 - `discuss-phase` — Optional: dive into phase specifics before execution
 - `research-phase` — Optional: research patterns for a specific phase
 - `execute-plan` — Execute plans with progress tracking
+- `insert-phase` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
+- `renumber-phases` — Clean up decimal phases to sequential integers
 
 ---
 
@@ -81,6 +84,8 @@ In Claude Code:
 | `/specd:discuss-phase [feature] [phase]` | Discuss a phase before execution |
 | `/specd:research-phase [feature] [phase]` | Research patterns for a phase |
 | `/specd:execute-plan [feature]` | Execute plans with progress tracking |
+| `/specd:insert-phase [feature] [after] [desc]` | Insert a new phase after an existing one |
+| `/specd:renumber-phases [feature]` | Renumber phases to clean integer sequence |
 
 ### Utilities
 
@@ -184,6 +189,15 @@ The feature planning flow accumulates context over multiple sessions:
               │        ┌────────────┐       │
               │        │execute-plan│       │
               │        └────────────┘       │
+              │                             │
+              │  Mid-flight adjustments:    │
+              │  ┌────────────┐             │
+              │  │insert-phase│ ──┐         │
+              │  └────────────┘   │         │
+              │            ┌──────▼──────┐  │
+              │            │  renumber-  │  │
+              │            │   phases    │  │
+              │            └─────────────┘  │
               └─────────────────────────────┘
 ```
 
@@ -194,6 +208,8 @@ Each session updates:
 **Phase-level commands** (optional but powerful):
 - `discuss-phase` — Just-in-time clarification for a specific phase
 - `research-phase` — Focused research for phase-specific patterns
+- `insert-phase` — Insert urgent work mid-flight as decimal phase (e.g., 3.1)
+- `renumber-phases` — Clean up decimal numbering to sequential integers
 
 Plans are prompts for implementing agents with:
 - Specific file paths
