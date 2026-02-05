@@ -1,6 +1,6 @@
 {
   "name": "specdacular",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "Feature planning system for existing codebases. Map, understand, and plan features in large projects.",
   "bin": {
     "specdacular": "bin/install.js"

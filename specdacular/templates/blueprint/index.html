@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>{feature-name} Blueprint</title>
+  <style>
+{styles}
+  </style>
+</head>
+<body>
+  <div class="blueprint-container">
+    <nav class="blueprint-sidebar">
+      <div class="sidebar-header">
+        <h2>{feature-name}</h2>
+        <span class="subtitle">Blueprint</span>
+      </div>
+      <ul class="nav-tabs">
+        <li><a href="#overview" class="tab-link active" data-tab="overview">Overview</a></li>
+        <li><a href="#decisions" class="tab-link" data-tab="decisions">Decisions</a></li>
+        <li><a href="#context" class="tab-link" data-tab="context">Context</a></li>
+        <li><a href="#plans" class="tab-link" data-tab="plans">Plans</a></li>
+        <li><a href="#wireframes" class="tab-link {wireframes-disabled}" data-tab="wireframes">Wireframes</a></li>
+        <li><a href="#diagrams" class="tab-link {diagrams-disabled}" data-tab="diagrams">Diagrams</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <span class="generated">Generated: {date}</span>
+      </div>
+    </nav>
+
+    <main class="blueprint-content">
+      <section id="overview" class="tab-content active">
+        <h1>Overview</h1>
+        <div class="overview-description">
+          {feature-description}
+        </div>
+        <div class="overview-stats">
+          <div class="stat">
+            <span class="stat-value">{decisions-count}</span>
+            <span class="stat-label">Decisions</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{sessions-count}</span>
+            <span class="stat-label">Discussion Sessions</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{plans-count}</span>
+            <span class="stat-label">Plans</span>
+          </div>
+        </div>
+        <div class="overview-timeline">
+          <h2>Activity Timeline</h2>
+          {timeline-content}
+        </div>
+      </section>
+
+      <section id="decisions" class="tab-content">
+        <h1>Decisions</h1>
+        <p class="section-intro">Click any decision to expand details.</p>
+        <div class="phase-tabs">
+          {decisions-phase-tabs}
+        </div>
+        <div class="decisions-list">
+{decisions-content}
+        </div>
+      </section>
+
+      <section id="context" class="tab-content">
+        <h1>Discussion Context</h1>
+        <div class="phase-tabs">
+          {context-phase-tabs}
+        </div>
+        <div class="context-content">
+{context-content}
+        </div>
+      </section>
+
+      <section id="plans" class="tab-content">
+        <h1>Plans</h1>
+        <div class="phase-tabs">
+          {plans-phase-tabs}
+        </div>
+        <div class="plans-content">
+{plans-content}
+        </div>
+      </section>
+
+      <section id="wireframes" class="tab-content">
+        <h1>Wireframes</h1>
+        <div class="wireframes-content">
+{wireframes-content}
+        </div>
+      </section>
+
+      <section id="diagrams" class="tab-content">
+        <h1>Diagrams</h1>
+        <div class="diagrams-content">
+{diagrams-content}
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+{scripts}
+  </script>
+</body>
+</html>

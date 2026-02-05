@@ -1,0 +1,372 @@
+<purpose>
+Generate a visual HTML blueprint for exploring Specdacular feature artifacts.
+
+Reads FEATURE.md, CONTEXT.md, DECISIONS.md, and plans/ to create a browsable
+static HTML file with sidebar navigation and accordion decision viewer.
+
+**Output:** `.specd/features/{name}/blueprint/index.html`
+</purpose>
+
+<philosophy>
+
+## Self-Contained Output
+
+The generated HTML must work when opened directly in a browser (file:// protocol).
+All CSS and JS is inlined. Only external dependency is Mermaid.js CDN.
+
+## Parse Defensively
+
+Markdown files may have missing fields, multi-line values, or edge cases.
+Always provide defaults and handle gracefully.
+
+## HTML-Escape Everything
+
+All content from markdown files must be HTML-escaped before embedding
+to prevent XSS and layout breakage.
+
+</philosophy>
+
+<process>
+
+<step name="parse_arguments">
+Parse the command arguments.
+
+**Input:** `$ARGUMENTS` (e.g., "my-feature wireframes")
+
+**Extract:**
+- Feature name: First word
+- Subcommand: Second word (optional) — "wireframes", "diagrams", or empty
+
+```bash
+# Parse arguments
+FEATURE_NAME=$(echo "$ARGUMENTS" | awk '{print $1}')
+SUBCOMMAND=$(echo "$ARGUMENTS" | awk '{print $2}')
+
+echo "Feature: $FEATURE_NAME"
+echo "Subcommand: $SUBCOMMAND"
+```
+
+**If no feature name:**
+```
+Please provide a feature name: /specd:blueprint {feature-name}
+```
+
+Continue to validate.
+</step>
+
+<step name="validate">
+Check feature exists and has required files.
+
+```bash
+# Check feature directory exists
+[ -d ".specd/features/$FEATURE_NAME" ] || { echo "not found"; exit 1; }
+
+# Check required files
+[ -f ".specd/features/$FEATURE_NAME/FEATURE.md" ] || { echo "missing FEATURE.md"; exit 1; }
+[ -f ".specd/features/$FEATURE_NAME/CONTEXT.md" ] || { echo "missing CONTEXT.md"; exit 1; }
+[ -f ".specd/features/$FEATURE_NAME/DECISIONS.md" ] || { echo "missing DECISIONS.md"; exit 1; }
+
+# Check optional files
+[ -d ".specd/features/$FEATURE_NAME/plans" ] && echo "has_plans"
+[ -f ".specd/features/$FEATURE_NAME/blueprint/wireframes.html" ] && echo "has_wireframes"
+[ -f ".specd/features/$FEATURE_NAME/blueprint/diagrams.html" ] && echo "has_diagrams"
+```
+
+**If feature not found:**
+```
+Feature '{name}' not found.
+
+Run /specd:new-feature {name} to create it first.
+```
+
+Continue to load_context.
+</step>
+
+<step name="load_context">
+Read all feature files.
+
+**Read with Read tool:**
+- `.specd/features/{name}/FEATURE.md`
+- `.specd/features/{name}/CONTEXT.md`
+- `.specd/features/{name}/DECISIONS.md`
+- `.specd/features/{name}/STATE.md` (for stats)
+- `.specd/features/{name}/config.json` (for counts)
+
+**If plans/ exists:**
+- List all plan files: `.specd/features/{name}/plans/phase-*/`
+- Read ROADMAP.md if exists
+
+Continue to parse_decisions.
+</step>
+
+<step name="parse_decisions">
+Parse DECISIONS.md to extract decision data.
+
+**Parsing strategy:**
+1. Split content on `### DEC-` to find decision blocks
+2. For each block:
+   - Extract ID from heading: `### DEC-XXX: Title`
+   - Parse `**Date:**` line for date
+   - Parse `**Phase:**` line for phase number (default: 0 if missing)
+   - Parse `**Status:**` line for status
+   - Parse `**Context:**` for context (may be multi-line)
+   - Parse `**Decision:**` for decision text
+   - Parse `**Rationale:**` for bullet points
+   - Parse `**Implications:**` for bullet points
+
+**Output format (for each decision):**
+```
+{
+  id: "DEC-001",
+  title: "Decision title",
+  date: "2026-02-04",
+  phase: 0,
+  status: "Active",
+  context: "Context text...",
+  decision: "Decision text...",
+  rationale: ["Reason 1", "Reason 2"],
+  implications: ["Implication 1", "Implication 2"]
+}
+```
+
+**Edge cases:**
+- Missing Phase field → default to 0 (pre-planning)
+- Phase: 0 → label as "Pre-planning"
+- Missing fields → use empty string or "Unknown"
+- Multi-line values → collect until next `**Field:**`
+- Code blocks → skip parsing inside triple backticks
+
+**Collect unique phases** from all decisions (sorted numerically) for phase tab generation.
+
+Continue to parse_context.
+</step>
+
+<step name="parse_context">
+Parse CONTEXT.md to extract resolved questions.
+
+**Parsing strategy:**
+1. Find `## Resolved Questions` section
+2. Split on `### ` to find question blocks
+3. For each question:
+   - Extract title from heading
+   - Parse `**Question:**` for the question
+   - Parse `**Resolution:**` for the answer
+   - Parse `**Details:**` for bullet points
+   - Parse `**Related Decisions:**` for decision references (e.g., "DEC-001")
+
+**Associate with phase:**
+- Check `**Related Decisions:** DEC-XXX` field
+- Look up the phase of the referenced decision (from parsed decisions)
+- If no related decision, use phase 0
+
+**Output format:**
+```
+{
+  title: "Question title",
+  question: "What was unclear?",
+  resolution: "The answer",
+  details: ["Detail 1", "Detail 2"],
+  relatedDecisions: ["DEC-001"],
+  phase: 0
+}
+```
+
+Continue to parse_feature.
+</step>
+
+<step name="parse_feature">
+Parse FEATURE.md to extract overview and stats.
+
+**Extract:**
+- `## What This Is` section → feature description
+- Count items in `### Must Create` → files to create count
+- `## Success Criteria` items → for progress indicators
+
+**From config.json:**
+- `discussion_sessions` count
+- `decisions_count`
+
+**From plans/:**
+- Count phase directories
+- Count plan files
+
+Continue to generate_html.
+</step>
+
+<step name="generate_html">
+Generate the HTML by filling in the template.
+
+**Read templates:**
+- `~/.claude/specdacular/templates/blueprint/index.html`
+- `~/.claude/specdacular/templates/blueprint/styles.css`
+- `~/.claude/specdacular/templates/blueprint/scripts.js`
+
+**Replace placeholders:**
+- `{feature-name}` → Feature name
+- `{date}` → Current date (YYYY-MM-DD)
+- `{feature-description}` → From FEATURE.md "What This Is"
+- `{decisions-count}` → Number of decisions
+- `{sessions-count}` → Number of discussion sessions
+- `{plans-count}` → Number of plans
+- `{styles}` → Contents of styles.css
+- `{scripts}` → Contents of scripts.js
+
+**Generate phase tabs HTML:**
+Collect unique phases from decisions (sorted numerically).
+For each section (Decisions, Context), generate:
+
+```html
+<button class="phase-tab all-tab active" data-phase="all">All</button>
+<button class="phase-tab" data-phase="0">Pre-planning</button>
+<button class="phase-tab" data-phase="1">Phase 1</button>
+<button class="phase-tab" data-phase="2">Phase 2</button>
+<!-- ... for each phase found -->
+```
+
+**Replace placeholders:**
+- `{decisions-phase-tabs}` → Generated phase tabs for decisions
+- `{context-phase-tabs}` → Generated phase tabs for context
+- `{plans-phase-tabs}` → Generated phase tabs for plans (no "All" tab needed, use phase numbers only)
+
+**Generate decisions HTML:**
+Group decisions by phase, wrap each group in a phase-content div:
+```html
+<div class="phase-content active" data-phase="0">
+  <!-- Pre-planning decisions -->
+  <details class="decision-item">
+    <summary class="decision-header">
+      <span class="decision-id">{id}</span>
+      <span class="decision-title">{title}</span>
+      <span class="decision-status status-{status-lower}">{status}</span>
+      <span class="decision-date">{date}</span>
+    </summary>
+    <div class="decision-content">
+      <p><strong>Context:</strong> {context}</p>
+      <p><strong>Decision:</strong> {decision}</p>
+      <p><strong>Rationale:</strong></p>
+      <ul>{rationale-items}</ul>
+      <p><strong>Implications:</strong></p>
+      <ul>{implication-items}</ul>
+    </div>
+  </details>
+</div>
+<div class="phase-content active" data-phase="1">
+  <!-- Phase 1 decisions -->
+</div>
+```
+
+All phase-content divs start with `active` class so "All" tab shows everything by default.
+
+**Generate context HTML:**
+For each resolved question, associate with a phase via `**Related Decisions:** DEC-XXX` field:
+- Look up the phase of the referenced decision
+- If no related decision, use phase 0
+- Wrap context items in phase-content divs (same pattern as decisions)
+
+**Generate plans HTML:**
+Plans are already grouped by phase directory. Wrap each phase in a phase-content div:
+```html
+<div class="phase-content active" data-phase="1">
+  <div class="phase-group">
+    <div class="phase-header">Phase 1: {title}</div>
+    <div class="plan-item">...</div>
+  </div>
+</div>
+<div class="phase-content active" data-phase="2">
+  <div class="phase-group">
+    <div class="phase-header">Phase 2: {title}</div>
+    <div class="plan-item">...</div>
+  </div>
+</div>
+```
+
+**Generate timeline HTML:**
+Combine decision dates and discussion session dates into chronological timeline.
+
+**Tab states:**
+- `{wireframes-disabled}` → "disabled" if no wireframes, empty if exists
+- `{diagrams-disabled}` → "disabled" if no diagrams, empty if exists
+
+**HTML-escape all content:**
+```javascript
+text.replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+```
+
+Continue to write_output.
+</step>
+
+<step name="write_output">
+Write the generated HTML to the blueprint directory.
+
+```bash
+# Create blueprint directory
+mkdir -p ".specd/features/$FEATURE_NAME/blueprint"
+```
+
+**Write file:**
+Use Write tool to create `.specd/features/{name}/blueprint/index.html`
+with the generated HTML content.
+
+Continue to open_browser.
+</step>
+
+<step name="open_browser">
+Open the blueprint in the default browser.
+
+```bash
+open ".specd/features/$FEATURE_NAME/blueprint/index.html"
+```
+
+**Present completion:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BLUEPRINT GENERATED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Feature:** {feature-name}
+
+## Stats
+- {N} decisions
+- {N} discussion sessions
+- {N} plans
+
+## Tabs
+- Overview ✓
+- Decisions ✓
+- Context ✓
+- Plans {✓ or ✗}
+- Wireframes {✓ or "not generated"}
+- Diagrams {✓ or "not generated"}
+
+**File:** `.specd/features/{name}/blueprint/index.html`
+
+───────────────────────────────────────────────────────
+
+## To Update
+
+Run `/specd:blueprint {name}` again to regenerate.
+
+## To Add Wireframes
+
+Run `/specd:blueprint {name} wireframes`
+
+## To Add Diagrams
+
+Run `/specd:blueprint {name} diagrams`
+```
+
+End workflow.
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] Feature validated
+- [ ] All files read and parsed
+- [ ] HTML generated with all content embedded
+- [ ] Output written to `.specd/features/{name}/blueprint/index.html`
+- [ ] Browser opens with the blueprint
+</success_criteria>

@@ -1,0 +1,429 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.blueprint-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.blueprint-sidebar {
+  width: 250px;
+  min-width: 250px;
+  background: #2c3e50;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  background: #1a252f;
+  border-bottom: 1px solid #34495e;
+}
+
+.sidebar-header h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-header .subtitle {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.nav-tabs {
+  list-style: none;
+  flex: 1;
+  padding: 1rem 0;
+}
+
+.tab-link {
+  display: block;
+  padding: 0.875rem 1.5rem;
+  color: white;
+  text-decoration: none;
+  transition: background 0.2s, border-left 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.tab-link:hover {
+  background: #34495e;
+}
+
+.tab-link.active {
+  background: #34495e;
+  border-left-color: #3498db;
+}
+
+.tab-link.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.sidebar-footer {
+  padding: 1rem 1.5rem;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  border-top: 1px solid #34495e;
+}
+
+/* Main Content */
+.blueprint-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-content h1 {
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.section-intro {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+/* Overview Stats */
+.overview-description {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #3498db;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Timeline */
+.overview-timeline {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.overview-timeline h2 {
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+}
+
+.timeline-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  gap: 1rem;
+}
+
+.timeline-item:last-child {
+  border-bottom: none;
+}
+
+.timeline-date {
+  color: #666;
+  font-size: 0.875rem;
+  min-width: 100px;
+}
+
+.timeline-event {
+  flex: 1;
+}
+
+/* Decisions (Accordion) */
+.decisions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.decision-item {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.decision-item summary {
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  list-style: none;
+  user-select: none;
+}
+
+.decision-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.decision-item summary:hover {
+  background: #f9f9f9;
+}
+
+.decision-id {
+  font-family: monospace;
+  background: #e8e8e8;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.decision-title {
+  flex: 1;
+  font-weight: 500;
+}
+
+.decision-status {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-superseded {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-revoked {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.decision-date {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.decision-content {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+}
+
+.decision-content p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.decision-content ul {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.decision-content li {
+  margin-bottom: 0.25rem;
+}
+
+/* Expand indicator */
+.decision-item summary::after {
+  content: '\25b6';
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+}
+
+.decision-item[open] summary::after {
+  transform: rotate(90deg);
+}
+
+/* Context */
+.context-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.context-section {
+  margin-bottom: 2rem;
+}
+
+.context-section h3 {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #3498db;
+}
+
+.resolved-question {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.resolved-question h4 {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+/* Plans */
+.plans-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.phase-group {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.phase-header {
+  padding: 1rem 1.5rem;
+  background: #3498db;
+  color: white;
+  font-weight: 600;
+}
+
+.plan-item {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.plan-item:last-child {
+  border-bottom: none;
+}
+
+.plan-title {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.plan-summary {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Wireframes */
+.wireframes-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.wireframe-placeholder {
+  padding: 3rem;
+  text-align: center;
+  color: #999;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+}
+
+/* Diagrams */
+.diagrams-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.diagram-container {
+  margin-bottom: 2rem;
+}
+
+.diagram-container h3 {
+  margin-bottom: 1rem;
+}
+
+.mermaid {
+  background: #fafafa;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+/* Phase Tabs (sub-navigation within sections) */
+.phase-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.phase-tab {
+  padding: 0.5rem 1rem;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.phase-tab:hover {
+  background: #e8e8e8;
+}
+
+.phase-tab.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.phase-tab.all-tab {
+  font-weight: 500;
+}
+
+/* Phase content visibility */
+.phase-content {
+  display: none;
+}
+
+.phase-content.active {
+  display: block;
+}
+
+/* No content placeholders */
+.no-content {
+  padding: 3rem;
+  text-align: center;
+  color: #999;
+}

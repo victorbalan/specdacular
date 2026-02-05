@@ -33,6 +33,7 @@ Display available specdacular commands and usage guidance.
 | `/specd:discuss-phase [feature] [phase]` | Discuss a phase before execution |
 | `/specd:research-phase [feature] [phase]` | Research patterns for a phase |
 | `/specd:execute-plan [feature] [plan]` | Execute a plan with progress tracking |
+| `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
 
 ### Utilities
 
