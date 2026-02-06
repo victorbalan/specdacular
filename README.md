@@ -34,17 +34,6 @@ feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
   phase:insert? -> phase:renumber?   <- mid-flight adjustments
 ```
 
-**You control the rhythm:**
-- `feature:new` — Initialize and start first discussion
-- `feature:discuss` — Refine understanding (call many times)
-- `feature:research` — Investigate implementation approaches
-- `feature:plan` — Create roadmap with phase overview
-- `phase:prepare` — Discuss gray areas + optionally research patterns (per phase)
-- `phase:plan` — Create detailed PLAN.md files for one phase
-- `phase:execute` — Execute plans with progress tracking
-- `phase:insert` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
-- `phase:renumber` — Clean up decimal phases to sequential integers
-
 ---
 
 ## Installation
@@ -68,22 +57,28 @@ In Claude Code:
 
 ## Commands
 
+Commands are organized into **feature** and **phase** namespaces.
+
 ### Codebase Documentation
 
 | Command | Description |
 |---------|-------------|
 | `/specd:map-codebase` | Analyze codebase with parallel agents |
 
-### Feature Commands
+### Feature Commands (`feature:`)
+
+Work with a feature as a whole — discuss, research, and create a roadmap.
 
 | Command | Description |
 |---------|-------------|
 | `/specd:feature:new [name]` | Initialize a feature, start first discussion |
-| `/specd:feature:discuss [name]` | Continue/deepen discussion (iterative) |
+| `/specd:feature:discuss [name]` | Continue/deepen discussion (call many times) |
 | `/specd:feature:research [name]` | Research implementation with parallel agents |
 | `/specd:feature:plan [name]` | Create roadmap with phase overview |
 
-### Phase Commands
+### Phase Commands (`phase:`)
+
+Work with individual phases — prepare, plan, and execute one at a time.
 
 | Command | Description |
 |---------|-------------|
@@ -112,33 +107,108 @@ In Claude Code:
 /specd:map-codebase
 ```
 
-Creates `.specd/codebase/` with 4 AI-optimized documents.
+Creates `.specd/codebase/` with 4 AI-optimized documents. This gives Claude context about your codebase's architecture, patterns, structure, and gotchas.
 
 ### Plan a Feature
+
+**Step 1: Initialize and discuss**
 
 ```
 /specd:feature:new user-dashboard
 ```
 
-Creates `.specd/features/user-dashboard/` with:
-- `FEATURE.md` — Technical requirements
-- `CONTEXT.md` — Discussion context (accumulates)
-- `DECISIONS.md` — Decisions with dates and rationale
-- `STATE.md` — Progress tracking
+Creates `.specd/features/user-dashboard/` and starts the first discussion. Claude asks what you're building, follows the thread, and captures technical requirements.
 
-Then refine and create a roadmap:
+**Step 2: Refine understanding**
+
 ```
-/specd:feature:discuss user-dashboard    # Clarify gray areas
-/specd:feature:research user-dashboard   # Research implementation
-/specd:feature:plan user-dashboard       # Create roadmap with phases
+/specd:feature:discuss user-dashboard    # Clarify gray areas (call many times)
+/specd:feature:research user-dashboard   # Research implementation approaches
 ```
 
-Then for each phase, prepare, plan, and execute:
+Discussion and research are iterative — call them as many times as you need. Context accumulates across sessions.
+
+**Step 3: Create a roadmap**
+
 ```
-/specd:phase:prepare user-dashboard 1    # Discuss + optionally research
-/specd:phase:plan user-dashboard 1       # Create detailed task plans
+/specd:feature:plan user-dashboard
+```
+
+Creates `ROADMAP.md` with phases derived from dependency analysis (types -> API -> UI), plus empty phase directories. No detailed plans yet — those come next, per phase.
+
+**Step 4: Prepare, plan, and execute each phase**
+
+```
+/specd:phase:prepare user-dashboard 1    # Discuss phase gray areas + optional research
+/specd:phase:plan user-dashboard 1       # Create detailed PLAN.md files
 /specd:phase:execute user-dashboard      # Execute with progress tracking
 ```
+
+Repeat for each phase. Plans are created just-in-time so they stay fresh.
+
+**Mid-flight adjustments:**
+
+```
+/specd:phase:insert user-dashboard 3 "Cache layer"  # Insert Phase 3.1
+/specd:phase:renumber user-dashboard                 # Clean up to integers
+```
+
+---
+
+## The Flow in Detail
+
+### Feature-Level Commands
+
+**`feature:new`** creates the feature folder and starts the first discussion. Output:
+- `FEATURE.md` — Technical requirements from the conversation
+- `CONTEXT.md` — Discussion context (accumulates over time)
+- `DECISIONS.md` — Decisions with dates, rationale, and implications
+- `STATE.md` — Progress tracking
+- `config.json` — Feature configuration
+
+**`feature:discuss`** continues the conversation. Can be called many times — each session adds to `CONTEXT.md` and `DECISIONS.md`. Claude identifies gray areas based on what's been discussed so far and probes until clear.
+
+**`feature:research`** spawns 3 parallel agents to investigate:
+1. **Codebase integration** — How does this fit with existing code?
+2. **External patterns** — What libraries/approaches are standard?
+3. **Pitfalls** — What commonly goes wrong?
+
+Output: `RESEARCH.md` with prescriptive guidance.
+
+**`feature:plan`** creates a roadmap with phases. Each phase has a goal, deliverables, and dependencies. Creates `ROADMAP.md` and empty `plans/phase-{NN}/` directories. Does **not** create detailed PLAN.md files — that happens per-phase with `phase:plan`.
+
+### Phase-Level Commands
+
+**`phase:prepare`** is the main pre-execution command. It:
+1. Shows the phase overview (goal, deliverables, existing context)
+2. Identifies gray areas based on phase type (Types, API, UI, etc.)
+3. Probes until clear (4 questions max per area)
+4. Records resolutions to phase `CONTEXT.md` and `DECISIONS.md`
+5. **Offers research** — "Would you like to research implementation patterns?"
+6. If yes, spawns 3 parallel research agents focused on the phase
+
+This replaces the old two-step of discuss-phase then research-phase.
+
+**`phase:research`** is the standalone research command. Use it when you want to research a phase without discussing first. Same research agents as `phase:prepare`, just without the discussion step.
+
+**`phase:plan`** creates detailed PLAN.md files for one phase. Each plan is a self-contained prompt for an implementing agent with:
+- Exact file paths to create/modify
+- Code patterns to follow (from codebase docs)
+- Verification commands to run
+- Clear completion criteria
+
+Plans are created just-in-time — right before execution — so they incorporate all context from preparation and earlier phases.
+
+**`phase:execute`** executes plans with:
+- Auto-fix for bugs/blockers (logged to `CHANGELOG.md`)
+- User confirmation for architectural changes
+- Verification after each task
+- Commits after each task
+- Progress tracking in `STATE.md`
+
+**`phase:insert`** adds a new phase using decimal numbering (e.g., Phase 3.1 after Phase 3). The `(INSERTED)` marker in `ROADMAP.md` identifies mid-flight additions.
+
+**`phase:renumber`** cleans up decimal phases to sequential integers after insertions stabilize.
 
 ---
 
@@ -170,8 +240,6 @@ Specdacular spawns specialized agents that run simultaneously:
 - Agents write directly to files
 
 ### Feature Flow
-
-The feature planning flow accumulates context over multiple sessions:
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -216,23 +284,6 @@ The feature planning flow accumulates context over multiple sessions:
               └─────────────────────────────┘
 ```
 
-Each session updates:
-- `CONTEXT.md` — Resolved questions accumulate
-- `DECISIONS.md` — Decisions with rationale accumulate
-
-**Phase-level commands:**
-- `phase:prepare` — Just-in-time discussion + optional research for a specific phase
-- `phase:plan` — Create detailed PLAN.md files for one phase (just-in-time, not upfront)
-- `phase:execute` — Execute plans with deviation tracking
-- `phase:insert` — Insert urgent work mid-flight as decimal phase (e.g., 3.1)
-- `phase:renumber` — Clean up decimal numbering to sequential integers
-
-Plans are prompts for implementing agents with:
-- Specific file paths
-- Code patterns to follow
-- Verification commands
-- Clear completion criteria
-
 ---
 
 ## Project Structure
@@ -255,12 +306,12 @@ your-project/
 │           ├── DECISIONS.md   # Decision log (feature + phase)
 │           ├── STATE.md       # Progress tracking
 │           ├── RESEARCH.md    # Feature-level research
-│           ├── ROADMAP.md     # Phase overview
-│           └── plans/         # Executable plans
+│           ├── ROADMAP.md     # Phase overview (from feature:plan)
+│           └── plans/
 │               ├── phase-01/
 │               │   ├── CONTEXT.md   # Phase discussion (from phase:prepare)
 │               │   ├── RESEARCH.md  # Phase research (from phase:prepare or phase:research)
-│               │   ├── 01-PLAN.md   # From phase:plan
+│               │   ├── 01-PLAN.md   # Detailed plans (from phase:plan)
 │               │   └── 02-PLAN.md
 │               └── phase-02/
 │                   ├── CONTEXT.md
@@ -294,6 +345,37 @@ Detailed plans are created per-phase, not all at once. This keeps plans fresh �
 ### Decisions Are Permanent
 
 Once recorded in `DECISIONS.md`, decisions aren't re-litigated. Each has date, context, rationale, and implications.
+
+---
+
+## Migrating from v0.4
+
+If you're upgrading from v0.4, here's what changed:
+
+**Commands were renamed** into `feature:` and `phase:` namespaces:
+
+| v0.4 | v0.5 |
+|------|------|
+| `/specd:new-feature` | `/specd:feature:new` |
+| `/specd:discuss-feature` | `/specd:feature:discuss` |
+| `/specd:research-feature` | `/specd:feature:research` |
+| `/specd:plan-feature` | `/specd:feature:plan` |
+| `/specd:discuss-phase` | `/specd:phase:prepare` |
+| `/specd:research-phase` | `/specd:phase:research` |
+| `/specd:execute-plan` | `/specd:phase:execute` |
+| `/specd:insert-phase` | `/specd:phase:insert` |
+| `/specd:renumber-phases` | `/specd:phase:renumber` |
+
+**New commands:**
+- `/specd:phase:prepare` — Replaces `discuss-phase`, adds optional research at the end
+- `/specd:phase:plan` — Creates detailed plans for **one phase** (new command)
+
+**Behavior changes:**
+- `feature:plan` now creates only `ROADMAP.md` + empty phase directories. It no longer creates `PLAN.md` files for all phases upfront.
+- Detailed `PLAN.md` files are created per-phase with `phase:plan`, right before execution. This prevents plans from going stale.
+- `phase:prepare` combines the old discuss-phase + research-phase into a single command. Discussion always happens; research is offered as an optional step at the end.
+
+**Existing `.specd/` data is fully compatible.** Your feature files, decisions, and roadmaps work with the new commands.
 
 ---
 
