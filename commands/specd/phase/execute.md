@@ -1,5 +1,5 @@
 ---
-name: specd:execute-plan
+name: specd:phase:execute
 description: Execute a feature plan with progress tracking
 argument-hint: "[feature-name] [plan-path]"
 allowed-tools:
@@ -19,10 +19,10 @@ Execute a plan from a feature, tracking progress and logging deviations.
 1. Load context — STATE.md, DECISIONS.md, RESEARCH.md, codebase patterns
 2. Find next plan — First incomplete plan, or accept path as argument
 3. Execute tasks with:
-   - Auto-fix blockers/bugs → log to CHANGELOG.md
-   - Ask about architectural changes → wait for user
+   - Auto-fix blockers/bugs -> log to CHANGELOG.md
+   - Ask about architectural changes -> wait for user
    - Run verification after each task
-   - Stop on verification failure → ask user (retry/skip/stop)
+   - Stop on verification failure -> ask user (retry/skip/stop)
    - Commit after each task
 4. Update progress — STATE.md with completed tasks
 5. Suggest next — Next plan to execute

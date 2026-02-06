@@ -1,5 +1,5 @@
 ---
-name: specd:insert-phase
+name: specd:phase:insert
 description: Insert a new phase after an existing one (decimal numbering)
 argument-hint: "[feature-name] [after-phase] [description...]"
 allowed-tools:

@@ -1,6 +1,6 @@
 ---
-name: specd:plan-feature
-description: Create executable task plans for implementing a feature
+name: specd:feature:plan
+description: Create roadmap with phase overview (no detailed plans)
 argument-hint: "[feature-name]"
 allowed-tools:
   - Read
@@ -12,17 +12,13 @@ allowed-tools:
 ---
 
 <objective>
-Create executable task plans that an agent can implement without asking clarifying questions.
+Create a roadmap with phase overview and empty phase directories. Detailed PLAN.md files are created later per-phase with `/specd:phase:plan`.
 
 **Creates:**
-- `.specd/features/{name}/ROADMAP.md` — Phase overview with dependencies
-- `.specd/features/{name}/plans/phase-{NN}/{NN}-PLAN.md` — Executable task plans
+- `.specd/features/{name}/ROADMAP.md` — Phase overview with goals, deliverables, dependencies
+- `.specd/features/{name}/plans/phase-{NN}/` — Empty phase directories
 
-**Each PLAN.md is a prompt** for an implementing agent with:
-- Files to create/modify with specific paths
-- Code patterns to follow (from codebase)
-- Verification commands
-- Clear completion criteria
+**Does NOT create PLAN.md files.** Those are created just-in-time with `/specd:phase:plan` before executing each phase.
 
 **Prerequisite:** Feature should have sufficient discussion context (FEATURE.md, CONTEXT.md, DECISIONS.md). Research (RESEARCH.md) recommended but optional.
 </objective>
@@ -50,10 +46,10 @@ Feature name: $ARGUMENTS
 1. **Validate** — Check feature exists, has required context
 2. **Load Context** — Read ALL feature and codebase docs
 3. **Assess Readiness** — Check if enough context to plan
-4. **Derive Phases** — Based on dependencies (types→API→UI pattern)
-5. **Break Into Tasks** — 2-3 tasks per plan, sized for agent execution
-6. **Write PLAN Files** — As prompts for implementing agent
-7. **Write ROADMAP.md** — Phase overview
+4. **Derive Phases** — Based on dependencies (types->API->UI pattern)
+5. **Write ROADMAP.md** — Phase overview with goals, deliverables, dependencies
+6. **Create Phase Directories** — Empty `plans/phase-{NN}/` directories
+7. **Update STATE.md** — Stage moves to "planned"
 8. **Commit and Present**
 </process>
 
@@ -61,9 +57,10 @@ Feature name: $ARGUMENTS
 - [ ] Feature validated with sufficient context
 - [ ] All context loaded (feature, codebase, research)
 - [ ] Phases derived from dependency analysis
-- [ ] Tasks are specific (files, actions, verification)
-- [ ] PLAN.md files are self-contained prompts
-- [ ] ROADMAP.md provides clear overview
+- [ ] ROADMAP.md provides clear phase overview
+- [ ] Empty phase directories created
+- [ ] No PLAN.md files created (that's `/specd:phase:plan`)
+- [ ] STATE.md updated to "planned" stage
 - [ ] Committed to git
-- [ ] User knows how to execute plans
+- [ ] User knows next step: `/specd:phase:prepare` or `/specd:phase:plan` for first phase
 </success_criteria>

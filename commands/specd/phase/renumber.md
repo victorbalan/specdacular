@@ -1,5 +1,5 @@
 ---
-name: specd:renumber-phases
+name: specd:phase:renumber
 description: Renumber phases to clean integer sequence
 argument-hint: "[feature-name]"
 allowed-tools:
@@ -17,7 +17,7 @@ Renumber all phases to a clean integer sequence after decimal phases have been i
 
 **What it does:**
 1. Validate — Feature exists with plans and ROADMAP.md
-2. Collect phases — List all phase directories, build old→new mapping
+2. Collect phases — List all phase directories, build old->new mapping
 3. Preview — Show renumbering plan, ask user to confirm
 4. Rename directories — Process highest-to-lowest to avoid collisions
 5. Update plan frontmatter — Fix phase references in plan files

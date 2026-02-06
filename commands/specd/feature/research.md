@@ -1,5 +1,5 @@
 ---
-name: specd:research-feature
+name: specd:feature:research
 description: Research how to implement a feature - spawns parallel agents for codebase, external, and pitfalls research
 argument-hint: "[feature-name]"
 allowed-tools:
@@ -48,7 +48,7 @@ Feature name: $ARGUMENTS
 
 ```bash
 # Check feature exists
-[ -d ".specd/features/$ARGUMENTS" ] || { echo "Feature not found. Run /specd:new-feature first."; exit 1; }
+[ -d ".specd/features/$ARGUMENTS" ] || { echo "Feature not found. Run /specd:feature:new first."; exit 1; }
 
 # Check if RESEARCH.md exists
 [ -f ".specd/features/$ARGUMENTS/RESEARCH.md" ] && echo "existing"
@@ -419,7 +419,7 @@ Present completion:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  RESEARCH COMPLETE ✓
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **Feature:** {name}
 **Confidence:** {level}
@@ -437,7 +437,7 @@ Present completion:
 
 ## Next Steps
 
-/specd:plan-feature {name} — Create executable task plans
+/specd:feature:plan {name} — Create roadmap with phase overview
 
 <sub>/clear first — fresh context window</sub>
 ```
@@ -453,5 +453,5 @@ Present completion:
 - [ ] Results synthesized into RESEARCH.md
 - [ ] Decisions recorded in DECISIONS.md
 - [ ] Files committed
-- [ ] User knows next step is /specd:plan-feature
+- [ ] User knows next step is `/specd:feature:plan`
 </success_criteria>

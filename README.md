@@ -28,21 +28,22 @@ Spawns 4 parallel agents to analyze your codebase and generate AI-optimized docu
 A structured flow for planning features with enough detail for agent implementation:
 
 ```
-new-feature → discuss-feature → plan-feature →
-  (discuss-phase? → research-phase? → execute-plan)* per phase
-  insert-phase? → renumber-phases?   ← mid-flight adjustments
+feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
+  [for each phase]
+    phase:prepare? -> phase:plan -> phase:execute
+  phase:insert? -> phase:renumber?   <- mid-flight adjustments
 ```
 
 **You control the rhythm:**
-- `new-feature` — Initialize and start first discussion
-- `discuss-feature` — Refine understanding (call many times)
-- `research-feature` — Investigate implementation approaches
-- `plan-feature` — Create executable task plans
-- `discuss-phase` — Optional: dive into phase specifics before execution
-- `research-phase` — Optional: research patterns for a specific phase
-- `execute-plan` — Execute plans with progress tracking
-- `insert-phase` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
-- `renumber-phases` — Clean up decimal phases to sequential integers
+- `feature:new` — Initialize and start first discussion
+- `feature:discuss` — Refine understanding (call many times)
+- `feature:research` — Investigate implementation approaches
+- `feature:plan` — Create roadmap with phase overview
+- `phase:prepare` — Discuss gray areas + optionally research patterns (per phase)
+- `phase:plan` — Create detailed PLAN.md files for one phase
+- `phase:execute` — Execute plans with progress tracking
+- `phase:insert` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
+- `phase:renumber` — Clean up decimal phases to sequential integers
 
 ---
 
@@ -73,24 +74,31 @@ In Claude Code:
 |---------|-------------|
 | `/specd:map-codebase` | Analyze codebase with parallel agents |
 
-### Feature Planning
+### Feature Commands
 
 | Command | Description |
 |---------|-------------|
-| `/specd:new-feature [name]` | Initialize a feature, start first discussion |
-| `/specd:discuss-feature [name]` | Continue/deepen discussion (iterative) |
-| `/specd:research-feature [name]` | Research implementation with parallel agents |
-| `/specd:plan-feature [name]` | Create executable task plans |
-| `/specd:discuss-phase [feature] [phase]` | Discuss a phase before execution |
-| `/specd:research-phase [feature] [phase]` | Research patterns for a phase |
-| `/specd:execute-plan [feature]` | Execute plans with progress tracking |
-| `/specd:insert-phase [feature] [after] [desc]` | Insert a new phase after an existing one |
-| `/specd:renumber-phases [feature]` | Renumber phases to clean integer sequence |
+| `/specd:feature:new [name]` | Initialize a feature, start first discussion |
+| `/specd:feature:discuss [name]` | Continue/deepen discussion (iterative) |
+| `/specd:feature:research [name]` | Research implementation with parallel agents |
+| `/specd:feature:plan [name]` | Create roadmap with phase overview |
+
+### Phase Commands
+
+| Command | Description |
+|---------|-------------|
+| `/specd:phase:prepare [feature] [phase]` | Discuss gray areas + optionally research patterns |
+| `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
+| `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
+| `/specd:phase:execute [feature]` | Execute plans with progress tracking |
+| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
+| `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
 
 ### Utilities
 
 | Command | Description |
 |---------|-------------|
+| `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
 | `/specd:help` | Show available commands |
 | `/specd:update` | Update to latest version |
 
@@ -109,7 +117,7 @@ Creates `.specd/codebase/` with 4 AI-optimized documents.
 ### Plan a Feature
 
 ```
-/specd:new-feature user-dashboard
+/specd:feature:new user-dashboard
 ```
 
 Creates `.specd/features/user-dashboard/` with:
@@ -118,18 +126,18 @@ Creates `.specd/features/user-dashboard/` with:
 - `DECISIONS.md` — Decisions with dates and rationale
 - `STATE.md` — Progress tracking
 
-Then refine and plan:
+Then refine and create a roadmap:
 ```
-/specd:discuss-feature user-dashboard    # Clarify gray areas
-/specd:research-feature user-dashboard   # Research implementation
-/specd:plan-feature user-dashboard       # Create executable plans
+/specd:feature:discuss user-dashboard    # Clarify gray areas
+/specd:feature:research user-dashboard   # Research implementation
+/specd:feature:plan user-dashboard       # Create roadmap with phases
 ```
 
-Optionally, before executing each phase:
+Then for each phase, prepare, plan, and execute:
 ```
-/specd:discuss-phase user-dashboard 1    # Discuss phase 1 specifics
-/specd:research-phase user-dashboard 1   # Research phase 1 patterns
-/specd:execute-plan user-dashboard       # Execute with phase context
+/specd:phase:prepare user-dashboard 1    # Discuss + optionally research
+/specd:phase:plan user-dashboard 1       # Create detailed task plans
+/specd:phase:execute user-dashboard      # Execute with progress tracking
 ```
 
 ---
@@ -167,37 +175,44 @@ The feature planning flow accumulates context over multiple sessions:
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│ new-feature  │ ──▶ │   discuss    │ ◀─▶ │   research   │
-│              │     │   feature    │     │   feature    │
+│  feature:new │ ──▶ │   feature:   │ ◀─▶ │   feature:   │
+│              │     │   discuss    │     │   research   │
 └──────────────┘     └──────────────┘     └──────────────┘
                             │
                             ▼
                      ┌──────────────┐
-                     │ plan-feature │
+                     │  feature:plan│ (creates roadmap)
                      └──────────────┘
                             │
                             ▼
               ┌─────────────────────────────┐
               │     For each phase:         │
-              │  ┌─────────┐   ┌─────────┐  │
-              │  │ discuss │ → │research │  │
-              │  │  phase  │   │  phase  │  │
-              │  └─────────┘   └─────────┘  │
-              │         │           │       │
-              │         └─────┬─────┘       │
-              │               ▼             │
-              │        ┌────────────┐       │
-              │        │execute-plan│       │
-              │        └────────────┘       │
+              │  ┌──────────┐               │
+              │  │  phase:  │               │
+              │  │ prepare  │               │
+              │  └──────────┘               │
+              │       │                     │
+              │       ▼                     │
+              │  ┌──────────┐               │
+              │  │  phase:  │               │
+              │  │   plan   │               │
+              │  └──────────┘               │
+              │       │                     │
+              │       ▼                     │
+              │  ┌──────────┐               │
+              │  │  phase:  │               │
+              │  │ execute  │               │
+              │  └──────────┘               │
               │                             │
               │  Mid-flight adjustments:    │
-              │  ┌────────────┐             │
-              │  │insert-phase│ ──┐         │
-              │  └────────────┘   │         │
-              │            ┌──────▼──────┐  │
-              │            │  renumber-  │  │
-              │            │   phases    │  │
-              │            └─────────────┘  │
+              │  ┌──────────┐               │
+              │  │  phase:  │ ──┐           │
+              │  │  insert  │   │           │
+              │  └──────────┘   │           │
+              │          ┌──────▼────────┐  │
+              │          │    phase:     │  │
+              │          │   renumber   │  │
+              │          └──────────────┘  │
               └─────────────────────────────┘
 ```
 
@@ -205,11 +220,12 @@ Each session updates:
 - `CONTEXT.md` — Resolved questions accumulate
 - `DECISIONS.md` — Decisions with rationale accumulate
 
-**Phase-level commands** (optional but powerful):
-- `discuss-phase` — Just-in-time clarification for a specific phase
-- `research-phase` — Focused research for phase-specific patterns
-- `insert-phase` — Insert urgent work mid-flight as decimal phase (e.g., 3.1)
-- `renumber-phases` — Clean up decimal numbering to sequential integers
+**Phase-level commands:**
+- `phase:prepare` — Just-in-time discussion + optional research for a specific phase
+- `phase:plan` — Create detailed PLAN.md files for one phase (just-in-time, not upfront)
+- `phase:execute` — Execute plans with deviation tracking
+- `phase:insert` — Insert urgent work mid-flight as decimal phase (e.g., 3.1)
+- `phase:renumber` — Clean up decimal numbering to sequential integers
 
 Plans are prompts for implementing agents with:
 - Specific file paths
@@ -242,9 +258,9 @@ your-project/
 │           ├── ROADMAP.md     # Phase overview
 │           └── plans/         # Executable plans
 │               ├── phase-01/
-│               │   ├── CONTEXT.md   # Phase discussion (optional)
-│               │   ├── RESEARCH.md  # Phase research (optional)
-│               │   ├── 01-PLAN.md
+│               │   ├── CONTEXT.md   # Phase discussion (from phase:prepare)
+│               │   ├── RESEARCH.md  # Phase research (from phase:prepare or phase:research)
+│               │   ├── 01-PLAN.md   # From phase:plan
 │               │   └── 02-PLAN.md
 │               └── phase-02/
 │                   ├── CONTEXT.md
@@ -270,6 +286,10 @@ These docs answer questions Claude can't get from reading code:
 ### Plans Are Prompts
 
 Each `PLAN.md` is literally what you'd send to an implementing agent. It contains everything needed to implement without asking questions.
+
+### Just-in-Time Planning
+
+Detailed plans are created per-phase, not all at once. This keeps plans fresh — earlier phases inform later ones, and context doesn't go stale.
 
 ### Decisions Are Permanent
 

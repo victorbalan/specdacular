@@ -242,7 +242,7 @@ Feature: {feature}
 ───────────────────────────────────────────────────────
 
 All phases now use clean integer numbering.
-`/specd:execute-plan {feature}` to continue execution.
+`/specd:phase:execute {feature}` to continue execution.
 ```
 
 End workflow.

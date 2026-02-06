@@ -111,7 +111,7 @@ Load all context needed for phase research.
 
 **Read phase context:**
 - All plan files in `plans/phase-{NN}/`
-- `plans/phase-{NN}/CONTEXT.md` if exists (from discuss-phase)
+- `plans/phase-{NN}/CONTEXT.md` if exists (from phase:prepare)
 - Previous phases' RESEARCH.md files for continuity
 
 **Read codebase context:**
@@ -560,9 +560,11 @@ Present summary and next options.
 
 ## What's Next
 
-**/specd:execute-plan {feature}** — Execute this phase (will load phase research)
+**/specd:phase:execute {feature}** — Execute this phase (will load phase research)
 
-**/specd:discuss-phase {feature} {N}** — Discuss this phase further
+**/specd:phase:prepare {feature} {N}** — Discuss this phase further
+
+**/specd:phase:plan {feature} {N}** — Create detailed plans for this phase
 
 <sub>/clear first — fresh context window for execution</sub>
 ```

@@ -1,5 +1,5 @@
 ---
-name: specd:discuss-feature
+name: specd:feature:discuss
 description: Continue or deepen feature discussion - can be called multiple times
 argument-hint: "[feature-name]"
 allowed-tools:

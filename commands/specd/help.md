@@ -20,27 +20,33 @@ Display available specdacular commands and usage guidance.
 
 | Command | Description |
 |---------|-------------|
-| `/specd:map-codebase` | Analyze codebase with parallel agents → produce AI-optimized docs |
+| `/specd:map-codebase` | Analyze codebase with parallel agents -> produce AI-optimized docs |
 
-### Feature Flow
+### Feature Commands
 
 | Command | Description |
 |---------|-------------|
-| `/specd:new-feature [name]` | Initialize a feature, start first discussion |
-| `/specd:discuss-feature [name]` | Continue/deepen feature discussion (can call many times) |
-| `/specd:research-feature [name]` | Research implementation with parallel agents |
-| `/specd:plan-feature [name]` | Create executable task plans for agents |
-| `/specd:discuss-phase [feature] [phase]` | Discuss a phase before execution |
-| `/specd:research-phase [feature] [phase]` | Research patterns for a phase |
-| `/specd:execute-plan [feature] [plan]` | Execute a plan with progress tracking |
-| `/specd:insert-phase [feature] [after] [desc]` | Insert a new phase after an existing one |
-| `/specd:renumber-phases [feature]` | Renumber phases to clean integer sequence |
+| `/specd:feature:new [name]` | Initialize a feature, start first discussion |
+| `/specd:feature:discuss [name]` | Continue/deepen feature discussion (can call many times) |
+| `/specd:feature:research [name]` | Research implementation with parallel agents |
+| `/specd:feature:plan [name]` | Create roadmap with phase overview |
+
+### Phase Commands
+
+| Command | Description |
+|---------|-------------|
+| `/specd:phase:prepare [feature] [phase]` | Discuss gray areas + optionally research patterns |
+| `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
+| `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
+| `/specd:phase:execute [feature] [plan]` | Execute a plan with progress tracking |
+| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
+| `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
+
+### Other
+
+| Command | Description |
+|---------|-------------|
 | `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
-
-### Utilities
-
-| Command | Description |
-|---------|-------------|
 | `/specd:update` | Update Specdacular to the latest version |
 | `/specd:help` | Show this help |
 
@@ -51,26 +57,27 @@ Display available specdacular commands and usage guidance.
 The feature flow helps you plan features specific enough that an agent can implement without asking questions.
 
 ```
-new-feature → discuss-feature → plan-feature →
-  (discuss-phase? → research-phase? → execute-plan)* per phase
-  insert-phase? → renumber-phases?   ← mid-flight adjustments
+feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
+  [for each phase]
+    phase:prepare? -> phase:plan -> phase:execute
+  phase:insert? -> phase:renumber?   <- mid-flight adjustments
 ```
 
 **You control the rhythm:**
-- `new-feature` — Creates structure, asks initial questions, starts first discussion
-- `discuss-feature` — Can be called **many times** to refine understanding
-- `research-feature` — Can be called **many times** to investigate
-- `plan-feature` — When satisfied, creates executable plans for an agent
-- `discuss-phase` — Optional: dive deeper into phase specifics before execution
-- `research-phase` — Optional: research patterns for a specific phase
-- `execute-plan` — Execute plans with progress tracking and deviation logging
-- `insert-phase` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
-- `renumber-phases` — Clean up decimal phases to sequential integers
+- `feature:new` — Creates structure, asks initial questions, starts first discussion
+- `feature:discuss` — Can be called **many times** to refine understanding
+- `feature:research` — Can be called **many times** to investigate
+- `feature:plan` — Creates roadmap with phases (no detailed plans yet)
+- `phase:prepare` — Discuss gray areas + optionally research (per phase)
+- `phase:plan` — Create detailed PLAN.md files for one phase
+- `phase:execute` — Execute plans with progress tracking
+- `phase:insert` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
+- `phase:renumber` — Clean up decimal phases to sequential integers
 
 ### Quick Start
 
 ```
-/specd:new-feature user-dashboard
+/specd:feature:new user-dashboard
 ```
 
 This creates `.specd/features/user-dashboard/` with:
@@ -80,12 +87,20 @@ This creates `.specd/features/user-dashboard/` with:
 - `CHANGELOG.md` — Auto-captured implementation decisions during execution
 - `STATE.md` — Progress tracking
 
-After initialization, refine with discussion and research, then create plans:
+After initialization, refine and plan:
 
 ```
-/specd:discuss-feature user-dashboard    # Clarify gray areas
-/specd:research-feature user-dashboard   # Research implementation
-/specd:plan-feature user-dashboard       # Create executable plans
+/specd:feature:discuss user-dashboard    # Clarify gray areas
+/specd:feature:research user-dashboard   # Research implementation
+/specd:feature:plan user-dashboard       # Create roadmap
+```
+
+Then for each phase:
+
+```
+/specd:phase:prepare user-dashboard 1    # Discuss + optionally research
+/specd:phase:plan user-dashboard 1       # Create detailed plans
+/specd:phase:execute user-dashboard      # Execute with progress tracking
 ```
 
 ---
@@ -110,10 +125,10 @@ Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`
 These docs are **for Claude, not humans**.
 
 Each document answers a question Claude can't get from reading code:
-- MAP.md → "Where is X? What functions exist?"
-- PATTERNS.md → "How do I write code that fits?"
-- STRUCTURE.md → "Where do I put new code?"
-- CONCERNS.md → "What will bite me?"
+- MAP.md -> "Where is X? What functions exist?"
+- PATTERNS.md -> "How do I write code that fits?"
+- STRUCTURE.md -> "Where do I put new code?"
+- CONCERNS.md -> "What will bite me?"
 
 **Principle:** Don't document what Claude can grep. Document tribal knowledge, gotchas, and patterns.
 
@@ -121,7 +136,7 @@ Each document answers a question Claude can't get from reading code:
 
 ## Updating
 
-When an update is available, you'll see `⬆ /specd:update` in your statusline. Run:
+When an update is available, you'll see `update available` in your statusline. Run:
 ```
 /specd:update
 ```

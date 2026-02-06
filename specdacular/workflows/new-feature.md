@@ -67,7 +67,7 @@ Use AskUserQuestion:
 - header: "Feature Exists"
 - question: "Feature '{name}' already exists. What would you like to do?"
 - options:
-  - "Resume" — Continue with existing feature (suggest /specd:discuss-feature)
+  - "Resume" — Continue with existing feature (suggest /specd:feature:discuss)
   - "Reset" — Delete and start fresh
   - "Different name" — Use a different name
 
@@ -164,7 +164,7 @@ Does that capture it, or should we dig into anything more?
 **When to move on:**
 - User confirms understanding is correct
 - You have enough for initial FEATURE.md
-- Further details can be discussed later with /specd:discuss-feature
+- Further details can be discussed later with /specd:feature:discuss
 
 Continue to write_feature.
 </step>
@@ -322,13 +322,13 @@ Present what was created and next options.
 
 You control the rhythm. Options:
 
-**/specd:discuss-feature {feature-name}** — Dive deeper into specific areas
+**/specd:feature:discuss {feature-name}** — Dive deeper into specific areas
   {Suggested if gray areas remain}
 
-**/specd:research-feature {feature-name}** — Research implementation approach
+**/specd:feature:research {feature-name}** — Research implementation approach
   {Suggested if technology choices are unclear}
 
-**/specd:plan-feature {feature-name}** — Create executable task plans
+**/specd:feature:plan {feature-name}** — Create roadmap with phase overview
   {Only when discussion + research are sufficient}
 
 Or just **keep talking** — this conversation continues naturally.

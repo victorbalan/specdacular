@@ -1,6 +1,6 @@
 ---
-name: specd:new-feature
-description: Initialize a new feature with technical questioning and start the first discussion
+name: specd:feature:new
+description: Initialize a new feature and start the first discussion
 argument-hint: "[feature-name]"
 allowed-tools:
   - Read
@@ -63,5 +63,5 @@ Feature name: $ARGUMENTS
 - [ ] STATE.md tracks current position
 - [ ] config.json created
 - [ ] Committed to git
-- [ ] User knows next options: discuss-feature, research-feature, or continue talking
+- [ ] User knows next options: `/specd:feature:discuss`, `/specd:feature:research`, or continue talking
 </success_criteria>

@@ -1,5 +1,5 @@
 ---
-name: specd:research-phase
+name: specd:phase:research
 description: Research implementation patterns for a phase
 argument-hint: "[feature-name] [phase-number]"
 allowed-tools:
@@ -19,6 +19,8 @@ Research implementation patterns for a specific phase before executing it. Spawn
 **Output:** `.specd/features/{name}/plans/phase-{NN}/RESEARCH.md` with phase-specific guidance.
 
 **Why phase-level research?** Instead of researching the entire feature upfront, investigate each phase's specifics right before executing it. Smaller scope, more focused, fresher context.
+
+**Note:** This is also available as part of `/specd:phase:prepare`. Use this standalone command when you want to research without discussing first.
 </objective>
 
 <execution_context>

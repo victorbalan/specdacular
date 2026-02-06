@@ -18,7 +18,7 @@ Parse the command arguments:
 - Second argument: integer phase number to insert after
 - Remaining arguments: phase description
 
-Example: `/specd:insert-phase visual-blueprint-tool 3 Architecture Update`
+Example: `/specd:phase:insert visual-blueprint-tool 3 Architecture Update`
 → feature = "visual-blueprint-tool"
 → after = 3
 → description = "Architecture Update"
@@ -32,8 +32,8 @@ Example: `/specd:insert-phase visual-blueprint-tool 3 Architecture Update`
 ```
 ERROR: Missing arguments.
 
-Usage: /specd:insert-phase [feature-name] [after-phase] [description...]
-Example: /specd:insert-phase visual-blueprint-tool 3 Architecture Update
+Usage: /specd:phase:insert [feature-name] [after-phase] [description...]
+Example: /specd:phase:insert visual-blueprint-tool 3 Architecture Update
 ```
 </step>
 
@@ -66,7 +66,7 @@ Feature '{name}' not found.
 Available features:
 {list .specd/features/*/}
 
-Run /specd:new-feature {name} to create it.
+Run /specd:feature:new {name} to create it.
 ```
 
 **If target phase not found:**
@@ -187,11 +187,10 @@ Present completion summary:
 
 ## Next Steps
 
-- `/specd:discuss-phase {feature} {new_phase}` — Discuss the new phase
-- `/specd:research-phase {feature} {new_phase}` — Research the phase
-- Manually create plan files in `plans/phase-{new_phase}/`
-- `/specd:execute-plan {feature}` — Execute when plans exist
-- `/specd:renumber-phases {feature}` — Clean up to integer sequence when ready
+- `/specd:phase:prepare {feature} {new_phase}` — Discuss + optionally research the new phase
+- `/specd:phase:plan {feature} {new_phase}` — Create detailed plans for the phase
+- `/specd:phase:execute {feature}` — Execute when plans exist
+- `/specd:phase:renumber {feature}` — Clean up to integer sequence when ready
 ```
 
 End workflow.
@@ -201,7 +200,7 @@ End workflow.
 
 <anti_patterns>
 - Don't insert before Phase 1 (Phase 0.x makes no sense)
-- Don't renumber existing phases (that's /specd:renumber-phases)
+- Don't renumber existing phases (that's /specd:phase:renumber)
 - Don't modify the target phase content
 - Don't create plans yet — user decides how to plan (discuss, research, or manual)
 - Don't commit changes — user decides when to commit

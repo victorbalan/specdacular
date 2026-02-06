@@ -63,7 +63,7 @@ Validate feature exists and has required files.
 ```
 Feature '{name}' not found.
 
-Did you mean to run /specd:new-feature {name} first?
+Did you mean to run /specd:feature:new {name} first?
 ```
 
 Continue to load_context.
@@ -358,13 +358,13 @@ Present session summary and next options.
 
 ## What's Next
 
-**/specd:discuss-feature {feature-name}** — Continue discussing
+**/specd:feature:discuss {feature-name}** — Continue discussing
   {Recommended if gray areas remain}
 
-**/specd:research-feature {feature-name}** — Research implementation
+**/specd:feature:research {feature-name}** — Research implementation
   {Recommended if technical questions need investigation}
 
-**/specd:plan-feature {feature-name}** — Create executable plans
+**/specd:feature:plan {feature-name}** — Create roadmap with phase overview
   {Recommended when discussion is sufficient}
 
 Or just **keep talking** — this conversation continues naturally.

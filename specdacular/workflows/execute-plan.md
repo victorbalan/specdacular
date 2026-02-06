@@ -64,14 +64,14 @@ Validate feature exists and has plans.
 ```
 Feature '{name}' not found.
 
-Run /specd:new-feature {name} to create it.
+Run /specd:feature:new {name} to create it.
 ```
 
 **If no plans:**
 ```
 Feature '{name}' has no plans yet.
 
-Run /specd:plan-feature {name} to create plans.
+Run /specd:feature:plan {name} to create a roadmap, then /specd:phase:plan {name} {N} to create plans.
 ```
 
 Continue to load_context.
@@ -101,7 +101,7 @@ Load ALL context needed for execution.
 - Which phase we're in
 - Key decisions affecting implementation
 - Patterns to follow
-- Phase-specific context and research (if discuss-phase/research-phase were run)
+- Phase-specific context and research (if phase:prepare/phase:research were run)
 
 Continue to find_plan.
 </step>
@@ -383,7 +383,7 @@ git commit -m "docs({feature}): complete plan {phase-XX/YY}"
 **Next plan:** {path or "None - all plans complete"}
 
 {If next plan exists:}
-Run `/specd:execute-plan {feature}` to continue.
+Run `/specd:phase:execute {feature}` to continue.
 
 {If all complete:}
 All plans complete! Feature '{feature}' is implemented.

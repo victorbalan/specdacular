@@ -76,7 +76,7 @@ Check feature exists and has required files.
 ```
 Feature '{name}' not found.
 
-Run /specd:new-feature {name} to create it first.
+Run /specd:feature:new {name} to create it first.
 ```
 
 Continue to load_context.

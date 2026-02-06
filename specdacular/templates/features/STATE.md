@@ -75,10 +75,12 @@
 {What the user should do next based on current state.}
 
 **Options:**
-- `/specd:discuss-feature {feature-name}` — Continue refining understanding
-- `/specd:research-feature {feature-name}` — Research implementation approach
-- `/specd:plan-feature {feature-name}` — Create executable plans (when ready)
-- `/specd:execute-plan {feature-name}` — Execute plans with progress tracking
+- `/specd:feature:discuss {feature-name}` — Continue refining understanding
+- `/specd:feature:research {feature-name}` — Research implementation approach
+- `/specd:feature:plan {feature-name}` — Create roadmap with phase overview (when ready)
+- `/specd:phase:prepare {feature-name} {N}` — Prepare a specific phase
+- `/specd:phase:plan {feature-name} {N}` — Create detailed plans for a phase
+- `/specd:phase:execute {feature-name}` — Execute plans with progress tracking
 
 ---
 

@@ -1,30 +1,20 @@
 <purpose>
-Create executable task plans that an agent can implement without asking clarifying questions.
+Create a roadmap with phase overview and empty phase directories. Detailed PLAN.md files are created later per-phase with `/specd:phase:plan`.
 
 **Key principles:**
-- Plans are prompts, not documents
-- Each task references specific files with exact paths
-- Include code patterns from codebase
-- Verification is executable commands
-- Tasks sized for ~15-60 min agent execution
+- Roadmap defines phases with goals, deliverables, and dependencies
+- Phases follow natural code dependencies (types->API->UI)
+- Empty phase directories are created as scaffolding
+- No PLAN.md files — those are created just-in-time per phase
 
-**Output:** ROADMAP.md + plans/phase-XX/YY-PLAN.md files
+**Output:** ROADMAP.md + empty `plans/phase-XX/` directories
 </purpose>
 
 <philosophy>
 
-## Plans Are Prompts
+## Roadmap, Not Plans
 
-Each PLAN.md is literally what you'd send to an implementing agent. It must contain everything needed to implement without asking questions:
-- What files to create/modify
-- What patterns to follow (with code examples)
-- How to verify success
-- When the task is done
-
-## Specificity Over Abstraction
-
-**Bad:** "Create a component for displaying items"
-**Good:** "Create `src/components/ItemList/index.tsx` following pattern from `src/components/UserList/index.tsx`. Must export `ItemList` component that accepts `items: Item[]` prop..."
+The roadmap defines WHAT each phase does and WHY it's ordered that way. The HOW (detailed plans) comes later, per phase, when context is freshest.
 
 ## Dependency-Driven Phases
 
@@ -36,21 +26,12 @@ Phases follow natural code dependencies:
 
 Each phase's output is input for the next.
 
-## Task Sizing
+## Just-in-Time Detail
 
-Each plan should contain 2-3 tasks. Each task should be:
-- Completable in 15-60 minutes of agent execution
-- Independently verifiable
-- Focused on related files
-
-Too big = agent loses context. Too small = overhead exceeds value.
-
-## Verification Is Executable
-
-**Bad:** "Make sure it works"
-**Good:** `npx tsc --noEmit && npm test -- --grep "ItemList"`
-
-Every task has a verification step. If you can't verify it with a command, add a specific manual check.
+Creating detailed plans for all phases upfront means later plans go stale as earlier phases deviate. Instead:
+1. Create the roadmap (this workflow)
+2. For each phase: prepare -> plan -> execute
+3. Each phase's plans use the latest context
 
 </philosophy>
 
@@ -76,7 +57,7 @@ Validate feature exists and has required context.
 ```
 Feature '{name}' not found.
 
-Run /specd:new-feature {name} to create it.
+Run /specd:feature:new {name} to create it.
 ```
 
 **If missing required files:**
@@ -84,7 +65,7 @@ Run /specd:new-feature {name} to create it.
 Feature '{name}' is missing required context for planning:
 - {missing file}
 
-Run /specd:discuss-feature {name} to build more context.
+Run /specd:feature:discuss {name} to build more context.
 ```
 
 Continue to load_context.
@@ -115,7 +96,7 @@ Continue to assess_readiness.
 </step>
 
 <step name="assess_readiness">
-Check if there's enough context to create good plans.
+Check if there's enough context to create a good roadmap.
 
 **Required for planning:**
 - [ ] Clear list of files to create
@@ -139,19 +120,19 @@ Feature '{name}' might benefit from more discussion before planning.
 - Gray areas remaining: {count}
 
 **Recommendation:**
-/specd:discuss-feature {name} — Resolve remaining gray areas
-/specd:research-feature {name} — Research implementation approach
+/specd:feature:discuss {name} — Resolve remaining gray areas
+/specd:feature:research {name} — Research implementation approach
 
-Continue anyway? (Plans may need revision)
+Continue anyway? (Roadmap may need revision)
 ```
 
 Use AskUserQuestion:
 - header: "Plan Readiness"
 - question: "How would you like to proceed?"
 - options:
-  - "Continue planning" — Create plans with current context
-  - "Discuss first" — Run discuss-feature
-  - "Research first" — Run research-feature
+  - "Continue planning" — Create roadmap with current context
+  - "Discuss first" — Run feature:discuss
+  - "Research first" — Run feature:research
 
 **If sufficient or user chooses to continue:**
 Continue to derive_phases.
@@ -204,139 +185,6 @@ Depends on: Phase 1
 Does this phasing make sense? Any adjustments?
 ```
 
-Continue to break_into_tasks.
-</step>
-
-<step name="break_into_tasks">
-Break each phase into tasks.
-
-**For each phase:**
-
-1. Group related files into tasks (2-3 tasks per phase)
-2. Order tasks by internal dependencies
-3. Define clear boundaries
-
-**Task structure:**
-- Files: Specific paths (1-3 files per task)
-- Action: What to create/modify
-- Pattern: Code pattern to follow (with example)
-- Verify: Command to verify completion
-- Done: Completion criteria checklist
-
-**Example task breakdown:**
-
-Phase 1: Types & Schema
-- Task 1: Create type definitions
-- Task 2: Create database schema
-
-Phase 2: API Layer
-- Task 1: Create API route handlers
-- Task 2: Create API client functions
-
-Phase 3: UI Components
-- Task 1: Create core component
-- Task 2: Create supporting components
-- Task 3: Create styles/tests
-
-Continue to write_plans.
-</step>
-
-<step name="write_plans">
-Write PLAN.md files for each task.
-
-**Create plans directory:**
-```bash
-mkdir -p .specd/features/{feature-name}/plans/phase-01
-mkdir -p .specd/features/{feature-name}/plans/phase-02
-# ... for each phase
-```
-
-**For each plan, use template at `~/.claude/specdacular/templates/features/PLAN.md`**
-
-**Fill in plan content:**
-
-**Frontmatter:**
-```yaml
----
-feature: {feature-name}
-phase: {N}
-plan: {NN}
-depends_on: [list of previous plan IDs]
-creates:
-  - {exact/path/to/file.ts}
-modifies:
-  - {exact/path/to/existing.ts}
----
-```
-
-**Objective:**
-One sentence: what this accomplishes and why.
-
-**Context:**
-```markdown
-**Reference these files:**
-- `@.specd/codebase/PATTERNS.md` — Code patterns
-- `@{path/to/pattern/file}` — Pattern to follow
-
-**Relevant Decisions:**
-- DEC-XXX: {Decision affecting this plan}
-
-**From Research:** (if RESEARCH.md exists)
-- {Key finding}
-- {Pitfall to avoid}
-```
-
-**Tasks:**
-For each task:
-```markdown
-### Task N: {Title}
-
-**Files:** `{path/to/file}`
-
-**Action:**
-{Clear description with enough detail to implement}
-
-Follow pattern from `{path/to/example}`:
-```{language}
-// Pattern to follow
-{actual code from codebase}
-```
-
-Create:
-```{language}
-// What to create (scaffold or full example)
-{code example}
-```
-
-**Verify:**
-```bash
-{verification command}
-```
-
-**Done when:**
-- [ ] {Specific criterion}
-- [ ] {Specific criterion}
-```
-
-**Verification section:**
-```markdown
-## Verification
-
-After all tasks complete:
-
-```bash
-# Type check
-npx tsc --noEmit
-
-# Run tests
-npm test -- --grep "{pattern}"
-```
-
-**Plan complete when:**
-- [ ] All tasks done
-- [ ] All verifications pass
-```
-
 Continue to write_roadmap.
 </step>
 
@@ -349,7 +197,6 @@ Write ROADMAP.md with phase overview.
 
 **Overview table:**
 - Total phases
-- Total plans
 - Current phase: 1
 - Status: Not Started
 
@@ -359,7 +206,6 @@ Write ROADMAP.md with phase overview.
 - Goal
 - Creates (file list)
 - Modifies (file list)
-- Plans (with summaries)
 - Success criteria
 - Dependencies
 
@@ -368,6 +214,18 @@ Write ROADMAP.md with phase overview.
 **Key decisions affecting roadmap:**
 Reference decisions from DECISIONS.md that affect phase ordering
 
+Continue to create_directories.
+</step>
+
+<step name="create_directories">
+Create empty phase directories.
+
+```bash
+mkdir -p .specd/features/{feature-name}/plans/phase-01
+mkdir -p .specd/features/{feature-name}/plans/phase-02
+# ... for each phase
+```
+
 Continue to update_state.
 </step>
 
@@ -375,22 +233,18 @@ Continue to update_state.
 Update STATE.md with planning status.
 
 **Update STATE.md:**
-- Stage: planning → execution (ready)
-- Planning complete: yes
+- Stage: discussion -> planned
+- Roadmap created: yes
 - Add planning session to history
 
 **Update config.json:**
 ```json
 {
-  "stage": "execution",
+  "stage": "planned",
   "phases": {
     "total": {N},
     "completed": 0,
     "current": 1
-  },
-  "plans": {
-    "total": {N},
-    "completed": 0
   }
 }
 ```
@@ -399,14 +253,13 @@ Continue to commit.
 </step>
 
 <step name="commit">
-Commit the plans.
+Commit the roadmap.
 
 ```bash
 git add .specd/features/{feature-name}/ROADMAP.md .specd/features/{feature-name}/plans/ .specd/features/{feature-name}/STATE.md .specd/features/{feature-name}/config.json
-git commit -m "docs({feature-name}): create implementation plans
+git commit -m "docs({feature-name}): create roadmap
 
 Phases: {N}
-Plans: {N}
 
 Phase structure:
 - Phase 1: {name}
@@ -418,69 +271,43 @@ Continue to completion.
 </step>
 
 <step name="completion">
-Present what was created and how to execute.
+Present what was created and how to proceed.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- PLANS CREATED
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ROADMAP CREATED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **Feature:** {feature-name}
 
-## Structure
+## Phases
 
-**Phases:** {N}
-**Plans:** {N total}
-
-### Phase 1: {Name}
-- `plans/phase-01/01-PLAN.md` — {Summary}
-- `plans/phase-01/02-PLAN.md` — {Summary}
-
-### Phase 2: {Name}
-- `plans/phase-02/01-PLAN.md` — {Summary}
-
+**Phase 1:** {Name} — {Goal}
+**Phase 2:** {Name} — {Goal}
 ...
 
 ## Files Created
 
 - `.specd/features/{feature-name}/ROADMAP.md`
-- `.specd/features/{feature-name}/plans/phase-01/01-PLAN.md`
-- `.specd/features/{feature-name}/plans/phase-01/02-PLAN.md`
+- `.specd/features/{feature-name}/plans/phase-01/`
+- `.specd/features/{feature-name}/plans/phase-02/`
 ...
 
 ───────────────────────────────────────────────────────
 
-## How to Execute
+## What's Next — Phase by Phase
 
-Each plan is a self-contained prompt. To execute:
+For each phase, the flow is:
 
-**Option 1: Sequential execution**
-Read each plan and implement:
-```
-cat .specd/features/{feature-name}/plans/phase-01/01-PLAN.md
-```
-Then implement what it describes.
+1. `/specd:phase:prepare {feature} {N}` — Discuss gray areas + optional research
+2. `/specd:phase:plan {feature} {N}` — Create detailed task plans
+3. `/specd:phase:execute {feature}` — Execute with progress tracking
 
-**Option 2: Agent execution**
-Give a plan to an implementing agent:
-"Implement the plan in `.specd/features/{feature-name}/plans/phase-01/01-PLAN.md`"
+**Start with Phase 1:**
 
-**Start with Phase 1, Plan 01.**
+/specd:phase:prepare {feature} 1 — Prepare the first phase
 
-───────────────────────────────────────────────────────
-
-## Verification
-
-After each plan:
-1. Run the plan's verification commands
-2. Commit the changes
-3. Update STATE.md (or let agent do it)
-4. Move to next plan
-
-After all plans in a phase:
-1. Run phase success criteria checks
-2. Mark phase complete in STATE.md
-3. Move to next phase
+<sub>/clear first — fresh context window</sub>
 ```
 
 End workflow.
@@ -492,10 +319,10 @@ End workflow.
 - Feature validated with sufficient context
 - All context loaded and analyzed
 - Phases derived from dependency analysis
-- Tasks are specific (exact files, patterns, verification)
-- Each PLAN.md is a self-contained agent prompt
-- ROADMAP.md provides clear execution path
-- STATE.md updated to execution stage
+- ROADMAP.md provides clear phase overview
+- Empty phase directories created
+- No PLAN.md files created
+- STATE.md updated to "planned" stage
 - Committed to git
-- User knows how to execute plans
+- User knows the per-phase flow: prepare -> plan -> execute
 </success_criteria>
