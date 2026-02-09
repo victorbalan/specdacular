@@ -12,7 +12,7 @@ allowed-tools:
 ---
 
 <objective>
-Initialize a feature folder and start the first discussion. Creates structure, asks initial questions about what's being built, and writes technical requirements.
+Initialize a feature folder and start the first discussion. Creates structure, asks initial questions about what's being built, and writes technical requirements. After initialization, offers to continue discussing or stop.
 
 **Creates:**
 - `.specd/features/{name}/FEATURE.md` — Technical requirements from discussion
@@ -21,7 +21,7 @@ Initialize a feature folder and start the first discussion. Creates structure, a
 - `.specd/features/{name}/STATE.md` — Progress tracking
 - `.specd/features/{name}/config.json` — Feature configuration
 
-**This is the entry point.** After this, user controls the loop with discuss/research/plan.
+**This is the entry point.** After this, continue with `/specd:feature:next` to drive the entire lifecycle.
 </objective>
 
 <execution_context>
@@ -63,5 +63,5 @@ Feature name: $ARGUMENTS
 - [ ] STATE.md tracks current position
 - [ ] config.json created
 - [ ] Committed to git
-- [ ] User knows next options: `/specd:feature:discuss`, `/specd:feature:research`, or continue talking
+- [ ] User offered to continue discussing or stop with `/specd:feature:next`
 </success_criteria>

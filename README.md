@@ -25,14 +25,14 @@ Spawns 4 parallel agents to analyze your codebase and generate AI-optimized docu
 
 ### 2. Plan Features
 
-A structured flow for planning features with enough detail for agent implementation:
+Two commands drive the entire feature lifecycle:
 
 ```
-feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
-  [for each phase]
-    phase:prepare? -> phase:plan -> phase:execute -> phase:review?
-  phase:insert? -> phase:renumber?   <- mid-flight adjustments
+/specd:feature:new my-feature     # Initialize + first discussion
+/specd:feature:next my-feature    # Everything else — discussion, research, planning, execution, review
 ```
+
+`feature:next` reads your feature's current state and offers the natural next step. You never need to remember which command comes next.
 
 ---
 
@@ -72,9 +72,7 @@ Work with a feature as a whole — discuss, research, and create a roadmap.
 | Command | Description |
 |---------|-------------|
 | `/specd:feature:new [name]` | Initialize a feature, start first discussion |
-| `/specd:feature:discuss [name]` | Continue/deepen discussion (call many times) |
-| `/specd:feature:research [name]` | Research implementation with parallel agents |
-| `/specd:feature:plan [name]` | Create roadmap with phase overview |
+| `/specd:feature:next [name]` | **Drive the entire lifecycle** — picks up where you left off |
 
 ### Phase Commands (`phase:`)
 
@@ -113,41 +111,39 @@ Creates `.specd/codebase/` with 4 AI-optimized documents. This gives Claude cont
 
 ### Plan a Feature
 
-**Step 1: Initialize and discuss**
+**Step 1: Initialize**
 
 ```
 /specd:feature:new user-dashboard
 ```
 
-Creates `.specd/features/user-dashboard/` and starts the first discussion. Claude asks what you're building, follows the thread, and captures technical requirements.
+Creates `.specd/features/user-dashboard/` and starts the first discussion. Claude asks what you're building, follows the thread, and captures technical requirements. When done, offers to continue discussing or stop.
 
-**Step 2: Refine understanding**
-
-```
-/specd:feature:discuss user-dashboard    # Clarify gray areas (call many times)
-/specd:feature:research user-dashboard   # Research implementation approaches
-```
-
-Discussion and research are iterative — call them as many times as you need. Context accumulates across sessions.
-
-**Step 3: Create a roadmap**
+**Step 2: Drive the lifecycle**
 
 ```
-/specd:feature:plan user-dashboard
+/specd:feature:next user-dashboard
 ```
 
-Creates `ROADMAP.md` with phases derived from dependency analysis (types -> API -> UI), plus empty phase directories. No detailed plans yet — those come next, per phase.
+That's it. `feature:next` reads the current state and guides you through each stage:
 
-**Step 4: Prepare, plan, and execute each phase**
+1. **Discussion** — Probes gray areas until clear
+2. **Research** — Spawns parallel agents for patterns/pitfalls
+3. **Planning** — Creates roadmap with phases
+4. **Phase preparation** — Discusses phase-specific gray areas
+5. **Phase planning** — Creates detailed PLAN.md files
+6. **Phase execution** — Implements with progress tracking
+7. **Phase review** — Compares plans against actual code
+
+After each step, you can continue or stop. Resume anytime with `/specd:feature:next`.
+
+**No argument? It picks for you:**
 
 ```
-/specd:phase:prepare user-dashboard 1    # Discuss phase gray areas + optional research
-/specd:phase:plan user-dashboard 1       # Create detailed PLAN.md files
-/specd:phase:execute user-dashboard      # Execute with progress tracking
-/specd:phase:review user-dashboard 1     # Review phase against actual code
+/specd:feature:next
 ```
 
-Repeat for each phase. Plans are created just-in-time so they stay fresh.
+Scans for in-progress features and shows a picker.
 
 **Mid-flight adjustments:**
 
@@ -162,23 +158,18 @@ Repeat for each phase. Plans are created just-in-time so they stay fresh.
 
 ### Feature-Level Commands
 
-**`feature:new`** creates the feature folder and starts the first discussion. Output:
+**`feature:new`** creates the feature folder and starts the first discussion. After initialization, offers to continue discussing or come back later with `feature:next`. Output:
 - `FEATURE.md` — Technical requirements from the conversation
 - `CONTEXT.md` — Discussion context (accumulates over time)
 - `DECISIONS.md` — Decisions with dates, rationale, and implications
 - `STATE.md` — Progress tracking
 - `config.json` — Feature configuration
 
-**`feature:discuss`** continues the conversation. Can be called many times — each session adds to `CONTEXT.md` and `DECISIONS.md`. Claude identifies gray areas based on what's been discussed so far and probes until clear.
+**`feature:next`** is the smart state machine. It reads `config.json` and `STATE.md` to determine where the feature is, shows a status summary, and offers the natural next step. After each action it loops back — you keep going until you choose to stop. Under the hood it delegates to these stages:
 
-**`feature:research`** spawns 3 parallel agents to investigate:
-1. **Codebase integration** — How does this fit with existing code?
-2. **External patterns** — What libraries/approaches are standard?
-3. **Pitfalls** — What commonly goes wrong?
-
-Output: `RESEARCH.md` with prescriptive guidance.
-
-**`feature:plan`** creates a roadmap with phases. Each phase has a goal, deliverables, and dependencies. Creates `ROADMAP.md` and empty `plans/phase-{NN}/` directories. Does **not** create detailed PLAN.md files — that happens per-phase with `phase:plan`.
+- **Discussion** — Probes gray areas, records decisions. Context accumulates across sessions.
+- **Research** — Spawns 3 parallel agents: codebase integration, external patterns, and pitfalls. Output: `RESEARCH.md`.
+- **Planning** — Creates `ROADMAP.md` with phases derived from dependency analysis, plus empty `plans/phase-{NN}/` directories.
 
 ### Phase-Level Commands
 
@@ -251,53 +242,46 @@ Specdacular spawns specialized agents that run simultaneously:
 
 ### Feature Flow
 
+**The simple way** — two commands:
+
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  feature:new │ ──▶ │   feature:   │ ◀─▶ │   feature:   │
-│              │     │   discuss    │     │   research   │
-└──────────────┘     └──────────────┘     └──────────────┘
-                            │
-                            ▼
-                     ┌──────────────┐
-                     │  feature:plan│ (creates roadmap)
-                     └──────────────┘
-                            │
-                            ▼
-              ┌─────────────────────────────┐
-              │     For each phase:         │
-              │  ┌──────────┐               │
-              │  │  phase:  │               │
-              │  │ prepare  │               │
-              │  └──────────┘               │
-              │       │                     │
-              │       ▼                     │
-              │  ┌──────────┐               │
-              │  │  phase:  │               │
-              │  │   plan   │               │
-              │  └──────────┘               │
-              │       │                     │
-              │       ▼                     │
-              │  ┌──────────┐               │
-              │  │  phase:  │               │
-              │  │ execute  │               │
-              │  └──────────┘               │
-              │       │                     │
-              │       ▼                     │
-              │  ┌──────────┐               │
-              │  │  phase:  │               │
-              │  │  review  │               │
-              │  └──────────┘               │
-              │                             │
-              │  Mid-flight adjustments:    │
-              │  ┌──────────┐               │
-              │  │  phase:  │ ──┐           │
-              │  │  insert  │   │           │
-              │  └──────────┘   │           │
-              │          ┌──────▼────────┐  │
-              │          │    phase:     │  │
-              │          │   renumber   │  │
-              │          └──────────────┘  │
-              └─────────────────────────────┘
+/specd:feature:new          /specd:feature:next
+      │                           │
+      ▼                           ▼
+ Create feature          ┌─── Read state ◀──────────────┐
+ First discussion        │    Show status                │
+ Offer to continue       │    Offer next step            │
+      │                  │         │                     │
+      ▼                  │         ▼                     │
+ "Keep discussing?"      │   ┌──────────────┐           │
+  Yes → discuss loop     │   │  Execute the │           │
+  No  → feature:next     │   │  next action │           │
+                         │   └──────────────┘           │
+                         │         │                     │
+                         │    ┌────┴────┐                │
+                         │    │ Discuss │ Research       │
+                         │    │ Plan    │ Prepare phase  │
+                         │    │ Execute │ Review phase   │
+                         │    └────┬────┘                │
+                         │         │                     │
+                         │         ▼                     │
+                         │   "Continue or stop?"         │
+                         │    Continue ──────────────────┘
+                         │    Stop → clean exit
+                         │
+                         └─── No features? → feature:new
+```
+
+**Under the hood,** `feature:next` delegates to the same workflows as the individual commands:
+
+```
+discussion  → discuss-feature workflow
+research    → research-feature workflow (3 parallel agents)
+planning    → plan-feature workflow
+phase prep  → prepare-phase workflow
+phase plan  → plan-phase workflow
+execution   → execute-plan workflow
+review      → review-phase workflow
 ```
 
 ---
@@ -361,6 +345,19 @@ Detailed plans are created per-phase, not all at once. This keeps plans fresh �
 ### Decisions Are Permanent
 
 Once recorded in `DECISIONS.md`, decisions aren't re-litigated. Each has date, context, rationale, and implications.
+
+---
+
+## Migrating from v0.5
+
+**New command: `/specd:feature:next`** — Drives the entire feature lifecycle from a single command. Reads current state and offers the next step automatically.
+
+| Before (v0.5) | After (v0.6) |
+|----------------|--------------|
+| Remember command sequence: `discuss` → `research` → `plan` → `phase:prepare` → `phase:plan` → `phase:execute` → `phase:review` | Just run `/specd:feature:next` — it figures out what's next |
+| `feature:new` ends with list of commands to try | `feature:new` offers to continue discussing or stop with `feature:next` |
+
+**Existing `.specd/` data is fully compatible.** `feature:next` reads the same `config.json`, `STATE.md`, and other files.
 
 ---
 

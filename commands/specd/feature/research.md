@@ -13,6 +13,8 @@ allowed-tools:
 ---
 
 <objective>
+> **Note:** Consider using `/specd:feature:next` instead — it guides you through the entire feature lifecycle automatically, including research.
+
 Research how to implement a feature before planning. Spawns parallel research agents to investigate:
 
 1. **Codebase Integration** - How does this fit with existing code? (uses Claude Code Explore agent)

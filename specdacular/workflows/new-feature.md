@@ -288,7 +288,7 @@ Continue to completion.
 </step>
 
 <step name="completion">
-Present what was created and next options.
+Present what was created and offer to continue.
 
 **Output:**
 ```
@@ -315,23 +315,51 @@ Present what was created and next options.
 **Open areas to discuss:**
 - {Gray area 1}
 - {Gray area 2}
+```
 
+Continue to continuation_offer.
+</step>
+
+<step name="continuation_offer">
+Offer to continue discussing or stop.
+
+**If gray areas remain:**
+
+Use AskUserQuestion:
+- header: "Continue?"
+- question: "Want to keep discussing the open areas, or come back later?"
+- options:
+  - "Keep discussing" — Dive into the gray areas now
+  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+
+**If Keep discussing:**
+Execute the discuss-feature workflow logic:
+@~/.claude/specdacular/workflows/discuss-feature.md
+
+After discussion completes (commit done), return to this step (continuation_offer) — re-read CONTEXT.md to check if gray areas remain, and offer again.
+
+**If no gray areas remain:**
+
+Use AskUserQuestion:
+- header: "Continue?"
+- question: "Discussion looks solid. Want to keep going or come back later?"
+- options:
+  - "Continue" — Move to the next step (research or planning)
+  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+
+**If Continue:**
+Hand off to the next-feature workflow logic to determine next action:
+@~/.claude/specdacular/workflows/next-feature.md
+
+Start from the read_state step with the current feature.
+
+**If Stop for now:**
+```
 ───────────────────────────────────────────────────────
 
-## What's Next
+Progress saved. Pick up where you left off anytime:
 
-You control the rhythm. Options:
-
-**/specd:feature:discuss {feature-name}** — Dive deeper into specific areas
-  {Suggested if gray areas remain}
-
-**/specd:feature:research {feature-name}** — Research implementation approach
-  {Suggested if technology choices are unclear}
-
-**/specd:feature:plan {feature-name}** — Create roadmap with phase overview
-  {Only when discussion + research are sufficient}
-
-Or just **keep talking** — this conversation continues naturally.
+/specd:feature:next {feature-name}
 ```
 
 End workflow.
