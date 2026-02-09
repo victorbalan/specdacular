@@ -46,6 +46,7 @@ Display available specdacular commands and usage guidance.
 
 | Command | Description |
 |---------|-------------|
+| `/specd:status [--all]` | Show feature status dashboard |
 | `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
 | `/specd:update` | Update Specdacular to the latest version |
 | `/specd:help` | Show this help |
