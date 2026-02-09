@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** discussion
+**Stage:** research
 **Last Updated:** 2026-02-09
 
 ---
@@ -15,8 +15,8 @@
 - [x] All gray areas resolved
 
 ### Research
-- [ ] Research conducted
-- [ ] Findings documented in RESEARCH.md
+- [x] Research conducted
+- [x] Findings documented in RESEARCH.md
 
 ### Planning
 - [ ] Phases derived
@@ -56,7 +56,7 @@
 | FEATURE.md | Created | 2026-02-06 |
 | CONTEXT.md | Created | 2026-02-06 |
 | DECISIONS.md | 6 decisions | 2026-02-09 |
-| RESEARCH.md | Not started | — |
+| RESEARCH.md | Complete | 2026-02-09 |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
 
@@ -72,8 +72,8 @@
 
 ## Next Steps
 
-**Recommended:** Research the Agent Skills standard in depth, then plan phases.
+**Recommended:** Create roadmap with phase overview.
 
 **Options:**
-- `/specd:feature:research agent-skills-migration` — Research Agent Skills standard, Vercel implementation, cross-tool installation
 - `/specd:feature:plan agent-skills-migration` — Create roadmap with phase overview
+- `/specd:feature:discuss agent-skills-migration` — Discuss further if needed
