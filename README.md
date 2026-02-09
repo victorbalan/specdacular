@@ -93,6 +93,7 @@ Work with individual phases — prepare, plan, and execute one at a time.
 
 | Command | Description |
 |---------|-------------|
+| `/specd:status [--all]` | Show feature status dashboard |
 | `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
 | `/specd:help` | Show available commands |
 | `/specd:update` | Update to latest version |
