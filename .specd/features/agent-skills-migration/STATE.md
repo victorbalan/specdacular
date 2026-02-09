@@ -3,7 +3,7 @@
 ## Current Position
 
 **Stage:** discussion
-**Last Updated:** 2026-02-06
+**Last Updated:** 2026-02-09
 
 ---
 
@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -45,6 +45,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-02-06 | Architecture analysis, standard comparison | Feature initialized, 3 decisions, 4 gray areas identified |
+| 2026-02-09 | Vercel rules/ structure, codebase output format, _sections.md, versioning | 3 gray areas resolved, 3 new decisions (DEC-004 to DEC-006), remaining deferred to research |
 
 ---
 
@@ -54,7 +55,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-06 |
 | CONTEXT.md | Created | 2026-02-06 |
-| DECISIONS.md | 3 decisions | 2026-02-06 |
+| DECISIONS.md | 6 decisions | 2026-02-09 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
@@ -63,9 +64,9 @@
 
 ## Decision Count
 
-- **Active:** 3
+- **Active:** 6
 - **Superseded:** 0
-- **Total:** 3
+- **Total:** 6
 
 ---
 
@@ -74,6 +75,5 @@
 **Recommended:** Research the Agent Skills standard in depth, then plan phases.
 
 **Options:**
-- `/specd:feature:discuss agent-skills-migration` — Resolve remaining gray areas
-- `/specd:feature:research agent-skills-migration` — Research Agent Skills standard, Vercel implementation
+- `/specd:feature:research agent-skills-migration` — Research Agent Skills standard, Vercel implementation, cross-tool installation
 - `/specd:feature:plan agent-skills-migration` — Create roadmap with phase overview

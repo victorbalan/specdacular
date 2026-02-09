@@ -13,6 +13,10 @@ Migrate Specdacular from its custom command system (YAML frontmatter commands + 
 - [ ] `references/agents/` — Agent definitions loaded only when spawning (migrated from `specdacular/agents/`)
 - [ ] `assets/templates/` — Template files loaded only when creating features (migrated from `specdacular/templates/`)
 - [ ] `scripts/` — Any automation scripts (migrated from `bin/`)
+- [ ] `.specd/codebase/rules/` — Atomic rule files replacing PATTERNS.md (output by map-codebase)
+- [ ] `.specd/codebase/rules/_sections.md` — Category definitions with impact levels (output by map-codebase)
+- [ ] `.specd/codebase/version.json` — Format version tracking (`{ "version": 2 }`)
+- [ ] Migration script — Converts existing PATTERNS.md to atomic rules/ files
 
 ### Must Integrate With
 
@@ -22,6 +26,8 @@ Migrate Specdacular from its custom command system (YAML frontmatter commands + 
 - `specdacular/templates/` — Current templates (to be moved to `assets/templates/`)
 - `bin/install.js` — Current installation script (to be simplified or replaced)
 - `.specd/` — Feature state directory (unchanged, but referenced differently from SKILL.md)
+- `specdacular/workflows/map-codebase.md` — Must be updated to output rules/ instead of PATTERNS.md
+- `.specd/codebase/PATTERNS.md` — Existing file to be replaced by rules/ (migration needed)
 
 ### Constraints
 
@@ -40,6 +46,11 @@ Migrate Specdacular from its custom command system (YAML frontmatter commands + 
 - [ ] Full workflow instructions load only when user triggers a specific command
 - [ ] Installation is: copy skill folder to `.claude/skills/specdacular/` (or equivalent per tool)
 - [ ] Works in at least Claude Code and one other tool (Cursor or VS Code)
+- [ ] Map-codebase outputs atomic `rules/` directory instead of PATTERNS.md
+- [ ] Each rule file follows Vercel template (title, impact, tags, incorrect/correct examples)
+- [ ] `.specd/codebase/version.json` written with `{ "version": 2 }`
+- [ ] Migration script converts existing PATTERNS.md to rules/ files
+- [ ] Old format detected on command run, migration offered to user
 
 ---
 
