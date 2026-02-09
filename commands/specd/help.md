@@ -39,6 +39,7 @@ Display available specdacular commands and usage guidance.
 | `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
 | `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
 | `/specd:phase:execute [feature] [plan]` | Execute a plan with progress tracking |
+| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
 | `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
 | `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
 
@@ -60,7 +61,7 @@ The feature flow helps you plan features specific enough that an agent can imple
 ```
 feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
   [for each phase]
-    phase:prepare? -> phase:plan -> phase:execute
+    phase:prepare? -> phase:plan -> phase:execute -> phase:review?
   phase:insert? -> phase:renumber?   <- mid-flight adjustments
 ```
 
@@ -72,6 +73,7 @@ feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
 - `phase:prepare` — Discuss gray areas + optionally research (per phase)
 - `phase:plan` — Create detailed PLAN.md files for one phase
 - `phase:execute` — Execute plans with progress tracking
+- `phase:review` — Review executed plans, generate corrective plans if needed
 - `phase:insert` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
 - `phase:renumber` — Clean up decimal phases to sequential integers
 
@@ -102,6 +104,7 @@ Then for each phase:
 /specd:phase:prepare user-dashboard 1    # Discuss + optionally research
 /specd:phase:plan user-dashboard 1       # Create detailed plans
 /specd:phase:execute user-dashboard      # Execute with progress tracking
+/specd:phase:review user-dashboard 1     # Review phase against actual code
 ```
 
 ---
