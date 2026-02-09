@@ -62,7 +62,7 @@
 | DECISIONS.md | 6 decisions | 2026-02-09 |
 | RESEARCH.md | Complete | 2026-02-09 |
 | ROADMAP.md | Complete | 2026-02-09 |
-| plans/ | Phase 1: 2 plans created | 2026-02-09 |
+| plans/ | Phase 1: 2 plans (done), Phase 2: 1 plan | 2026-02-09 |
 
 ---
 
@@ -76,11 +76,10 @@
 
 ## Next Steps
 
-**Recommended:** Execute Phase 1 plans.
+**Recommended:** Execute Phase 2 plans.
 
 **Options:**
-- `/specd:phase:execute phase-review` — Execute Phase 1 plans
-- `/specd:phase:prepare phase-review 1` — Discuss Phase 1 gray areas first
+- `/specd:phase:execute phase-review` — Execute Phase 2 plans
 
 ---
 
