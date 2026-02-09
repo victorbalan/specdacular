@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -45,6 +45,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-02-09 | Core concept, review flow, naming, execute loop integration | Feature initialized, 2 decisions, 4 gray areas identified |
+| 2026-02-09 | Corrective plans, STATE tracking, output format, partial review | All 4 gray areas resolved, 4 new decisions (DEC-003 to DEC-006) |
 
 ---
 
@@ -54,7 +55,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-09 |
 | CONTEXT.md | Created | 2026-02-09 |
-| DECISIONS.md | 2 decisions | 2026-02-09 |
+| DECISIONS.md | 6 decisions | 2026-02-09 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
@@ -63,18 +64,17 @@
 
 ## Decision Count
 
-- **Active:** 2
+- **Active:** 6
 - **Superseded:** 0
-- **Total:** 2
+- **Total:** 6
 
 ---
 
 ## Next Steps
 
-**Recommended:** Discuss remaining gray areas (corrective plan numbering, STATE.md tracking, review output format).
+**Recommended:** Research implementation patterns or proceed directly to planning.
 
 **Options:**
-- `/specd:feature:discuss phase-review` — Resolve remaining gray areas
 - `/specd:feature:research phase-review` — Research review/reconciliation patterns
 - `/specd:feature:plan phase-review` — Create roadmap with phase overview
 
@@ -83,6 +83,8 @@
 ## Session Notes
 
 Initial discussion established the core concept: post-execution review loop that captures decisions, surfaces deviations, and generates corrective plans. Key design choice: Claude inspects automatically first, then asks user for input.
+
+Session 2 resolved all gray areas: corrective plans continue numbering sequence with `corrects` frontmatter, review cycles tracked in new STATE.md section, per-plan status table output format, and partial execution review supported.
 
 ---
 
