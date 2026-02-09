@@ -30,7 +30,7 @@ A structured flow for planning features with enough detail for agent implementat
 ```
 feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
   [for each phase]
-    phase:prepare? -> phase:plan -> phase:execute
+    phase:prepare? -> phase:plan -> phase:execute -> phase:review?
   phase:insert? -> phase:renumber?   <- mid-flight adjustments
 ```
 
@@ -86,6 +86,7 @@ Work with individual phases — prepare, plan, and execute one at a time.
 | `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
 | `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
 | `/specd:phase:execute [feature]` | Execute plans with progress tracking |
+| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
 | `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
 | `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
 
@@ -143,6 +144,7 @@ Creates `ROADMAP.md` with phases derived from dependency analysis (types -> API 
 /specd:phase:prepare user-dashboard 1    # Discuss phase gray areas + optional research
 /specd:phase:plan user-dashboard 1       # Create detailed PLAN.md files
 /specd:phase:execute user-dashboard      # Execute with progress tracking
+/specd:phase:review user-dashboard 1     # Review phase against actual code
 ```
 
 Repeat for each phase. Plans are created just-in-time so they stay fresh.
@@ -206,6 +208,13 @@ Plans are created just-in-time — right before execution — so they incorporat
 - Verification after each task
 - Commits after each task
 - Progress tracking in `STATE.md`
+
+**`phase:review`** reviews executed plans against actual code:
+- Claude inspects each plan's `creates`/`modifies` against actual files
+- Per-plan status table with ✅/⚠️/❌/⏸️ icons
+- User conversation captures additional issues
+- Generates corrective plans if needed (fed back into `phase:execute`)
+- Review cycle tracked in `STATE.md`
 
 **`phase:insert`** adds a new phase using decimal numbering (e.g., Phase 3.1 after Phase 3). The `(INSERTED)` marker in `ROADMAP.md` identifies mid-flight additions.
 
@@ -271,6 +280,12 @@ Specdacular spawns specialized agents that run simultaneously:
               │  ┌──────────┐               │
               │  │  phase:  │               │
               │  │ execute  │               │
+              │  └──────────┘               │
+              │       │                     │
+              │       ▼                     │
+              │  ┌──────────┐               │
+              │  │  phase:  │               │
+              │  │  review  │               │
               │  └──────────┘               │
               │                             │
               │  Mid-flight adjustments:    │
