@@ -1,12 +1,47 @@
 # Specdacular
 
-**AI-optimized codebase documentation and feature planning for Claude.**
+**AI-optimized feature planning and codebase documentation for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).**
 
-A Claude Code extension that helps you understand codebases and plan features specific enough that an agent can implement without asking questions.
+Plan features specific enough that an agent can implement without asking questions.
 
 ```bash
 npx specdacular
 ```
+
+> [!CAUTION]
+> **Early Discovery Phase.** This project is actively evolving as we explore workflow patterns for AI-assisted feature planning. Commands, file formats, and conventions change frequently between versions. We aim to provide backwards-compatible migrations, but breaking changes may occur. Pin to a specific version if stability matters to you.
+
+> [!WARNING]
+> **Open Source Software.** This is maintained by a small team in their free time. It installs slash commands and workflow files into your `.claude/` directory. Always use version control. Review what gets installed. Back up your work. The software is provided "as is" without warranty of any kind. By using this tool, you accept full responsibility for any changes it makes to your project.
+
+---
+
+## Table of Contents
+
+- [What It Does](#what-it-does)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Commands](#commands)
+  - [Feature Commands](#feature-commands-feature)
+  - [Phase Commands](#phase-commands-phase)
+  - [Codebase Documentation](#codebase-documentation)
+  - [Utilities](#utilities)
+- [The Flow in Detail](#the-flow-in-detail)
+  - [Feature-Level Commands](#feature-level-commands)
+  - [Phase-Level Commands](#phase-level-commands)
+- [How It Works](#how-it-works)
+  - [Parallel Agents](#parallel-agents)
+  - [Feature Flow](#feature-flow)
+- [Project Structure](#project-structure)
+- [Philosophy](#philosophy)
+- [Migration Guides](#migration-guides)
+  - [From v0.5](#migrating-from-v05)
+  - [From v0.4](#migrating-from-v04)
+- [Updating](#updating)
+- [Uninstalling](#uninstalling)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
@@ -36,6 +71,14 @@ Two commands drive the entire feature lifecycle:
 
 ---
 
+## Requirements
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed and working
+- Node.js >= 16.7.0
+- Git (recommended — Specdacular commits progress automatically)
+
+---
+
 ## Installation
 
 ```bash
@@ -52,50 +95,6 @@ In Claude Code:
 ```
 /specd:help
 ```
-
----
-
-## Commands
-
-Commands are organized into **feature** and **phase** namespaces.
-
-### Codebase Documentation
-
-| Command | Description |
-|---------|-------------|
-| `/specd:map-codebase` | Analyze codebase with parallel agents |
-
-### Feature Commands (`feature:`)
-
-Work with a feature as a whole — discuss, research, and create a roadmap.
-
-| Command | Description |
-|---------|-------------|
-| `/specd:feature:new [name]` | Initialize a feature, start first discussion |
-| `/specd:feature:next [name]` | **Drive the entire lifecycle** — picks up where you left off |
-
-### Phase Commands (`phase:`)
-
-Work with individual phases — prepare, plan, and execute one at a time.
-
-| Command | Description |
-|---------|-------------|
-| `/specd:phase:prepare [feature] [phase]` | Discuss gray areas + optionally research patterns |
-| `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
-| `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
-| `/specd:phase:execute [feature]` | Execute plans with progress tracking |
-| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
-| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
-| `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
-
-### Utilities
-
-| Command | Description |
-|---------|-------------|
-| `/specd:status [--all]` | Show feature status dashboard |
-| `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
-| `/specd:help` | Show available commands |
-| `/specd:update` | Update to latest version |
 
 ---
 
@@ -154,6 +153,50 @@ Scans for in-progress features and shows a picker.
 
 ---
 
+## Commands
+
+Commands are organized into **feature** and **phase** namespaces.
+
+### Feature Commands (`feature:`)
+
+Work with a feature as a whole — discuss, research, and create a roadmap.
+
+| Command | Description |
+|---------|-------------|
+| `/specd:feature:new [name]` | Initialize a feature, start first discussion |
+| `/specd:feature:next [name]` | **Drive the entire lifecycle** — picks up where you left off |
+
+### Phase Commands (`phase:`)
+
+Work with individual phases — prepare, plan, and execute one at a time.
+
+| Command | Description |
+|---------|-------------|
+| `/specd:phase:prepare [feature] [phase]` | Discuss gray areas + optionally research patterns |
+| `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
+| `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
+| `/specd:phase:execute [feature]` | Execute plans with progress tracking |
+| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
+| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
+| `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
+
+### Codebase Documentation
+
+| Command | Description |
+|---------|-------------|
+| `/specd:map-codebase` | Analyze codebase with parallel agents |
+
+### Utilities
+
+| Command | Description |
+|---------|-------------|
+| `/specd:status [--all]` | Show feature status dashboard |
+| `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
+| `/specd:help` | Show available commands |
+| `/specd:update` | Update to latest version |
+
+---
+
 ## The Flow in Detail
 
 ### Feature-Level Commands
@@ -181,8 +224,6 @@ Scans for in-progress features and shows a picker.
 5. **Offers research** — "Would you like to research implementation patterns?"
 6. If yes, spawns 3 parallel research agents focused on the phase
 
-This replaces the old two-step of discuss-phase then research-phase.
-
 **`phase:research`** is the standalone research command. Use it when you want to research a phase without discussing first. Same research agents as `phase:prepare`, just without the discussion step.
 
 **`phase:plan`** creates detailed PLAN.md files for one phase. Each plan is a self-contained prompt for an implementing agent with:
@@ -202,7 +243,7 @@ Plans are created just-in-time — right before execution — so they incorporat
 
 **`phase:review`** reviews executed plans against actual code:
 - Claude inspects each plan's `creates`/`modifies` against actual files
-- Per-plan status table with ✅/⚠️/❌/⏸️ icons
+- Per-plan status table with pass/warn/fail/skip icons
 - User conversation captures additional issues
 - Generates corrective plans if needed (fed back into `phase:execute`)
 - Review cycle tracked in `STATE.md`
@@ -309,9 +350,9 @@ your-project/
 │           ├── ROADMAP.md     # Phase overview (from feature:plan)
 │           └── plans/
 │               ├── phase-01/
-│               │   ├── CONTEXT.md   # Phase discussion (from phase:prepare)
-│               │   ├── RESEARCH.md  # Phase research (from phase:prepare or phase:research)
-│               │   ├── 01-PLAN.md   # Detailed plans (from phase:plan)
+│               │   ├── CONTEXT.md   # Phase discussion
+│               │   ├── RESEARCH.md  # Phase research
+│               │   ├── 01-PLAN.md   # Detailed plans
 │               │   └── 02-PLAN.md
 │               └── phase-02/
 │                   ├── CONTEXT.md
@@ -348,7 +389,9 @@ Once recorded in `DECISIONS.md`, decisions aren't re-litigated. Each has date, c
 
 ---
 
-## Migrating from v0.5
+## Migration Guides
+
+### Migrating from v0.5
 
 **New command: `/specd:feature:next`** — Drives the entire feature lifecycle from a single command. Reads current state and offers the next step automatically.
 
@@ -359,13 +402,9 @@ Once recorded in `DECISIONS.md`, decisions aren't re-litigated. Each has date, c
 
 **Existing `.specd/` data is fully compatible.** `feature:next` reads the same `config.json`, `STATE.md`, and other files.
 
----
+### Migrating from v0.4
 
-## Migrating from v0.4
-
-If you're upgrading from v0.4, here's what changed:
-
-**Commands were renamed** into `feature:` and `phase:` namespaces:
+Commands were renamed into `feature:` and `phase:` namespaces:
 
 | v0.4 | v0.5 |
 |------|------|
@@ -379,14 +418,14 @@ If you're upgrading from v0.4, here's what changed:
 | `/specd:insert-phase` | `/specd:phase:insert` |
 | `/specd:renumber-phases` | `/specd:phase:renumber` |
 
-**New commands:**
+**New commands in v0.5:**
 - `/specd:phase:prepare` — Replaces `discuss-phase`, adds optional research at the end
 - `/specd:phase:plan` — Creates detailed plans for **one phase** (new command)
 
-**Behavior changes:**
+**Behavior changes in v0.5:**
 - `feature:plan` now creates only `ROADMAP.md` + empty phase directories. It no longer creates `PLAN.md` files for all phases upfront.
-- Detailed `PLAN.md` files are created per-phase with `phase:plan`, right before execution. This prevents plans from going stale.
-- `phase:prepare` combines the old discuss-phase + research-phase into a single command. Discussion always happens; research is offered as an optional step at the end.
+- Detailed `PLAN.md` files are created per-phase with `phase:plan`, right before execution.
+- `phase:prepare` combines the old discuss-phase + research-phase into a single command.
 
 **Existing `.specd/` data is fully compatible.** Your feature files, decisions, and roadmaps work with the new commands.
 
@@ -403,6 +442,8 @@ Or in Claude Code:
 /specd:update
 ```
 
+---
+
 ## Uninstalling
 
 ```bash
@@ -410,6 +451,12 @@ npx specdacular --global --uninstall
 # or
 npx specdacular --local --uninstall
 ```
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome at [github.com/victorbalan/specdacular](https://github.com/victorbalan/specdacular).
 
 ---
 
