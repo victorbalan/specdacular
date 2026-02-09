@@ -1,9 +1,9 @@
 {
   "feature_name": "phase-review",
   "created": "2026-02-09",
-  "stage": "planning",
+  "stage": "execution",
   "discussion_sessions": 2,
   "decisions_count": 6,
   "phases_count": 2,
-  "plans_count": 0
+  "plans_count": 2
 }
