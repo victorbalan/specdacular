@@ -41,6 +41,13 @@
 
 ---
 
+## Review Cycles
+
+| Phase | Cycle | Date | Findings | Corrective Plans | Status |
+|-------|-------|------|----------|------------------|--------|
+
+---
+
 ## Discussion Sessions
 
 | Date | Focus | Outcome |
@@ -81,6 +88,7 @@
 - `/specd:phase:prepare {feature-name} {N}` — Prepare a specific phase
 - `/specd:phase:plan {feature-name} {N}` — Create detailed plans for a phase
 - `/specd:phase:execute {feature-name}` — Execute plans with progress tracking
+- `/specd:phase:review {feature-name} {N}` — Review executed plans against actual code
 
 ---
 
