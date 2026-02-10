@@ -149,6 +149,59 @@
 
 ---
 
+### DEC-009: Validate dependency graph for cycles during planning
+
+**Date:** 2026-02-10
+**Status:** Active
+**Context:** Research identified circular dependency deadlock as a critical pitfall. If Project A phase 2 depends on Project B phase 2, which depends on Project A phase 2, the scheduler deadlocks.
+**Decision:** Run topological sort on the cross-project dependency graph during `plan-feature`. Fail and ask user to restructure if cycles are detected. Re-validate after any replan.
+**Rationale:**
+- Proven pattern from CI/CD tools (GitHub Actions, Nx)
+- Catches deadlocks before execution, not during
+- Topological sort is simple and well-understood
+**Implications:**
+- `plan-feature` orchestrator flow must include cycle detection step
+- After replanning (due to contract deviations), re-validate graph
+**References:**
+- Nx dependency graph validation
+- GitHub Actions `needs` validation
+
+---
+
+### DEC-010: Limit replan cascade depth to 2
+
+**Date:** 2026-02-10
+**Status:** Active
+**Context:** Research shows cascading failures are amplified in multi-agent LLM systems. One contract deviation can trigger replans that cascade through the entire system.
+**Decision:** After 2 cascading replans triggered by a single change, pause and ask user to review the overall approach before continuing. Batch all deviations from a phase before triggering any replans.
+**Rationale:**
+- Research shows 41-86.7% failure rates in multi-agent systems, with cascading failures as a primary cause
+- Human review prevents the orchestrator from spiraling into unproductive replan loops
+- Batching deviations gives a complete picture before acting
+**Implications:**
+- Track replan chain depth in orchestrator state
+- Show full impact analysis before replanning: "Changing X affects Y, Z, W"
+- After depth 2, force pause: "Multiple cascading replans detected. Review overall approach?"
+
+---
+
+### DEC-011: One active orchestrator session at a time
+
+**Date:** 2026-02-10
+**Status:** Active
+**Context:** Research identified stale state race conditions as a critical pitfall. File-based state with no locking means concurrent Claude Code sessions can read/write state simultaneously.
+**Decision:** Document "one active session at a time" as a constraint for orchestrator mode. Re-read all state files before determining next action.
+**Rationale:**
+- File-based state has no locking mechanism
+- Concurrent sessions cause stale dependency graphs and wrong scheduling
+- Adding proper locking would require runtime code (violates zero-dependency constraint)
+**Implications:**
+- Document this constraint in orchestrator setup
+- `next` command always re-reads state files fresh before scheduling
+- Future: could add advisory `.specd/.lock` file
+
+---
+
 ## Superseded Decisions
 
 (none)
@@ -173,3 +226,6 @@
 | DEC-006 | 2026-02-10 | Orchestrator mode detected via config.json type field | Active |
 | DEC-007 | 2026-02-10 | Sub-project mappers run first, orchestrator mapper runs after | Active |
 | DEC-008 | 2026-02-10 | Loose contracts in CONTRACTS.md, specific contracts per-feature | Active |
+| DEC-009 | 2026-02-10 | Validate dependency graph for cycles during planning | Active |
+| DEC-010 | 2026-02-10 | Limit replan cascade depth to 2 | Active |
+| DEC-011 | 2026-02-10 | One active orchestrator session at a time | Active |

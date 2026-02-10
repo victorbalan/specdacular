@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** discussion
+**Stage:** research
 **Last Updated:** 2026-02-10
 
 ---
@@ -15,8 +15,8 @@
 - [x] All gray areas resolved
 
 ### Research
-- [ ] Research conducted
-- [ ] Findings documented in RESEARCH.md
+- [x] Research conducted
+- [x] Findings documented in RESEARCH.md
 
 ### Planning
 - [ ] Phases derived
@@ -63,8 +63,8 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-10 |
 | CONTEXT.md | Created | 2026-02-10 |
-| DECISIONS.md | 8 decisions | 2026-02-10 |
-| RESEARCH.md | Not started | — |
+| DECISIONS.md | 11 decisions | 2026-02-10 |
+| RESEARCH.md | Complete | 2026-02-10 |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
 
@@ -72,15 +72,15 @@
 
 ## Decision Count
 
-- **Active:** 8
+- **Active:** 11
 - **Superseded:** 0
-- **Total:** 8
+- **Total:** 11
 
 ---
 
 ## Next Steps
 
-All gray areas resolved. Ready for research or planning.
+Research complete. Ready for planning — create roadmap with phase overview.
 
 **Resume:** `/specd:feature:next multi-project-specd` — Picks up where you left off and guides the next step automatically.
 
@@ -88,7 +88,7 @@ All gray areas resolved. Ready for research or planning.
 
 ## Session Notes
 
-All gray areas resolved across 2 sessions. Core architecture is clear: orchestrator coordinates, sub-projects stay independent, contracts are the key mechanism for cross-project integrity. Ready for research into implementation patterns or direct planning.
+Research complete. 3 parallel agents investigated codebase integration (5 workflows analyzed), external patterns (Nx, Turborepo, GitHub Actions, Pact), and pitfalls (LLM-specific context loss, cascading failures, deadlocks). 3 new decisions from research (DEC-009 through DEC-011). Ready for roadmap creation.
 
 ---
 
