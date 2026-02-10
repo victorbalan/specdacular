@@ -96,6 +96,59 @@
 
 ---
 
+### DEC-006: Orchestrator mode detected via config.json type field
+
+**Date:** 2026-02-10
+**Status:** Active
+**Context:** Commands need to know whether they're running in single-project or orchestrator mode to branch behavior accordingly.
+**Decision:** `.specd/config.json` has a `"type": "orchestrator"` field. Commands read this to decide which mode to operate in. Absence of the field (or `"type": "project"`) means single-project mode.
+**Rationale:**
+- Simple, explicit flag — no heuristics needed
+- Set once during `map-codebase`, read by all subsequent commands
+- Backwards compatible — existing single-project configs without `type` default to single-project
+**Implications:**
+- All orchestrator-aware commands must check `config.json` type field at startup
+- `map-codebase` writes the type field during initial setup
+- Config format: `{"type": "orchestrator", "projects": [...]}`
+
+---
+
+### DEC-007: Sub-project mappers run first, orchestrator mapper runs after with full context
+
+**Date:** 2026-02-10
+**Status:** Active
+**Context:** Needed to decide the order of mapping in multi-project mode — orchestrator first, sub-projects first, or parallel.
+**Decision:** Sub-project mappers run first in parallel (existing logic). After all complete, the orchestrator mapper runs with access to all sub-project analysis AND does its own system-level codebase scan.
+**Rationale:**
+- Orchestrator docs are more accurate when informed by actual sub-project analysis
+- CONTRACTS.md and TOPOLOGY.md can reference real endpoints, types, and patterns found in code
+- Sub-project mapping is the heavy lifting; orchestrator synthesis is fast since it reads existing docs
+- Orchestrator also scans codebases directly for system-level artifacts (docker-compose, cross-project imports, shared configs)
+- One-time operation, so extra scanning cost is acceptable for richer context
+**Implications:**
+- Map-codebase flow: register projects → parallel sub-project mappers → wait → orchestrator mapper
+- Orchestrator mapper has richest possible context (sub-project docs + its own scan)
+
+---
+
+### DEC-008: Loose contracts in CONTRACTS.md, specific contracts per-feature
+
+**Date:** 2026-02-10
+**Status:** Active
+**Context:** Needed to decide how detailed CONTRACTS.md should be. Exact API specs would go stale quickly if not continuously updated.
+**Decision:** CONTRACTS.md describes the nature of relationships between projects (communication patterns, shared domains, source of truth) — loose descriptions that age well. Specific contracts for a feature are defined in the feature's orchestrator FEATURE.md during planning — that's what deviation detection checks against.
+**Rationale:**
+- Detailed specs go stale the moment someone pushes a change
+- Relationship descriptions (REST, pub/sub, shared DB) change rarely
+- Feature-level contracts are specific and scoped — easier to keep accurate
+- CONTRACTS.md serves as stable reference for project routing during feature creation
+**Implications:**
+- CONTRACTS.md is a reference document, not a living spec
+- Deviation detection runs against feature FEATURE.md expectations, not CONTRACTS.md
+- Feature routing uses CONTRACTS.md to suggest which projects are involved
+
+---
+
 ## Superseded Decisions
 
 (none)
@@ -117,3 +170,6 @@
 | DEC-003 | 2026-02-10 | Orchestrator is coordination-only (no code) for v1 | Active |
 | DEC-004 | 2026-02-10 | Orchestrator acts as contract guardian | Active |
 | DEC-005 | 2026-02-10 | Manual project registration for v1 | Active |
+| DEC-006 | 2026-02-10 | Orchestrator mode detected via config.json type field | Active |
+| DEC-007 | 2026-02-10 | Sub-project mappers run first, orchestrator mapper runs after | Active |
+| DEC-008 | 2026-02-10 | Loose contracts in CONTRACTS.md, specific contracts per-feature | Active |
