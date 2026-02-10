@@ -2,78 +2,67 @@
 
 ## What This Is
 
-Migrate Specdacular from its custom command system (YAML frontmatter commands + monolithic workflow files) to the Agent Skills open standard (agentskills.io). Enables progressive disclosure, cross-tool interoperability, and dramatic context window savings.
+Adopt the Vercel Agent Skills atomic rules pattern for Specdacular's codebase documentation output. Map-codebase currently outputs a monolithic PATTERNS.md file; this changes it to output atomic `rules/` files following the Vercel React Best Practices pattern — each rule with title, impact, tags, and incorrect/correct code examples. Includes version tracking and migration for existing users.
 
 ## Technical Requirements
 
 ### Must Create
 
-- [ ] `SKILL.md` — Standard Agent Skills entry point with frontmatter (`name`, `description`, `license`, `metadata`, `compatibility`). Compact router (~500 lines) that lists all commands with when-to-use guidance
-- [ ] `references/workflows/` — Individual workflow files loaded on demand (migrated from `specdacular/workflows/`)
-- [ ] `references/agents/` — Agent definitions loaded only when spawning (migrated from `specdacular/agents/`)
-- [ ] `assets/templates/` — Template files loaded only when creating features (migrated from `specdacular/templates/`)
-- [ ] `scripts/` — Any automation scripts (migrated from `bin/`)
 - [ ] `.specd/codebase/rules/` — Atomic rule files replacing PATTERNS.md (output by map-codebase)
 - [ ] `.specd/codebase/rules/_sections.md` — Category definitions with impact levels (output by map-codebase)
+- [ ] `.specd/codebase/rules/_template.md` — Standardized rule format reference
 - [ ] `.specd/codebase/version.json` — Format version tracking (`{ "version": 2 }`)
 - [ ] Migration script — Converts existing PATTERNS.md to atomic rules/ files
 
 ### Must Integrate With
 
-- `commands/specd/*.md` — Current command definitions (to be replaced by SKILL.md routing)
-- `specdacular/workflows/*.md` — Current monolithic workflows (to be decomposed into `references/`)
-- `specdacular/agents/*.md` — Current agent definitions (to be moved to `references/agents/`)
-- `specdacular/templates/` — Current templates (to be moved to `assets/templates/`)
-- `bin/install.js` — Current installation script (to be simplified or replaced)
-- `.specd/` — Feature state directory (unchanged, but referenced differently from SKILL.md)
 - `specdacular/workflows/map-codebase.md` — Must be updated to output rules/ instead of PATTERNS.md
+- `specdacular/agents/specd-codebase-mapper.md` — Must be updated for atomic rule output format
 - `.specd/codebase/PATTERNS.md` — Existing file to be replaced by rules/ (migration needed)
+- `.specd/codebase/MAP.md`, `STRUCTURE.md`, `CONCERNS.md` — Unchanged, kept as-is
 
 ### Constraints
 
-- **Backward compatibility period** — Must support existing Claude Code command format during migration. Users shouldn't break overnight.
-- **Progressive disclosure** — SKILL.md must be a compact router. Full workflow instructions loaded only when a specific command triggers. Currently workflows are 20-50KB each; at startup Claude should see only ~50 tokens per command.
-- **Interoperability** — Same skill must work across Claude Code, Cursor, Gemini CLI, VS Code. Standard frontmatter and structure required.
-- **No functionality loss** — Every current command must have an equivalent in the new structure.
+- **Backward compatibility** — Existing users with PATTERNS.md must be offered migration, not broken
+- **Vercel template format** — Each rule file follows the property table + incorrect/correct pattern from Vercel's react-best-practices
+- **Progressive loading** — Rules loaded on demand by category prefix, not all at once
+- **No functionality loss** — All patterns currently in PATTERNS.md must be captured in rules/
 
 ---
 
 ## Success Criteria
 
-- [ ] `SKILL.md` passes `skills-ref validate` CLI check
-- [ ] All current commands have equivalent triggers in SKILL.md
-- [ ] At startup, total tokens loaded from Specdacular < 500 (currently thousands)
-- [ ] Full workflow instructions load only when user triggers a specific command
-- [ ] Installation is: copy skill folder to `.claude/skills/specdacular/` (or equivalent per tool)
-- [ ] Works in at least Claude Code and one other tool (Cursor or VS Code)
 - [ ] Map-codebase outputs atomic `rules/` directory instead of PATTERNS.md
 - [ ] Each rule file follows Vercel template (title, impact, tags, incorrect/correct examples)
+- [ ] `rules/_sections.md` defines categories with impact levels
 - [ ] `.specd/codebase/version.json` written with `{ "version": 2 }`
 - [ ] Migration script converts existing PATTERNS.md to rules/ files
 - [ ] Old format detected on command run, migration offered to user
+- [ ] MAP.md, STRUCTURE.md, CONCERNS.md unchanged
 
 ---
 
 ## Out of Scope
 
-- [X] Rewriting workflow logic — Workflows are migrated structurally, not rewritten
-- [X] Multi-skill splitting — Specdacular stays as one skill, not decomposed into many
-- [X] Custom skill registry — Use standard installation, no custom package manager
+- [X] Migrating Specdacular's own command system to SKILL.md format — separate future effort
+- [X] Cross-tool interoperability (Cursor, VS Code, Gemini CLI) — not relevant for codebase output
+- [X] Rewriting workflow logic — only output format changes
+- [X] Changing MAP.md, STRUCTURE.md, or CONCERNS.md format
 
 ---
 
 ## Initial Context
 
 ### User Need
-Specdacular's custom command system is proprietary to Claude Code and wastes context by loading entire workflows at startup. The Agent Skills open standard solves both problems: progressive disclosure reduces context usage by ~90%, and the standard format works across all major AI coding tools.
+Map-codebase outputs a monolithic PATTERNS.md that loads everything into context even when only one category of patterns is needed. The Vercel Agent Skills pattern of atomic rule files enables progressive loading — load only the rules relevant to the current task.
 
 ### Integration Points
-- Every command file in `commands/specd/` maps to a trigger in SKILL.md
-- Every workflow in `specdacular/workflows/` becomes a reference file
-- `bin/install.js` simplifies to directory copy
-- Existing `.specd/` feature state is unaffected
+- Map-codebase workflow orchestrates the mapper agents
+- Mapper agents write the output files
+- Existing workflows reference `.specd/codebase/PATTERNS.md` — must handle both old and new format
+- Version detection needed on specd command startup
 
 ### Key Constraints
-- Must maintain feature parity with current command set
-- Progressive disclosure is the primary technical win
-- Vercel's React Best Practices skill is the reference implementation pattern
+- Vercel's React Best Practices rules/ is the reference implementation
+- Rule files use property tables (not YAML frontmatter) for metadata
+- `_sections.md` defines categories; filename prefixes group rules by category

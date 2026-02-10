@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** research
+**Stage:** planned
 **Last Updated:** 2026-02-09
 
 ---
@@ -19,11 +19,13 @@
 - [x] Findings documented in RESEARCH.md
 
 ### Planning
-- [ ] Phases derived
-- [ ] Plans created
+- [x] Phases derived
+- [x] ROADMAP.md complete
+- [ ] Phase plans created
 
 ### Execution
-- [ ] (phases TBD)
+- [ ] Phase 1 complete
+- [ ] Phase 2 complete
 
 ---
 
@@ -53,12 +55,12 @@
 
 | Document | Status | Last Updated |
 |----------|--------|--------------|
-| FEATURE.md | Created | 2026-02-06 |
+| FEATURE.md | Updated (scope reduced) | 2026-02-09 |
 | CONTEXT.md | Created | 2026-02-06 |
 | DECISIONS.md | 6 decisions | 2026-02-09 |
 | RESEARCH.md | Complete | 2026-02-09 |
-| ROADMAP.md | Not started | — |
-| plans/ | Not started | — |
+| ROADMAP.md | Complete | 2026-02-09 |
+| plans/ | Phase directories created | 2026-02-09 |
 
 ---
 
@@ -72,8 +74,9 @@
 
 ## Next Steps
 
-**Recommended:** Create roadmap with phase overview.
+**Recommended:** Prepare and plan Phase 1, then execute.
 
 **Options:**
-- `/specd:feature:plan agent-skills-migration` — Create roadmap with phase overview
-- `/specd:feature:discuss agent-skills-migration` — Discuss further if needed
+- `/specd:phase:prepare agent-skills-migration 1` — Discuss Phase 1 gray areas + optional research
+- `/specd:phase:plan agent-skills-migration 1` — Create detailed plans for Phase 1
+- `/specd:feature:next agent-skills-migration` — Let the state machine guide next step
