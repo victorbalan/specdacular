@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** planned
+**Stage:** abandoned
 **Last Updated:** 2026-02-09
 
 ---
@@ -74,9 +74,4 @@
 
 ## Next Steps
 
-**Recommended:** Prepare and plan Phase 1, then execute.
-
-**Options:**
-- `/specd:phase:prepare agent-skills-migration 1` — Discuss Phase 1 gray areas + optional research
-- `/specd:phase:plan agent-skills-migration 1` — Create detailed plans for Phase 1
-- `/specd:feature:next agent-skills-migration` — Let the state machine guide next step
+**Abandoned.** After research and phase preparation discussion, concluded that the Vercel atomic rules pattern is a poor fit for auto-generated, project-specific codebase documentation. PATTERNS.md works well as-is for this use case. The SKILL.md command migration was also descoped as not needed currently.
