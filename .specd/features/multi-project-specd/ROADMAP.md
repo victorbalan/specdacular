@@ -74,6 +74,12 @@
 
 **Dependencies:** Phase 1 complete (orchestrator templates exist)
 
+**Plans:**
+- `01-PLAN.md` — Add mode detection, legacy handling, and project-level config.json
+- `02-PLAN.md` — Add full multi-project flow (register, per-project mapping, orchestrator mapping)
+
+**Status:** Planned
+
 ---
 
 ### Phase 3: new-feature Orchestrator Flow
