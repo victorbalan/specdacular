@@ -12,7 +12,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Templates & Foundation** — Create orchestrator templates, config structures, and DEPENDENCIES.md template
+- [ ] **Phase 1: Templates & Foundation** — Create orchestrator templates, config structures, and DEPENDENCIES.md template *(Planned: 2 plans, 5 tasks)*
 - [ ] **Phase 2: map-codebase Orchestrator Flow** — Add multi-project detection, project registration, and orchestrator mapping
 - [ ] **Phase 3: new-feature Orchestrator Flow** — Add orchestrator-aware feature creation with project routing and delegation
 - [ ] **Phase 4: plan-feature Orchestrator Flow** — Add cross-project roadmaps, dependency graph, and cycle detection
@@ -44,6 +44,12 @@
 4. Orchestrator config.json template includes `"type": "orchestrator"` and `"projects"` array structure
 
 **Dependencies:** None (first phase)
+
+**Plans:**
+- `01-PLAN.md` — Create orchestrator codebase templates (PROJECTS, TOPOLOGY, CONTRACTS, CONCERNS)
+- `02-PLAN.md` — Create config and dependencies templates (config.json, DEPENDENCIES.md)
+
+**Status:** Planned
 
 ---
 
