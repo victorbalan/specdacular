@@ -1,0 +1,12 @@
+{
+  "type": "orchestrator",
+  "specd_version": 1,
+  "created": "{date}",
+  "projects": [
+    {
+      "name": "{project-name}",
+      "path": "{./relative/path}",
+      "description": "{One-liner purpose}"
+    }
+  ]
+}

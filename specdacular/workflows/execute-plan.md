@@ -96,6 +96,40 @@ Load ALL context needed for execution.
 - `STRUCTURE.md` — Where files go
 - `MAP.md` — System overview
 
+**Check for orchestrator mode:**
+
+Read feature's `config.json`. If `"orchestrator": true`:
+
+Set mode = "orchestrator".
+
+**Load orchestrator context:**
+- Orchestrator FEATURE.md — System-level expectations (used for contract validation)
+- Orchestrator DEPENDENCIES.md — Cross-project dependency graph
+- Orchestrator STATE.md — Which project/phase to execute
+
+**Determine target project:**
+From orchestrator STATE.md or arguments, identify which project and phase to execute.
+Read the target project's feature context:
+- `{project-path}/.specd/features/{feature-name}/config.json`
+- `{project-path}/.specd/features/{feature-name}/STATE.md`
+- `{project-path}/.specd/features/{feature-name}/ROADMAP.md`
+- `{project-path}/.specd/features/{feature-name}/DECISIONS.md`
+
+Read the project's codebase context:
+- `{project-path}/.specd/codebase/PATTERNS.md`
+- `{project-path}/.specd/codebase/STRUCTURE.md`
+- `{project-path}/.specd/codebase/MAP.md`
+
+```
+Orchestrator mode: executing in {project-name} ({project-path}).
+Feature: {feature-name}, Phase {N}.
+```
+
+Continue to find_plan (with project-path-prefixed plan lookup).
+
+**If not orchestrator:**
+Set mode = "project".
+
 **Internalize:**
 - Which plans are complete (from STATE.md)
 - Which phase we're in
@@ -390,7 +424,124 @@ All plans complete! Feature '{feature}' is implemented.
 Review STATE.md and CHANGELOG.md for summary.
 ```
 
+**If orchestrator mode:**
+Continue to contract_review.
+
+**If single-project mode:**
 End workflow.
+</step>
+
+<step name="contract_review">
+Review completed phase against cross-project contract expectations (orchestrator mode only).
+
+**Only runs in orchestrator mode, after a plan completes in a sub-project.**
+
+**Gather what was implemented:**
+1. Read the sub-project's CHANGELOG.md for this plan — deviations and changes
+2. Review files created/modified during this plan
+3. Understand what the phase actually produced
+
+**Compare against expectations:**
+1. Read orchestrator FEATURE.md — system-level requirements and cross-project contracts
+2. Read DEPENDENCIES.md — which other project phases depend on this phase's output
+3. For each downstream dependency, check: does the actual output match what the dependent phase expects?
+
+**Assessment:**
+```
+### Contract Review: {project-name}/phase-{N}
+
+**Implemented:** {brief summary of what was built}
+
+**Cross-project impact:**
+{For each dependent phase:}
+- {other-project}/phase-{M}: {expects X} → {actual output matches / deviates}
+```
+
+**If no deviations:**
+```
+No contract deviations detected. Downstream phases can proceed as planned.
+```
+
+Update orchestrator STATE.md: mark this project phase as complete.
+Continue to orchestrator_phase_complete.
+
+**If deviations detected:**
+```
+Contract deviation detected:
+
+**What changed:** {description of deviation}
+**Expected by:** {list of dependent project phases}
+**Impact:** {what breaks or needs updating}
+
+For example:
+"API changed /auth/login response from {token: string} to {accessToken: string, refreshToken: string}.
+UI phase 2 expects {token: string}. Will need to update token handling."
+```
+
+Use AskUserQuestion:
+- header: "Deviation"
+- question: "How would you like to handle this contract deviation?"
+- options:
+  - "Accept and update" — Accept the deviation, update orchestrator notes, continue
+  - "Trigger replan" — Replan affected project phases to accommodate the change
+  - "Investigate" — Look deeper before deciding
+
+**If "Accept and update":**
+- Log deviation to orchestrator CHANGELOG.md
+- Note that downstream phases should account for the change
+- Continue to orchestrator_phase_complete
+
+**If "Trigger replan":**
+- Check cascade depth (DEC-010)
+- If depth < 2: trigger replan for affected project phases
+  - Update affected project's ROADMAP.md phase description
+  - Regenerate affected PLAN.md files
+  - Log to orchestrator CHANGELOG.md
+  - Increment cascade depth
+- If depth >= 2: force pause
+  ```
+  Multiple cascading replans detected (depth {N}).
+
+  This suggests a significant architectural mismatch.
+  Before continuing, review the overall approach:
+  - Are the project responsibilities correctly divided?
+  - Should the feature be restructured?
+
+  Recommend: /specd:feature:discuss {feature-name} to reassess.
+  ```
+  End workflow (user must explicitly resume).
+</step>
+
+<step name="orchestrator_phase_complete">
+Update orchestrator state and present summary after contract review.
+
+**Update orchestrator STATE.md:**
+- Mark this project's phase as complete in Sub-Project Features table
+- Update orchestrator progress
+
+**Update orchestrator config.json:**
+- Increment completed phase count if all plans for this project phase are done
+
+**Present summary:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ PHASE COMPLETE (ORCHESTRATOR)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Feature:** {feature-name}
+**Project:** {project-name}
+**Phase:** {N}
+**Contract review:** {passed / deviations accepted / replanned}
+
+**Next unblocked work:**
+{From DEPENDENCIES.md — which phases are now unblocked by this completion}
+
+───────────────────────────────────────────────────────
+
+Resume with /specd:feature:next {feature-name}
+```
+
+End workflow (returns to orchestrator scheduling via next).
 </step>
 
 </process>
@@ -418,6 +569,8 @@ Types:
 </changelog_format>
 
 <success_criteria>
+
+## Single-Project Mode
 - Feature validated with plans
 - All context loaded and internalized
 - Tasks executed in plan order
@@ -426,4 +579,16 @@ Types:
 - Commits made with proper format
 - STATE.md updated with progress
 - Next plan identified or completion announced
+
+## Multi-Project Mode (Orchestrator)
+- Orchestrator mode detected from feature config.json
+- Sub-project context loaded with path-prefixed file access
+- Plans executed inline in sub-project context
+- Contract review performed after phase completion (DEC-004)
+- Deviations flagged with cross-project impact analysis
+- User can accept deviation or trigger replan
+- Replan cascade depth limited to 2 (DEC-010)
+- Orchestrator STATE.md updated after each phase
+- Summary shows next unblocked work
+
 </success_criteria>

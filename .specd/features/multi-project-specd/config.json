@@ -1,0 +1,12 @@
+{
+  "feature_name": "multi-project-specd",
+  "created": "2026-02-10",
+  "stage": "complete",
+  "phases": {
+    "total": 5,
+    "completed": 5,
+    "current": 5
+  },
+  "discussion_sessions": 2,
+  "decisions_count": 12
+}

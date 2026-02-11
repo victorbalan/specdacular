@@ -1,4 +1,4 @@
-# Changelog: workflow-validation
+# Changelog: multi-project-specd
 
 Implementation log - auto-captured decisions and deviations during execution.
 

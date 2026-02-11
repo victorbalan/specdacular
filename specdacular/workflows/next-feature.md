@@ -3,6 +3,8 @@ Smart state machine that reads current feature state and drives the entire lifec
 
 **One command for the entire lifecycle:** discussion, research, planning, phase preparation, phase planning, phase execution, phase review.
 
+**Multi-project:** In orchestrator mode, aggregates state across all sub-projects and uses the dependency graph to schedule work. Users can also work directly in sub-projects for single-project changes (DEC-001).
+
 **Core loop:**
 ```
 read state → show status → determine next action → execute → loop
@@ -112,6 +114,40 @@ ls .specd/features/{name}/plans/phase-{NN}/*-PLAN.md 2>/dev/null | head -1
 # Check STATE.md for completed plans in this phase
 ```
 
+**Check for orchestrator mode:**
+
+Read feature's `config.json`. If `"orchestrator": true`:
+
+Set mode = "orchestrator".
+
+**Aggregate cross-project state:**
+1. Read orchestrator DEPENDENCIES.md — cross-project phase dependency graph
+2. For each project in feature config.json `"projects"` array:
+   - Read `{project-path}/.specd/features/{feature-name}/config.json` — stage, phases
+   - Read `{project-path}/.specd/features/{feature-name}/STATE.md` — detailed progress
+
+**Build combined state:**
+For each project phase, determine status:
+- **complete** — All plans executed for this phase
+- **in_progress** — Some plans executed
+- **ready** — All cross-project dependencies satisfied, phase can start
+- **blocked** — Waiting on another project's phase to complete
+- **not_started** — Phase exists but not yet prepared/planned
+
+**Check for optional project argument:**
+If arguments contain a second token after feature name (e.g., `/specd:feature:next feature-name project-name`):
+- Set target_project = project name
+- Validate project exists in feature config.json
+
+```
+Orchestrator mode: aggregating state across {N} projects.
+```
+
+Continue to show_status (orchestrator variant).
+
+**If not orchestrator:**
+Set mode = "project".
+
 Continue to show_status.
 </step>
 
@@ -154,7 +190,103 @@ Present a concise status summary.
 **Phase status:** {prepared | planned | executing | executed}
 ```
 
+**If mode = "project":**
 Continue to determine_action.
+
+**If mode = "orchestrator":**
+
+```
+## {feature-name} (Multi-Project)
+
+**Stage:** {stage}
+**Overall progress:** {total completed phases}/{total phases} across {N} projects
+
+### Per-Project Status
+
+{For each project:}
+**{project-name}** — {completed}/{total} phases
+  {For each phase: status indicator + name}
+  ✓ Phase 1: {name} — complete
+  ▶ Phase 2: {name} — ready
+  ○ Phase 3: {name} — blocked by {dep}
+
+### Cross-Project Dependencies
+
+{Summary of key dependencies and their status}
+
+**Note:** One orchestrator session at a time (DEC-011). State re-read fresh each time.
+```
+
+Continue to orchestrator_schedule.
+</step>
+
+<step name="orchestrator_schedule">
+Determine next work based on cross-project dependencies.
+
+**Compute unblocked work:**
+From the combined state and dependency graph:
+1. Find all phases with status "ready" (dependencies satisfied, not started/in-progress)
+2. Among "ready" phases, prioritize by:
+   - Phases that unblock the most downstream work
+   - Earlier phases within a project
+   - Projects with less progress (balance workload)
+
+**If target_project specified (from argument):**
+Filter to only that project's unblocked work.
+
+**If no unblocked work:**
+```
+All available phases are blocked or complete.
+
+{If all complete:}
+All phases across all projects are complete! Feature is implemented.
+
+{If blocked:}
+Waiting on:
+{List blocked phases and what they're waiting on}
+```
+
+→ Go to action_complete (if all done) or action_stop (if blocked).
+
+**If one phase unblocked:**
+Auto-suggest:
+```
+Next: {project-name}/Phase {N} — {phase-name}
+{Brief description of what this phase does}
+```
+
+Use AskUserQuestion:
+- header: "Next Step"
+- question: "Execute {project-name} Phase {N}?"
+- options:
+  - "Execute (Recommended)" — Run this phase
+  - "Stop for now" — Come back later
+
+**If multiple phases unblocked:**
+```
+Multiple phases are ready:
+
+{For each ready phase:}
+- **{project-name}/Phase {N}** — {phase-name} ({brief description})
+```
+
+Use AskUserQuestion:
+- header: "Next Step"
+- question: "Which phase should we work on next?"
+- options: List each ready phase as an option + "Stop for now"
+
+**After selection:**
+Set the target project and phase.
+
+**Determine phase readiness:**
+Check if the target phase is prepared and planned:
+- If not prepared: → delegate to prepare-phase workflow
+- If prepared but not planned: → delegate to plan-phase workflow
+- If planned: → delegate to execute-plan workflow
+
+Pass feature name and project context to the delegated workflow.
+
+After delegated workflow completes, loop back to read_state.
 </step>
 
 <step name="determine_action">
@@ -487,6 +619,8 @@ End workflow.
 </process>
 
 <success_criteria>
+
+## Single-Project Mode
 - Feature selected (from argument or picker)
 - Current state accurately read and displayed
 - Correct next action determined from state
@@ -494,4 +628,17 @@ End workflow.
 - Looped back after action completion
 - User could stop at any natural boundary
 - Clean exit with resume instructions
+
+## Multi-Project Mode (Orchestrator)
+- Orchestrator mode detected from feature config.json
+- Cross-project state aggregated from all sub-projects
+- Dependency graph read from DEPENDENCIES.md
+- Per-project progress dashboard displayed
+- Unblocked work computed from dependency graph
+- Auto-suggests when one phase ready, asks when multiple
+- Optional project argument: /specd:feature:next feature project
+- Delegates to prepare/plan/execute based on phase readiness
+- One-session-at-a-time constraint documented (DEC-011)
+- Direct sub-project access always works (DEC-001)
+
 </success_criteria>
