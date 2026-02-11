@@ -2,19 +2,9 @@
   "feature_name": "{name}",
   "feature_abbrev": "{ABBREV}",
   "created": "{date}",
-  "mode": "interactive",
-  "depth": "standard",
   "phases": {
     "total": 0,
     "completed": 0,
     "current": 1
-  },
-  "requirements": {
-    "v1_count": 0,
-    "v2_count": 0,
-    "completed": 0
-  },
-  "execution": {
-    "auto_commit": false
   }
 }
