@@ -1,7 +1,7 @@
 {
   "feature_name": "commit-settings",
   "created": "2026-02-11",
-  "stage": "execution",
+  "stage": "complete",
   "discussion_sessions": 1,
   "decisions_count": 4,
   "phases": {
