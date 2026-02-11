@@ -641,6 +641,21 @@ Continue to commit.
 <step name="commit">
 Commit the feature initialization.
 
+**Check auto-commit setting:**
+
+Read `.specd/config.json` if it exists. Check the `auto_commit_docs` field.
+- If the file doesn't exist, or the field is missing, or it's `true`: proceed with the commit below.
+- If `auto_commit_docs` is `false`: skip the git add and git commit. Instead print:
+
+```
+Auto-commit disabled for docs — changes not committed.
+Modified files: .specd/features/{feature-name}/
+```
+
+Continue to completion.
+
+**If auto-commit is enabled (default):**
+
 ```bash
 git add .specd/features/{feature-name}/
 git commit -m "docs({feature-name}): initialize feature

@@ -356,7 +356,22 @@ Continue to commit_codebase_map.
 </step>
 
 <step name="commit_codebase_map">
-Commit the codebase map:
+Commit the codebase map.
+
+**Check auto-commit setting:**
+
+Read `.specd/config.json` if it exists. Check the `auto_commit_docs` field.
+- If the file doesn't exist, or the field is missing, or it's `true`: proceed with the commit below.
+- If `auto_commit_docs` is `false`: skip the git add and git commit. Instead print:
+
+```
+Auto-commit disabled for docs — changes not committed.
+Modified files: .specd/codebase/*.md
+```
+
+Continue to completion.
+
+**If auto-commit is enabled (default):**
 
 ```bash
 git add .specd/codebase/*.md .specd/config.json
