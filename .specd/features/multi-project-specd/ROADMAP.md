@@ -16,7 +16,7 @@
 - [x] **Phase 2: map-codebase Orchestrator Flow** — Add multi-project detection, project registration, and orchestrator mapping *(Complete: 2 plans, 6 tasks)*
 - [x] **Phase 3: new-feature Orchestrator Flow** — Add orchestrator-aware feature creation with project routing and delegation *(Complete: 2 plans, 6 tasks)*
 - [x] **Phase 4: plan-feature Orchestrator Flow** — Add cross-project roadmaps, dependency graph, and cycle detection *(Complete: 2 plans, 6 tasks)*
-- [ ] **Phase 5: Execution & Scheduling** — Add contract validation to execute-plan and cross-project scheduling to next-feature *(Planned: 2 plans, 6 tasks)*
+- [x] **Phase 5: Execution & Scheduling** — Add contract validation to execute-plan and cross-project scheduling to next-feature *(Complete: 2 plans, 6 tasks)*
 
 ---
 
