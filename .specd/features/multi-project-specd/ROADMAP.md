@@ -132,6 +132,12 @@
 
 **Dependencies:** Phase 3 complete (features must be creatable in orchestrator mode)
 
+**Plans:**
+- `01-PLAN.md` — Orchestrator detection, multi-project phase derivation, per-project roadmaps (3 tasks)
+- `02-PLAN.md` — Dependency graph, cycle detection, commit and completion (3 tasks)
+
+**Status:** Planned
+
 ---
 
 ### Phase 5: Execution & Scheduling
