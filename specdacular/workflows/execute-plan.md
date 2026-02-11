@@ -330,18 +330,22 @@ Use AskUserQuestion:
 
 ### 5. Commit task (if auto_commit enabled)
 
-**Check `.specd/config.json` for `auto_commit_code`:**
+**First, check auto-commit setting. Run this command:**
 
-Read `.specd/config.json` if it exists. Check the `auto_commit_code` field.
-- If the file doesn't exist, or the field is missing, or it's `true`: proceed with the commit below.
-- If `auto_commit_code` is `false`: skip the git add and git commit. Instead print:
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_code": true}'
+```
+
+Read the output. If `auto_commit_code` is `false`, do NOT run the git commands below. Instead print:
 
 ```
 Auto-commit disabled for code — changes not committed.
 Modified files: {files from task}
 ```
 
-**If auto-commit is enabled (default):**
+Then skip to step 6.
+
+**Only if `auto_commit_code` is `true` or not set (default), run:**
 
 ```bash
 git add {files from task}
@@ -382,19 +386,21 @@ Mark plan complete and suggest next.
 
 3. Update stage progress checkboxes
 
-**Commit STATE.md update:**
+**Commit STATE.md update. First, check auto-commit setting. Run this command:**
 
-**Check `.specd/config.json` for `auto_commit_docs`:**
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
+```
 
-Read `.specd/config.json` if it exists. Check the `auto_commit_docs` field.
-- If the file doesn't exist, or the field is missing, or it's `true`: proceed with the commit below.
-- If `auto_commit_docs` is `false`: skip. Print:
+Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
 
 ```
 Auto-commit disabled for docs — STATE.md changes not committed.
 ```
 
-**If auto-commit is enabled (default):**
+Then skip ahead to "Find next plan".
+
+**Only if `auto_commit_docs` is `true` or not set (default), run:**
 
 ```bash
 git add .specd/features/{feature}/STATE.md

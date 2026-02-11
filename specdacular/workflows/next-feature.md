@@ -592,18 +592,22 @@ Set `stage` to `"complete"`.
 **Update STATE.md:**
 Set stage to `complete`.
 
-**Check `.specd/config.json` for `auto_commit_docs`:**
+**First, check auto-commit setting. Run this command:**
 
-Read `.specd/config.json` if it exists. Check the `auto_commit_docs` field.
-- If the file doesn't exist, or the field is missing, or it's `true`: proceed with the commit below.
-- If `auto_commit_docs` is `false`: skip. Print:
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
+```
+
+Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
 
 ```
 Auto-commit disabled for docs — feature completion not committed.
 Modified files: .specd/features/{name}/config.json, .specd/features/{name}/STATE.md
 ```
 
-**If auto-commit is enabled (default):**
+Then end the workflow.
+
+**Only if `auto_commit_docs` is `true` or not set (default), run:**
 
 ```bash
 git add .specd/features/{name}/config.json .specd/features/{name}/STATE.md
