@@ -4,8 +4,8 @@
   "stage": "execution",
   "phases": {
     "total": 5,
-    "completed": 0,
-    "current": 1
+    "completed": 1,
+    "current": 2
   },
   "discussion_sessions": 2,
   "decisions_count": 11
