@@ -33,11 +33,9 @@ npx specdacular
 - [How It Works](#how-it-works)
   - [Parallel Agents](#parallel-agents)
   - [Feature Flow](#feature-flow)
+- [Multi-Project Support](#multi-project-support)
 - [Project Structure](#project-structure)
 - [Philosophy](#philosophy)
-- [Migration Guides](#migration-guides)
-  - [From v0.5](#migrating-from-v05)
-  - [From v0.4](#migrating-from-v04)
 - [Updating](#updating)
 - [Uninstalling](#uninstalling)
 - [Contributing](#contributing)
@@ -58,6 +56,8 @@ Spawns 4 parallel agents to analyze your codebase and generate AI-optimized docu
 | `STRUCTURE.md` | Where do I put new code? |
 | `CONCERNS.md` | What will bite me? Gotchas? Tech debt? |
 
+For monorepos and multi-repo setups, it maps each sub-project in parallel, then produces system-level docs (`PROJECTS.md`, `TOPOLOGY.md`, `CONTRACTS.md`, `CONCERNS.md`) at the orchestrator level.
+
 ### 2. Plan Features
 
 Two commands drive the entire feature lifecycle:
@@ -68,6 +68,8 @@ Two commands drive the entire feature lifecycle:
 ```
 
 `feature:next` reads your feature's current state and offers the natural next step. You never need to remember which command comes next.
+
+Works with single projects and multi-project setups (monorepos, multi-repo). In multi-project mode, features are discussed at the system level and routed to the relevant sub-projects, with cross-project dependency tracking and contract validation.
 
 ---
 
@@ -106,7 +108,7 @@ In Claude Code:
 /specd:map-codebase
 ```
 
-Creates `.specd/codebase/` with 4 AI-optimized documents. This gives Claude context about your codebase's architecture, patterns, structure, and gotchas.
+Creates `.specd/codebase/` with 4 AI-optimized documents. This gives Claude context about your codebase's architecture, patterns, structure, and gotchas. For multi-project setups, it detects sub-projects automatically and maps each one in parallel before producing system-level documentation.
 
 ### Plan a Feature
 
@@ -327,9 +329,49 @@ review      → review-phase workflow
 
 ---
 
+## Multi-Project Support
+
+Specdacular supports monorepos and multi-repo setups through an orchestrator layer. All existing commands gain multi-project awareness automatically — no new commands to learn.
+
+### Setup
+
+```
+/specd:map-codebase
+```
+
+When it detects multiple projects (via `package.json`, `go.mod`, `Cargo.toml`, etc.), it offers to enable multi-project mode. This:
+
+1. Registers sub-projects in an orchestrator `.specd/config.json`
+2. Spawns 4 mapper agents per sub-project in parallel
+3. Runs an orchestrator mapper that produces system-level docs:
+
+| Document | What It Answers |
+|----------|-----------------|
+| `PROJECTS.md` | What projects exist, their tech stacks and purposes? |
+| `TOPOLOGY.md` | How do projects communicate? What's the data flow? |
+| `CONTRACTS.md` | What are the cross-project relationships and shared domains? |
+| `CONCERNS.md` | What are the system-level gotchas? |
+
+### Feature Planning
+
+`feature:new` conducts a system-level discussion, identifies which projects are involved, and creates per-project features with self-contained requirements. Each sub-project's `.specd/` works identically whether standalone or part of a multi-project setup.
+
+`feature:plan` creates per-project roadmaps plus a cross-project dependency graph (`DEPENDENCIES.md`) with cycle validation.
+
+### Execution & Scheduling
+
+`feature:next` schedules across projects, respecting cross-project dependencies. After each phase, it performs contract review — comparing what was implemented against system-level expectations and flagging deviations before they cascade to downstream projects.
+
+```
+/specd:feature:next auth-system       # Auto-picks next unblocked phase across projects
+/specd:feature:next auth-system api   # Target a specific sub-project
+```
+
+---
+
 ## Project Structure
 
-After using Specdacular:
+### Single Project
 
 ```
 your-project/
@@ -361,6 +403,44 @@ your-project/
 └── ...
 ```
 
+### Multi-Project
+
+```
+monorepo/
+├── .specd/                         # Orchestrator level
+│   ├── config.json                 # type: "orchestrator", projects list
+│   ├── codebase/                   # System-level docs
+│   │   ├── PROJECTS.md
+│   │   ├── TOPOLOGY.md
+│   │   ├── CONTRACTS.md
+│   │   └── CONCERNS.md
+│   └── features/
+│       └── auth-system/
+│           ├── FEATURE.md          # System-level requirements
+│           ├── DEPENDENCIES.md     # Cross-project dependency graph
+│           └── STATE.md            # Cross-project progress
+│
+├── api/
+│   └── .specd/                     # Sub-project (works standalone too)
+│       ├── config.json             # type: "project"
+│       ├── codebase/
+│       │   ├── MAP.md
+│       │   ├── PATTERNS.md
+│       │   ├── STRUCTURE.md
+│       │   └── CONCERNS.md
+│       └── features/
+│           └── auth-system/
+│               ├── FEATURE.md      # Project-specific requirements
+│               ├── ROADMAP.md      # Per-project phases
+│               └── plans/...
+│
+└── web/
+    └── .specd/                     # Another sub-project
+        ├── config.json
+        ├── codebase/...
+        └── features/...
+```
+
 ---
 
 ## Philosophy
@@ -386,48 +466,6 @@ Detailed plans are created per-phase, not all at once. This keeps plans fresh �
 ### Decisions Are Permanent
 
 Once recorded in `DECISIONS.md`, decisions aren't re-litigated. Each has date, context, rationale, and implications.
-
----
-
-## Migration Guides
-
-### Migrating from v0.5
-
-**New command: `/specd:feature:next`** — Drives the entire feature lifecycle from a single command. Reads current state and offers the next step automatically.
-
-| Before (v0.5) | After (v0.6) |
-|----------------|--------------|
-| Remember command sequence: `discuss` → `research` → `plan` → `phase:prepare` → `phase:plan` → `phase:execute` → `phase:review` | Just run `/specd:feature:next` — it figures out what's next |
-| `feature:new` ends with list of commands to try | `feature:new` offers to continue discussing or stop with `feature:next` |
-
-**Existing `.specd/` data is fully compatible.** `feature:next` reads the same `config.json`, `STATE.md`, and other files.
-
-### Migrating from v0.4
-
-Commands were renamed into `feature:` and `phase:` namespaces:
-
-| v0.4 | v0.5 |
-|------|------|
-| `/specd:new-feature` | `/specd:feature:new` |
-| `/specd:discuss-feature` | `/specd:feature:discuss` |
-| `/specd:research-feature` | `/specd:feature:research` |
-| `/specd:plan-feature` | `/specd:feature:plan` |
-| `/specd:discuss-phase` | `/specd:phase:prepare` |
-| `/specd:research-phase` | `/specd:phase:research` |
-| `/specd:execute-plan` | `/specd:phase:execute` |
-| `/specd:insert-phase` | `/specd:phase:insert` |
-| `/specd:renumber-phases` | `/specd:phase:renumber` |
-
-**New commands in v0.5:**
-- `/specd:phase:prepare` — Replaces `discuss-phase`, adds optional research at the end
-- `/specd:phase:plan` — Creates detailed plans for **one phase** (new command)
-
-**Behavior changes in v0.5:**
-- `feature:plan` now creates only `ROADMAP.md` + empty phase directories. It no longer creates `PLAN.md` files for all phases upfront.
-- Detailed `PLAN.md` files are created per-phase with `phase:plan`, right before execution.
-- `phase:prepare` combines the old discuss-phase + research-phase into a single command.
-
-**Existing `.specd/` data is fully compatible.** Your feature files, decisions, and roadmaps work with the new commands.
 
 ---
 
