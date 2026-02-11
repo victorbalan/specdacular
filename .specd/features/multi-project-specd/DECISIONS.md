@@ -202,6 +202,26 @@
 
 ---
 
+### DEC-012: Project-level config.json with specd_version at both orchestrator and project level
+
+**Date:** 2026-02-11
+**Status:** Active
+**Phase:** 2 — map-codebase Orchestrator Flow
+**Context:** Existing users already have `.specd/` directories from before multi-project support. Need a way to detect legacy setups and prompt re-mapping. Also, map-codebase currently doesn't create a project-level config — only feature-level configs exist.
+**Decision:** map-codebase always creates `.specd/config.json` with `"type"` and `"specd_version"` fields. Both orchestrator AND sub-project levels get their own config. Legacy detection: no `.specd/config.json` = legacy, prompt to re-map. Outdated detection: `specd_version` < current = prompt to re-map.
+**Rationale:**
+- Existing users need a migration path when Specdacular gains multi-project support
+- Sub-projects need independent version tracking (DEC-001: portable and unaware)
+- Orchestrator needs its own version tracking for orchestrator-level migrations
+- Simple detection: absence of config.json or older version number
+**Implications:**
+- map-codebase gains a project-level `.specd/config.json` creation step (new for single-project mode too)
+- All workflows can check `specd_version` at entry for migration prompts
+- Config format: `{"type": "project", "specd_version": 1}` for projects, `{"type": "orchestrator", "specd_version": 1, "projects": [...]}` for orchestrator
+- Phase 1's orchestrator config.json template needs `specd_version` field added
+
+---
+
 ## Superseded Decisions
 
 (none)
@@ -229,3 +249,4 @@
 | DEC-009 | 2026-02-10 | Validate dependency graph for cycles during planning | Active |
 | DEC-010 | 2026-02-10 | Limit replan cascade depth to 2 | Active |
 | DEC-011 | 2026-02-10 | One active orchestrator session at a time | Active |
+| DEC-012 | 2026-02-11 | Project-level config.json with specd_version at both levels | Active |
