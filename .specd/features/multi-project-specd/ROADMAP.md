@@ -12,9 +12,9 @@
 
 ## Phases
 
-- [ ] **Phase 1: Templates & Foundation** — Create orchestrator templates, config structures, and DEPENDENCIES.md template *(Planned: 2 plans, 5 tasks)*
-- [ ] **Phase 2: map-codebase Orchestrator Flow** — Add multi-project detection, project registration, and orchestrator mapping
-- [ ] **Phase 3: new-feature Orchestrator Flow** — Add orchestrator-aware feature creation with project routing and delegation
+- [x] **Phase 1: Templates & Foundation** — Create orchestrator templates, config structures, and DEPENDENCIES.md template *(Complete: 2 plans, 5 tasks)*
+- [x] **Phase 2: map-codebase Orchestrator Flow** — Add multi-project detection, project registration, and orchestrator mapping *(Complete: 2 plans, 6 tasks)*
+- [ ] **Phase 3: new-feature Orchestrator Flow** — Add orchestrator-aware feature creation with project routing and delegation *(Planned: 2 plans, 6 tasks)*
 - [ ] **Phase 4: plan-feature Orchestrator Flow** — Add cross-project roadmaps, dependency graph, and cycle detection
 - [ ] **Phase 5: Execution & Scheduling** — Add contract validation to execute-plan and cross-project scheduling to next-feature
 
@@ -102,6 +102,12 @@
 7. Single-project flow works exactly as before (no regression)
 
 **Dependencies:** Phase 1 (DEPENDENCIES.md template), Phase 2 (orchestrator must exist with config.json)
+
+**Plans:**
+- `01-PLAN.md` — Orchestrator detection, system-level discussion, project routing (3 tasks)
+- `02-PLAN.md` — Feature creation, sub-project delegation, commit and completion (3 tasks)
+
+**Status:** Planned
 
 ---
 
