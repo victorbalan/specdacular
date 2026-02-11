@@ -8,11 +8,8 @@ Plan features specific enough that an agent can implement without asking questio
 npx specdacular
 ```
 
-> [!CAUTION]
-> **Early Discovery Phase.** This project is actively evolving as we explore workflow patterns for AI-assisted feature planning. Commands, file formats, and conventions change frequently between versions. We aim to provide backwards-compatible migrations, but breaking changes may occur. Pin to a specific version if stability matters to you.
-
-> [!WARNING]
-> **Open Source Software.** This is maintained by a small team in their free time. It installs slash commands and workflow files into your `.claude/` directory. Always use version control. Review what gets installed. Back up your work. The software is provided "as is" without warranty of any kind. By using this tool, you accept full responsibility for any changes it makes to your project.
+> [!NOTE]
+> **Early Discovery Phase.** Commands and conventions may change between versions. Pin to a specific version if stability matters to you.
 
 ---
 
