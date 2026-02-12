@@ -20,7 +20,7 @@
 
 ### Planning
 - [x] Phases derived
-- [ ] Plans created
+- [x] Plans created
 
 ### Execution
 - [ ] Phase 1 complete
@@ -64,7 +64,7 @@
 | DECISIONS.md | 2 decisions | 2026-02-11 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Created | 2026-02-11 |
-| plans/ | 1 phase directory | 2026-02-11 |
+| plans/ | 1 plan (phase 1) | 2026-02-11 |
 
 ---
 
@@ -78,9 +78,9 @@
 
 ## Next Steps
 
-Roadmap created with 1 phase. Ready for phase preparation and detailed planning.
+Phase 1 prepared and planned. Ready for execution.
 
-**Recommended:** `/specd:feature:next improved-status-command` — Prepare and plan Phase 1.
+**Recommended:** `/specd:phase:execute improved-status-command` — Execute Phase 1.
 
 **Resume:** `/specd:feature:next improved-status-command` — Picks up where you left off and guides the next step automatically.
 

@@ -5,9 +5,9 @@
 | Metric | Value |
 |--------|-------|
 | Total Phases | 1 |
-| Total Plans | TBD |
+| Total Plans | 1 |
 | Current Phase | 1 |
-| Status | Not Started |
+| Status | Planned |
 
 ---
 
