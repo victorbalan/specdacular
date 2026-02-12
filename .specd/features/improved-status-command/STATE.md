@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** discussion
+**Stage:** planned
 **Last Updated:** 2026-02-11
 
 ---
@@ -15,11 +15,11 @@
 - [x] All gray areas resolved
 
 ### Research
-- [ ] Research conducted
-- [ ] Findings documented in RESEARCH.md
+- [x] Research conducted (skipped — straightforward workflow change)
+- [x] Findings documented in RESEARCH.md (N/A)
 
 ### Planning
-- [ ] Phases derived
+- [x] Phases derived
 - [ ] Plans created
 
 ### Execution
@@ -63,8 +63,8 @@
 | CONTEXT.md | Created | 2026-02-11 |
 | DECISIONS.md | 2 decisions | 2026-02-11 |
 | RESEARCH.md | Not started | — |
-| ROADMAP.md | Not started | — |
-| plans/ | Not started | — |
+| ROADMAP.md | Created | 2026-02-11 |
+| plans/ | 1 phase directory | 2026-02-11 |
 
 ---
 
@@ -78,9 +78,9 @@
 
 ## Next Steps
 
-Discussion is complete with no gray areas remaining. Ready for research or planning.
+Roadmap created with 1 phase. Ready for phase preparation and detailed planning.
 
-**Recommended:** `/specd:feature:next improved-status-command` — Determine whether research is needed or skip straight to planning.
+**Recommended:** `/specd:feature:next improved-status-command` — Prepare and plan Phase 1.
 
 **Resume:** `/specd:feature:next improved-status-command` — Picks up where you left off and guides the next step automatically.
 
