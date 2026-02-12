@@ -96,7 +96,7 @@ Config written to `.specd/config.json`:
 - Auto-commit code (implementation): {on|off}
 
 These settings apply to all specd workflows in this project.
-To change later, run `/specd:init-config` again.
+To change later, run `/specd:config` again.
 ```
 
 End workflow.

@@ -1,5 +1,5 @@
 ---
-name: specd:init-config
+name: specd:config
 description: Create or update .specd/config.json with commit settings
 argument-hint: ""
 allowed-tools:
@@ -18,5 +18,5 @@ Currently supports:
 </objective>
 
 <execution_context>
-@~/.claude/specdacular/workflows/init-config.md
+@~/.claude/specdacular/workflows/config.md
 </execution_context>
