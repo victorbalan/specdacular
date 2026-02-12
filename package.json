@@ -32,6 +32,9 @@
   "bugs": {
     "url": "https://github.com/victorbalan/specdacular/issues"
   },
+  "scripts": {
+    "build:local": "node bin/install.js --global"
+  },
   "engines": {
     "node": ">=16.7.0"
   }
