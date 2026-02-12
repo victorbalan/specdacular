@@ -81,7 +81,8 @@ Continue to load_context.
 Load ALL context needed for execution.
 
 **Read feature context:**
-- `config.json` — Feature settings (check `execution.auto_commit`)
+- `config.json` — Feature settings
+- `.specd/config.json` — Global settings (check `auto_commit_code` and `auto_commit_docs`)
 - `STATE.md` — Current progress, completed plans
 - `DECISIONS.md` — Constraints to follow during implementation
 - `RESEARCH.md` — Implementation notes, pitfalls (if exists)
@@ -180,7 +181,8 @@ Feature execution finished. Review:
 - Phase RESEARCH.md: patterns identified
 
 **Settings:**
-- Auto-commit: {yes | no} (from config.json)
+- Auto-commit code: {yes | no} (from .specd/config.json, default: yes)
+- Auto-commit docs: {yes | no} (from .specd/config.json, default: yes)
 
 **Next plan:** {plans/phase-XX/YY-PLAN.md}
 **Objective:** {one-line from plan}
@@ -328,23 +330,26 @@ Use AskUserQuestion:
 
 ### 5. Commit task (if auto_commit enabled)
 
-**Check config.json `execution.auto_commit`:**
+**First, check auto-commit setting. Run this command:**
 
-**If auto_commit is true:**
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_code": true}'
+```
+
+Read the output. If `auto_commit_code` is `false`, do NOT run the git commands below. Instead print:
+
+```
+Auto-commit disabled for code — changes not committed.
+Modified files: {files from task}
+```
+
+Then skip to step 6.
+
+**Only if `auto_commit_code` is `true` or not set (default), run:**
+
 ```bash
 git add {files from task}
 git commit -m "feat({feature}): {task description}"
-```
-
-**If auto_commit is false:**
-- Do NOT commit
-- Show message:
-```
-Task {N} complete. Changes ready for review.
-Files modified: {file list}
-
-Commit when ready:
-git add {files} && git commit -m "feat({feature}): {task description}"
 ```
 
 ### 6. Update STATE.md
@@ -381,17 +386,26 @@ Mark plan complete and suggest next.
 
 3. Update stage progress checkboxes
 
-**Commit STATE.md update (if auto_commit enabled):**
+**Commit STATE.md update. First, check auto-commit setting. Run this command:**
 
-**If auto_commit is true:**
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
+```
+
+Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
+
+```
+Auto-commit disabled for docs — STATE.md changes not committed.
+```
+
+Then skip ahead to "Find next plan".
+
+**Only if `auto_commit_docs` is `true` or not set (default), run:**
+
 ```bash
 git add .specd/features/{feature}/STATE.md
 git commit -m "docs({feature}): complete plan {phase-XX/YY}"
 ```
-
-**If auto_commit is false:**
-- Do NOT commit
-- Include STATE.md in the list of modified files for user to review
 
 **Find next plan:**
 - Check ROADMAP.md for next plan in sequence

@@ -515,6 +515,23 @@ Continue to commit.
 <step name="commit">
 Commit the phase research.
 
+**First, check auto-commit setting. Run this command:**
+
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
+```
+
+Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
+
+```
+Auto-commit disabled for docs — changes not committed.
+Modified files: .specd/features/{feature}/plans/phase-{NN}/RESEARCH.md, DECISIONS.md
+```
+
+Then skip ahead to completion.
+
+**Only if `auto_commit_docs` is `true` or not set (default), run:**
+
 ```bash
 git add ".specd/features/{feature}/plans/phase-{NN}/RESEARCH.md"
 git add ".specd/features/{feature}/DECISIONS.md"
