@@ -39,6 +39,9 @@
 ### Completed Plans
 | Plan | Completed | Tasks | Deviations |
 |------|-----------|-------|------------|
+| plans/phase-01/01-PLAN.md | 2026-02-13 | 3 | 0 |
+| plans/phase-01/02-PLAN.md | 2026-02-13 | 3 | 0 |
+| plans/phase-01/03-PLAN.md | 2026-02-13 | 2 | 0 |
 
 ---
 
