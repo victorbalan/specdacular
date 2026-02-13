@@ -1,7 +1,7 @@
 # Context: tool-agnostic
 
 **Last Updated:** 2026-02-13
-**Sessions:** 1
+**Sessions:** 2
 
 ## Discussion Summary
 
@@ -44,13 +44,47 @@ User wants Specdacular to work beyond Claude Code — specifically in OpenAI's C
 
 ---
 
+## Resolved Questions (Session 2)
+
+### How do workflows map to Codex skills?
+
+**Question:** Should complex workflows be one SKILL.md, split into multiple skills, or use file inclusion?
+
+**Resolution:** Each workflow becomes a skill directory with a brief SKILL.md entry point and a `references/workflow.md` containing the full logic.
+
+**Details:**
+- Codex does NOT support `@path` file references in skill files
+- Codex DOES support a `references/` folder pattern — files linked via standard markdown
+- SKILL.md recommended under 500 lines; references loaded on demand
+- This maps directly to our current command → workflow split
+
+**Structure:**
+```
+.agents/skills/specd-new-feature/
+├── SKILL.md              ← Brief entry point
+├── references/
+│   └── workflow.md       ← Full workflow logic (translated)
+```
+
+**Related Decisions:** DEC-004
+
+---
+
+### How does Codex handle arguments and file references?
+
+**Question:** Do Codex skills support `$ARGUMENTS` and `@path` syntax?
+
+**Resolution:** `$ARGUMENTS` exists in deprecated custom prompts. Skills use explicit invocation (`$skill-name arg`) or implicit matching. No `@path` syntax — only standard markdown links.
+
+**Details:**
+- `@` in Codex is interactive-only (fuzzy file picker), not a static reference
+- `/mention` is runtime-only, cannot be used in instruction files
+- AGENTS.md has 32 KiB combined limit, no file imports
+- Skills are invoked explicitly (`$specd-new-feature my-feature`) or implicitly by description match
+
+---
+
 ## Deferred Questions
-
-### How exactly should workflows map to Codex skills?
-
-**Reason:** Need to prototype the translation to understand edge cases
-**Default for now:** One workflow → one SKILL.md, with tool references rewritten
-**Revisit when:** During research/planning phase
 
 ### How to handle map-codebase parallel agents in Codex?
 
@@ -65,15 +99,13 @@ User wants Specdacular to work beyond Claude Code — specifically in OpenAI's C
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
 | 2026-02-13 | Tool-agnostic vision, Codex research, porting strategy | Decided on generator approach, scoped to Claude Code + Codex |
+| 2026-02-13 | Codex file reference research, skill structure | Resolved skill directory pattern, no @path support, references/ folder |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Exact SKILL.md structure for complex multi-step workflows — need to prototype
-- [ ] How Codex handles the `@path` file reference syntax — may need different approach
-- [ ] Whether Codex slash commands support the same `$ARGUMENTS` pattern
-- [ ] Build script architecture — single pass or per-file transformation
+- [ ] Build script architecture — single pass or per-file transformation (planning concern)
 
 ---
 

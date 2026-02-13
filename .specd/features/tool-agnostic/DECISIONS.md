@@ -3,6 +3,7 @@
 **Feature:** tool-agnostic
 **Created:** 2026-02-13
 **Last Updated:** 2026-02-13
+**Decisions Count:** 4
 
 ---
 
@@ -61,6 +62,28 @@
 
 ---
 
+### DEC-004: Skill directory pattern with references/ folder
+
+**Date:** 2026-02-13
+**Status:** Active
+**Context:** Codex doesn't support `@path` file inclusion in SKILL.md. Needed to decide how to structure complex multi-step workflows.
+**Decision:** Each workflow becomes a skill directory: brief SKILL.md entry point + `references/workflow.md` with full logic.
+**Rationale:**
+- Codex supports `references/` folder with standard markdown links for on-demand loading
+- SKILL.md recommended under 500 lines; our workflows are longer
+- Maps directly to our existing command (thin) → workflow (detailed) split
+- Keeps the same architectural pattern across both tools
+**Implications:**
+- Build script generates skill directories, not just single files
+- `codex/skills/specd-{name}/SKILL.md` + `codex/skills/specd-{name}/references/workflow.md`
+- Tool references translated in the workflow.md (Read → cat, Grep → rg, etc.)
+**References:**
+- Codex Agent Skills specification
+- `commands/specd/*.md` → SKILL.md mapping
+- `specdacular/workflows/*.md` → references/workflow.md mapping
+
+---
+
 ## Superseded Decisions
 
 _None yet._
@@ -80,3 +103,4 @@ _None yet._
 | DEC-001 | 2026-02-13 | Generator approach, not universal abstraction | Active |
 | DEC-002 | 2026-02-13 | Scope to Claude Code + Codex only | Active |
 | DEC-003 | 2026-02-13 | Generated files committed to repository | Active |
+| DEC-004 | 2026-02-13 | Skill directory pattern with references/ folder | Active |

@@ -52,6 +52,7 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-02-13 | Initial discussion | FEATURE.md created — generator approach for Codex support |
+| 2026-02-13 | Codex file references | Resolved skill structure — DEC-004, 3 gray areas cleared |
 
 ---
 
@@ -61,7 +62,7 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-13 |
 | CONTEXT.md | Created | 2026-02-13 |
-| DECISIONS.md | 3 decisions | 2026-02-13 |
+| DECISIONS.md | 4 decisions | 2026-02-13 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
@@ -70,9 +71,9 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 
 ## Decision Count
 
-- **Active:** 3
+- **Active:** 4
 - **Superseded:** 0
-- **Total:** 3
+- **Total:** 4
 
 ---
 
