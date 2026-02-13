@@ -20,7 +20,7 @@
 
 ### Planning
 - [x] Phases derived
-- [ ] Plans created
+- [x] Phase 1 plans created
 
 ### Execution
 - [ ] Phase 1 complete
@@ -37,13 +37,18 @@ Phase status tracks: `pending` → `executing` → `executed` → `completed`
 Current phase status is tracked in `config.json` → `phases.current_status`.
 
 ### Current Plan
-- Plan: none
-- Task: —
+- Plan: phase-01/01-PLAN.md
+- Task: pending
 - Started: —
 
 ### Completed Plans
 | Plan | Completed | Tasks | Deviations |
 |------|-----------|-------|------------|
+
+### Phase 1 Plans
+| Plan | Summary | Tasks |
+|------|---------|-------|
+| 01-PLAN.md | Build script core + test with help command | 2 |
 
 ---
 
@@ -65,7 +70,7 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 | DECISIONS.md | 6 decisions | 2026-02-13 |
 | RESEARCH.md | Complete | 2026-02-13 |
 | ROADMAP.md | Complete | 2026-02-13 |
-| plans/ | Not started | — |
+| plans/phase-01/01-PLAN.md | Created | 2026-02-13 |
 
 ---
 
@@ -79,9 +84,9 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 
 ## Next Steps
 
-Roadmap complete with 4 phases. Ready for phase preparation and planning.
+Phase 1 planned with 1 plan (2 tasks). Ready for execution.
 
-**Resume:** `/specd:feature:continue tool-agnostic` — Picks up where you left off and guides the next step automatically.
+**Resume:** `/specd:feature:continue tool-agnostic` — Execute Phase 1 plans.
 
 ---
 
