@@ -45,11 +45,17 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 | Plan | Completed | Tasks | Deviations |
 |------|-----------|-------|------------|
 | phase-01/01-PLAN.md | 2026-02-13 | 2 | 1 (name prefix fix) |
+| phase-02/01-PLAN.md | 2026-02-13 | 2 | 0 |
 
 ### Phase 1 Plans
 | Plan | Summary | Tasks |
 |------|---------|-------|
 | 01-PLAN.md | Build script core + test with help command | 2 |
+
+### Phase 2 Plans
+| Plan | Summary | Tasks |
+|------|---------|-------|
+| 01-PLAN.md | Shared references + cross-skill pointers | 2 |
 
 ---
 
@@ -85,9 +91,9 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 
 ## Next Steps
 
-Phase 2 planned with 1 plan (2 tasks). Ready for execution.
+Phase 2 executed — all plans complete. Pending review.
 
-**Resume:** `/specd:feature:continue tool-agnostic` — Execute Phase 2 plans.
+**Resume:** `/specd:feature:continue tool-agnostic` — Review Phase 2.
 
 ---
 
