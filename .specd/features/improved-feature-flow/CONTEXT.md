@@ -131,6 +131,21 @@ User identified command sprawl as the core problem — ~15 commands are too many
 
 ---
 
+### How should phase transitions work in the state machine?
+
+**Question:** When does a phase advance to the next? Currently it auto-advances after all plans execute, which causes `continue` in a fresh context to skip review.
+
+**Resolution:** Phase status tracks three states: `executing` → `executed` → `completed`. After all plans in a phase run, status becomes `executed` (not `completed`). `continue` sees `executed` and triggers the review checkpoint. Only after user says "yes, move on" does it become `completed` and the next phase activates.
+
+**Details:**
+- Discovered when phase 7 wasn't reviewed but state showed phase 8
+- `continue` in a fresh context must always land on the right step
+- The user approval gate is what makes `continue` reliable across context resets
+
+**Related Decisions:** DEC-009
+
+---
+
 ## Deferred Questions
 
 ### Should toolbox show different options based on feature stage?
@@ -147,6 +162,7 @@ User identified command sprawl as the core problem — ~15 commands are too many
 |------|----------------|--------------|
 | 2026-02-13 | Command consolidation, naming, review behavior, autocomplete | 5 decisions, feature scoped |
 | 2026-02-13 | Toolbox menu, decimal numbering, review flow, scope questions | 3 more decisions, all gray areas resolved |
+| 2026-02-13 | Phase state machine, transition gating | DEC-009, critical state tracking fix |
 
 ---
 

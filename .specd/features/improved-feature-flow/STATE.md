@@ -62,7 +62,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-13 |
 | CONTEXT.md | Created | 2026-02-13 |
-| DECISIONS.md | 8 decisions | 2026-02-13 |
+| DECISIONS.md | 9 decisions | 2026-02-13 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
@@ -71,9 +71,9 @@
 
 ## Decision Count
 
-- **Active:** 8
+- **Active:** 9
 - **Superseded:** 0
-- **Total:** 8
+- **Total:** 9
 
 ---
 

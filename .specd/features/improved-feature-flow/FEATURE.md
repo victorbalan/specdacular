@@ -20,7 +20,8 @@ Simplifies the specdacular command surface from ~15 commands to 7 by consolidati
 - `specdacular/workflows/discuss-feature.md` — Keep workflow, remove command stub, called from toolbox
 - `specdacular/workflows/research-feature.md` — Keep workflow, remove command stub, called from toolbox
 - `specdacular/workflows/plan-feature.md` — Keep workflow, remove command stub, called from toolbox
-- `specdacular/workflows/execute-plan.md` — Add review checkpoint after phase execution ("Is this OK?")
+- `specdacular/workflows/execute-plan.md` — Add review checkpoint after phase execution ("Is this OK?"), mark phase as `executed` not `completed`
+- `specdacular/workflows/continue-feature.md` — Phase state machine: check `executed` vs `completed` status, gate transitions on user approval
 - `commands/specd/new-feature.md` — Update continuation references from `next` to `continue`
 - `commands/specd/help.md` — Update to reflect new command surface
 - `bin/install.js` — Update file copy list (remove old commands, add new ones)
@@ -44,7 +45,10 @@ Simplifies the specdacular command surface from ~15 commands to 7 by consolidati
 - [ ] No standalone `feature:discuss`, `feature:research`, `feature:plan` commands in autocomplete
 - [ ] Review workflow shows summary to user, waits for feedback, generates fix plans from feedback
 - [ ] After phase execution, `continue` asks "Is this OK?" before moving to next phase
-- [ ] `insert` from toolbox adds a phase and auto-renumbers
+- [ ] `insert` from toolbox adds a phase with decimal numbering (6.1, 6.2)
+- [ ] Phase state machine: `executing` → `executed` → `completed`, transitions gated on user approval
+- [ ] `continue` in fresh context lands on correct step (review if `executed`, next phase if `completed`)
+- [ ] Discuss/research/plan from toolbox ask scope: whole feature or specific phase
 - [ ] All references to `next` updated to `continue` (STATE.md template, help, new-feature completion)
 - [ ] `bin/install.js` correctly installs only the new command set
 

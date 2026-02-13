@@ -145,6 +145,25 @@
 
 ---
 
+### DEC-009: Phase transition requires explicit user approval
+
+**Date:** 2026-02-13
+**Status:** Active
+**Context:** Currently, after all plans in a phase execute, the state auto-advances to the next phase. This means running `continue` in a fresh context skips review and jumps to the wrong phase. User discovered this when phase 7 wasn't reviewed but state already showed phase 8.
+**Decision:** Phase status in STATE.md must track: `executing` → `executed` → `completed`. A phase moves to `completed` only after explicit user approval ("Is this OK? Yes"). Only then does the next phase become active. `continue` in a fresh context reads this status and knows to show the review checkpoint, not advance.
+**Rationale:**
+- Fresh context must load the correct state — can't skip review
+- User approval is the gate between phases
+- Prevents losing review feedback when context resets
+- Makes `continue` reliable regardless of when it's called
+**Implications:**
+- STATE.md phase tracking needs `executed` vs `completed` distinction
+- `continue` workflow must check phase status before deciding next action
+- Execute workflow marks phase as `executed` (not `completed`) when all plans done
+- Review/approval step marks phase as `completed` and advances to next phase
+
+---
+
 ## Superseded Decisions
 
 _(none)_
@@ -169,3 +188,4 @@ _(none)_
 | DEC-006 | 2026-02-13 | Decimal phase numbering for inserts | Active |
 | DEC-007 | 2026-02-13 | Discuss/research/plan ask scope (feature vs phase) | Active |
 | DEC-008 | 2026-02-13 | Review shows summary + test guidance, revisions become fix plans | Active |
+| DEC-009 | 2026-02-13 | Phase transition requires explicit user approval | Active |
