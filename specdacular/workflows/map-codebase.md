@@ -358,37 +358,11 @@ Continue to commit_codebase_map.
 <step name="commit_codebase_map">
 Commit the codebase map.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — changes not committed.
-Modified files: .specd/codebase/*.md
-```
-
-Then skip ahead to completion.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add .specd/codebase/*.md .specd/config.json
-git commit -m "$(cat <<'EOF'
-docs: map codebase for Claude
-
-- MAP.md - Navigation: modules, functions, integrations
-- PATTERNS.md - Code examples: services, errors, testing
-- STRUCTURE.md - Organization: where to put new code
-- CONCERNS.md - Warnings: gotchas, anti-patterns, debt
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-```
+- **$FILES:** `.specd/codebase/*.md .specd/config.json`
+- **$MESSAGE:** `docs: map codebase for Claude` with list of documents created
+- **$LABEL:** `codebase map`
 
 Continue to completion.
 </step>

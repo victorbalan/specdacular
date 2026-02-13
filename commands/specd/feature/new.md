@@ -21,7 +21,7 @@ Initialize a feature folder and start the first discussion. Creates structure, a
 - `.specd/features/{name}/STATE.md` — Progress tracking
 - `.specd/features/{name}/config.json` — Feature configuration
 
-**This is the entry point.** After this, continue with `/specd:feature:next` to drive the entire lifecycle.
+**This is the entry point.** After this, continue with `/specd:feature:continue` to drive the entire lifecycle.
 </objective>
 
 <execution_context>
@@ -63,5 +63,5 @@ Feature name: $ARGUMENTS
 - [ ] STATE.md tracks current position
 - [ ] config.json created
 - [ ] Committed to git
-- [ ] User offered to continue discussing or stop with `/specd:feature:next`
+- [ ] User offered to continue discussing or stop with `/specd:feature:continue`
 </success_criteria>

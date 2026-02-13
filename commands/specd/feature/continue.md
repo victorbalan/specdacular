@@ -1,6 +1,6 @@
 ---
-name: specd:feature:next
-description: Drive feature lifecycle — picks up where you left off and guides next steps
+name: specd:feature:continue
+description: Continue feature lifecycle — picks up where you left off
 argument-hint: "[feature-name]"
 allowed-tools:
   - Read
@@ -31,13 +31,13 @@ Smart state machine that reads current feature state and drives the entire lifec
 - Phase preparation (phase-specific discussion + research)
 - Phase planning (detailed PLAN.md files)
 - Phase execution (with progress tracking)
-- Phase review (compare plans vs actual code)
+- Phase review (review executed work, user-guided)
 
-**No need to remember individual commands.** This one command figures out what's next.
+**No need to remember individual commands.** This one command figures out what to do.
 </objective>
 
 <execution_context>
-@~/.claude/specdacular/workflows/next-feature.md
+@~/.claude/specdacular/workflows/continue-feature.md
 </execution_context>
 
 <context>
@@ -61,7 +61,7 @@ Feature name: $ARGUMENTS
 @~/.claude/specdacular/workflows/prepare-phase.md
 @~/.claude/specdacular/workflows/plan-phase.md
 @~/.claude/specdacular/workflows/execute-plan.md
-@~/.claude/specdacular/workflows/review-phase.md
+@~/.claude/specdacular/workflows/review-feature.md
 </context>
 
 <process>

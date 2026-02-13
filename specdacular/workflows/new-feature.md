@@ -453,7 +453,7 @@ Use AskUserQuestion:
 - question: "Want to keep discussing the open areas, or come back later?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Keep discussing:**
 Execute the discuss-feature workflow logic:
@@ -468,11 +468,11 @@ Use AskUserQuestion:
 - question: "Discussion looks solid. Want to keep going or come back later?"
 - options:
   - "Continue" — Move to the next step (research or planning)
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Continue:**
-Hand off to next-feature workflow:
-@~/.claude/specdacular/workflows/next-feature.md
+Hand off to continue-feature workflow:
+@~/.claude/specdacular/workflows/continue-feature.md
 
 Start from the read_state step with the current feature.
 
@@ -482,7 +482,7 @@ Start from the read_state step with the current feature.
 
 Progress saved. Pick up where you left off anytime:
 
-/specd:feature:next {feature-name}
+/specd:feature:continue {feature-name}
 ```
 
 End workflow.
@@ -641,35 +641,11 @@ Continue to commit.
 <step name="commit">
 Commit the feature initialization.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — changes not committed.
-Modified files: .specd/features/{feature-name}/
-```
-
-Then skip ahead to completion.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add .specd/features/{feature-name}/
-git commit -m "docs({feature-name}): initialize feature
-
-Creates feature structure with:
-- FEATURE.md: Technical requirements
-- CONTEXT.md: Discussion context
-- DECISIONS.md: Decision log ({N} decisions)
-- CHANGELOG.md: Implementation log (empty)
-- STATE.md: Progress tracking
-- config.json: Configuration"
-```
+- **$FILES:** `.specd/features/{feature-name}/`
+- **$MESSAGE:** `docs({feature-name}): initialize feature` with list of created files
+- **$LABEL:** `feature initialization`
 
 Continue to completion.
 </step>
@@ -717,7 +693,7 @@ Use AskUserQuestion:
 - question: "Want to keep discussing the open areas, or come back later?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Keep discussing:**
 Execute the discuss-feature workflow logic:
@@ -732,11 +708,11 @@ Use AskUserQuestion:
 - question: "Discussion looks solid. Want to keep going or come back later?"
 - options:
   - "Continue" — Move to the next step (research or planning)
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Continue:**
-Hand off to the next-feature workflow logic to determine next action:
-@~/.claude/specdacular/workflows/next-feature.md
+Hand off to the continue-feature workflow logic to determine next action:
+@~/.claude/specdacular/workflows/continue-feature.md
 
 Start from the read_state step with the current feature.
 
@@ -746,7 +722,7 @@ Start from the read_state step with the current feature.
 
 Progress saved. Pick up where you left off anytime:
 
-/specd:feature:next {feature-name}
+/specd:feature:continue {feature-name}
 ```
 
 End workflow.

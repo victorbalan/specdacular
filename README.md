@@ -20,13 +20,10 @@ npx specdacular
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Commands](#commands)
-  - [Feature Commands](#feature-commands-feature)
-  - [Phase Commands](#phase-commands-phase)
+  - [Core Flow](#core-flow)
   - [Codebase Documentation](#codebase-documentation)
   - [Utilities](#utilities)
 - [The Flow in Detail](#the-flow-in-detail)
-  - [Feature-Level Commands](#feature-level-commands)
-  - [Phase-Level Commands](#phase-level-commands)
 - [How It Works](#how-it-works)
   - [Parallel Agents](#parallel-agents)
   - [Feature Flow](#feature-flow)
@@ -57,14 +54,17 @@ For monorepos and multi-repo setups, it maps each sub-project in parallel, then 
 
 ### 2. Plan Features
 
-Two commands drive the entire feature lifecycle:
+Three commands drive the entire feature lifecycle:
 
 ```
-/specd:feature:new my-feature     # Initialize + first discussion
-/specd:feature:next my-feature    # Everything else — discussion, research, planning, execution, review
+/specd:feature:new my-feature         # Initialize + first discussion
+/specd:feature:continue my-feature    # Everything else — discussion, research, planning, execution, review
+/specd:feature:toolbox my-feature     # Advanced operations menu
 ```
 
-`feature:next` reads your feature's current state and offers the natural next step. You never need to remember which command comes next.
+`feature:continue` reads your feature's current state and offers the natural next step. You never need to remember which command comes next.
+
+`feature:toolbox` gives you direct access to advanced operations — discuss, research, plan, review, or insert a phase — when you want to jump to a specific action outside the normal flow.
 
 Works with single projects and multi-project setups (monorepos, multi-repo). In multi-project mode, features are discussed at the system level and routed to the relevant sub-projects, with cross-project dependency tracking and contract validation.
 
@@ -120,10 +120,10 @@ Creates `.specd/features/user-dashboard/` and starts the first discussion. Claud
 **Step 2: Drive the lifecycle**
 
 ```
-/specd:feature:next user-dashboard
+/specd:feature:continue user-dashboard
 ```
 
-That's it. `feature:next` reads the current state and guides you through each stage:
+That's it. `feature:continue` reads the current state and guides you through each stage:
 
 1. **Discussion** — Probes gray areas until clear
 2. **Research** — Spawns parallel agents for patterns/pitfalls
@@ -133,51 +133,35 @@ That's it. `feature:next` reads the current state and guides you through each st
 6. **Phase execution** — Implements with progress tracking
 7. **Phase review** — Compares plans against actual code
 
-After each step, you can continue or stop. Resume anytime with `/specd:feature:next`.
+After each step, you can continue or stop. Resume anytime with `/specd:feature:continue`.
 
 **No argument? It picks for you:**
 
 ```
-/specd:feature:next
+/specd:feature:continue
 ```
 
 Scans for in-progress features and shows a picker.
 
-**Mid-flight adjustments:**
+**Need a specific operation?**
 
 ```
-/specd:phase:insert user-dashboard 3 "Cache layer"  # Insert Phase 3.1
-/specd:phase:renumber user-dashboard                 # Clean up to integers
+/specd:feature:toolbox user-dashboard
 ```
+
+Opens a menu with: Discuss, Research, Plan, Review, Insert phase. Useful when you want to jump to a specific action — like running research mid-execution or inserting a phase between existing ones.
 
 ---
 
 ## Commands
 
-Commands are organized into **feature** and **phase** namespaces.
-
-### Feature Commands (`feature:`)
-
-Work with a feature as a whole — discuss, research, and create a roadmap.
+### Core Flow
 
 | Command | Description |
 |---------|-------------|
 | `/specd:feature:new [name]` | Initialize a feature, start first discussion |
-| `/specd:feature:next [name]` | **Drive the entire lifecycle** — picks up where you left off |
-
-### Phase Commands (`phase:`)
-
-Work with individual phases — prepare, plan, and execute one at a time.
-
-| Command | Description |
-|---------|-------------|
-| `/specd:phase:prepare [feature] [phase]` | Discuss gray areas + optionally research patterns |
-| `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
-| `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
-| `/specd:phase:execute [feature]` | Execute plans with progress tracking |
-| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
-| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
-| `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
+| `/specd:feature:continue [name]` | **Drive the entire lifecycle** — picks up where you left off |
+| `/specd:feature:toolbox [name]` | Advanced operations: discuss, research, plan, review, insert |
 
 ### Codebase Documentation
 
@@ -190,7 +174,6 @@ Work with individual phases — prepare, plan, and execute one at a time.
 | Command | Description |
 |---------|-------------|
 | `/specd:status [--all]` | Show feature status dashboard |
-| `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
 | `/specd:help` | Show available commands |
 | `/specd:update` | Update to latest version |
 
@@ -198,58 +181,30 @@ Work with individual phases — prepare, plan, and execute one at a time.
 
 ## The Flow in Detail
 
-### Feature-Level Commands
-
-**`feature:new`** creates the feature folder and starts the first discussion. After initialization, offers to continue discussing or come back later with `feature:next`. Output:
+**`feature:new`** creates the feature folder and starts the first discussion. After initialization, offers to continue discussing or come back later with `feature:continue`. Output:
 - `FEATURE.md` — Technical requirements from the conversation
 - `CONTEXT.md` — Discussion context (accumulates over time)
 - `DECISIONS.md` — Decisions with dates, rationale, and implications
 - `STATE.md` — Progress tracking
 - `config.json` — Feature configuration
 
-**`feature:next`** is the smart state machine. It reads `config.json` and `STATE.md` to determine where the feature is, shows a status summary, and offers the natural next step. After each action it loops back — you keep going until you choose to stop. Under the hood it delegates to these stages:
+**`feature:continue`** is the smart state machine. It reads `config.json` and `STATE.md` to determine where the feature is, shows a status summary, and offers the natural next step. After each action it loops back — you keep going until you choose to stop. Under the hood it delegates to these stages:
 
 - **Discussion** — Probes gray areas, records decisions. Context accumulates across sessions.
 - **Research** — Spawns 3 parallel agents: codebase integration, external patterns, and pitfalls. Output: `RESEARCH.md`.
 - **Planning** — Creates `ROADMAP.md` with phases derived from dependency analysis, plus empty `plans/phase-{NN}/` directories.
+- **Phase preparation** — Discusses phase-specific gray areas, records resolutions to phase `CONTEXT.md` and `DECISIONS.md`. Optionally spawns research agents focused on the phase.
+- **Phase planning** — Creates detailed PLAN.md files. Each plan is a self-contained prompt for an implementing agent with exact file paths, code patterns, verification commands, and completion criteria. Plans are created just-in-time so they incorporate all context from preparation and earlier phases.
+- **Phase execution** — Implements plans with auto-fix for bugs/blockers, user confirmation for architectural changes, verification after each task, commits, and progress tracking in `STATE.md`.
+- **Phase review** — Reviews executed plans against actual code using git diff. Generates corrective plans if needed (fed back into execution). Review cycle tracked in `STATE.md`.
 
-### Phase-Level Commands
+**`feature:toolbox`** provides direct access to advanced operations outside the normal flow:
 
-**`phase:prepare`** is the main pre-execution command. It:
-1. Shows the phase overview (goal, deliverables, existing context)
-2. Identifies gray areas based on phase type (Types, API, UI, etc.)
-3. Probes until clear (4 questions max per area)
-4. Records resolutions to phase `CONTEXT.md` and `DECISIONS.md`
-5. **Offers research** — "Would you like to research implementation patterns?"
-6. If yes, spawns 3 parallel research agents focused on the phase
-
-**`phase:research`** is the standalone research command. Use it when you want to research a phase without discussing first. Same research agents as `phase:prepare`, just without the discussion step.
-
-**`phase:plan`** creates detailed PLAN.md files for one phase. Each plan is a self-contained prompt for an implementing agent with:
-- Exact file paths to create/modify
-- Code patterns to follow (from codebase docs)
-- Verification commands to run
-- Clear completion criteria
-
-Plans are created just-in-time — right before execution — so they incorporate all context from preparation and earlier phases.
-
-**`phase:execute`** executes plans with:
-- Auto-fix for bugs/blockers (logged to `CHANGELOG.md`)
-- User confirmation for architectural changes
-- Verification after each task
-- Commits after each task
-- Progress tracking in `STATE.md`
-
-**`phase:review`** reviews executed plans against actual code:
-- Claude inspects each plan's `creates`/`modifies` against actual files
-- Per-plan status table with pass/warn/fail/skip icons
-- User conversation captures additional issues
-- Generates corrective plans if needed (fed back into `phase:execute`)
-- Review cycle tracked in `STATE.md`
-
-**`phase:insert`** adds a new phase using decimal numbering (e.g., Phase 3.1 after Phase 3). The `(INSERTED)` marker in `ROADMAP.md` identifies mid-flight additions.
-
-**`phase:renumber`** cleans up decimal phases to sequential integers after insertions stabilize.
+- **Discuss** — Explore open questions at the feature or phase level
+- **Research** — Spawn parallel agents for patterns/pitfalls
+- **Plan** — Create implementation plans for a specific phase
+- **Review** — Review executed work and report issues
+- **Insert phase** — Add a phase mid-development using decimal numbering (e.g., Phase 3.1 after Phase 3)
 
 ---
 
@@ -282,10 +237,8 @@ Specdacular spawns specialized agents that run simultaneously:
 
 ### Feature Flow
 
-**The simple way** — two commands:
-
 ```
-/specd:feature:new          /specd:feature:next
+/specd:feature:new        /specd:feature:continue
       │                           │
       ▼                           ▼
  Create feature          ┌─── Read state ◀──────────────┐
@@ -295,7 +248,7 @@ Specdacular spawns specialized agents that run simultaneously:
       ▼                  │         ▼                     │
  "Keep discussing?"      │   ┌──────────────┐           │
   Yes → discuss loop     │   │  Execute the │           │
-  No  → feature:next     │   │  next action │           │
+  No  → feature:continue │   │  next action │           │
                          │   └──────────────┘           │
                          │         │                     │
                          │    ┌────┴────┐                │
@@ -312,7 +265,7 @@ Specdacular spawns specialized agents that run simultaneously:
                          └─── No features? → feature:new
 ```
 
-**Under the hood,** `feature:next` delegates to the same workflows as the individual commands:
+**Under the hood,** `feature:continue` delegates to the same workflows as the toolbox operations:
 
 ```
 discussion  → discuss-feature workflow
@@ -321,7 +274,7 @@ planning    → plan-feature workflow
 phase prep  → prepare-phase workflow
 phase plan  → plan-phase workflow
 execution   → execute-plan workflow
-review      → review-phase workflow
+review      → review-feature workflow
 ```
 
 ---
@@ -353,15 +306,15 @@ When it detects multiple projects (via `package.json`, `go.mod`, `Cargo.toml`, e
 
 `feature:new` conducts a system-level discussion, identifies which projects are involved, and creates per-project features with self-contained requirements. Each sub-project's `.specd/` works identically whether standalone or part of a multi-project setup.
 
-`feature:plan` creates per-project roadmaps plus a cross-project dependency graph (`DEPENDENCIES.md`) with cycle validation.
+Planning creates per-project roadmaps plus a cross-project dependency graph (`DEPENDENCIES.md`) with cycle validation.
 
 ### Execution & Scheduling
 
-`feature:next` schedules across projects, respecting cross-project dependencies. After each phase, it performs contract review — comparing what was implemented against system-level expectations and flagging deviations before they cascade to downstream projects.
+`feature:continue` schedules across projects, respecting cross-project dependencies. After each phase, it performs contract review — comparing what was implemented against system-level expectations and flagging deviations before they cascade to downstream projects.
 
 ```
-/specd:feature:next auth-system       # Auto-picks next unblocked phase across projects
-/specd:feature:next auth-system api   # Target a specific sub-project
+/specd:feature:continue auth-system       # Auto-picks next unblocked phase across projects
+/specd:feature:continue auth-system api   # Target a specific sub-project
 ```
 
 ---

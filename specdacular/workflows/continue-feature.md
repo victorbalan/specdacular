@@ -10,7 +10,7 @@ Smart state machine that reads current feature state and drives the entire lifec
 read state → show status → determine next action → execute → loop
 ```
 
-The user only needs to remember `/specd:feature:next`. The state machine figures out what to do.
+The user only needs to remember `/specd:feature:continue`. The state machine figures out what to do next.
 </purpose>
 
 <philosophy>
@@ -36,42 +36,7 @@ When no argument is given, scan for in-progress features and let the user pick. 
 <process>
 
 <step name="select_feature">
-Determine which feature to work on.
-
-**If $ARGUMENTS provided:**
-Use as feature name. Normalize to kebab-case.
-
-```bash
-[ -d ".specd/features/$ARGUMENTS" ] || { echo "not found"; exit 1; }
-```
-
-**If no arguments:**
-Scan for in-progress features:
-
-```bash
-# List feature directories with config.json
-for dir in .specd/features/*/config.json; do
-  [ -f "$dir" ] && echo "$dir"
-done
-```
-
-Read each `config.json` and filter where `stage != "complete"`.
-
-**If no features found:**
-```
-No features in progress.
-
-Start one with /specd:feature:new
-```
-End workflow.
-
-**If features found:**
-Use AskUserQuestion:
-- header: "Feature"
-- question: "Which feature would you like to work on?"
-- options: List each feature with its current stage (e.g., "my-feature (discussion)", "other-feature (execution)")
-
-Use the selected feature name.
+@~/.claude/specdacular/references/select-feature.md
 
 Continue to read_state.
 </step>
@@ -135,7 +100,8 @@ For each project phase, determine status:
 - **not_started** — Phase exists but not yet prepared/planned
 
 **Check for optional project argument:**
-If arguments contain a second token after feature name (e.g., `/specd:feature:next feature-name project-name`):
+If arguments contain a second token after feature name (e.g., `/specd:feature:continue feature-name project-name`):
+
 - Set target_project = project name
 - Validate project exists in feature config.json
 
@@ -187,7 +153,7 @@ Present a concise status summary.
 ```
 **Phases:** {completed}/{total}
 **Current phase:** {N} — {name}
-**Phase status:** {prepared | planned | executing | executed}
+**Phase status:** {from config.json phases.current_status: pending | executing | executed}
 ```
 
 **If mode = "project":**
@@ -303,20 +269,23 @@ Route to the appropriate sub-step based on state:
 **stage=research (RESEARCH.md exists):**
 → Go to action_plan_offer
 
-**stage=planned, no phases started:**
+**stage=planned or stage=execution, current_status == "pending", phase not prepared:**
 → Go to action_phase_prepare
 
-**stage=planned or stage=execution, current phase prepared but not planned:**
+**stage=planned or stage=execution, current_status == "pending", phase prepared but not planned:**
 → Go to action_phase_plan
 
-**stage=execution, current phase planned but not all plans executed:**
+**stage=execution, current_status == "executing":**
 → Go to action_phase_execute
 
-**stage=execution, current phase all plans executed:**
+**stage=execution, current_status == "executed":**
 → Go to action_phase_review
 
-**stage=execution, all phases done:**
+**stage=execution, phases.completed == phases.total:**
 → Go to action_complete
+
+**Note:** `current_status` is read from `config.json` → `phases.current_status` (DEC-013).
+When `current_status` is missing, treat as `"pending"`.
 
 </step>
 
@@ -338,7 +307,7 @@ Use AskUserQuestion:
   - "Discuss" — Probe open areas (recommended if gray areas exist)
   - "Skip to research" — Move to researching implementation patterns
   - "Skip to planning" — Jump to creating the roadmap (only if enough context)
-  - "Stop for now" — Save progress, come back with /specd:feature:next
+  - "Stop for now" — Save progress, come back with /specd:feature:continue
 
 **If Discuss:**
 Execute the discuss-feature workflow logic:
@@ -379,7 +348,7 @@ Use AskUserQuestion:
   - "Research" — Spawn parallel agents to investigate patterns (recommended)
   - "Skip to planning" — Jump straight to roadmap creation
   - "Discuss more" — Go back to discussion
-  - "Stop for now" — Come back with /specd:feature:next
+  - "Stop for now" — Come back with /specd:feature:continue
 
 **If Research:**
 Execute the research-feature workflow logic:
@@ -412,7 +381,7 @@ Use AskUserQuestion:
 - options:
   - "Create roadmap" — Derive phases and write ROADMAP.md (recommended)
   - "Discuss more" — Go back to discussion
-  - "Stop for now" — Come back with /specd:feature:next
+  - "Stop for now" — Come back with /specd:feature:continue
 
 **If Create roadmap:**
 → Go to action_plan_execute
@@ -452,7 +421,7 @@ Use AskUserQuestion:
 - options:
   - "Prepare phase" — Discuss gray areas + optional research (recommended)
   - "Skip to planning" — Jump to creating detailed plans
-  - "Stop for now" — Come back with /specd:feature:next
+  - "Stop for now" — Come back with /specd:feature:continue
 
 **If Prepare phase:**
 Execute the prepare-phase workflow logic:
@@ -486,7 +455,7 @@ Use AskUserQuestion:
 - options:
   - "Create plans" — Write executable PLAN.md files (recommended)
   - "Prepare first" — Go back to phase preparation
-  - "Stop for now" — Come back with /specd:feature:next
+  - "Stop for now" — Come back with /specd:feature:continue
 
 **If Create plans:**
 Execute the plan-phase workflow logic:
@@ -519,7 +488,7 @@ Use AskUserQuestion:
 - question: "Execute Phase {N} plans?"
 - options:
   - "Execute" — Run the next plan with progress tracking (recommended)
-  - "Stop for now" — Come back with /specd:feature:next
+  - "Stop for now" — Come back with /specd:feature:continue
 
 **If Execute:**
 Execute the execute-plan workflow logic:
@@ -534,38 +503,47 @@ After execution completes (commit done), loop back to read_state.
 </step>
 
 <step name="action_phase_review">
-Offer to review the completed phase.
+Offer user-guided review for the executed phase (DEC-003, DEC-009).
 
 ```
-### Phase {N} Execution Complete
+### Phase {N} Executed — Pending Review
 
-All plans for Phase {N} have been executed. Review compares what was planned against what was actually built.
+All plans for Phase {N}: {phase-name} have been executed.
+Review shows what was built and lets you approve or request revisions.
 ```
 
 Use AskUserQuestion:
 - header: "Next Step"
 - question: "Review Phase {N}?"
 - options:
-  - "Review" — Compare plans against actual code (recommended)
-  - "Skip to next phase" — Move on to Phase {N+1}
-  - "Stop for now" — Come back with /specd:feature:next
+  - "Review" — See what changed, approve or request fixes (recommended)
+  - "Approve without review" — Mark phase complete and move on
+  - "Stop for now" — Come back with /specd:feature:continue
 
 **If Review:**
-Execute the review-phase workflow logic:
-@~/.claude/specdacular/workflows/review-phase.md
+Execute the review-feature workflow logic:
+@~/.claude/specdacular/workflows/review-feature.md
 
-Pass feature name and phase number as arguments.
+Pass feature name as argument.
 
-After review completes (commit done):
+After review completes (phase approved and marked completed), loop back to read_state.
 
-**If there are more phases:**
-Loop back to read_state (will pick up next phase).
+**If Approve without review:**
+Update config.json:
+- Set `phases.current_status` to `"pending"`
+- Increment `phases.completed`
+- Advance `phases.current` to next phase
+- Remove `phases.phase_start_commit`
 
-**If all phases done:**
-→ Go to action_complete
+Update STATE.md: mark phase as complete.
 
-**If Skip to next phase:**
-Loop back to read_state (will pick up next phase).
+Commit state changes:
+```bash
+git add .specd/features/{feature}/config.json .specd/features/{feature}/STATE.md
+git commit -m "docs({feature}): phase {N} approved (without review)"
+```
+
+Loop back to read_state.
 
 **If Stop for now:**
 → Go to action_stop
@@ -592,29 +570,11 @@ Set `stage` to `"complete"`.
 **Update STATE.md:**
 Set stage to `complete`.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — feature completion not committed.
-Modified files: .specd/features/{name}/config.json, .specd/features/{name}/STATE.md
-```
-
-Then end the workflow.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add .specd/features/{name}/config.json .specd/features/{name}/STATE.md
-git commit -m "docs({feature-name}): feature complete
-
-All {N} phases executed."
-```
+- **$FILES:** `.specd/features/{name}/config.json .specd/features/{name}/STATE.md`
+- **$MESSAGE:** `docs({feature-name}): feature complete` with phase count
+- **$LABEL:** `feature completion`
 
 End workflow.
 </step>
@@ -627,7 +587,7 @@ Clean exit with resume instructions.
 
 Progress saved. Resume anytime with:
 
-/specd:feature:next {feature-name}
+/specd:feature:continue {feature-name}
 ```
 
 End workflow.
@@ -653,7 +613,7 @@ End workflow.
 - Per-project progress dashboard displayed
 - Unblocked work computed from dependency graph
 - Auto-suggests when one phase ready, asks when multiple
-- Optional project argument: /specd:feature:next feature project
+- Optional project argument: `/specd:feature:continue feature project`
 - Delegates to prepare/plan/execute based on phase readiness
 - One-session-at-a-time constraint documented (DEC-011)
 - Direct sub-project access always works (DEC-001)

@@ -16,97 +16,53 @@ Display available specdacular commands and usage guidance.
 
 ## Commands
 
-### Codebase Documentation
-
-| Command | Description |
-|---------|-------------|
-| `/specd:map-codebase` | Analyze codebase with parallel agents -> produce AI-optimized docs |
-
-### Feature Commands
+### Core Flow
 
 | Command | Description |
 |---------|-------------|
 | `/specd:feature:new [name]` | Initialize a feature, start first discussion |
-| `/specd:feature:discuss [name]` | Continue/deepen feature discussion (can call many times) |
-| `/specd:feature:research [name]` | Research implementation with parallel agents |
-| `/specd:feature:plan [name]` | Create roadmap with phase overview |
+| `/specd:feature:continue [name]` | Continue feature lifecycle — picks up where you left off |
+| `/specd:feature:toolbox [name]` | Advanced operations: discuss, research, plan, review, insert |
 
-### Phase Commands
-
-| Command | Description |
-|---------|-------------|
-| `/specd:phase:prepare [feature] [phase]` | Discuss gray areas + optionally research patterns |
-| `/specd:phase:research [feature] [phase]` | Research patterns for a phase (standalone) |
-| `/specd:phase:plan [feature] [phase]` | Create detailed PLAN.md files for one phase |
-| `/specd:phase:execute [feature] [plan]` | Execute a plan with progress tracking |
-| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
-| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
-| `/specd:phase:renumber [feature]` | Renumber phases to clean integer sequence |
-
-### Other
+### Utilities
 
 | Command | Description |
 |---------|-------------|
-| `/specd:config` | Create or update `.specd/config.json` with commit settings |
+| `/specd:map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
 | `/specd:status [--all]` | Show feature status dashboard |
-| `/specd:blueprint [name] [sub]` | Generate visual blueprint (wireframes, diagrams) |
-| `/specd:update` | Update Specdacular to the latest version |
 | `/specd:help` | Show this help |
+| `/specd:update` | Update Specdacular to the latest version |
 
 ---
 
 ## Feature Flow
 
-The feature flow helps you plan features specific enough that an agent can implement without asking questions.
-
 ```
-feature:new -> feature:discuss -> feature:research -> feature:plan (roadmap) ->
-  [for each phase]
-    phase:prepare? -> phase:plan -> phase:execute -> phase:review?
-  phase:insert? -> phase:renumber?   <- mid-flight adjustments
+/specd:feature:new → /specd:feature:continue → continue → continue → done
 ```
 
-**You control the rhythm:**
-- `feature:new` — Creates structure, asks initial questions, starts first discussion
-- `feature:discuss` — Can be called **many times** to refine understanding
-- `feature:research` — Can be called **many times** to investigate
-- `feature:plan` — Creates roadmap with phases (no detailed plans yet)
-- `phase:prepare` — Discuss gray areas + optionally research (per phase)
-- `phase:plan` — Create detailed PLAN.md files for one phase
-- `phase:execute` — Execute plans with progress tracking
-- `phase:review` — Review executed plans, generate corrective plans if needed
-- `phase:insert` — Insert a new phase mid-flight with decimal numbering (e.g., Phase 3.1)
-- `phase:renumber` — Clean up decimal phases to sequential integers
+**You only need three commands:**
+
+1. **`/specd:feature:new [name]`** — Start here. Creates feature folder, asks initial questions.
+2. **`/specd:feature:continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
+   - Discussion → Research → Planning → Phase Execution → Review
+   - After each step, offers the next step or "stop for now"
+   - Works across context windows — reads state fresh each time
+3. **`/specd:feature:toolbox [name]`** — Advanced operations menu:
+   - **Discuss** — Explore open questions (feature or phase level)
+   - **Research** — Spawn parallel agents for patterns/pitfalls
+   - **Plan** — Create implementation plans
+   - **Review** — Review executed work, report issues
+   - **Insert phase** — Add a phase mid-development (decimal numbering)
 
 ### Quick Start
 
 ```
 /specd:feature:new user-dashboard
+/specd:feature:continue user-dashboard
 ```
 
-This creates `.specd/features/user-dashboard/` with:
-- `FEATURE.md` — Technical requirements
-- `CONTEXT.md` — Discussion context (accumulates)
-- `DECISIONS.md` — User-driven decisions with dates and rationale
-- `CHANGELOG.md` — Auto-captured implementation decisions during execution
-- `STATE.md` — Progress tracking
-
-After initialization, refine and plan:
-
-```
-/specd:feature:discuss user-dashboard    # Clarify gray areas
-/specd:feature:research user-dashboard   # Research implementation
-/specd:feature:plan user-dashboard       # Create roadmap
-```
-
-Then for each phase:
-
-```
-/specd:phase:prepare user-dashboard 1    # Discuss + optionally research
-/specd:phase:plan user-dashboard 1       # Create detailed plans
-/specd:phase:execute user-dashboard      # Execute with progress tracking
-/specd:phase:review user-dashboard 1     # Review phase against actual code
-```
+After initialization, just keep running `continue`. It figures out what's next.
 
 ---
 
@@ -124,18 +80,6 @@ Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`
 | **PATTERNS.md** | Code examples: services, errors, testing |
 | **STRUCTURE.md** | Organization: where to put new code |
 | **CONCERNS.md** | Warnings: gotchas, anti-patterns, debt |
-
-### Philosophy
-
-These docs are **for Claude, not humans**.
-
-Each document answers a question Claude can't get from reading code:
-- MAP.md -> "Where is X? What functions exist?"
-- PATTERNS.md -> "How do I write code that fits?"
-- STRUCTURE.md -> "Where do I put new code?"
-- CONCERNS.md -> "What will bite me?"
-
-**Principle:** Don't document what Claude can grep. Document tribal knowledge, gotchas, and patterns.
 
 ---
 

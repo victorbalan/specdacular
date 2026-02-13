@@ -30,6 +30,16 @@
 
 ## Execution Progress
 
+### Phase Status
+
+Phase status tracks: `pending` → `executing` → `executed` → `completed`
+- **pending** — Phase not yet started (prepare/plan needed)
+- **executing** — Plans are being executed
+- **executed** — All plans done, pending user review
+- **completed** — User approved, ready for next phase
+
+Current phase status is tracked in `config.json` → `phases.current_status`.
+
 ### Current Plan
 - Plan: none
 - Task: —
@@ -81,7 +91,7 @@
 
 {What the user should do next based on current state.}
 
-**Resume:** `/specd:feature:next {feature-name}` — Picks up where you left off and guides the next step automatically.
+**Resume:** `/specd:feature:continue {feature-name}` — Picks up where you left off and guides the next step automatically.
 
 ---
 

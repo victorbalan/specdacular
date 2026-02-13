@@ -443,7 +443,7 @@ No cycles detected.
 
 The orchestrator will guide you through phases respecting cross-project dependencies.
 
-/specd:feature:next {feature-name} — Start executing phases
+/specd:feature:continue {feature-name} — Start executing phases
 ```
 
 End workflow.
@@ -609,34 +609,11 @@ Continue to commit.
 <step name="commit">
 Commit the roadmap.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — changes not committed.
-Modified files: .specd/features/{feature-name}/ROADMAP.md, plans/, STATE.md, config.json
-```
-
-Then skip ahead to completion.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add .specd/features/{feature-name}/ROADMAP.md .specd/features/{feature-name}/plans/ .specd/features/{feature-name}/STATE.md .specd/features/{feature-name}/config.json
-git commit -m "docs({feature-name}): create roadmap
-
-Phases: {N}
-
-Phase structure:
-- Phase 1: {name}
-- Phase 2: {name}
-..."
-```
+- **$FILES:** `.specd/features/{feature-name}/ROADMAP.md .specd/features/{feature-name}/plans/ .specd/features/{feature-name}/STATE.md .specd/features/{feature-name}/config.json`
+- **$MESSAGE:** `docs({feature-name}): create roadmap` with phase count and structure
+- **$LABEL:** `roadmap creation`
 
 Continue to completion.
 </step>
@@ -709,6 +686,6 @@ End workflow.
 - Topological sort validates no cycles (DEC-009)
 - DEPENDENCIES.md written with table + Mermaid DAG
 - All roadmaps, state, and config committed
-- User knows to use /specd:feature:next for execution
+- User knows to use /specd:feature:continue for execution
 
 </success_criteria>
