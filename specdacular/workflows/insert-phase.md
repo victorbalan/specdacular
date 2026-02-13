@@ -3,7 +3,7 @@ Insert a new phase after an existing one using decimal numbering (e.g., Phase 03
 
 **Key principles:**
 - Decimal numbering preserves existing phase sequence
-- Never renumber existing phases — that's what renumber-phases is for
+- Never renumber existing phases — decimal numbering eliminates renumbering
 - Create directory structure but don't create plans — user decides how to plan
 - Mark inserted phases with `(INSERTED)` in ROADMAP.md
 
@@ -12,29 +12,47 @@ Insert a new phase after an existing one using decimal numbering (e.g., Phase 03
 
 <process>
 
-<step name="parse_arguments">
-Parse the command arguments:
-- First argument: feature name
-- Second argument: integer phase number to insert after
-- Remaining arguments: phase description
+<step name="select_feature">
+@~/.claude/specdacular/references/select-feature.md
 
-Example: `/specd:phase:insert visual-blueprint-tool 3 Architecture Update`
-→ feature = "visual-blueprint-tool"
-→ after = 3
-→ description = "Architecture Update"
+Continue to select_target.
+</step>
+
+<step name="select_target">
+Determine where to insert and what the phase is about.
+
+**If arguments include phase number and description (e.g., direct invocation):**
+Parse from arguments:
+- Second token: integer phase number to insert after
+- Remaining tokens: phase description
+
+Continue to validate.
+
+**If arguments are just feature name (e.g., from toolbox dispatch):**
+
+Read ROADMAP.md and show current phases:
+```
+Current phases:
+{List each phase with number and name from ROADMAP.md}
+```
+
+Use AskUserQuestion:
+- header: "Insert After"
+- question: "Insert new phase after which existing phase?"
+- options: List each phase as an option (e.g., "Phase 1: Rename + Toolbox", "Phase 2: Review + State Machine", etc.)
+
+After selection, ask:
+```
+What's this new phase about? Give a brief name and goal.
+```
+
+Wait for response.
 
 **Validation:**
-- All three parts are required (feature, phase number, description)
-- Phase number must be a positive integer
+- Phase number must be a positive integer (or existing decimal phase)
 - Cannot insert before Phase 1 (no Phase 0.x)
 
-**If arguments missing:**
-```
-ERROR: Missing arguments.
-
-Usage: /specd:phase:insert [feature-name] [after-phase] [description...]
-Example: /specd:phase:insert visual-blueprint-tool 3 Architecture Update
-```
+Continue to validate.
 </step>
 
 <step name="validate">
@@ -161,7 +179,7 @@ Insert this line after `Phase {after_phase}` checkbox and before `Phase {after_p
 Update config.json to reflect the new phase count.
 
 1. Read config.json
-2. Increment `phases_count` by 1
+2. Increment `phases.total` by 1
 3. Write updated config.json
 </step>
 
@@ -181,16 +199,32 @@ Present completion summary:
 **Updated:**
 - ROADMAP.md — New phase section added
 - STATE.md — Evolution note + unchecked checkbox
-- config.json — phases_count incremented
+- config.json — phases.total incremented
 
 ───────────────────────────────────────────────────────
 
 ## Next Steps
 
-- `/specd:phase:prepare {feature} {new_phase}` — Discuss + optionally research the new phase
-- `/specd:phase:plan {feature} {new_phase}` — Create detailed plans for the phase
-- `/specd:phase:execute {feature}` — Execute when plans exist
-- `/specd:phase:renumber {feature}` — Clean up to integer sequence when ready
+`/specd:feature:continue {feature}` — Picks up the new phase automatically
+`/specd:feature:toolbox {feature}` — Prepare, plan, or discuss the new phase
+```
+
+**Commit changes. First, check auto-commit setting:**
+
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
+```
+
+**If `auto_commit_docs` is `false`:**
+```
+Auto-commit disabled for docs — changes not committed.
+Modified files: ROADMAP.md, STATE.md, config.json, plans/phase-{new_phase}/
+```
+
+**If `auto_commit_docs` is `true` or not set (default):**
+```bash
+git add .specd/features/{feature}/ROADMAP.md .specd/features/{feature}/STATE.md .specd/features/{feature}/config.json .specd/features/{feature}/plans/phase-{new_phase}/
+git commit -m "docs({feature}): insert phase {new_phase} — {description}"
 ```
 
 End workflow.
@@ -200,7 +234,7 @@ End workflow.
 
 <anti_patterns>
 - Don't insert before Phase 1 (Phase 0.x makes no sense)
-- Don't renumber existing phases (that's /specd:phase:renumber)
+- Don't renumber existing phases — decimal numbering eliminates renumbering
 - Don't modify the target phase content
 - Don't create plans yet — user decides how to plan (discuss, research, or manual)
 - Don't commit changes — user decides when to commit
@@ -217,6 +251,6 @@ Phase insertion is complete when:
 - [ ] ROADMAP.md updated with new phase entry (includes `(INSERTED)` marker)
 - [ ] Phase inserted in correct position (after target phase, before next integer phase)
 - [ ] STATE.md updated with roadmap evolution note and unchecked checkbox
-- [ ] config.json `phases_count` incremented
+- [ ] config.json `phases.total` incremented
 - [ ] User informed of next steps
 </success_criteria>
