@@ -92,6 +92,59 @@
 
 ---
 
+### DEC-006: Decimal phase numbering for inserts
+
+**Date:** 2026-02-13
+**Status:** Active
+**Context:** Inserting phases between existing ones previously required renumbering all subsequent phases, breaking references.
+**Decision:** Use decimal numbering: insert after phase 6 → 6.1, again → 6.2, again → 6.3. One level of decimals only — no 6.1.1.
+**Rationale:**
+- No cascading renames of plan files or directories
+- Existing references to phase numbers stay valid
+- Simple mental model
+- Eliminates `phase:renumber` command entirely
+**Implications:**
+- Plan directories: `plans/phase-6.1/`, `plans/phase-6.2/`
+- ROADMAP.md lists decimal phases in order
+- Execution follows: 6 → 6.1 → 6.2 → 6.3 → 7
+
+---
+
+### DEC-007: Discuss/research/plan ask scope (feature vs phase)
+
+**Date:** 2026-02-13
+**Status:** Active
+**Context:** When user selects discuss, research, or plan from the toolbox, they might want to work on the whole feature or zoom into a specific phase.
+**Decision:** After selecting discuss/research/plan, present a follow-up: "Whole feature or a specific phase?" If specific phase, let user select which one.
+**Rationale:**
+- Sometimes you need to zoom into "how should phase 3 work" without rehashing everything
+- Feature-level and phase-level are both valid scopes
+- Matches how developers actually think about work
+**Implications:**
+- Toolbox workflow needs two-step flow for discuss/research/plan
+- Phase-level discuss/research/plan reuse existing phase workflows
+- Feature-level uses existing feature workflows
+
+---
+
+### DEC-008: Review shows summary + test guidance, revisions become fix plans
+
+**Date:** 2026-02-13
+**Status:** Active
+**Context:** Need to define the exact review flow after phase execution.
+**Decision:** After phase execution: (1) show files created/modified, (2) include brief test guidance paragraph, (3) ask "Is this OK or do you want to revise?", (4) if revise, user provides feedback, (5) feedback becomes fix plans with decimal numbering (6.1, 6.2), (6) execute fixes, ask again.
+**Rationale:**
+- Test guidance helps user know what to verify
+- User drives the review, not the agent
+- Fix plans use same format as regular plans for consistency
+- Decimal numbering keeps things ordered
+**Implications:**
+- Review workflow must read executed plan to know what files were touched
+- Test guidance derived from plan objectives and success criteria
+- Fix plans created in `plans/phase-{N.M}/` directories
+
+---
+
 ## Superseded Decisions
 
 _(none)_
@@ -113,3 +166,6 @@ _(none)_
 | DEC-003 | 2026-02-13 | Review is user-guided, not auto-fix | Active |
 | DEC-004 | 2026-02-13 | Rename next to continue | Active |
 | DEC-005 | 2026-02-13 | Autocomplete shows exactly 7 entries | Active |
+| DEC-006 | 2026-02-13 | Decimal phase numbering for inserts | Active |
+| DEC-007 | 2026-02-13 | Discuss/research/plan ask scope (feature vs phase) | Active |
+| DEC-008 | 2026-02-13 | Review shows summary + test guidance, revisions become fix plans | Active |

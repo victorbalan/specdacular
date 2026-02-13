@@ -1,7 +1,7 @@
 # Context: improved-feature-flow
 
 **Last Updated:** 2026-02-13
-**Sessions:** 1
+**Sessions:** 2
 
 ## Discussion Summary
 
@@ -71,6 +71,66 @@ User identified command sprawl as the core problem — ~15 commands are too many
 
 ---
 
+### What are the toolbox menu descriptions?
+
+**Question:** Exact wording for each option in the toolbox AskUserQuestion menu.
+
+**Resolution:** Confirmed menu structure:
+
+| Option | Label | Description |
+|--------|-------|-------------|
+| Discuss | "Discuss" | "Explore open questions and gray areas about the feature" |
+| Research | "Research" | "Spawn agents to research implementation patterns, libraries, and pitfalls" |
+| Plan | "Plan" | "Create phased implementation plans from feature context" |
+| Review | "Review" | "Review executed work — report issues, generate fix plans" |
+| Insert | "Insert phase" | "Add a new phase to the roadmap (decimal numbering)" |
+
+**Details:**
+- Discuss, Research, and Plan each ask a follow-up: "Whole feature or a specific phase?"
+- If specific phase, user selects which phase
+
+**Related Decisions:** DEC-006, DEC-007
+
+---
+
+### How does phase insertion numbering work?
+
+**Question:** When inserting a phase between existing phases, how to number it?
+
+**Resolution:** Decimal numbering, one level only. Insert after phase 6 → 6.1, again → 6.2, again → 6.3. No deeper nesting (no 6.1.1).
+
+**Details:**
+- Removes the need for renumbering entirely
+- Existing phase references stay valid
+- No `phase:renumber` needed at all
+- Edge case (insert between 6 and 6.1) not supported — just use next decimal
+
+**Related Decisions:** DEC-006
+
+---
+
+### How does the review workflow work?
+
+**Question:** What does the review show and how does user feedback become fix plans?
+
+**Resolution:** After phase execution completes:
+1. Show list of files created/modified
+2. Show brief paragraph on how/what to test
+3. Ask "Is this OK, or do you want to revise?"
+4. If revise: user provides feedback (bugs, things they don't like)
+5. Feedback becomes fix plans using decimal numbering (e.g., 6.1, 6.2)
+6. Execute fix plans, then ask again
+
+**Details:**
+- Review never auto-fixes code
+- User examines code themselves
+- Test guidance helps user know what to verify
+- Fix plans use same format as regular plans
+
+**Related Decisions:** DEC-003, DEC-008
+
+---
+
 ## Deferred Questions
 
 ### Should toolbox show different options based on feature stage?
@@ -86,14 +146,13 @@ User identified command sprawl as the core problem — ~15 commands are too many
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
 | 2026-02-13 | Command consolidation, naming, review behavior, autocomplete | 5 decisions, feature scoped |
+| 2026-02-13 | Toolbox menu, decimal numbering, review flow, scope questions | 3 more decisions, all gray areas resolved |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Toolbox menu descriptions — Exact wording for each option's description in the AskUserQuestion menu
-- [ ] Review workflow details — Exact structure of the review summary and how user feedback becomes fix plans
-- [ ] Insert workflow — How auto-renumber works when inserting between existing phases
+_(All resolved)_
 
 ---
 

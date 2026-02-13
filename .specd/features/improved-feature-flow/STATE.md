@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -52,6 +52,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-02-13 | Command consolidation, naming, review, autocomplete | FEATURE.md created, 5 decisions |
+| 2026-02-13 | Toolbox menu, decimal numbering, review flow | 3 more decisions, all gray areas resolved |
 
 ---
 
@@ -61,7 +62,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-13 |
 | CONTEXT.md | Created | 2026-02-13 |
-| DECISIONS.md | 5 decisions | 2026-02-13 |
+| DECISIONS.md | 8 decisions | 2026-02-13 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | plans/ | Not started | — |
@@ -70,9 +71,9 @@
 
 ## Decision Count
 
-- **Active:** 5
+- **Active:** 8
 - **Superseded:** 0
-- **Total:** 5
+- **Total:** 8
 
 ---
 
@@ -86,7 +87,7 @@
 
 ## Session Notes
 
-Gray areas to resolve: toolbox menu wording, review workflow structure, insert auto-renumber details.
+All gray areas resolved in session 2. Ready for research or planning.
 
 ---
 
