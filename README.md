@@ -97,6 +97,33 @@ In Claude Code:
 
 ---
 
+## Codex Support
+
+Specdacular also supports [OpenAI Codex CLI](https://github.com/openai/codex).
+
+### Install for Codex
+
+```bash
+npx specdacular --codex
+```
+
+This installs Codex skills to `.codex/skills/` and generates `AGENTS.md`.
+
+### Available Codex Skills
+
+All Specdacular commands work as Codex skills. Use `$specd-help` to see all commands, or `$specd-feature-continue` to drive the feature lifecycle.
+
+### Development
+
+When modifying workflows, regenerate Codex output:
+
+```bash
+npm run build:codex        # Regenerate codex/ directory
+npm run check:codex        # Verify codex/ is up to date (for CI)
+```
+
+---
+
 ## Quick Start
 
 ### Map a Codebase

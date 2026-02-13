@@ -20,6 +20,7 @@ const args = process.argv.slice(2);
 const hasGlobal = args.includes('--global') || args.includes('-g');
 const hasLocal = args.includes('--local') || args.includes('-l');
 const hasUninstall = args.includes('--uninstall') || args.includes('-u');
+const hasCodex = args.includes('--codex');
 const hasHelp = args.includes('--help') || args.includes('-h');
 
 const banner = '\n' +
@@ -41,6 +42,7 @@ if (hasHelp) {
   ${yellow}Options:${reset}
     ${cyan}-g, --global${reset}      Install globally (to ~/.claude/)
     ${cyan}-l, --local${reset}       Install locally (to ./.claude/)
+    ${cyan}--codex${reset}           Install Codex skills (to .codex/skills/)
     ${cyan}-u, --uninstall${reset}   Uninstall specdacular
     ${cyan}-h, --help${reset}        Show this help message
 
@@ -53,6 +55,9 @@ if (hasHelp) {
 
     ${dim}# Install to current project only${reset}
     npx specdacular --local
+
+    ${dim}# Install Codex skills${reset}
+    npx specdacular --codex
 
     ${dim}# Uninstall${reset}
     npx specdacular --global --uninstall
@@ -481,8 +486,121 @@ function promptLocation() {
   });
 }
 
+/**
+ * Generate AGENTS.md for Codex projects
+ */
+function generateAgentsMd() {
+  const agentsMdPath = path.join(process.cwd(), 'AGENTS.md');
+
+  if (fs.existsSync(agentsMdPath)) {
+    console.log(`  ${yellow}⚠${reset} AGENTS.md already exists — skipping`);
+    return;
+  }
+
+  const content = `# Specdacular — AI Feature Planning
+
+This project uses [Specdacular](https://github.com/victorbalan/specdacular) for feature planning and codebase documentation.
+
+## Codebase Context
+
+If \`.specd/codebase/\` exists, read these files for project understanding:
+- \`.specd/codebase/MAP.md\` — System overview
+- \`.specd/codebase/PATTERNS.md\` — Code patterns and conventions
+- \`.specd/codebase/STRUCTURE.md\` — Directory layout
+
+## Available Skills
+
+### Core Flow
+- \`$specd-feature-new\` — Initialize a new feature
+- \`$specd-feature-continue\` — Continue feature lifecycle (picks up where you left off)
+- \`$specd-feature-toolbox\` — Advanced operations (discuss, research, plan, review, insert)
+
+### Feature Operations
+- \`$specd-feature-discuss\` — Discuss and clarify feature requirements
+- \`$specd-feature-research\` — Research implementation patterns
+- \`$specd-feature-plan\` — Create roadmap with phases
+
+### Phase Operations
+- \`$specd-phase-prepare\` — Prepare a phase (discuss + optional research)
+- \`$specd-phase-plan\` — Create detailed executable plans
+- \`$specd-phase-execute\` — Execute plans with progress tracking
+- \`$specd-phase-research\` — Research phase-specific patterns
+- \`$specd-phase-insert\` — Insert a new phase into the roadmap
+
+### Review
+- \`$specd-feature-review\` — Review executed work, approve or request fixes
+
+### Utilities
+- \`$specd-help\` — Show all commands
+- \`$specd-status\` — Feature status dashboard
+- \`$specd-config\` — Configure settings
+- \`$specd-map-codebase\` — Analyze and document codebase
+- \`$specd-blueprint\` — Generate visual specifications
+
+## Workflow
+
+1. Map your codebase: \`$specd-map-codebase\`
+2. Start a feature: \`$specd-feature-new my-feature\`
+3. Drive the lifecycle: \`$specd-feature-continue my-feature\`
+
+The continue command figures out what to do next — no need to remember individual commands.
+`;
+
+  fs.writeFileSync(agentsMdPath, content);
+  console.log(`  ${green}✓${reset} Generated AGENTS.md`);
+}
+
+/**
+ * Install Codex skills
+ */
+function installCodex() {
+  const src = path.join(__dirname, '..', 'codex', 'skills');
+  const destDir = path.join(process.cwd(), '.codex', 'skills');
+
+  console.log(`  Installing Codex skills to ${cyan}.codex/skills/${reset}\n`);
+
+  if (!fs.existsSync(src)) {
+    console.error(`  ${yellow}✗${reset} Codex skills not found. Run 'npm run build:codex' first.`);
+    process.exit(1);
+  }
+
+  // Clean existing specd skills
+  if (fs.existsSync(destDir)) {
+    for (const entry of fs.readdirSync(destDir)) {
+      if (entry.startsWith('specd-')) {
+        fs.rmSync(path.join(destDir, entry), { recursive: true });
+      }
+    }
+  }
+
+  // Copy each skill directory
+  const skills = fs.readdirSync(src, { withFileTypes: true })
+    .filter(function(e) { return e.isDirectory(); });
+
+  for (const skill of skills) {
+    const skillSrc = path.join(src, skill.name);
+    const skillDest = path.join(destDir, skill.name);
+    copyWithPathReplacement(skillSrc, skillDest, '.codex/');
+  }
+
+  console.log(`  ${green}✓${reset} Installed ${skills.length} Codex skills`);
+
+  // Generate AGENTS.md
+  generateAgentsMd();
+
+  console.log(`
+  ${green}Done!${reset} Codex skills installed.
+
+  ${yellow}Next:${reset}
+    codex         — Start Codex CLI
+    $specd-help   — Show all specdacular commands
+`);
+}
+
 // Main logic
-if (hasGlobal && hasLocal) {
+if (hasCodex) {
+  installCodex();
+} else if (hasGlobal && hasLocal) {
   console.error(`  ${yellow}Cannot specify both --global and --local${reset}`);
   process.exit(1);
 } else if (hasUninstall) {
