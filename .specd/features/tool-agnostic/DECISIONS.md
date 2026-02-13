@@ -3,7 +3,7 @@
 **Feature:** tool-agnostic
 **Created:** 2026-02-13
 **Last Updated:** 2026-02-13
-**Decisions Count:** 4
+**Decisions Count:** 6
 
 ---
 
@@ -84,6 +84,38 @@
 
 ---
 
+### DEC-005: Progressive rollout — start with easy workflows
+
+**Date:** 2026-02-13
+**Status:** Active
+**Context:** Research showed 20 workflows with varying complexity. 4 require parallel agent conversion.
+**Decision:** Start with the 6 easy-to-convert workflows (status, help, config, discuss-feature, review-feature, toolbox), then medium, then hard.
+**Rationale:**
+- Validates the translation approach with minimal risk
+- Easy workflows have no agent spawning, simple tool usage
+- Catches build script bugs before tackling complex conversions
+**Implications:**
+- Phase 1 deliverable is limited but functional
+- Complex workflows (map-codebase, research-*) come later
+
+---
+
+### DEC-006: Pre-commit hook for generated file staleness
+
+**Date:** 2026-02-13
+**Status:** Active
+**Context:** Research identified stale generated files as a critical maintenance pitfall.
+**Decision:** Add a pre-commit hook that verifies `codex/` is up to date with source. CI check as backup.
+**Rationale:**
+- Prevents shipping outdated Codex skills
+- Catches the issue before it reaches the repo
+- Low cost to implement, high value prevention
+**Implications:**
+- Build script must be deterministic (same input = same output)
+- Auto-generated header comment in all generated files
+
+---
+
 ## Superseded Decisions
 
 _None yet._
@@ -104,3 +136,5 @@ _None yet._
 | DEC-002 | 2026-02-13 | Scope to Claude Code + Codex only | Active |
 | DEC-003 | 2026-02-13 | Generated files committed to repository | Active |
 | DEC-004 | 2026-02-13 | Skill directory pattern with references/ folder | Active |
+| DEC-005 | 2026-02-13 | Progressive rollout — start with easy workflows | Active |
+| DEC-006 | 2026-02-13 | Pre-commit hook for generated file staleness | Active |
