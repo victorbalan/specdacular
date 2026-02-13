@@ -11,6 +11,7 @@
     "agents",
     "specdacular",
     "hooks",
+    "codex",
     "README.md"
   ],
   "keywords": [
@@ -31,6 +32,11 @@
   "homepage": "https://github.com/victorbalan/specdacular",
   "bugs": {
     "url": "https://github.com/victorbalan/specdacular/issues"
+  },
+  "scripts": {
+    "build:codex": "node bin/build-codex.js",
+    "check:codex": "node bin/build-codex.js && git diff --exit-code codex/",
+    "prepublishOnly": "npm run build:codex"
   },
   "engines": {
     "node": ">=16.7.0"
