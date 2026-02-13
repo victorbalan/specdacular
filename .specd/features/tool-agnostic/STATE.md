@@ -24,7 +24,7 @@
 
 ### Execution
 - [x] Phase 1 complete
-- [ ] Phase 2 complete
+- [x] Phase 2 complete
 
 ---
 
