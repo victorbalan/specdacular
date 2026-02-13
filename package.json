@@ -32,6 +32,9 @@
   "bugs": {
     "url": "https://github.com/victorbalan/specdacular/issues"
   },
+  "scripts": {
+    "build:codex": "node bin/build-codex.js"
+  },
   "engines": {
     "node": ">=16.7.0"
   }
