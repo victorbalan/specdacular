@@ -81,7 +81,7 @@
 
 {What the user should do next based on current state.}
 
-**Resume:** `/specd:feature:next {feature-name}` — Picks up where you left off and guides the next step automatically.
+**Resume:** `/specd:feature:continue {feature-name}` — Picks up where you left off and guides the next step automatically.
 
 ---
 

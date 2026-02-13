@@ -12,7 +12,7 @@ allowed-tools:
 ---
 
 <objective>
-> **Note:** Consider using `/specd:feature:next` instead — it guides you through the entire feature lifecycle automatically, including discussion.
+> **Note:** Consider using `/specd:feature:continue` instead — it guides you through the entire feature lifecycle automatically, including discussion.
 
 Continue or deepen understanding of a feature through targeted discussion. Can be called **many times** — context accumulates.
 

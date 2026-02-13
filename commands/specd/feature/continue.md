@@ -1,0 +1,84 @@
+---
+name: specd:feature:continue
+description: Continue feature lifecycle — picks up where you left off
+argument-hint: "[feature-name]"
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - Task
+  - AskUserQuestion
+---
+
+<objective>
+Smart state machine that reads current feature state and drives the entire lifecycle. One command from discussion through phase execution.
+
+**How it works:**
+1. Select feature (from argument or picker)
+2. Read current state (STATE.md, config.json, CONTEXT.md, ROADMAP.md)
+3. Show status summary
+4. Offer the natural next step
+5. Execute it (delegating to existing workflows)
+6. Loop back — offer the next step or stop
+
+**Covers the full lifecycle:**
+- Discussion (gray areas, decisions)
+- Research (parallel agents for patterns/pitfalls)
+- Planning (roadmap with phases)
+- Phase preparation (phase-specific discussion + research)
+- Phase planning (detailed PLAN.md files)
+- Phase execution (with progress tracking)
+- Phase review (review executed work, user-guided)
+
+**No need to remember individual commands.** This one command figures out what to do.
+</objective>
+
+<execution_context>
+@~/.claude/specdacular/workflows/continue-feature.md
+</execution_context>
+
+<context>
+Feature name: $ARGUMENTS
+
+**Scans for features:**
+@.specd/features/*/config.json
+
+**Loads feature context (once selected):**
+@.specd/features/{name}/config.json
+@.specd/features/{name}/STATE.md
+@.specd/features/{name}/CONTEXT.md
+@.specd/features/{name}/FEATURE.md
+@.specd/features/{name}/ROADMAP.md (if exists)
+@.specd/features/{name}/RESEARCH.md (if exists)
+
+**Delegates to existing workflows:**
+@~/.claude/specdacular/workflows/discuss-feature.md
+@~/.claude/specdacular/workflows/research-feature.md
+@~/.claude/specdacular/workflows/plan-feature.md
+@~/.claude/specdacular/workflows/prepare-phase.md
+@~/.claude/specdacular/workflows/plan-phase.md
+@~/.claude/specdacular/workflows/execute-plan.md
+@~/.claude/specdacular/workflows/review-feature.md
+</context>
+
+<process>
+1. **Select Feature** — From argument or scan .specd/features/*/config.json
+2. **Read State** — Load config.json, STATE.md, CONTEXT.md, ROADMAP.md
+3. **Show Status** — Concise summary of where things stand
+4. **Determine Next** — Based on stage + phase status
+5. **Offer Choice** — Next step + alternatives + "stop for now"
+6. **Execute** — Delegate to appropriate workflow
+7. **Loop** — Back to step 2 after each action
+</process>
+
+<success_criteria>
+- [ ] Feature selected (from argument or picker)
+- [ ] Current state accurately displayed
+- [ ] Correct next action offered
+- [ ] User can stop at any natural boundary
+- [ ] Delegated to correct workflow for execution
+- [ ] Looped back after completion
+</success_criteria>

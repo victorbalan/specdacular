@@ -552,7 +552,7 @@ Update orchestrator state and present summary after contract review.
 
 ───────────────────────────────────────────────────────
 
-Resume with /specd:feature:next {feature-name}
+Resume with /specd:feature:continue {feature-name}
 ```
 
 End workflow (returns to orchestrator scheduling via next).

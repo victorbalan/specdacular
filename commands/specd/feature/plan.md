@@ -12,7 +12,7 @@ allowed-tools:
 ---
 
 <objective>
-> **Note:** Consider using `/specd:feature:next` instead — it guides you through the entire feature lifecycle automatically, including planning.
+> **Note:** Consider using `/specd:feature:continue` instead — it guides you through the entire feature lifecycle automatically, including planning.
 
 Create a roadmap with phase overview and empty phase directories. Detailed PLAN.md files are created later per-phase with `/specd:phase:plan`.
 

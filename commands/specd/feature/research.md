@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-> **Note:** Consider using `/specd:feature:next` instead — it guides you through the entire feature lifecycle automatically, including research.
+> **Note:** Consider using `/specd:feature:continue` instead — it guides you through the entire feature lifecycle automatically, including research.
 
 Research how to implement a feature before planning. Spawns parallel research agents to investigate:
 

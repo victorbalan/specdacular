@@ -453,7 +453,7 @@ Use AskUserQuestion:
 - question: "Want to keep discussing the open areas, or come back later?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Keep discussing:**
 Execute the discuss-feature workflow logic:
@@ -468,11 +468,11 @@ Use AskUserQuestion:
 - question: "Discussion looks solid. Want to keep going or come back later?"
 - options:
   - "Continue" — Move to the next step (research or planning)
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Continue:**
-Hand off to next-feature workflow:
-@~/.claude/specdacular/workflows/next-feature.md
+Hand off to continue-feature workflow:
+@~/.claude/specdacular/workflows/continue-feature.md
 
 Start from the read_state step with the current feature.
 
@@ -482,7 +482,7 @@ Start from the read_state step with the current feature.
 
 Progress saved. Pick up where you left off anytime:
 
-/specd:feature:next {feature-name}
+/specd:feature:continue {feature-name}
 ```
 
 End workflow.
@@ -717,7 +717,7 @@ Use AskUserQuestion:
 - question: "Want to keep discussing the open areas, or come back later?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Keep discussing:**
 Execute the discuss-feature workflow logic:
@@ -732,11 +732,11 @@ Use AskUserQuestion:
 - question: "Discussion looks solid. Want to keep going or come back later?"
 - options:
   - "Continue" — Move to the next step (research or planning)
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd:feature:continue {feature-name}
 
 **If Continue:**
-Hand off to the next-feature workflow logic to determine next action:
-@~/.claude/specdacular/workflows/next-feature.md
+Hand off to the continue-feature workflow logic to determine next action:
+@~/.claude/specdacular/workflows/continue-feature.md
 
 Start from the read_state step with the current feature.
 
@@ -746,7 +746,7 @@ Start from the read_state step with the current feature.
 
 Progress saved. Pick up where you left off anytime:
 
-/specd:feature:next {feature-name}
+/specd:feature:continue {feature-name}
 ```
 
 End workflow.

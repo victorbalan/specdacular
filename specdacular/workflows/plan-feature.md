@@ -443,7 +443,7 @@ No cycles detected.
 
 The orchestrator will guide you through phases respecting cross-project dependencies.
 
-/specd:feature:next {feature-name} — Start executing phases
+/specd:feature:continue {feature-name} — Start executing phases
 ```
 
 End workflow.
@@ -709,6 +709,6 @@ End workflow.
 - Topological sort validates no cycles (DEC-009)
 - DEPENDENCIES.md written with table + Mermaid DAG
 - All roadmaps, state, and config committed
-- User knows to use /specd:feature:next for execution
+- User knows to use /specd:feature:continue for execution
 
 </success_criteria>
