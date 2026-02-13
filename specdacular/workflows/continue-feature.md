@@ -526,7 +526,7 @@ Execute the review-feature workflow logic:
 
 Pass feature name as argument.
 
-After review completes (phase approved and marked completed), loop back to read_state.
+After review completes (phase approved and marked completed), → Go to action_phase_transition.
 
 **If Approve without review:**
 Update config.json:
@@ -543,9 +543,39 @@ git add .specd/features/{feature}/config.json .specd/features/{feature}/STATE.md
 git commit -m "docs({feature}): phase {N} approved (without review)"
 ```
 
-Loop back to read_state.
+→ Go to action_phase_transition.
 
 **If Stop for now:**
+→ Go to action_stop
+</step>
+
+<step name="action_phase_transition">
+Phase completed — offer to clear context before continuing.
+
+```
+### Phase {N} Complete
+
+{If more phases remain:}
+Next up: **Phase {next_N} — {phase-name}**
+
+For a fresh context window, run:
+
+`/clear` then `/specd:feature:continue {feature-name}`
+
+Or continue in this session.
+```
+
+Use AskUserQuestion:
+- header: "Next Step"
+- question: "Continue to Phase {next_N}?"
+- options:
+  - "Continue here" — Keep going in this session
+  - "Stop — I'll /clear and resume" — Clear context first for a fresh 200k window
+
+**If Continue here:**
+Loop back to read_state.
+
+**If Stop — I'll /clear and resume:**
 → Go to action_stop
 </step>
 
@@ -585,9 +615,12 @@ Clean exit with resume instructions.
 ```
 ───────────────────────────────────────────────────────
 
-Progress saved. Resume anytime with:
+Progress saved. Resume anytime:
 
+/clear
 /specd:feature:continue {feature-name}
+
+(/clear first → fresh context window)
 ```
 
 End workflow.
