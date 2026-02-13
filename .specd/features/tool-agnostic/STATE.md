@@ -91,9 +91,9 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 
 ## Next Steps
 
-Phase 2 executed — all plans complete. Pending review.
+Phase 3 executed — all plans complete. Pending review.
 
-**Resume:** `/specd:feature:continue tool-agnostic` — Review Phase 2.
+**Resume:** `/specd:feature:continue tool-agnostic` — Review Phase 3.
 
 ---
 
