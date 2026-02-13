@@ -3,7 +3,7 @@
 **Feature:** tool-agnostic
 **Created:** 2026-02-13
 **Last Updated:** 2026-02-13
-**Decisions Count:** 8
+**Decisions Count:** 10
 
 ---
 
@@ -148,6 +148,37 @@
 
 ---
 
+### DEC-009: Create command stubs for workflow-only files
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 3 — Complex Workflow Conversion
+**Context:** 9 workflows lack command files, preventing skill generation. Build script discovers commands, not workflows.
+**Decision:** Create command stub .md files for all 9 workflows. Also extend build script to discover internal workflows as fallback.
+**Rationale:**
+- Commands make workflows user-invocable in both Claude Code and Codex
+- Build script fallback catches any referenced-but-not-commanded workflows
+**Implications:**
+- New files in commands/specd/feature/ and commands/specd/phase/
+
+---
+
+### DEC-010: Parallel agents → sequential with warnings in Codex
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 3 — Complex Workflow Conversion
+**Context:** map-codebase uses 4 parallel background agents. Codex has no equivalent.
+**Decision:** Convert to sequential execution with explicit timing warnings.
+**Rationale:**
+- Sequential is correct behavior, just slower
+- Warning sets user expectations
+- Only map-codebase is truly parallel; others already sequential
+**Implications:**
+- Build script adds "Note: In Codex, these run sequentially (slower than Claude Code)" to affected workflows
+
+---
+
 ## Superseded Decisions
 
 _None yet._
@@ -172,3 +203,5 @@ _None yet._
 | DEC-006 | 2026-02-13 | Pre-commit hook for generated file staleness | Active |
 | DEC-007 | 2026-02-13 | Shared references copied per-skill | Active |
 | DEC-008 | 2026-02-13 | Cross-workflow references become skill pointers | Active |
+| DEC-009 | 2026-02-13 | Create command stubs for workflow-only files | Active |
+| DEC-010 | 2026-02-13 | Parallel agents → sequential with warnings in Codex | Active |
