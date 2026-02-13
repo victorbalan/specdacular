@@ -14,7 +14,7 @@
 
 - [x] **Phase 1: Build Script Foundation** — Core build script with tool translation and frontmatter conversion *(Complete: 1 plan, 2 tasks)*
 - [ ] **Phase 2: Easy Workflow Conversion** — Convert 6 simple workflows to Codex skills *(Planned: 1 plan, 2 tasks)*
-- [ ] **Phase 3: Complex Workflow Conversion** — Convert remaining workflows including parallel agent fallback
+- [ ] **Phase 3: Complex Workflow Conversion** — Convert remaining workflows including parallel agent fallback *(Planned: 1 plan, 3 tasks)*
 - [ ] **Phase 4: Installation & Integration** — Add `--codex` flag, AGENTS.md, config.toml, pre-commit hook
 
 ---
