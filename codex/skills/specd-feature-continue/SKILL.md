@@ -44,13 +44,13 @@ Feature name: $ARGUMENTS
 @.specd/features/{name}/RESEARCH.md (if exists)
 
 **Delegates to existing workflows:**
-(see references/)
-(see references/)
-(see references/)
-(see references/)
-(see references/)
-(see references/)
-(see references/)
+(see skill: specd-discuss-feature)
+(see skill: specd-research-feature)
+(see skill: specd-plan-feature)
+(see skill: specd-prepare-phase)
+(see skill: specd-plan-phase)
+(see skill: specd-execute-plan)
+(see skill: specd-review-feature)
 </context>
 
 <process>

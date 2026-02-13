@@ -21,13 +21,13 @@ Menu of advanced feature operations. Presents options and dispatches to the appr
 Feature name: $ARGUMENTS
 
 **Delegates to workflows:**
-(see references/)
-(see references/)
-(see references/)
-(see references/)
-(see references/)
-(see references/)
-(see references/)
+(see skill: specd-discuss-feature)
+(see skill: specd-research-feature)
+(see skill: specd-plan-feature)
+(see skill: specd-review-feature)
+(see skill: specd-insert-phase)
+(see skill: specd-prepare-phase)
+(see skill: specd-plan-phase)
 </context>
 
 <success_criteria>

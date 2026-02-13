@@ -361,7 +361,7 @@ Continue to commit_codebase_map.
 <step name="commit_codebase_map">
 Commit the codebase map.
 
-(see references/)
+[commit-docs.md](references/commit-docs.md)
 
 - **$FILES:** `.specd/codebase/*.md .specd/config.json`
 - **$MESSAGE:** `docs: map codebase for Claude` with list of documents created

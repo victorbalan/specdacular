@@ -29,7 +29,7 @@ Discuss, research, and plan can operate at feature level OR phase level. The too
 <process>
 
 <step name="select_feature">
-(see references/)
+[select-feature.md](references/select-feature.md)
 
 Continue to show_menu.
 </step>
@@ -74,19 +74,19 @@ Use ask_user_question:
 
 **If Whole feature:**
 Route to feature-level workflow:
-- discuss → (see references/)
-- research → (see references/)
-- plan → (see references/)
+- discuss → (see skill: specd-discuss-feature)
+- research → (see skill: specd-research-feature)
+- plan → (see skill: specd-plan-feature)
 
 Pass feature name as argument.
 
 **If Specific phase:**
-(see references/)
+[select-phase.md](references/select-phase.md)
 
 Then route to phase-level workflow:
-- discuss → (see references/) (discussion part)
-- research → (see references/) (research part)
-- plan → (see references/)
+- discuss → (see skill: specd-prepare-phase) (discussion part)
+- research → (see skill: specd-prepare-phase) (research part)
+- plan → (see skill: specd-plan-phase)
 
 Pass feature name and phase number as arguments.
 </step>
@@ -94,7 +94,7 @@ Pass feature name and phase number as arguments.
 <step name="dispatch_review">
 Execute the review workflow.
 
-(see references/)
+(see skill: specd-review-feature)
 
 Pass feature name as argument.
 </step>
@@ -102,7 +102,7 @@ Pass feature name as argument.
 <step name="dispatch_insert">
 Execute the insert-phase workflow.
 
-(see references/)
+(see skill: specd-insert-phase)
 
 Pass feature name as argument.
 </step>

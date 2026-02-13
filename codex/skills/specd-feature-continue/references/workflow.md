@@ -39,7 +39,7 @@ When no argument is given, scan for in-progress features and let the user pick. 
 <process>
 
 <step name="select_feature">
-(see references/)
+[select-feature.md](references/select-feature.md)
 
 Continue to read_state.
 </step>
@@ -314,7 +314,7 @@ Use ask_user_question:
 
 **If Discuss:**
 Execute the discuss-feature workflow logic:
-(see references/)
+(see skill: specd-discuss-feature)
 
 After discussion completes (commit done), loop back to read_state.
 
@@ -355,7 +355,7 @@ Use ask_user_question:
 
 **If Research:**
 Execute the research-feature workflow logic:
-(see references/)
+(see skill: specd-research-feature)
 
 After research completes (commit done), loop back to read_state.
 
@@ -400,7 +400,7 @@ Use ask_user_question:
 Execute the plan-feature workflow.
 
 Execute the plan-feature workflow logic:
-(see references/)
+(see skill: specd-plan-feature)
 
 After planning completes (commit done), loop back to read_state.
 </step>
@@ -428,7 +428,7 @@ Use ask_user_question:
 
 **If Prepare phase:**
 Execute the prepare-phase workflow logic:
-(see references/)
+(see skill: specd-prepare-phase)
 
 Pass feature name and phase number as arguments.
 
@@ -462,7 +462,7 @@ Use ask_user_question:
 
 **If Create plans:**
 Execute the plan-phase workflow logic:
-(see references/)
+(see skill: specd-plan-phase)
 
 Pass feature name and phase number as arguments.
 
@@ -495,7 +495,7 @@ Use ask_user_question:
 
 **If Execute:**
 Execute the execute-plan workflow logic:
-(see references/)
+(see skill: specd-execute-plan)
 
 Pass feature name as argument (it finds the next incomplete plan).
 
@@ -525,7 +525,7 @@ Use ask_user_question:
 
 **If Review:**
 Execute the review-feature workflow logic:
-(see references/)
+(see skill: specd-review-feature)
 
 Pass feature name as argument.
 
@@ -603,7 +603,7 @@ Set `stage` to `"complete"`.
 **Update STATE.md:**
 Set stage to `complete`.
 
-(see references/)
+[commit-docs.md](references/commit-docs.md)
 
 - **$FILES:** `.specd/features/{name}/config.json .specd/features/{name}/STATE.md`
 - **$MESSAGE:** `docs({feature-name}): feature complete` with phase count

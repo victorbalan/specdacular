@@ -460,7 +460,7 @@ Use ask_user_question:
 
 **If Keep discussing:**
 Execute the discuss-feature workflow logic:
-(see references/)
+(see skill: specd-discuss-feature)
 
 After discussion completes, return to this step.
 
@@ -475,7 +475,7 @@ Use ask_user_question:
 
 **If Continue:**
 Hand off to continue-feature workflow:
-(see references/)
+(see skill: specd-continue-feature)
 
 Start from the read_state step with the current feature.
 
@@ -644,7 +644,7 @@ Continue to commit.
 <step name="commit">
 Commit the feature initialization.
 
-(see references/)
+[commit-docs.md](references/commit-docs.md)
 
 - **$FILES:** `.specd/features/{feature-name}/`
 - **$MESSAGE:** `docs({feature-name}): initialize feature` with list of created files
@@ -700,7 +700,7 @@ Use ask_user_question:
 
 **If Keep discussing:**
 Execute the discuss-feature workflow logic:
-(see references/)
+(see skill: specd-discuss-feature)
 
 After discussion completes (commit done), return to this step (continuation_offer) — re-read CONTEXT.md to check if gray areas remain, and offer again.
 
@@ -715,7 +715,7 @@ Use ask_user_question:
 
 **If Continue:**
 Hand off to the continue-feature workflow logic to determine next action:
-(see references/)
+(see skill: specd-continue-feature)
 
 Start from the read_state step with the current feature.
 
