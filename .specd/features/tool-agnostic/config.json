@@ -3,11 +3,12 @@
   "created": "2026-02-13",
   "stage": "execution",
   "discussion_sessions": 2,
-  "decisions_count": 6,
+  "decisions_count": 8,
   "phases": {
     "total": 4,
     "completed": 1,
     "current": 2,
-    "current_status": "pending"
+    "current_status": "executing",
+    "phase_start_commit": "5aaf272cd3c96e8c48520a6689b7285f23a1f6cb"
   }
 }
