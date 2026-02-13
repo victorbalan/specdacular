@@ -182,6 +182,60 @@
 
 ---
 
+### DEC-012: Review uses git diff for file tracking
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 2 — Review + State Machine
+**Context:** Review workflow needs to show what files were created/modified during phase execution.
+**Decision:** Store `phases.phase_start_commit` in config.json when execution begins. Review runs `git diff {start_commit}..HEAD --stat` to show exactly what changed.
+**Rationale:**
+- Git diff is ground truth — captures planned work, auto-fixes, and deviations
+- Plan files only show intended changes, not actual
+- CHANGELOG.md captures deviations but still misses some edge cases
+**Implications:**
+- execute-plan workflow must write `phase_start_commit` to config.json before first task
+- Review workflow reads this commit hash and diffs against HEAD
+
+---
+
+### DEC-013: Single current_status field for phase state tracking
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 2 — Review + State Machine
+**Context:** Need to distinguish "all plans executed but not reviewed" from "user approved" in a way that survives context resets.
+**Decision:** Add `phases.current_status` field to config.json. Values: `pending` | `executing` | `executed` | `completed`. When phase passes review, `current` advances, `completed` increments, `current_status` resets to `pending`.
+**Rationale:**
+- Single field is simple and easy to read/write from JSON
+- `continue` just checks one field instead of parsing plan completion state
+- Per-phase array would be overkill — historical phases are all completed
+**Implications:**
+- config.json phases section gains `current_status` field
+- `continue` routing uses explicit field check, not inference
+- execute-plan sets `executing`, marks `executed` when all plans done
+- Review/approval sets `completed`
+
+---
+
+### DEC-014: Review writes fix plans directly
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 2 — Review + State Machine
+**Context:** When user finds issues during review, need to create fix plans.
+**Decision:** Review workflow writes fix PLAN.md files directly in `plans/phase-{N.1}/` (decimal numbering per DEC-006). Does not delegate to plan-phase workflow.
+**Rationale:**
+- Keeps conversational context about what needs fixing
+- Review already understands the issues from user feedback
+- Handing off to plan-phase would lose that context
+**Implications:**
+- Review workflow needs to create phase directories and write PLAN.md files
+- Fix plans use same format as regular plans
+- After fix execution, loops back to review for another pass
+
+---
+
 ### DEC-011: Prepare-phase should offer "Discuss all" option
 
 **Date:** 2026-02-13
@@ -224,3 +278,6 @@ _(none)_
 | DEC-009 | 2026-02-13 | Phase transition requires explicit user approval | Active |
 | DEC-010 | 2026-02-13 | Extract shared workflow logic into reusable references | Active |
 | DEC-011 | 2026-02-13 | Prepare-phase should offer "Discuss all" option | Active |
+| DEC-012 | 2026-02-13 | Review uses git diff for file tracking | Active |
+| DEC-013 | 2026-02-13 | Single current_status field for phase state tracking | Active |
+| DEC-014 | 2026-02-13 | Review writes fix plans directly | Active |
