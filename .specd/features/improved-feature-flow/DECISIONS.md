@@ -164,6 +164,39 @@
 
 ---
 
+### DEC-010: Extract shared workflow logic into reusable references
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 1 — Rename + Toolbox
+**Context:** Feature selection logic, phase selection logic, and commit config reading are duplicated across multiple workflows. Creating toolbox would add more duplication.
+**Decision:** Extract shared logic into `specdacular/references/` (existing empty directory). Workflows `@`-reference these shared snippets. Start with: `select-feature.md`, `select-phase.md`, `commit-config.md`.
+**Rationale:**
+- DRY — feature selection is duplicated in next, discuss, research, plan, execute, and now toolbox
+- Shared references are consistent with the `@` pattern already used for workflow loading
+- `specdacular/references/` already exists, was designed for this purpose
+**Implications:**
+- New shared files in `specdacular/references/`
+- Toolbox and continue use shared references from the start
+- Other workflows can be updated incrementally (Phase 4 cleanup or later)
+
+---
+
+### DEC-011: Prepare-phase should offer "Discuss all" option
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 1 — Rename + Toolbox
+**Context:** User wanted to discuss all gray areas one by one instead of picking individual areas.
+**Decision:** Add a "Discuss all one by one" option to the prepare-phase AskUserQuestion menu, in addition to individual area options.
+**Rationale:**
+- Common use case — users often want to go through everything
+- Avoids repeated menu selections
+**Implications:**
+- Update `specdacular/workflows/prepare-phase.md` identify_gray_areas step
+
+---
+
 ## Superseded Decisions
 
 _(none)_
@@ -189,3 +222,5 @@ _(none)_
 | DEC-007 | 2026-02-13 | Discuss/research/plan ask scope (feature vs phase) | Active |
 | DEC-008 | 2026-02-13 | Review shows summary + test guidance, revisions become fix plans | Active |
 | DEC-009 | 2026-02-13 | Phase transition requires explicit user approval | Active |
+| DEC-010 | 2026-02-13 | Extract shared workflow logic into reusable references | Active |
+| DEC-011 | 2026-02-13 | Prepare-phase should offer "Discuss all" option | Active |
