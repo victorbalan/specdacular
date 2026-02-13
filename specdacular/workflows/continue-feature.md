@@ -153,7 +153,7 @@ Present a concise status summary.
 ```
 **Phases:** {completed}/{total}
 **Current phase:** {N} — {name}
-**Phase status:** {prepared | planned | executing | executed}
+**Phase status:** {from config.json phases.current_status: pending | executing | executed}
 ```
 
 **If mode = "project":**
@@ -269,20 +269,23 @@ Route to the appropriate sub-step based on state:
 **stage=research (RESEARCH.md exists):**
 → Go to action_plan_offer
 
-**stage=planned, no phases started:**
+**stage=planned or stage=execution, current_status == "pending", phase not prepared:**
 → Go to action_phase_prepare
 
-**stage=planned or stage=execution, current phase prepared but not planned:**
+**stage=planned or stage=execution, current_status == "pending", phase prepared but not planned:**
 → Go to action_phase_plan
 
-**stage=execution, current phase planned but not all plans executed:**
+**stage=execution, current_status == "executing":**
 → Go to action_phase_execute
 
-**stage=execution, current phase all plans executed:**
+**stage=execution, current_status == "executed":**
 → Go to action_phase_review
 
-**stage=execution, all phases done:**
+**stage=execution, phases.completed == phases.total:**
 → Go to action_complete
+
+**Note:** `current_status` is read from `config.json` → `phases.current_status` (DEC-013).
+When `current_status` is missing, treat as `"pending"`.
 
 </step>
 
@@ -500,38 +503,47 @@ After execution completes (commit done), loop back to read_state.
 </step>
 
 <step name="action_phase_review">
-Offer to review the completed phase.
+Offer user-guided review for the executed phase (DEC-003, DEC-009).
 
 ```
-### Phase {N} Execution Complete
+### Phase {N} Executed — Pending Review
 
-All plans for Phase {N} have been executed. Review compares what was planned against what was actually built.
+All plans for Phase {N}: {phase-name} have been executed.
+Review shows what was built and lets you approve or request revisions.
 ```
 
 Use AskUserQuestion:
 - header: "Next Step"
 - question: "Review Phase {N}?"
 - options:
-  - "Review" — Compare plans against actual code (recommended)
-  - "Skip to next phase" — Move on to Phase {N+1}
+  - "Review" — See what changed, approve or request fixes (recommended)
+  - "Approve without review" — Mark phase complete and move on
   - "Stop for now" — Come back with /specd:feature:continue
 
 **If Review:**
-Execute the review-phase workflow logic:
-@~/.claude/specdacular/workflows/review-phase.md
+Execute the review-feature workflow logic:
+@~/.claude/specdacular/workflows/review-feature.md
 
-Pass feature name and phase number as arguments.
+Pass feature name as argument.
 
-After review completes (commit done):
+After review completes (phase approved and marked completed), loop back to read_state.
 
-**If there are more phases:**
-Loop back to read_state (will pick up next phase).
+**If Approve without review:**
+Update config.json:
+- Set `phases.current_status` to `"pending"`
+- Increment `phases.completed`
+- Advance `phases.current` to next phase
+- Remove `phases.phase_start_commit`
 
-**If all phases done:**
-→ Go to action_complete
+Update STATE.md: mark phase as complete.
 
-**If Skip to next phase:**
-Loop back to read_state (will pick up next phase).
+Commit state changes:
+```bash
+git add .specd/features/{feature}/config.json .specd/features/{feature}/STATE.md
+git commit -m "docs({feature}): phase {N} approved (without review)"
+```
+
+Loop back to read_state.
 
 **If Stop for now:**
 → Go to action_stop

@@ -30,6 +30,16 @@
 
 ## Execution Progress
 
+### Phase Status
+
+Phase status tracks: `pending` → `executing` → `executed` → `completed`
+- **pending** — Phase not yet started (prepare/plan needed)
+- **executing** — Plans are being executed
+- **executed** — All plans done, pending user review
+- **completed** — User approved, ready for next phase
+
+Current phase status is tracked in `config.json` → `phases.current_status`.
+
 ### Current Plan
 - Plan: none
 - Task: —
