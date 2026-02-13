@@ -217,6 +217,44 @@ function discoverCommands(dir, prefix) {
 }
 
 /**
+ * Map workflow filename to a specd: skill name.
+ * Uses explicit mapping for known workflows, falls back to specd:{filename}.
+ */
+const WORKFLOW_NAME_MAP = {
+  'discuss-feature': 'specd:feature:discuss',
+  'research-feature': 'specd:feature:research',
+  'plan-feature': 'specd:feature:plan',
+  'review-feature': 'specd:feature:review',
+  'prepare-phase': 'specd:phase:prepare',
+  'plan-phase': 'specd:phase:plan',
+  'research-phase': 'specd:phase:research',
+  'review-phase': 'specd:phase:review',
+  'execute-plan': 'specd:phase:execute',
+  'insert-phase': 'specd:phase:insert',
+  'renumber-phases': 'specd:phase:renumber',
+  'blueprint-diagrams': 'specd:blueprint:diagrams',
+  'blueprint-wireframes': 'specd:blueprint:wireframes',
+};
+
+function workflowToCommandName(filename) {
+  const base = filename.replace('.md', '');
+  return WORKFLOW_NAME_MAP[base] || 'specd:' + base;
+}
+
+/**
+ * Generate a description from a workflow's content.
+ */
+function extractWorkflowDescription(content) {
+  // Try to find a heading or first meaningful line
+  const lines = content.split('\n');
+  for (const line of lines) {
+    const h1 = line.match(/^#\s+(.+)/);
+    if (h1) return h1[1];
+  }
+  return 'Specdacular workflow';
+}
+
+/**
  * Main build function.
  */
 function main() {
@@ -228,9 +266,11 @@ function main() {
   }
 
   const commands = discoverCommands(COMMANDS_DIR);
+  const coveredWorkflows = new Set(); // track which workflows have commands
   let generated = 0;
   let skipped = 0;
 
+  // Pass 1: Build skills from command files
   for (const cmd of commands) {
     const content = fs.readFileSync(cmd.path, 'utf8');
     const { frontmatter: fm, body } = parseFrontmatter(content);
@@ -245,6 +285,7 @@ function main() {
     const workflowRef = extractWorkflowRef(body);
     let workflowContent = null;
     if (workflowRef) {
+      coveredWorkflows.add(workflowRef);
       const workflowPath = path.join(WORKFLOWS_DIR, workflowRef);
       if (fs.existsSync(workflowPath)) {
         workflowContent = fs.readFileSync(workflowPath, 'utf8');
@@ -277,6 +318,41 @@ function main() {
 
     generated++;
     console.log(`  ${green}✓${reset} ${skillName}`);
+  }
+
+  // Pass 2: Build skills from workflows that have no command file
+  const workflowFiles = fs.readdirSync(WORKFLOWS_DIR).filter(function(f) { return f.endsWith('.md'); });
+
+  for (const wfFile of workflowFiles) {
+    if (coveredWorkflows.has(wfFile)) continue;
+
+    const wfPath = path.join(WORKFLOWS_DIR, wfFile);
+    const workflowContent = fs.readFileSync(wfPath, 'utf8');
+    const cmdName = workflowToCommandName(wfFile);
+    const skillName = cmdName.replace(/:/g, '-');
+    const description = extractWorkflowDescription(workflowContent);
+
+    const skillDir = path.join(OUTPUT_DIR, skillName);
+    const refsDir = path.join(skillDir, 'references');
+    fs.mkdirSync(refsDir, { recursive: true });
+
+    // Generate a minimal SKILL.md
+    const fm = `---\nname: ${skillName}\ndescription: ${yamlQuote(description)}\n---\n\n`;
+    const skillMd = AUTO_GENERATED_HEADER + fm + 'See [full workflow](references/workflow.md) for detailed steps.\n';
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), skillMd);
+
+    // Write references/workflow.md
+    const translatedWorkflow = generateWorkflowMd(workflowContent);
+    fs.writeFileSync(path.join(refsDir, 'workflow.md'), translatedWorkflow);
+
+    // Copy shared references
+    const refs = copySharedRefs(workflowContent, refsDir);
+    if (refs.length > 0) {
+      console.log(`    ${dim}+ refs: ${refs.join(', ')}${reset}`);
+    }
+
+    generated++;
+    console.log(`  ${green}✓${reset} ${skillName} ${dim}(from workflow)${reset}`);
   }
 
   console.log(`\n${green}Done:${reset} ${generated} skills generated, ${skipped} skipped.`);

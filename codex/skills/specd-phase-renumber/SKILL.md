@@ -2,8 +2,8 @@
 <!-- Source: Claude Code commands + workflows. Run: npm run build:codex -->
 
 ---
-name: specd-phase-research
-description: Check feature exists
+name: specd-phase-renumber
+description: Process highest target first to avoid collisions
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

@@ -3,17 +3,7 @@
 
 ---
 name: specd-feature-discuss
-description: Continue or deepen discussion about a feature
+description: Check feature exists
 ---
-
-<objective>
-Continue or deepen understanding of a feature through targeted discussion. Can be called many times — context accumulates across sessions.
-
-Shows what's already been discussed, identifies remaining gray areas, probes until clear, and records decisions.
-</objective>
-
-<context>
-Feature name: $ARGUMENTS
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.

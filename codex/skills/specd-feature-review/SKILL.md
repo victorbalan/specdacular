@@ -3,15 +3,7 @@
 
 ---
 name: specd-feature-review
-description: Review executed phase work and approve or request fixes
+description: Check existing decimal phases for current phase
 ---
-
-<objective>
-User-guided review of an executed phase. Shows what was built (git diff), provides test guidance, and takes user feedback to generate fix plans.
-</objective>
-
-<context>
-Feature name: $ARGUMENTS
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.

@@ -529,6 +529,8 @@ If \`.specd/codebase/\` exists, read these files for project understanding:
 
 ### Review
 - \`$specd-feature-review\` — Review executed work, approve or request fixes
+- \`$specd-phase-review\` — Review a specific phase
+- \`$specd-phase-renumber\` — Renumber phases after insertion
 
 ### Utilities
 - \`$specd-help\` — Show all commands
@@ -536,6 +538,9 @@ If \`.specd/codebase/\` exists, read these files for project understanding:
 - \`$specd-config\` — Configure settings
 - \`$specd-map-codebase\` — Analyze and document codebase
 - \`$specd-blueprint\` — Generate visual specifications
+- \`$specd-blueprint-diagrams\` — Generate architecture diagrams
+- \`$specd-blueprint-wireframes\` — Generate UI wireframes
+- \`$specd-update\` — Update to latest version
 
 ## Workflow
 

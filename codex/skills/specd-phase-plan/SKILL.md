@@ -3,15 +3,7 @@
 
 ---
 name: specd-phase-plan
-description: Create detailed executable plans for a phase
+description: Check feature exists
 ---
-
-<objective>
-Create detailed, executable PLAN.md files for a single phase. Plans are prompts — each contains everything needed to implement without asking questions.
-</objective>
-
-<context>
-Arguments: $ARGUMENTS (feature-name phase-number)
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.

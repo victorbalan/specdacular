@@ -2,8 +2,8 @@
 <!-- Source: Claude Code commands + workflows. Run: npm run build:codex -->
 
 ---
-name: specd-phase-research
-description: Check feature exists
+name: specd-blueprint-wireframes
+description: Check feature directory exists
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

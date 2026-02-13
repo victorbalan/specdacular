@@ -3,15 +3,7 @@
 
 ---
 name: specd-phase-prepare
-description: Prepare a phase by discussing gray areas and optionally researching
+description: Check feature exists
 ---
-
-<objective>
-Prepare a phase for execution by discussing phase-specific gray areas and optionally researching implementation patterns. Single command replaces the discuss-then-research two-step.
-</objective>
-
-<context>
-Arguments: $ARGUMENTS (feature-name phase-number)
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.

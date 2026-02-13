@@ -3,15 +3,7 @@
 
 ---
 name: specd-phase-insert
-description: Insert a new phase into the roadmap
+description: Specdacular workflow
 ---
-
-<objective>
-Insert a new phase into an existing roadmap using decimal numbering (e.g., phase 2.1 between phases 2 and 3). Useful when review reveals needed additions.
-</objective>
-
-<context>
-Arguments: $ARGUMENTS (feature-name after-phase-number)
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.

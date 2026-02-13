@@ -3,15 +3,7 @@
 
 ---
 name: specd-phase-execute
-description: Execute plans for a feature with progress tracking
+description: Check feature exists
 ---
-
-<objective>
-Execute a plan from a feature, tracking progress and logging deviations. Auto-fixes bugs/blockers, asks before architectural changes, stops on verification failure.
-</objective>
-
-<context>
-Feature name: $ARGUMENTS
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.

@@ -3,15 +3,7 @@
 
 ---
 name: specd-feature-research
-description: Research implementation patterns for a feature
+description: Specdacular workflow
 ---
-
-<objective>
-Research how to implement a feature by investigating codebase integration, external patterns, and common pitfalls. Produces RESEARCH.md.
-</objective>
-
-<context>
-Feature name: $ARGUMENTS
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.

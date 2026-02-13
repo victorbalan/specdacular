@@ -3,15 +3,7 @@
 
 ---
 name: specd-feature-plan
-description: Create roadmap with phase overview for a feature
+description: Check feature exists
 ---
-
-<objective>
-Create a roadmap with phase overview and empty phase directories. Phases follow natural code dependencies (types->API->UI). Detailed plans are created later per-phase.
-</objective>
-
-<context>
-Feature name: $ARGUMENTS
-</context>
 
 See [full workflow](references/workflow.md) for detailed steps.
