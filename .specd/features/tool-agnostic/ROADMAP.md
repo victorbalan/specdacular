@@ -5,15 +5,15 @@
 | Metric | Value |
 |--------|-------|
 | Total Phases | 4 |
-| Current Phase | 1 |
-| Status | Phase 1 Planned |
+| Current Phase | 2 |
+| Status | Phase 2 Planned |
 
 ---
 
 ## Phases
 
-- [ ] **Phase 1: Build Script Foundation** — Core build script with tool translation and frontmatter conversion *(Planned: 1 plan, 2 tasks)*
-- [ ] **Phase 2: Easy Workflow Conversion** — Convert 6 simple workflows to Codex skills
+- [x] **Phase 1: Build Script Foundation** — Core build script with tool translation and frontmatter conversion *(Complete: 1 plan, 2 tasks)*
+- [ ] **Phase 2: Easy Workflow Conversion** — Convert 6 simple workflows to Codex skills *(Planned: 1 plan, 2 tasks)*
 - [ ] **Phase 3: Complex Workflow Conversion** — Convert remaining workflows including parallel agent fallback
 - [ ] **Phase 4: Installation & Integration** — Add `--codex` flag, AGENTS.md, config.toml, pre-commit hook
 
