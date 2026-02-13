@@ -570,29 +570,11 @@ Set `stage` to `"complete"`.
 **Update STATE.md:**
 Set stage to `complete`.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — feature completion not committed.
-Modified files: .specd/features/{name}/config.json, .specd/features/{name}/STATE.md
-```
-
-Then end the workflow.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add .specd/features/{name}/config.json .specd/features/{name}/STATE.md
-git commit -m "docs({feature-name}): feature complete
-
-All {N} phases executed."
-```
+- **$FILES:** `.specd/features/{name}/config.json .specd/features/{name}/STATE.md`
+- **$MESSAGE:** `docs({feature-name}): feature complete` with phase count
+- **$LABEL:** `feature completion`
 
 End workflow.
 </step>

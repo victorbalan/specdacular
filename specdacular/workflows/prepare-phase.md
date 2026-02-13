@@ -676,42 +676,11 @@ Continue to commit.
 <step name="commit">
 Commit the phase preparation.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — changes not committed.
-Modified files: .specd/features/{feature}/plans/phase-{NN}/CONTEXT.md, RESEARCH.md (if created), DECISIONS.md
-```
-
-Then skip ahead to completion.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-# Add phase CONTEXT.md
-git add ".specd/features/{feature}/plans/phase-{NN}/CONTEXT.md"
-
-# Add phase RESEARCH.md if created
-git add ".specd/features/{feature}/plans/phase-{NN}/RESEARCH.md" 2>/dev/null
-
-# Add updated DECISIONS.md if modified
-git add ".specd/features/{feature}/DECISIONS.md"
-
-git commit -m "docs({feature}): prepare phase {N} - {phase title}
-
-Resolved:
-- {Area 1}
-- {Area 2}
-
-{If research:}Research: codebase, patterns, pitfalls
-New decisions: {count}"
-```
+- **$FILES:** `.specd/features/{feature}/plans/phase-{NN}/CONTEXT.md .specd/features/{feature}/plans/phase-{NN}/RESEARCH.md .specd/features/{feature}/DECISIONS.md` (skip RESEARCH.md if not created)
+- **$MESSAGE:** `docs({feature}): prepare phase {N} - {phase title}` with resolved areas and decision count
+- **$LABEL:** `phase preparation`
 
 Continue to completion.
 </step>

@@ -354,27 +354,10 @@ Use AskUserQuestion:
 
 ### 5. Commit task (if auto_commit enabled)
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-code.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_code": true}'
-```
-
-Read the output. If `auto_commit_code` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for code — changes not committed.
-Modified files: {files from task}
-```
-
-Then skip to step 6.
-
-**Only if `auto_commit_code` is `true` or not set (default), run:**
-
-```bash
-git add {files from task}
-git commit -m "feat({feature}): {task description}"
-```
+- **$FILES:** `{files from task}`
+- **$MESSAGE:** `feat({feature}): {task description}`
 
 ### 6. Update STATE.md
 Update current task number:
@@ -410,26 +393,13 @@ Mark plan complete and suggest next.
 
 3. Update stage progress checkboxes
 
-**Commit STATE.md update. First, check auto-commit setting. Run this command:**
+**Commit STATE.md update:**
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
+@~/.claude/specdacular/references/commit-docs.md
 
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — STATE.md changes not committed.
-```
-
-Then skip ahead to "Find next plan".
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add .specd/features/{feature}/STATE.md
-git commit -m "docs({feature}): complete plan {phase-XX/YY}"
-```
+- **$FILES:** `.specd/features/{feature}/STATE.md`
+- **$MESSAGE:** `docs({feature}): complete plan {phase-XX/YY}`
+- **$LABEL:** `plan completion`
 
 **Find next plan:**
 - Check ROADMAP.md for next plan in sequence within the current phase

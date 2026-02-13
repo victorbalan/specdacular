@@ -641,35 +641,11 @@ Continue to commit.
 <step name="commit">
 Commit the feature initialization.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — changes not committed.
-Modified files: .specd/features/{feature-name}/
-```
-
-Then skip ahead to completion.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add .specd/features/{feature-name}/
-git commit -m "docs({feature-name}): initialize feature
-
-Creates feature structure with:
-- FEATURE.md: Technical requirements
-- CONTEXT.md: Discussion context
-- DECISIONS.md: Decision log ({N} decisions)
-- CHANGELOG.md: Implementation log (empty)
-- STATE.md: Progress tracking
-- config.json: Configuration"
-```
+- **$FILES:** `.specd/features/{feature-name}/`
+- **$MESSAGE:** `docs({feature-name}): initialize feature` with list of created files
+- **$LABEL:** `feature initialization`
 
 Continue to completion.
 </step>

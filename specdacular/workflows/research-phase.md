@@ -515,37 +515,11 @@ Continue to commit.
 <step name="commit">
 Commit the phase research.
 
-**First, check auto-commit setting. Run this command:**
+@~/.claude/specdacular/references/commit-docs.md
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-Read the output. If `auto_commit_docs` is `false`, do NOT run the git commands below. Instead print:
-
-```
-Auto-commit disabled for docs — changes not committed.
-Modified files: .specd/features/{feature}/plans/phase-{NN}/RESEARCH.md, DECISIONS.md
-```
-
-Then skip ahead to completion.
-
-**Only if `auto_commit_docs` is `true` or not set (default), run:**
-
-```bash
-git add ".specd/features/{feature}/plans/phase-{NN}/RESEARCH.md"
-git add ".specd/features/{feature}/DECISIONS.md"
-
-git commit -m "docs({feature}): research phase {N} - {phase title}
-
-Research dimensions:
-- Codebase integration
-- {Phase type} patterns
-- {Phase type} pitfalls
-
-Key findings:
-- {one-liner from summary}"
-```
+- **$FILES:** `.specd/features/{feature}/plans/phase-{NN}/RESEARCH.md .specd/features/{feature}/DECISIONS.md`
+- **$MESSAGE:** `docs({feature}): research phase {N} - {phase title}` with research dimensions and key findings
+- **$LABEL:** `phase research`
 
 Continue to completion.
 </step>

@@ -209,23 +209,13 @@ Present completion summary:
 `/specd:feature:toolbox {feature}` — Prepare, plan, or discuss the new phase
 ```
 
-**Commit changes. First, check auto-commit setting:**
+**Commit changes:**
 
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
+@~/.claude/specdacular/references/commit-docs.md
 
-**If `auto_commit_docs` is `false`:**
-```
-Auto-commit disabled for docs — changes not committed.
-Modified files: ROADMAP.md, STATE.md, config.json, plans/phase-{new_phase}/
-```
-
-**If `auto_commit_docs` is `true` or not set (default):**
-```bash
-git add .specd/features/{feature}/ROADMAP.md .specd/features/{feature}/STATE.md .specd/features/{feature}/config.json .specd/features/{feature}/plans/phase-{new_phase}/
-git commit -m "docs({feature}): insert phase {new_phase} — {description}"
-```
+- **$FILES:** `.specd/features/{feature}/ROADMAP.md .specd/features/{feature}/STATE.md .specd/features/{feature}/config.json .specd/features/{feature}/plans/phase-{new_phase}/`
+- **$MESSAGE:** `docs({feature}): insert phase {new_phase} — {description}`
+- **$LABEL:** `phase insertion`
 
 End workflow.
 </step>
