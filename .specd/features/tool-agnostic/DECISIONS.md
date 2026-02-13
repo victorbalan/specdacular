@@ -3,7 +3,7 @@
 **Feature:** tool-agnostic
 **Created:** 2026-02-13
 **Last Updated:** 2026-02-13
-**Decisions Count:** 6
+**Decisions Count:** 8
 
 ---
 
@@ -116,6 +116,38 @@
 
 ---
 
+### DEC-007: Shared references copied per-skill
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 2 — Easy Workflow Conversion
+**Context:** Multiple workflows reference commit-docs.md and commit-code.md. Needed to decide where these go in Codex output.
+**Decision:** Copy shared references into each skill's `references/` directory. Each skill is self-contained.
+**Rationale:**
+- No relative path complexity
+- Skills work independently even if moved/copied
+- Small file duplication is acceptable
+**Implications:**
+- Build script needs a "shared references" list to copy per-skill
+
+---
+
+### DEC-008: Cross-workflow references become skill pointers
+
+**Date:** 2026-02-13
+**Status:** Active
+**Phase:** 2 — Easy Workflow Conversion
+**Context:** Workflows reference other workflows via `@path`. Codex skills can't use `@path` syntax.
+**Decision:** Replace cross-workflow references with "See skill: specd-{name}" text. Codex discovers skills by name.
+**Rationale:**
+- Codex has built-in skill discovery
+- Avoids deep nesting of referenced content
+- Keeps each skill focused
+**Implications:**
+- Build script needs a translation rule for cross-workflow references
+
+---
+
 ## Superseded Decisions
 
 _None yet._
@@ -138,3 +170,5 @@ _None yet._
 | DEC-004 | 2026-02-13 | Skill directory pattern with references/ folder | Active |
 | DEC-005 | 2026-02-13 | Progressive rollout — start with easy workflows | Active |
 | DEC-006 | 2026-02-13 | Pre-commit hook for generated file staleness | Active |
+| DEC-007 | 2026-02-13 | Shared references copied per-skill | Active |
+| DEC-008 | 2026-02-13 | Cross-workflow references become skill pointers | Active |
