@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** execution
+**Stage:** completed
 **Last Updated:** 2026-02-13
 
 ---
@@ -95,9 +95,7 @@ Current phase status is tracked in `config.json` → `phases.current_status`.
 
 ## Next Steps
 
-All 4 phases executed — feature complete. Pending final review.
-
-**Resume:** `/specd:feature:continue tool-agnostic` — Review Phase 4.
+Feature complete. All 4 phases executed and reviewed.
 
 ---
 

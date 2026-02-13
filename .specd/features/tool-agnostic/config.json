@@ -1,14 +1,14 @@
 {
   "feature_name": "tool-agnostic",
   "created": "2026-02-13",
-  "stage": "execution",
+  "stage": "completed",
   "discussion_sessions": 2,
   "decisions_count": 10,
   "phases": {
     "total": 4,
     "completed": 4,
     "current": 4,
-    "current_status": "executed",
+    "current_status": "completed",
     "phase_start_commit": "efd22271d1453e1f82e8a011d3d83a865574cfc1"
   }
 }
