@@ -173,6 +173,7 @@ Opens a menu with: Discuss, Research, Plan, Review, Insert phase. Useful when yo
 
 | Command | Description |
 |---------|-------------|
+| `/specd:config` | Configure auto-commit settings for docs and code |
 | `/specd:status [--all]` | Show feature status dashboard |
 | `/specd:help` | Show available commands |
 | `/specd:update` | Update to latest version |

@@ -17,6 +17,7 @@
 | Command | Description |
 |---------|-------------|
 | `/specd:map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
+| `/specd:config` | Configure auto-commit settings for docs and code |
 | `/specd:status [--all]` | Show feature status dashboard |
 | `/specd:help` | Show this help |
 | `/specd:update` | Update Specdacular to the latest version |
@@ -81,4 +82,4 @@ Or manually: `npx specdacular@latest`
 
 ---
 
-GitHub: https://github.com/vlad-ds/specdacular
+GitHub: https://github.com/victorbalan/specdacular
