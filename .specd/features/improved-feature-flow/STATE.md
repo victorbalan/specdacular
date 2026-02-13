@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** discussion
+**Stage:** planned
 **Last Updated:** 2026-02-13
 
 ---
@@ -15,15 +15,17 @@
 - [x] All gray areas resolved
 
 ### Research
-- [ ] Research conducted
-- [ ] Findings documented in RESEARCH.md
+- [x] Skipped — internal restructuring, codebase well-known
 
 ### Planning
-- [ ] Phases derived
-- [ ] Plans created
+- [x] Phases derived (4 phases)
+- [ ] Plans created (per-phase, just-in-time)
 
 ### Execution
-- [ ] Phase 1 complete
+- [ ] Phase 1: Rename + Toolbox
+- [ ] Phase 2: Review + State Machine
+- [ ] Phase 3: Insert Workflow
+- [ ] Phase 4: Cleanup + Installation
 
 ---
 
@@ -63,9 +65,9 @@
 | FEATURE.md | Created | 2026-02-13 |
 | CONTEXT.md | Created | 2026-02-13 |
 | DECISIONS.md | 9 decisions | 2026-02-13 |
-| RESEARCH.md | Not started | — |
-| ROADMAP.md | Not started | — |
-| plans/ | Not started | — |
+| RESEARCH.md | Skipped | 2026-02-13 |
+| ROADMAP.md | Created | 2026-02-13 |
+| plans/ | 4 phase dirs | 2026-02-13 |
 
 ---
 
@@ -79,7 +81,7 @@
 
 ## Next Steps
 
-{What the user should do next based on current state.}
+Roadmap created with 4 phases. Next: prepare and plan Phase 1.
 
 **Resume:** `/specd:feature:continue improved-feature-flow` — Picks up where you left off and guides the next step automatically.
 
@@ -87,7 +89,7 @@
 
 ## Session Notes
 
-All gray areas resolved in session 2. Ready for research or planning.
+Roadmap created. Research skipped (internal restructuring). Ready for phase-by-phase execution.
 
 ---
 
