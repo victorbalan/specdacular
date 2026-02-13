@@ -1,12 +1,12 @@
 {
   "feature_name": "improved-feature-flow",
   "created": "2026-02-13",
-  "stage": "execution",
+  "stage": "complete",
   "discussion_sessions": 2,
-  "decisions_count": 9,
+  "decisions_count": 14,
   "phases": {
     "total": 4,
-    "completed": 0,
-    "current": 1
+    "completed": 4,
+    "current": 4
   }
 }
