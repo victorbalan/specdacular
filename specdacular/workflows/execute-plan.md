@@ -138,6 +138,30 @@ Set mode = "project".
 - Patterns to follow
 - Phase-specific context and research (if phase:prepare/phase:research were run)
 
+**Record phase start commit (DEC-012, DEC-013):**
+
+Check `phases.current_status` from config.json:
+
+**If `current_status` is `"pending"` or missing:**
+This is the first plan execution for this phase. Record the starting point:
+
+```bash
+git rev-parse HEAD
+```
+
+Update config.json:
+- Set `phases.phase_start_commit` to the commit hash
+- Set `phases.current_status` to `"executing"`
+
+Commit the config update:
+```bash
+git add .specd/features/{feature}/config.json
+git commit -m "docs({feature}): start phase {N} execution"
+```
+
+**If `current_status` is already `"executing"`:**
+Phase execution is resuming after a context reset. No changes needed — `phase_start_commit` is already recorded.
+
 Continue to find_plan.
 </step>
 
@@ -408,8 +432,10 @@ git commit -m "docs({feature}): complete plan {phase-XX/YY}"
 ```
 
 **Find next plan:**
-- Check ROADMAP.md for next plan in sequence
-- Or next phase if current phase complete
+- Check ROADMAP.md for next plan in sequence within the current phase
+- Include any decimal-numbered fix phases (e.g., phase-{N}.1, phase-{N}.2)
+
+**If next plan exists in current phase:**
 
 **Present summary:**
 ```
@@ -428,14 +454,46 @@ git commit -m "docs({feature}): complete plan {phase-XX/YY}"
 
 ───────────────────────────────────────────────────────
 
-**Next plan:** {path or "None - all plans complete"}
+**Next plan:** {path}
 
-{If next plan exists:}
-Run `/specd:phase:execute {feature}` to continue.
+Run `/specd:feature:continue {feature}` to continue.
+```
 
-{If all complete:}
-All plans complete! Feature '{feature}' is implemented.
-Review STATE.md and CHANGELOG.md for summary.
+End workflow (continue-feature will pick up the next plan).
+
+**If no more plans in current phase (phase execution complete):**
+
+**Mark phase as executed (DEC-009, DEC-013):**
+
+Update config.json:
+- Set `phases.current_status` to `"executed"`
+- Do NOT increment `phases.completed`
+- Do NOT advance `phases.current`
+
+Update STATE.md: note phase is executed, pending review.
+
+Commit state changes:
+```bash
+git add .specd/features/{feature}/config.json .specd/features/{feature}/STATE.md
+git commit -m "docs({feature}): phase {N} executed — pending review"
+```
+
+**Present summary:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ PHASE {N} EXECUTED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Plan:** {path}
+**Tasks executed:** {N}
+**Deviations logged:** {count}
+
+All plans for Phase {N} have been executed.
+Phase is pending review before advancing to Phase {N+1}.
+
+───────────────────────────────────────────────────────
+
+Resume with /specd:feature:continue {feature} for review.
 ```
 
 **If orchestrator mode:**
