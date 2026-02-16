@@ -3,7 +3,7 @@
 
 ---
 name: specd-feature-plan
-description: Check feature exists
+description: Create a roadmap with phase overview and empty phase directories.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

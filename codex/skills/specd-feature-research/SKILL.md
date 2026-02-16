@@ -3,7 +3,7 @@
 
 ---
 name: specd-feature-research
-description: Specdacular workflow
+description: Research how to implement a feature by spawning parallel agents for different research dimensions.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

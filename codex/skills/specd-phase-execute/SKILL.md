@@ -3,7 +3,7 @@
 
 ---
 name: specd-phase-execute
-description: Check feature exists
+description: "Execute a plan from a feature, tracking progress and logging deviations."
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

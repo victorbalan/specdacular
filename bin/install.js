@@ -487,7 +487,24 @@ function promptLocation() {
 }
 
 /**
- * Generate AGENTS.md for Codex projects
+ * Parse YAML frontmatter from a SKILL.md file (simple key: value parsing).
+ */
+function parseSkillFrontmatter(content) {
+  const start = content.indexOf('---');
+  if (start === -1) return {};
+  content = content.slice(start);
+  const end = content.indexOf('---', 3);
+  if (end === -1) return {};
+  const fm = {};
+  for (const line of content.slice(3, end).trim().split('\n')) {
+    const m = line.match(/^(\w+)\s*:\s*(.*)/);
+    if (m) fm[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
+  }
+  return fm;
+}
+
+/**
+ * Generate AGENTS.md for Codex projects — reads skills dynamically from codex/skills/
  */
 function generateAgentsMd() {
   const agentsMdPath = path.join(process.cwd(), 'AGENTS.md');
@@ -496,6 +513,26 @@ function generateAgentsMd() {
     console.log(`  ${yellow}⚠${reset} AGENTS.md already exists — skipping`);
     return;
   }
+
+  // Read all skills from codex/skills/
+  const skillsDir = path.join(__dirname, '..', 'codex', 'skills');
+  const skillEntries = [];
+  if (fs.existsSync(skillsDir)) {
+    for (const dir of fs.readdirSync(skillsDir, { withFileTypes: true })) {
+      if (!dir.isDirectory()) continue;
+      const skillMdPath = path.join(skillsDir, dir.name, 'SKILL.md');
+      if (!fs.existsSync(skillMdPath)) continue;
+      const fm = parseSkillFrontmatter(fs.readFileSync(skillMdPath, 'utf8'));
+      if (fm.name && fm.description) {
+        skillEntries.push({ name: fm.name, description: fm.description });
+      }
+    }
+  }
+  skillEntries.sort(function(a, b) { return a.name.localeCompare(b.name); });
+
+  const skillList = skillEntries.map(function(s) {
+    return '- `$' + s.name + '` — ' + s.description;
+  }).join('\n');
 
   const content = `# Specdacular — AI Feature Planning
 
@@ -510,37 +547,7 @@ If \`.specd/codebase/\` exists, read these files for project understanding:
 
 ## Available Skills
 
-### Core Flow
-- \`$specd-feature-new\` — Initialize a new feature
-- \`$specd-feature-continue\` — Continue feature lifecycle (picks up where you left off)
-- \`$specd-feature-toolbox\` — Advanced operations (discuss, research, plan, review, insert)
-
-### Feature Operations
-- \`$specd-feature-discuss\` — Discuss and clarify feature requirements
-- \`$specd-feature-research\` — Research implementation patterns
-- \`$specd-feature-plan\` — Create roadmap with phases
-
-### Phase Operations
-- \`$specd-phase-prepare\` — Prepare a phase (discuss + optional research)
-- \`$specd-phase-plan\` — Create detailed executable plans
-- \`$specd-phase-execute\` — Execute plans with progress tracking
-- \`$specd-phase-research\` — Research phase-specific patterns
-- \`$specd-phase-insert\` — Insert a new phase into the roadmap
-
-### Review
-- \`$specd-feature-review\` — Review executed work, approve or request fixes
-- \`$specd-phase-review\` — Review a specific phase
-- \`$specd-phase-renumber\` — Renumber phases after insertion
-
-### Utilities
-- \`$specd-help\` — Show all commands
-- \`$specd-status\` — Feature status dashboard
-- \`$specd-config\` — Configure settings
-- \`$specd-map-codebase\` — Analyze and document codebase
-- \`$specd-blueprint\` — Generate visual specifications
-- \`$specd-blueprint-diagrams\` — Generate architecture diagrams
-- \`$specd-blueprint-wireframes\` — Generate UI wireframes
-- \`$specd-update\` — Update to latest version
+${skillList}
 
 ## Workflow
 

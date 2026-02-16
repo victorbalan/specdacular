@@ -3,7 +3,7 @@
 
 ---
 name: specd-phase-prepare
-description: Check feature exists
+description: Prepare a phase for execution by discussing gray areas and optionally researching implementation patterns.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

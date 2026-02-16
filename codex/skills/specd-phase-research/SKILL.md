@@ -3,7 +3,7 @@
 
 ---
 name: specd-phase-research
-description: Check feature exists
+description: Research implementation patterns for a specific phase before executing it.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

@@ -3,7 +3,7 @@
 
 ---
 name: specd-blueprint-diagrams
-description: Check feature directory exists
+description: Generate Mermaid diagrams for a Specdacular feature blueprint.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

@@ -217,35 +217,62 @@ function discoverCommands(dir, prefix) {
 }
 
 /**
- * Map workflow filename to a specd: skill name.
- * Uses explicit mapping for known workflows, falls back to specd:{filename}.
+ * Build workflow→command name map dynamically from command files.
+ * Scans all commands, extracts their workflow refs, maps workflow filename → command name.
  */
-const WORKFLOW_NAME_MAP = {
-  'discuss-feature': 'specd:feature:discuss',
-  'research-feature': 'specd:feature:research',
-  'plan-feature': 'specd:feature:plan',
-  'review-feature': 'specd:feature:review',
-  'prepare-phase': 'specd:phase:prepare',
-  'plan-phase': 'specd:phase:plan',
-  'research-phase': 'specd:phase:research',
-  'review-phase': 'specd:phase:review',
+function buildWorkflowNameMap(commands) {
+  const map = {};
+  for (const cmd of commands) {
+    const content = fs.readFileSync(cmd.path, 'utf8');
+    const { frontmatter: fm, body } = parseFrontmatter(content);
+    if (!fm.name) continue;
+    const wfRef = extractWorkflowRef(body);
+    if (wfRef) {
+      const wfBase = wfRef.replace('.md', '');
+      map[wfBase] = fm.name;
+    }
+  }
+  return map;
+}
+
+// Exceptions where workflow filename doesn't follow {verb}-{noun} → specd:{noun}:{verb}
+const WORKFLOW_NAME_OVERRIDES = {
   'execute-plan': 'specd:phase:execute',
-  'insert-phase': 'specd:phase:insert',
   'renumber-phases': 'specd:phase:renumber',
   'blueprint-diagrams': 'specd:blueprint:diagrams',
   'blueprint-wireframes': 'specd:blueprint:wireframes',
 };
 
-function workflowToCommandName(filename) {
+function workflowToCommandName(filename, nameMap) {
   const base = filename.replace('.md', '');
-  return WORKFLOW_NAME_MAP[base] || 'specd:' + base;
+  // 1. From command files (most reliable)
+  if (nameMap[base]) return nameMap[base];
+  // 2. Explicit overrides for irregular names
+  if (WORKFLOW_NAME_OVERRIDES[base]) return WORKFLOW_NAME_OVERRIDES[base];
+  // 3. Smart fallback: {verb}-{noun} → specd:{noun}:{verb}
+  const match = base.match(/^([a-z]+)-([a-z]+)$/);
+  if (match) return 'specd:' + match[2] + ':' + match[1];
+  // 4. Final fallback
+  return 'specd:' + base;
 }
 
 /**
  * Generate a description from a workflow's content.
+ * Prefers first line of <purpose> block, then first heading, then fallback.
  */
 function extractWorkflowDescription(content) {
-  // Try to find a heading or first meaningful line
+  // Try <purpose> block first
+  const purposeMatch = content.match(/<purpose>\s*\n?\s*([^\n<]+)/);
+  if (purposeMatch) {
+    let desc = purposeMatch[1].trim().replace(/\*\*/g, '');
+    // Truncate at first sentence if long
+    if (desc.length > 100) {
+      const dotIdx = desc.indexOf('.');
+      if (dotIdx > 0 && dotIdx < 100) desc = desc.slice(0, dotIdx + 1);
+    }
+    return desc;
+  }
+  // Fallback to first heading
   const lines = content.split('\n');
   for (const line of lines) {
     const h1 = line.match(/^#\s+(.+)/);
@@ -266,6 +293,7 @@ function main() {
   }
 
   const commands = discoverCommands(COMMANDS_DIR);
+  const workflowNameMap = buildWorkflowNameMap(commands);
   const coveredWorkflows = new Set(); // track which workflows have commands
   let generated = 0;
   let skipped = 0;
@@ -328,7 +356,7 @@ function main() {
 
     const wfPath = path.join(WORKFLOWS_DIR, wfFile);
     const workflowContent = fs.readFileSync(wfPath, 'utf8');
-    const cmdName = workflowToCommandName(wfFile);
+    const cmdName = workflowToCommandName(wfFile, workflowNameMap);
     const skillName = cmdName.replace(/:/g, '-');
     const description = extractWorkflowDescription(workflowContent);
 

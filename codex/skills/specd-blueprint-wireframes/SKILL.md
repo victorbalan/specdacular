@@ -3,7 +3,7 @@
 
 ---
 name: specd-blueprint-wireframes
-description: Check feature directory exists
+description: Generate HTML/CSS wireframes for a Specdacular feature blueprint.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

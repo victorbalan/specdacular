@@ -3,7 +3,7 @@
 
 ---
 name: specd-phase-insert
-description: Specdacular workflow
+description: "Insert a new phase after an existing one using decimal numbering (e.g., Phase 03.1)."
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

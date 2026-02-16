@@ -3,7 +3,7 @@
 
 ---
 name: specd-phase-plan
-description: Check feature exists
+description: "Create detailed, executable PLAN.md files for a single phase."
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

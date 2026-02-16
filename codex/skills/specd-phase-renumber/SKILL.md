@@ -3,7 +3,7 @@
 
 ---
 name: specd-phase-renumber
-description: Process highest target first to avoid collisions
+description: Renumber all phases to a clean integer sequence after decimal phases have been inserted.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

@@ -3,7 +3,7 @@
 
 ---
 name: specd-phase-review
-description: Specdacular workflow
+description: Review executed plans for a phase by comparing intended changes against actual code.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

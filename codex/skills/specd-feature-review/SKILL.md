@@ -3,7 +3,7 @@
 
 ---
 name: specd-feature-review
-description: Check existing decimal phases for current phase
+description: User-guided review of an executed phase.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.

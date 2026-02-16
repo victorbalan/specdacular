@@ -3,7 +3,7 @@
 
 ---
 name: specd-feature-discuss
-description: Check feature exists
+description: Continue or deepen understanding of a feature through targeted discussion.
 ---
 
 See [full workflow](references/workflow.md) for detailed steps.
