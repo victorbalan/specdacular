@@ -13,7 +13,7 @@ Update Specdacular to the latest version and show what changed.
 <process>
 1. Check current version:
 ```bash
-cat .codex/specdacular/VERSION 2>/dev/null || cat .claude/specdacular/VERSION 2>/dev/null || echo "unknown"
+cat .agents/specdacular/VERSION 2>/dev/null || cat .claude/specdacular/VERSION 2>/dev/null || echo "unknown"
 ```
 
 2. Check latest version:
@@ -28,12 +28,12 @@ npx specdacular@latest --global
 
 4. Show new version:
 ```bash
-cat .codex/specdacular/VERSION 2>/dev/null || cat .claude/specdacular/VERSION 2>/dev/null
+cat .agents/specdacular/VERSION 2>/dev/null || cat .claude/specdacular/VERSION 2>/dev/null
 ```
 
 5. Clear the update cache:
 ```bash
-rm -f .codex/cache/specd-update-check.json
+rm -f .agents/cache/specd-update-check.json
 ```
 
 6. If versions were the same, inform user commands were refreshed. If version changed, inform user of the update. Suggest restarting Claude Code to pick up any command changes.

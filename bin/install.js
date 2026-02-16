@@ -42,7 +42,7 @@ if (hasHelp) {
   ${yellow}Options:${reset}
     ${cyan}-g, --global${reset}      Install globally (to ~/.claude/)
     ${cyan}-l, --local${reset}       Install locally (to ./.claude/)
-    ${cyan}--codex${reset}           Install Codex skills (to .codex/skills/)
+    ${cyan}--codex${reset}           Install Codex skills (to .agents/skills/)
     ${cyan}-u, --uninstall${reset}   Uninstall specdacular
     ${cyan}-h, --help${reset}        Show this help message
 
@@ -567,9 +567,9 @@ The continue command figures out what to do next — no need to remember individ
  */
 function installCodex() {
   const src = path.join(__dirname, '..', 'codex', 'skills');
-  const destDir = path.join(process.cwd(), '.codex', 'skills');
+  const destDir = path.join(process.cwd(), '.agents', 'skills');
 
-  console.log(`  Installing Codex skills to ${cyan}.codex/skills/${reset}\n`);
+  console.log(`  Installing Codex skills to ${cyan}.agents/skills/${reset}\n`);
 
   if (!fs.existsSync(src)) {
     console.error(`  ${yellow}✗${reset} Codex skills not found. Run 'npm run build:codex' first.`);
@@ -592,7 +592,7 @@ function installCodex() {
   for (const skill of skills) {
     const skillSrc = path.join(src, skill.name);
     const skillDest = path.join(destDir, skill.name);
-    copyWithPathReplacement(skillSrc, skillDest, '.codex/');
+    copyWithPathReplacement(skillSrc, skillDest, '.agents/');
   }
 
   console.log(`  ${green}✓${reset} Installed ${skills.length} Codex skills`);

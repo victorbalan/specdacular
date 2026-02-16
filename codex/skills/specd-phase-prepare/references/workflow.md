@@ -417,7 +417,7 @@ Return findings as structured markdown:
 
 ```
 Task(
-  prompt="First, read .codex/specdacular/agents/feature-researcher.md for your role.
+  prompt="First, read .agents/specdacular/agents/feature-researcher.md for your role.
 
 <research_type>
 {Phase Type} patterns research for phase {N} of {feature-name}.
@@ -478,7 +478,7 @@ Return findings as structured markdown with confidence levels.
 
 ```
 Task(
-  prompt="First, read .codex/specdacular/agents/feature-researcher.md for your role.
+  prompt="First, read .agents/specdacular/agents/feature-researcher.md for your role.
 
 <research_type>
 Pitfalls research for {Phase Type} work in phase {N} of {feature-name}.

@@ -107,7 +107,7 @@ Specdacular also supports [OpenAI Codex CLI](https://github.com/openai/codex).
 npx specdacular --codex
 ```
 
-This installs Codex skills to `.codex/skills/` and generates `AGENTS.md`.
+This installs Codex skills to `.agents/skills/` and generates `AGENTS.md`.
 
 ### Available Codex Skills
 

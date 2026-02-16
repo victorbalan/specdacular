@@ -3,3 +3,5 @@ node_modules/
 *.log
 gsd-reference/
 .claude/
+.agents/
+AGENTS.md

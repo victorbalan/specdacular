@@ -6,6 +6,6 @@ name: specd-help
 description: Show all specdacular commands and usage guide
 ---
 
-Read the file at `.codex/specdacular/HELP.md` and output its entire contents to the user as-is. Do not summarize, truncate, or add commentary.
+Read the file at `.agents/specdacular/HELP.md` and output its entire contents to the user as-is. Do not summarize, truncate, or add commentary.
 
 See [full workflow](references/workflow.md) for detailed steps.

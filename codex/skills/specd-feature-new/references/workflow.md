@@ -252,7 +252,7 @@ mkdir -p .specd/features/{feature-name}
 ```
 
 **Write FEATURE.md (system view):**
-Use template at `.codex/specdacular/templates/features/FEATURE.md` but adapt for system level:
+Use template at `.agents/specdacular/templates/features/FEATURE.md` but adapt for system level:
 
 - **What This Is:** System-level description from orchestrator discussion
 - **Must Create:** List the involved projects and what each creates (high-level)
@@ -266,7 +266,7 @@ Use template at `.codex/specdacular/templates/features/FEATURE.md` but adapt for
   - Cross-Project Contracts: what needs to align between projects
 
 **Write CONTEXT.md:**
-Use template at `.codex/specdacular/templates/features/CONTEXT.md`
+Use template at `.agents/specdacular/templates/features/CONTEXT.md`
 
 Fill in:
 - **Discussion Summary:** System-level discussion summary
@@ -275,15 +275,15 @@ Fill in:
 - **Gray Areas Remaining:** Open areas
 
 **Write DECISIONS.md:**
-Use template at `.codex/specdacular/templates/features/DECISIONS.md`
+Use template at `.agents/specdacular/templates/features/DECISIONS.md`
 Record any decisions made during the system-level discussion.
 
 **Write CHANGELOG.md:**
-Use template at `.codex/specdacular/templates/features/CHANGELOG.md`
+Use template at `.agents/specdacular/templates/features/CHANGELOG.md`
 Initialize empty.
 
 **Write STATE.md:**
-Use template at `.codex/specdacular/templates/features/STATE.md`
+Use template at `.agents/specdacular/templates/features/STATE.md`
 
 Initialize with:
 - Stage: discussion
@@ -327,7 +327,7 @@ mkdir -p {project-path}/.specd/features/{feature-name}
 ```
 
 **Write FEATURE.md (project-specific):**
-Use template at `.codex/specdacular/templates/features/FEATURE.md`
+Use template at `.agents/specdacular/templates/features/FEATURE.md`
 
 Translate the system-level requirements into project-specific requirements:
 - **What This Is:** What this project specifically does for the feature (not the system-level description)
@@ -345,20 +345,20 @@ Translate the system-level requirements into project-specific requirements:
 - GOOD: "Must expose /auth/login endpoint that returns JWT tokens"
 
 **Write CONTEXT.md:**
-Use template at `.codex/specdacular/templates/features/CONTEXT.md`
+Use template at `.agents/specdacular/templates/features/CONTEXT.md`
 - Discussion Summary: "Requirements defined as part of system-level {feature-name} feature planning."
 - Resolved Questions: Any project-specific questions resolved during orchestrator discussion
 
 **Write DECISIONS.md:**
-Use template at `.codex/specdacular/templates/features/DECISIONS.md`
+Use template at `.agents/specdacular/templates/features/DECISIONS.md`
 Include any project-specific decisions from orchestrator discussion.
 
 **Write CHANGELOG.md:**
-Use template at `.codex/specdacular/templates/features/CHANGELOG.md`
+Use template at `.agents/specdacular/templates/features/CHANGELOG.md`
 Initialize empty.
 
 **Write STATE.md:**
-Use template at `.codex/specdacular/templates/features/STATE.md`
+Use template at `.agents/specdacular/templates/features/STATE.md`
 Initialize with stage: discussion, initial discussion complete: yes.
 
 **Write config.json:**
@@ -551,7 +551,7 @@ mkdir -p .specd/features/{feature-name}
 ```
 
 **Write FEATURE.md:**
-Use template at `.codex/specdacular/templates/features/FEATURE.md`
+Use template at `.agents/specdacular/templates/features/FEATURE.md`
 
 Fill in based on conversation:
 - **What This Is:** 1-2 sentences from discussion
@@ -569,7 +569,7 @@ Continue to write_context.
 Write CONTEXT.md with initial discussion state.
 
 **Write CONTEXT.md:**
-Use template at `.codex/specdacular/templates/features/CONTEXT.md`
+Use template at `.agents/specdacular/templates/features/CONTEXT.md`
 
 Fill in:
 - **Discussion Summary:** Brief summary of what was discussed
@@ -584,7 +584,7 @@ Continue to initialize_decisions.
 Initialize DECISIONS.md with any decisions made.
 
 **Write DECISIONS.md:**
-Use template at `.codex/specdacular/templates/features/DECISIONS.md`
+Use template at `.agents/specdacular/templates/features/DECISIONS.md`
 
 If any decisions were made during discussion (technology choices, scope decisions, approach decisions), record them:
 
@@ -609,7 +609,7 @@ Continue to initialize_changelog.
 Initialize CHANGELOG.md (empty, ready for implementation).
 
 **Write CHANGELOG.md:**
-Use template at `.codex/specdacular/templates/features/CHANGELOG.md`
+Use template at `.agents/specdacular/templates/features/CHANGELOG.md`
 
 Replace `{feature-name}` with actual feature name. Leave the rest as template structure — entries will be added during plan execution.
 
@@ -620,7 +620,7 @@ Continue to initialize_state.
 Create STATE.md and config.json.
 
 **Write STATE.md:**
-Use template at `.codex/specdacular/templates/features/STATE.md`
+Use template at `.agents/specdacular/templates/features/STATE.md`
 
 Initialize with:
 - Stage: discussion

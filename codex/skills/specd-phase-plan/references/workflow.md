@@ -192,7 +192,7 @@ Continue to write_plans.
 <step name="write_plans">
 Write PLAN.md files for each task.
 
-**For each plan, use template at `.codex/specdacular/templates/features/PLAN.md`**
+**For each plan, use template at `.agents/specdacular/templates/features/PLAN.md`**
 
 **Fill in plan content:**
 

@@ -200,9 +200,9 @@ Continue to generate_html.
 Generate the HTML by filling in the template.
 
 **Read templates:**
-- `.codex/specdacular/templates/blueprint/index.html`
-- `.codex/specdacular/templates/blueprint/styles.css`
-- `.codex/specdacular/templates/blueprint/scripts.js`
+- `.agents/specdacular/templates/blueprint/index.html`
+- `.agents/specdacular/templates/blueprint/styles.css`
+- `.agents/specdacular/templates/blueprint/scripts.js`
 
 **Replace placeholders:**
 - `{feature-name}` → Feature name

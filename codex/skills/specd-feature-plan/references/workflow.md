@@ -192,7 +192,7 @@ Write ROADMAP.md for each involved sub-project.
 For each project:
 
 **Write ROADMAP.md:**
-Use template at `.codex/specdacular/templates/features/ROADMAP.md`
+Use template at `.agents/specdacular/templates/features/ROADMAP.md`
 
 Fill in with project-specific phases:
 - Overview table: total phases, current phase 1, not started
@@ -341,7 +341,7 @@ Use ask_user_question:
 Write DEPENDENCIES.md in the orchestrator's feature folder.
 
 **Write DEPENDENCIES.md:**
-Use template at `.codex/specdacular/templates/features/DEPENDENCIES.md`
+Use template at `.agents/specdacular/templates/features/DEPENDENCIES.md`
 
 Fill in:
 - **Project Involvement table:** Each project with its role, phase count, and feature path
@@ -548,7 +548,7 @@ Continue to write_roadmap.
 <step name="write_roadmap">
 Write ROADMAP.md with phase overview.
 
-**Use template at `.codex/specdacular/templates/features/ROADMAP.md`**
+**Use template at `.agents/specdacular/templates/features/ROADMAP.md`**
 
 **Fill in:**
 

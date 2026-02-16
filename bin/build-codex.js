@@ -133,10 +133,10 @@ function replacePathRefs(content) {
   result = result.replace(/@~\/\.claude\/[^\s<)]+/g, '(removed for Codex)');
 
   // 6. Backtick-wrapped ~/.claude/ paths
-  result = result.replace(/`~\/\.claude\/([^`]+)`/g, '`.codex/$1`');
+  result = result.replace(/`~\/\.claude\/([^`]+)`/g, '`.agents/$1`');
 
   // 7. Bare ~/.claude/ paths (not in backticks, not @-prefixed)
-  result = result.replace(/(?<![@`])~\/\.claude\//g, '.codex/');
+  result = result.replace(/(?<![@`])~\/\.claude\//g, '.agents/');
 
   return result;
 }
