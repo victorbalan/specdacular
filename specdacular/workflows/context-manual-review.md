@@ -173,7 +173,7 @@ Use AskUserQuestion:
   - "Done" — Finish reviewing this file
 
 **If "Select section":**
-Ask which section number. Continue to show_section. After the action, return to show_section_list.
+Ask the user: "Which section number?" — the section list is already displayed above, so just ask for the number as a plain text prompt. Do NOT use AskUserQuestion (it has a 4-option limit and can't show all sections). Continue to show_section. After the action, return to show_section_list.
 
 **If "Walk all":**
 Continue to walk_sections.
