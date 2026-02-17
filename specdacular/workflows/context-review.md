@@ -104,6 +104,14 @@ Use AskUserQuestion:
   - "STRUCTURE.md" — Directory layout {Last Reviewed: date or "never reviewed"}
   - "CONCERNS.md" — Gotchas and warnings {Last Reviewed: date or "never reviewed"}
 
+**Set the mapper focus** based on the selected file (used by re-map action):
+- `MAP.md` → `MAPPER_FOCUS = "map"`
+- `PATTERNS.md` → `MAPPER_FOCUS = "patterns"`
+- `STRUCTURE.md` → `MAPPER_FOCUS = "structure"`
+- `CONCERNS.md` → `MAPPER_FOCUS = "concerns"`
+
+**Extract `Last Reviewed` date** from the selected file for assessment logic. Store as `LAST_REVIEWED_DATE`. If no `Last Reviewed:` line exists, set to `null`.
+
 Continue to git_checkpoint.
 </step>
 
@@ -144,14 +152,37 @@ Continue to walk_sections.
 </step>
 
 <step name="walk_sections">
-Walk through each section in document order. For each section:
+Walk through each section in document order. Every section is shown to the user — never skip.
 
-**Display the section:**
+**For each section, first perform an assessment:**
+
+Use the assessment logic from `@specdacular/templates/context-review-diff.md`:
+
+1. Extract file paths from the section content (anything in backticks that looks like a file path — contains `/` or `.` extension)
+2. Check if those paths exist:
+   ```bash
+   # For each extracted path
+   test -f "{path}" && echo "exists" || echo "missing"
+   ```
+3. If `LAST_REVIEWED_DATE` is set, check git activity on referenced files:
+   ```bash
+   git log --oneline --since="{LAST_REVIEWED_DATE}" -- {paths} 2>/dev/null | head -5
+   ```
+4. Classify:
+   - Any path missing → ⚠️ **Potentially stale**
+   - Git commits found after Last Reviewed → 🔄 **Changed since last review**
+   - All paths exist and no recent changes → ✅ **Up to date**
+   - No `Last Reviewed` date → ⚠️ **Potentially stale** (never reviewed)
+   - No file paths in section → ✅ **Up to date** (cannot verify, assume ok)
+
+**Display using template format** (`@specdacular/templates/context-review-diff.md` — Section Review Display):
 ```
 ───────────────────────────────────────────────────────
 {## or ###} {Section Title}  [{current}/{total}]
 {If USER_MODIFIED: "User modified: YYYY-MM-DD"}
 ───────────────────────────────────────────────────────
+
+**Assessment:** {✅ Up to date | ⚠️ Potentially stale | 🔄 Changed since last review}
 
 {section content, formatted for readability}
 ```
@@ -164,12 +195,12 @@ Walk through each section in document order. For each section:
   - "Edit" — Tell me what to change
   - "Remove" — Delete this section
   - "Re-map" — Re-run the mapper for this section and compare
-  - "Confirm all remaining" — Mark all remaining sections as reviewed
+  - "Approve all remaining" — Mark all remaining sections as reviewed
 
 **If Confirm:**
 Move to next section.
 
-**If Confirm all remaining:**
+**If Approve all remaining:**
 Skip all remaining sections. Continue to update_timestamps.
 
 **If Edit:**
@@ -208,76 +239,72 @@ If confirmed: Remove the section (and children if ##) from the file using the Ed
 If cancelled: Move to next section.
 
 **If Re-map:**
-Spawn a targeted re-mapping agent.
+Spawn a targeted re-mapping agent using the `specd-codebase-mapper` agent with file-type-specific focus (DEC-011).
 
 Use the Task tool:
 ```
-subagent_type: "general-purpose"
+subagent_type: "specd-codebase-mapper"
 model: "sonnet"
 description: "Re-map section: {section title}"
 ```
 
 **Prompt for the agent:**
 ```
-You are re-mapping a SINGLE SECTION of a codebase context document.
+Focus: {MAPPER_FOCUS}
 
-<section_to_remap>
-Document: .specd/codebase/{file}
+You are re-mapping a SINGLE SECTION of .specd/codebase/{file}.
+
 Section heading: {exact heading text}
 Heading level: {## or ###}
-</section_to_remap>
 
-<current_content>
+Current content of this section:
 {paste the exact current section content, excluding the heading line}
-</current_content>
 
 {If USER_MODIFIED tag exists:}
-<user_modifications>
 This section was manually modified by the user on {date}.
-The user's version should be considered — they may have added domain knowledge
-that isn't in the codebase. Preserve user additions that are still accurate.
-</user_modifications>
+Preserve user additions that are still accurate.
 
-<scope_constraint>
-Re-map ONLY content relevant to the heading "{section title}".
-Do NOT cover topics from these other sections: {list other section headings in the file}
-Explore the codebase to verify current state of what this section documents.
-Verify all file paths mentioned still exist.
-</scope_constraint>
+Other sections in this file (do NOT cover these topics):
+{list other section headings in the file}
 
-<output>
-Return ONLY the replacement section content.
-Do NOT include the heading line itself.
+Explore the codebase to verify and update what this section documents.
+Check that all file paths still exist. Add new items discovered. Remove items that no longer exist.
+
+Return ONLY the replacement section content as raw markdown.
+Do NOT include the heading line.
 Do NOT write to any file.
 Do NOT wrap in code fences or add explanation.
-Return raw markdown content.
-</output>
 ```
 
 **After agent returns:**
 
-Present a semantic diff:
+Present using the Re-map Diff Display format from `@specdacular/templates/context-review-diff.md`:
 
 ```
-───────────────────────────────────────────────────────
-Re-mapping results for: {section title}
-───────────────────────────────────────────────────────
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RE-MAP RESULTS: {section title}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Note: AI regeneration may use different phrasing.
-Focus on factual differences, not wording changes.
+Note: AI regeneration may rephrase content even when
+facts are unchanged. Focus on factual differences.
 
-**Current content:**
-```
+───── CURRENT ─────────────────────────────────────────
+
 {current section content}
-```
 
-**Re-mapped content:**
-```
+───── RE-MAPPED ───────────────────────────────────────
+
 {agent's returned content}
-```
 
-**Key differences:**
-- {summarize what's actually new, removed, or factually changed}
+───── KEY DIFFERENCES ─────────────────────────────────
+
+- {factual difference 1: added/removed/changed item}
+- {factual difference 2}
+...
+
+{If no factual differences: "No factual changes detected — only phrasing differences."}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 Use AskUserQuestion:
@@ -296,7 +323,7 @@ If "Edit manually": Ask user what to change. Apply edit. Add/update USER_MODIFIE
 
 Move to next section.
 
-Continue to update_timestamps after all sections processed (or "confirm all remaining" selected).
+Continue to update_timestamps after all sections processed (or "Approve all remaining" selected).
 </step>
 
 <step name="update_timestamps">
@@ -360,12 +387,15 @@ End workflow.
 <success_criteria>
 - User selects a context file to review
 - Git checkpoint created before changes
-- Each section displayed readably with heading and content
+- Every section shown with ✅/⚠️/🔄 assessment (no auto-skipping)
+- Assessment checks file path existence and git activity since last review
+- Display follows template format from `specdacular/templates/context-review-diff.md`
 - User can confirm, edit, remove, or re-map each section
 - Edits add USER_MODIFIED tag with date
 - Removes warn about child sections
-- Re-map spawns targeted agent and shows semantic diff
-- "Confirm all remaining" escape hatch available
+- Re-map spawns `specd-codebase-mapper` agent with file-type-specific focus (DEC-011)
+- Re-map diff displayed using template format with key differences summary
+- "Approve all remaining" escape hatch available
 - Timestamps updated after review
 - Changes committed
 - Summary shown
