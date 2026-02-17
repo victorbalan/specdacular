@@ -54,15 +54,15 @@ Then present the menu using AskUserQuestion:
   - "Discuss" — Explore gray areas and record decisions
   - "Research" — Spawn parallel agents for patterns/pitfalls
   - "Plan" — Create execution phases
-  - "Execute / Review" — Execute next phase or review executed phase
+  - "Execute" — Execute the next phase
+  - "Review" — Review executed phase
 
 Based on selection, delegate to the appropriate workflow:
-- Discuss → follow the discuss.md workflow
-- Research → follow the research.md workflow
-- Plan → follow the plan.md workflow
-- Execute / Review → Check `config.json` → `phases.current_status`:
-  - If "executed" → follow the review.md workflow
-  - Otherwise → follow the execute.md workflow
+- Discuss → @~/.claude/specdacular/workflows/discuss.md
+- Research → @~/.claude/specdacular/workflows/research.md
+- Plan → @~/.claude/specdacular/workflows/plan.md
+- Execute → @~/.claude/specdacular/workflows/execute.md
+- Review → @~/.claude/specdacular/workflows/review.md
 
 ---
 
