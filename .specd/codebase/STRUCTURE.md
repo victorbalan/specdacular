@@ -159,8 +159,8 @@ JavaScript files executed at session start or for statusline.
 **Structure created by commands:**
 - `.specd/codebase/` — Created by `/specd:map-codebase`
   - `MAP.md`, `PATTERNS.md`, `STRUCTURE.md`, `CONCERNS.md`
-- `.specd/features/{name}/` — Created by `/specd:new-feature`
-  - Feature planning documents
+- `.specd/tasks/{name}/` — Created by `/specd:new`
+  - Task planning documents
 
 ### `.claude/` — Local Install Artifacts
 

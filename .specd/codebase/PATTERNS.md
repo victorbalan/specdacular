@@ -547,13 +547,13 @@ Validate feature exists and has plans.
 
 ```bash
 # Check feature exists
-[ -d ".specd/features/$ARGUMENTS" ] || { echo "not found"; exit 1; }
+[ -d ".specd/tasks/$ARGUMENTS" ] || { echo "not found"; exit 1; }
 
 # Check plans exist
-[ -d ".specd/features/$ARGUMENTS/plans" ] || { echo "no plans"; exit 1; }
+[ -d ".specd/tasks/$ARGUMENTS/plans" ] || { echo "no plans"; exit 1; }
 
 # Check ROADMAP exists
-[ -f ".specd/features/$ARGUMENTS/ROADMAP.md" ] || { echo "no roadmap"; exit 1; }
+[ -f ".specd/tasks/$ARGUMENTS/ROADMAP.md" ] || { echo "no roadmap"; exit 1; }
 ```
 
 **If feature not found:**
