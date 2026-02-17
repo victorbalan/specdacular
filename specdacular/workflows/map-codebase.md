@@ -609,30 +609,10 @@ Continue to commit_orchestrator_map.
 <step name="commit_orchestrator_map">
 Commit all mapping results (orchestrator + all sub-projects).
 
-```bash
-# Add orchestrator docs and config
-git add .specd/codebase/*.md .specd/config.json
-
-# Add per-project docs and configs
-# {For each project:}
-git add {project-path}/.specd/codebase/*.md {project-path}/.specd/config.json
-
-git commit -m "$(cat <<'EOF'
-docs: map multi-project codebase for Claude
-
-Orchestrator:
-- PROJECTS.md - Project registry
-- TOPOLOGY.md - Communication patterns
-- CONTRACTS.md - Shared interfaces
-- CONCERNS.md - System-level gotchas
-
-Projects mapped:
-{For each project: - {name}: MAP, PATTERNS, STRUCTURE, CONCERNS}
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-```
+@~/.claude/specdacular/references/commit-docs.md
+- **$FILES:** `.specd/codebase/*.md .specd/config.json {project-path}/.specd/codebase/*.md .specd/config.json` (for each project)
+- **$MESSAGE:** `docs: map multi-project codebase for Claude` with orchestrator docs list and per-project summary
+- **$LABEL:** `orchestrator codebase map`
 
 Continue to orchestrator_completion.
 </step>
