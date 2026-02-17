@@ -155,6 +155,7 @@ For plan step:
 
 For execute step:
 - "Execute" (Recommended) — Start/resume phase execution
+- "Research this phase" — Research patterns before executing
 - "Review plan" — Read the PLAN.md first
 - "Stop for now" — Come back later
 
@@ -174,6 +175,9 @@ Progress saved. Pick up where you left off anytime:
 /specd:continue {task-name}
 ```
 End workflow.
+
+**If user chooses "Research this phase":**
+Set `$NEXT_STEP = "research"` and continue to dispatch. The brain already knows `phases.current` — research.md will detect execution stage and scope research to the current phase. After research returns, brain loops back (stage is still "execution", status still "pending") and routes to execute again.
 
 **If user chooses an alternative (e.g., "Skip to research"):**
 Update `$NEXT_STEP` accordingly and continue to dispatch.

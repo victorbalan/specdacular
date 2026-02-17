@@ -42,9 +42,22 @@ Load all task context. Extract:
 - Technology stack (from codebase docs if available)
 - Files to create/modify (from FEATURE.md)
 
+**Detect phase-level research:**
+Read `.specd/tasks/$TASK_NAME/config.json`. If `stage` is `"execution"`, this is phase-level research:
+- Read `phases.current` to determine the current phase number
+- Set `$PHASE_NUM` to the zero-padded phase number (e.g., `01`)
+- Read the phase plan: `.specd/tasks/$TASK_NAME/phases/phase-$PHASE_NUM/PLAN.md`
+- Append the phase plan contents to `$TASK_CONTEXT` so research agents have phase-specific context
+- Set `$RESEARCH_OUTPUT` to `.specd/tasks/$TASK_NAME/phases/phase-$PHASE_NUM/RESEARCH.md`
+- Set `$PHASE_LEVEL = true`
+
+**If not in execution stage (task-level research):**
+- Set `$RESEARCH_OUTPUT` to `.specd/tasks/$TASK_NAME/RESEARCH.md`
+- Set `$PHASE_LEVEL = false`
+
 **Check if RESEARCH.md already exists:**
 ```bash
-[ -f ".specd/tasks/$TASK_NAME/RESEARCH.md" ] && echo "existing"
+[ -f "$RESEARCH_OUTPUT" ] && echo "existing"
 ```
 
 **If exists:**
@@ -93,7 +106,7 @@ Continue to synthesize.
 <step name="synthesize">
 @~/.claude/specdacular/references/synthesize-research.md
 
-Combine agent outputs into `.specd/tasks/$TASK_NAME/RESEARCH.md`.
+Combine agent outputs into `$RESEARCH_OUTPUT`.
 
 Continue to record_decisions.
 </step>
@@ -109,10 +122,15 @@ Continue to update_state.
 <step name="update_state">
 Update STATE.md and config.json.
 
-**STATE.md:**
-- Mark research as conducted
+**If phase-level research (`$PHASE_LEVEL = true`):**
+- Update STATE.md to note phase research was conducted
+- Do NOT change `stage` in config.json (stay in "execution")
+- Continue to commit
+
+**If task-level research (`$PHASE_LEVEL = false`):**
+- Mark research as conducted in STATE.md
 - Mark RESEARCH.md as created
-- Update decisions count
+- Update decisions count in STATE.md and config.json
 
 **config.json:**
 - Update `decisions_count`
@@ -123,8 +141,8 @@ Continue to commit.
 <step name="commit">
 @~/.claude/specdacular/references/commit-docs.md
 
-- **$FILES:** `.specd/tasks/{task-name}/RESEARCH.md .specd/tasks/{task-name}/DECISIONS.md .specd/tasks/{task-name}/STATE.md .specd/tasks/{task-name}/config.json`
-- **$MESSAGE:** `docs({task-name}): research complete` with key findings summary
+- **$FILES:** `$RESEARCH_OUTPUT .specd/tasks/{task-name}/DECISIONS.md .specd/tasks/{task-name}/STATE.md .specd/tasks/{task-name}/config.json`
+- **$MESSAGE:** `docs({task-name}): research complete` (or `docs({task-name}): phase {NN} research complete` for phase-level) with key findings summary
 - **$LABEL:** `research findings`
 
 Continue to completion.
