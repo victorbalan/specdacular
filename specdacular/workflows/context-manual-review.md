@@ -1,5 +1,5 @@
 <purpose>
-Guided section-by-section review of a codebase context file (.specd/codebase/*.md). Walks through each section at both ## and ### levels, letting the user confirm, edit, remove, or re-map each section.
+Manual review of a codebase context file (.specd/codebase/*.md). Shows a section list and lets the user pick which section to review, edit, remove, re-map, or add new content.
 
 Edits are tagged with `<!-- USER_MODIFIED: YYYY-MM-DD -->`. Re-mapping spawns a targeted agent for just that section and shows a semantic diff.
 
@@ -8,21 +8,17 @@ Output: Updated context file with reviewed/edited sections and updated timestamp
 
 <philosophy>
 
+## User Picks What To Review
+
+Don't walk through every section automatically. Show a list of sections and let the user choose which one to look at. The user knows what needs attention.
+
 ## User Controls Everything
 
 Every change requires explicit user approval. Never auto-edit, auto-remove, or auto-accept re-mapped content.
 
-## Readable Display
+## Minimal Touch
 
-Sections are displayed cleanly with visual separators. Don't dump raw markdown — format it for readability.
-
-## Escape Hatches
-
-Reviewing a file with 15 sections shouldn't mean 15 mandatory prompts. Offer "confirm all remaining" to avoid fatigue.
-
-## Safety First
-
-Create a git checkpoint before any destructive operations. Warn about child sections before removing a parent.
+Edit only what the user asks. Don't reorganize surrounding sections or rewrite adjacent content.
 
 </philosophy>
 
@@ -34,10 +30,11 @@ Always write dates as `YYYY-MM-DD`. Never write times. Never write month names.
 
 ## Section Tags
 
-Two tag types for tracking how sections were last modified:
+Three tag types for tracking section state:
 
 - `<!-- USER_MODIFIED: YYYY-MM-DD -->` — Section was manually edited by the user
 - `<!-- AUTO_GENERATED: YYYY-MM-DD -->` — Section was updated via re-map agent
+- `<!-- REVIEWED: YYYY-MM-DD -->` — Section was confirmed unchanged during review
 
 Placement: On its own line immediately after the section heading. No blank line between heading and tag.
 
@@ -71,21 +68,19 @@ Last Modified: 2026-02-17
 
 If `Last Reviewed:` or `Last Modified:` lines don't exist yet, add them after the `Generated:` line (or `**Analysis Date:**` line for CONCERNS.md).
 
-## After Every Reviewed Section
+## After Every Action
 
-For EVERY section reviewed, you MUST add or update the tag immediately — not later, not at the end:
+For EVERY section acted on, you MUST add or update the tag immediately — not later, not at the end:
 
 - **User edits a section** → `<!-- USER_MODIFIED: {today} -->`
 - **Re-map accepted** → `<!-- AUTO_GENERATED: {today} -->`
 - **Section confirmed unchanged** → `<!-- REVIEWED: {today} -->`
 
-Also update the file's `Last Modified: {today}` timestamp at the top if any content changed (edit or re-map).
+Also update the file's `Last Modified: {today}` timestamp at the top if any content changed (edit, remove, or re-map).
 
-When the review session ends (all sections processed or "Done for now"), you MUST update `Last Reviewed: {today}` at the top of the file.
+When returning to the section list, update `Last Reviewed: {today}` at the top of the file.
 
 Never skip tagging. Never defer to a later step.
-
-Never skip these. Never defer them to a later step.
 
 </critical_rules>
 
@@ -143,55 +138,82 @@ Read the selected file and build a section list.
 3. For each heading, capture:
    - Heading level (## or ###)
    - Heading text
-   - Whether a `<!-- USER_MODIFIED: YYYY-MM-DD -->` tag exists on the line after the heading
-   - The USER_MODIFIED date if present
+   - Whether a tag exists on the line after the heading (USER_MODIFIED, AUTO_GENERATED, or REVIEWED)
+   - The tag type and date if present
    - The section content (everything from after the heading/tag until the next heading of same or higher level)
    - Parent `##` heading (for `###` sections)
 4. **Exclude empty parent sections:** If a `##` section has no content of its own (only `###` children), do NOT count it as a reviewable section. Instead, store its heading text as the parent label for its children.
 5. Count only reviewable sections (sections with actual content)
 
-```
-Found {N} reviewable sections in {file}
-```
-
-Continue to walk_sections.
+Continue to show_section_list.
 </step>
 
-<step name="walk_sections">
-Walk through each reviewable section in document order. Every section with content is shown — skip empty parents.
+<step name="show_section_list">
+Show the user a numbered list of all sections with their tag status, then let them pick one or add new content.
 
-**For each section, assess and display using the section display template:**
+```
+================================================================
+{file} — {N} sections
+================================================================
+
+{For each section:}
+{N}. {If ### subsection: "{Parent} > "}{heading}  {If tagged: "({tag type}: {date})" else "(unreviewed)"}
+{...}
+
+================================================================
+```
+
+Use AskUserQuestion:
+- header: "{file}"
+- question: "Select a section to review, or add new content"
+- options:
+  - "Select section" — Enter a section number to review
+  - "Add new section" — Add new content to this file
+  - "Done" — Finish reviewing this file
+
+**If "Select section":**
+Ask which section number. Continue to show_section.
+
+**If "Add new section":**
+Continue to add_content.
+
+**If "Done":**
+Continue to update_timestamps.
+</step>
+
+<step name="show_section">
+Display the selected section and let the user act on it.
+
+**Perform an assessment** using the assessment logic from `@~/.claude/specdacular/templates/context/section-display.md`.
+
+**Display using the section display template:**
 
 @~/.claude/specdacular/templates/context/section-display.md
 
 Follow the Section Display format from the template above exactly. Do not improvise a different format.
 
 **After displaying, use AskUserQuestion:**
-- header: "{current}/{total}"
+- header: "Section {N}"
 - question: "What would you like to do with this section?"
 - options:
-  - "Confirm" — Section is correct, move to next
+  - "Confirm" — Section is correct, mark as reviewed
   - "Edit" — Tell me what to change
   - "Remove" — Delete this section
   - "Re-map" — Re-run the mapper for this section and compare
-  - "Done for now" — Mark all remaining sections as reviewed
 
 **If Confirm:**
-Move to next section.
-
-**If Done for now:**
-Skip all remaining sections. Continue to update_timestamps.
+Add or update `<!-- REVIEWED: {today} -->` tag. Return to show_section_list.
 
 **If Edit:**
 Ask: "What should I change in this section?"
 
 Wait for user response. Apply the edit using the Edit tool.
 
-Add or update `<!-- USER_MODIFIED: {today} -->` on the line immediately after the section heading. If a tag already exists, replace it with today's date.
+Add or update `<!-- USER_MODIFIED: {today} -->` on the line immediately after the section heading.
 
 Mark that modifications were made in this session.
 
-Move to next section.
+Return to show_section_list.
 
 **If Remove:**
 Check if this is a `##` section with `###` children.
@@ -202,8 +224,6 @@ Removing "## {title}" will also remove {N} subsections:
 - ### {child 1}
 - ### {child 2}
 ...
-
-This is reversible via git (checkpoint was created at session start).
 ```
 
 Use AskUserQuestion:
@@ -213,12 +233,12 @@ Use AskUserQuestion:
   - "Yes, remove" — Delete the section
   - "Cancel" — Keep the section
 
-If confirmed: Remove the section (and children if ##) from the file using the Edit tool. Mark modifications made. Adjust remaining section count.
+If confirmed: Remove the section (and children if ##) from the file using the Edit tool. Mark modifications made. Re-parse sections.
 
-If cancelled: Move to next section.
+If cancelled: Return to show_section_list.
 
 **If Re-map:**
-Spawn a targeted re-mapping agent using the `specd-codebase-mapper` agent with file-type-specific focus (DEC-011).
+Spawn a targeted re-mapping agent using the `specd-codebase-mapper` agent with file-type-specific focus.
 
 Use the Task tool:
 ```
@@ -290,19 +310,77 @@ Use AskUserQuestion:
 - header: "Re-map"
 - question: "How do you want to handle the re-mapped content?"
 - options:
-  - "Accept new" — Replace with re-mapped content (removes USER_MODIFIED tag)
+  - "Accept new" — Replace with re-mapped content
   - "Keep current" — Keep existing content unchanged
   - "Edit manually" — Tell me what to change
 
 If "Accept new": Replace section content with agent's output. Add or update tag to `<!-- AUTO_GENERATED: {today} -->`. Mark modifications made.
 
-If "Keep current": Move to next section.
+If "Keep current": Return to show_section_list.
 
 If "Edit manually": Ask user what to change. Apply edit. Add/update USER_MODIFIED tag. Mark modifications made.
 
-Move to next section.
+Return to show_section_list.
+</step>
 
-Continue to update_timestamps after all sections processed (or "Done for now" selected).
+<step name="add_content">
+Add new content to the file.
+
+Ask: "What do you want to add? Describe the information — I'll suggest where it belongs."
+
+Wait for user response.
+
+**Check for duplicates:**
+Search the current file for key terms from the user's description using Grep.
+
+**If similar content found:**
+```
+Similar content already exists in: {## Section}
+{relevant excerpt, 2-3 lines}
+```
+
+Use AskUserQuestion:
+- header: "Duplicate?"
+- question: "Similar content exists. What would you like to do?"
+- options:
+  - "Add anyway" — Add as new content
+  - "Update existing" — Edit the existing section instead
+  - "Cancel" — Don't add
+
+If "Update existing": Show the section, ask what to change. Apply edit, add USER_MODIFIED tag. Return to show_section_list.
+If "Cancel": Return to show_section_list.
+
+**Identify best section:**
+Based on the content, determine which existing section it fits under, or propose creating a new section.
+
+**Confirm placement:**
+```
+I'll add this to:
+
+**Section:** {## Section} → {### Subsection if applicable}
+{If new section: "New section: ## {proposed title}"}
+
+**Content to add:**
+
+{formatted content that will be written}
+```
+
+Use AskUserQuestion:
+- header: "Placement"
+- question: "Add content here?"
+- options:
+  - "Confirm" — Add it here
+  - "Different section" — Show other options
+  - "Cancel" — Don't add
+
+If "Different section": Show all sections and let user pick.
+If "Cancel": Return to show_section_list.
+
+**Write content:**
+1. If adding to existing section: Append content at end of section, add/update `<!-- USER_MODIFIED: {today} -->` tag.
+2. If creating new section: Add heading at appropriate location, add `<!-- USER_MODIFIED: {today} -->` tag, add content.
+
+Mark modifications made. Re-parse sections. Return to show_section_list.
 </step>
 
 <step name="update_timestamps">
@@ -311,7 +389,7 @@ Update the file's document-level timestamps.
 **Always set:**
 - `Last Reviewed: {today}` — because the user reviewed the file
 
-**If any modifications were made (edit, remove, re-map accepted):**
+**If any modifications were made (edit, remove, re-map accepted, content added):**
 - `Last Modified: {today}`
 
 **How to update:**
@@ -332,7 +410,7 @@ Still commit the timestamp update (Last Reviewed changed).
 @~/.claude/specdacular/references/commit-docs.md
 
 - **$FILES:** `.specd/codebase/{file}`
-- **$MESSAGE:** `docs: review {file}` with brief summary of changes (N sections confirmed, N edited, N removed, N re-mapped)
+- **$MESSAGE:** `docs: review {file}` with brief summary of changes
 - **$LABEL:** `context review`
 
 Continue to completion.
@@ -346,12 +424,12 @@ Show review summary.
 Review complete: {file}
 ───────────────────────────────────────────────────────
 
-Sections reviewed: {total}
+Sections: {total}
 - Confirmed: {N}
-- Edited: {N} (USER_MODIFIED tags added)
+- Edited: {N}
 - Removed: {N}
 - Re-mapped: {N}
-- Skipped (confirm all): {N}
+- Added: {N}
 
 Timestamps updated:
 - Last Reviewed: {today}
@@ -365,17 +443,17 @@ End workflow.
 
 <success_criteria>
 - User selects a context file to review
-- Git checkpoint created before changes
-- Every section shown with ✅/⚠️/🔄 assessment (no auto-skipping)
-- Assessment checks file path existence and git activity since last review
+- Section list shown with tag status
+- User picks which section to review (not auto-walked)
+- User can add new content from the same flow
 - Section display follows `specdacular/templates/context/section-display.md`
 - Re-map diff display follows `specdacular/templates/context/review-diff.md`
 - User can confirm, edit, remove, or re-map each section
 - Edits add USER_MODIFIED tag with date
+- Re-map accepts add AUTO_GENERATED tag with date
+- Confirms add REVIEWED tag with date
 - Removes warn about child sections
-- Re-map spawns `specd-codebase-mapper` agent with file-type-specific focus (DEC-011)
-- Re-map diff displayed using template format with key differences summary
-- "Done for now" escape hatch available
+- Re-map spawns `specd-codebase-mapper` agent with file-type-specific focus
 - Timestamps updated after review
 - Changes committed
 - Summary shown
