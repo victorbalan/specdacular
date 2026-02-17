@@ -57,6 +57,70 @@ After initialization, just keep running `continue`. It figures out what's next.
 
 ---
 
+## The Brain
+
+The `continue` command is powered by the **brain** — a config-driven orchestrator that reads `pipeline.json` and drives the entire task lifecycle. Step workflows are pure execution; the brain decides what comes next.
+
+**The brain loop:**
+1. Read current state (`config.json`, `STATE.md`)
+2. Determine next step from pipeline config
+3. Execute pre-hooks → step workflow → post-hooks
+4. Update state → loop back
+
+**Execution modes:**
+
+| Mode | Behavior |
+|------|----------|
+| **Interactive** (default) | Prompts at each stage transition |
+| **Semi-auto** (`--semi-auto`) | Auto-runs steps where `pause_in_semi_auto: false`, pauses where `true` |
+| **Auto** (`--auto`) | Runs everything, only stops on errors or task completion |
+
+---
+
+## Pipeline Configuration
+
+The pipeline is defined in `pipeline.json` — nothing is hardcoded. The default pipeline ships with Specdacular and can be fully replaced by placing a `.specd/pipeline.json` in your project.
+
+**Default pipeline:** `discuss → research → plan → phase-execution (execute → review → revise loop)`
+
+**Customization options:**
+- **Swap workflows:** Point any step's `workflow` to your own `.md` file
+- **Enable/disable steps:** Set `"enabled": false` on any step
+- **Change mode:** Set `"mode": "semi-auto"` or `"auto"` as default
+- **Add hooks:** Configure pre/post hooks per step or globally
+- **Full replace:** Drop `.specd/pipeline.json` to replace the entire pipeline
+
+---
+
+## Hooks
+
+Hooks are markdown workflow files that run before and after pipeline steps. They can read and modify task files just like any other workflow.
+
+**Execution order:** Global pre-step → Step pre-hook → **Step runs** → Step post-hook → Global post-step
+
+**Configuration in pipeline.json:**
+
+```json
+{
+  "name": "execute",
+  "workflow": "execute.md",
+  "hooks": {
+    "pre": { "workflow": ".specd/hooks/pre-execute.md", "mode": "inline" },
+    "post": { "workflow": ".specd/hooks/post-execute.md", "mode": "subagent", "optional": true }
+  }
+}
+```
+
+**Hook modes:**
+- **`inline`** — Runs in the brain's context (can see all state)
+- **`subagent`** — Spawns a separate agent (fresh context, isolated)
+
+**Convention fallback:** If no hooks are configured, the brain auto-discovers `.specd/hooks/pre-{step}.md` and `.specd/hooks/post-{step}.md`.
+
+**Error handling:** Required hooks (`optional: false`, default) stop the pipeline on failure. Optional hooks log a warning and continue.
+
+---
+
 ## Codebase Documentation
 
 ```
