@@ -106,6 +106,89 @@
 
 ---
 
+### DEC-007: Extract shared references to eliminate duplication
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Workflow analysis found ~2,000 lines of duplication across 17 workflows (22-26% of total). Same patterns copy-pasted: validation, context loading, decision recording, research agent spawning, research synthesis.
+**Decision:** Extract five shared references:
+- `load-context.md` — Standard feature context loading (~400 lines saved across 8+ workflows)
+- `record-decision.md` — DEC-{NNN} template (~180 lines saved across 6+ workflows)
+- `spawn-research-agents.md` — Three-agent research pattern (~300 lines saved)
+- `synthesize-research.md` — RESEARCH.md template and synthesis
+- `validate-task.md` — Task existence and file validation (~100 lines saved across 10+ workflows)
+**Rationale:**
+- Reduces maintenance burden — fix once, applies everywhere
+- Makes workflows shorter and easier to read
+- Consistent behavior across all workflows
+**Implications:**
+- Workflows reference shared docs via `@` paths
+- References must be parameterized (e.g., which optional files to load)
+
+---
+
+### DEC-008: Merge two review workflows into one
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Two competing review workflows exist: `review-feature.md` (user-guided, git diff, actually used) and `review-phase.md` (Claude-driven semantic inspection, 545 lines, not connected to any command). Confusing and wasteful.
+**Decision:** Merge into a single `review.md` workflow that combines both: Claude inspects code vs plan intent first, then presents findings with git diff summary. User approves or requests revisions. Fix plans in decimal phases.
+**Rationale:**
+- One review model, not two
+- Takes the best of both: automated inspection + user control
+- Eliminates 545 lines of orphaned workflow
+**Implications:**
+- `review-phase.md` and `review-feature.md` both deleted
+- New `review.md` is the single review entry point
+- Execute workflow chains to review automatically
+
+---
+
+### DEC-009: Convert research-feature.md to proper step-based workflow
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** `research-feature.md` is an intent document with `<research_dimensions>` sections, not a step-based `<process>` workflow like all others. Inconsistent when referenced by `continue-feature.md`.
+**Decision:** Rewrite as proper step-based workflow (`research.md`) using the same `<step name="...">` format. Reference the new shared `spawn-research-agents.md` and `synthesize-research.md`.
+**Rationale:**
+- Consistent workflow format
+- Predictable behavior when dispatched by continue workflow
+**Implications:**
+- `research.md` becomes a real workflow, not a conceptual doc
+
+---
+
+### DEC-010: Split orchestrator branches into separate workflow files
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Five workflows have orchestrator-mode branches that roughly double their line count (~700 lines total). Makes main workflows hard to read.
+**Decision:** Extract orchestrator logic into `specdacular/workflows/orchestrator/new.md` and `orchestrator/plan.md`. Main workflows detect mode and branch: `@orchestrator/this-workflow.md`.
+**Rationale:**
+- Main workflows stay focused on single-project flow
+- Orchestrator logic is self-contained and easier to maintain
+**Implications:**
+- New `orchestrator/` subdirectory in workflows
+- Main workflows need mode detection + branch
+
+---
+
+### DEC-011: Remove phase-specific command variants
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Current system has both feature-level and phase-level commands: `discuss-feature` + `discuss-phase`, `research-feature` + `research-phase`, `plan-feature` + `plan-phase`, `prepare-phase`, `insert-phase`, `renumber-phases`. With one PLAN.md per phase, the phase-level variants are unnecessary — the main commands handle everything.
+**Decision:** Remove all phase-specific commands and workflows. The main commands (`discuss`, `research`, `plan`, `execute`, `review`) operate on phases directly.
+**Rationale:**
+- One PLAN.md per phase means less phase-specific complexity
+- Fewer commands = simpler UX
+- `continue` workflow handles phase progression
+**Implications:**
+- 6 command files and 6 workflow files removed
+- `toolbox.md` simplified (fewer operations to expose)
+
+---
+
 ## Decision Log
 
 | ID | Date | Title | Status |
@@ -116,3 +199,8 @@
 | DEC-004 | 2026-02-17 | No backward compatibility | Active |
 | DEC-005 | 2026-02-17 | Code review agent runs after every phase execution | Active |
 | DEC-006 | 2026-02-17 | Keep "phases" naming (not "steps") | Active |
+| DEC-007 | 2026-02-17 | Extract shared references to eliminate duplication | Active |
+| DEC-008 | 2026-02-17 | Merge two review workflows into one | Active |
+| DEC-009 | 2026-02-17 | Convert research to proper step-based workflow | Active |
+| DEC-010 | 2026-02-17 | Split orchestrator branches into separate files | Active |
+| DEC-011 | 2026-02-17 | Remove phase-specific command variants | Active |

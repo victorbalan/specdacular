@@ -5,60 +5,62 @@
 
 ## Discussion Summary
 
-User wants to simplify the specdacular command structure and planning hierarchy. Key changes: (1) flatten plans so each phase has exactly one PLAN.md, (2) rename `features/` to `tasks/` and shorten commands from `/specd:feature:*` to `/specd:*`, (3) add `--semi-auto` and `--auto` flags to `/specd:continue` (interactive is default), (4) add a code review agent that runs after every phase execution.
+User wants to simplify specdacular's command structure, planning hierarchy, and internal efficiency. Key changes:
+
+1. **Rename:** `features/` → `tasks/`, commands from `/specd:feature:*` → `/specd:*`
+2. **Flatten plans:** One PLAN.md per phase at `phases/phase-NN/PLAN.md`. Phases kept small.
+3. **Auto flags:** `--semi-auto` and `--auto` on `/specd:continue` (interactive is default)
+4. **Code review:** Review agent runs after every phase execution in all modes
+5. **Deduplication:** Extract ~2,000 lines of duplicated workflow logic into shared references
+6. **Merge reviews:** Combine `review-feature.md` + `review-phase.md` into single `review.md`
+7. **Fix research:** Convert `research-feature.md` from intent doc to proper step-based workflow
+8. **Split orchestrator:** Move orchestrator branches to separate workflow files
+9. **Remove phase commands:** Phase-specific variants (discuss-phase, research-phase, etc.) removed
 
 Task type classification (small/medium/big/bug) was discussed but explicitly deferred.
-
-Investigated reference library review patterns — two approaches exist (automated semantic review and user-guided git-diff review). The new review workflow will combine both: Claude inspects code against plan intent, presents findings with git diff, user approves or requests revisions, fix plans go in decimal phases.
 
 ---
 
 ## Resolved Questions
 
 ### Folder and command naming
-
-**Question:** What should replace the `features/` folder and `feature:*` commands?
-
-**Resolution:** Folder becomes `.specd/tasks/`, commands become `/specd:new`, `/specd:continue`, `/specd:discuss`, etc.
+**Resolution:** `.specd/tasks/`, commands `/specd:new`, `/specd:continue`, `/specd:discuss`, etc.
 
 ### Plan structure
-
-**Question:** How should plans be organized?
-
-**Resolution:** `phases/phase-NN/PLAN.md` — one plan file per phase. Phases should be kept small. No more multiple plans per phase.
+**Resolution:** `phases/phase-NN/PLAN.md` — one plan per phase, phases kept small.
 
 ### Auto-mode behavior
-
-**Question:** Should the workflow auto-advance through stages?
-
-**Resolution:** Interactive is the default. Two opt-in flags:
-- `--semi-auto` — Auto-runs discuss→research→plan, then executes phase-by-phase with review + user approval after each
-- `--auto` — Runs everything until task completion, only stops if review finds issues
+**Resolution:** Interactive default. `--semi-auto` (auto discuss→research→plan, pause after each phase). `--auto` (run everything, stop only on review issues).
 
 ### Backward compatibility
-
-**Question:** Support existing `.specd/features/` layouts?
-
-**Resolution:** No. Clean break, no migration.
+**Resolution:** No. Clean break.
 
 ### Code review
-
-**Question:** Should code be reviewed after execution?
-
-**Resolution:** Yes. A code review agent runs after every phase execution in all modes. It inspects code against plan intent, presents findings, and can generate fix plans in decimal phases (e.g., `phases/phase-01.1/PLAN.md`).
+**Resolution:** Runs after every phase execution in all modes. Combines semantic inspection + git diff. Fix plans in decimal phases.
 
 ### Naming: steps vs phases
+**Resolution:** Keep "phases" naming. `phases/phase-01/PLAN.md`.
 
-**Question:** Should the plan folders be called "steps" or "phases"?
+### Workflow duplication
+**Resolution:** Extract 5 shared references: load-context, record-decision, spawn-research-agents, synthesize-research, validate-task.
 
-**Resolution:** Keep "phases" naming. Folder structure: `phases/phase-01/PLAN.md`. Simpler and avoids introducing new terminology.
+### Two review workflows
+**Resolution:** Merge into single `review.md`. Delete both `review-feature.md` and `review-phase.md`.
+
+### research-feature.md format
+**Resolution:** Rewrite as proper step-based workflow.
+
+### Orchestrator branches
+**Resolution:** Split into `workflows/orchestrator/new.md` and `orchestrator/plan.md`.
+
+### Phase-specific commands
+**Resolution:** Remove all. Main commands handle phases directly.
 
 ---
 
 ## Deferred Questions
 
 ### Task type classification
-
 **Reason:** User wants this but hasn't defined what changes per type yet
 **Default for now:** All tasks get the same document structure
 **Revisit when:** After the rearchitect is complete
@@ -69,13 +71,13 @@ Investigated reference library review patterns — two approaches exist (automat
 
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
-| 2026-02-17 | Folder rename, plan simplification, command rename, auto-mode, code review, naming | FEATURE.md created, 6 decisions |
+| 2026-02-17 | Renames, plan flattening, auto-mode, code review, naming, workflow efficiency | FEATURE.md created, 11 decisions |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Workflow efficiency improvements — User wants to investigate current workflows/agents for streamlining beyond just renaming
+None — discussion complete.
 
 ---
 
