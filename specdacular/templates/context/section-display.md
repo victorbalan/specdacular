@@ -6,23 +6,23 @@ Template for displaying a single section of a codebase context file to the user 
 
 ## Section Display
 
-Display each section as an HTML table with three rows and one column. Use HTML because markdown tables cannot hold multi-line content.
+```
+================================================================
+{## or ###} {Section Title}  [{current}/{total}]{If USER_MODIFIED: "  · User modified: YYYY-MM-DD"}
+================================================================
 
-```html
-<table>
-<tr><th align="left">{## or ###} {Section Title} [{current}/{total}] {If USER_MODIFIED: " · User modified: YYYY-MM-DD"}</th></tr>
-<tr><td><pre>
 {exact section content from the file — verbatim, no modifications, no strikethrough, no interpretation}
-</pre></td></tr>
-<tr><td>{assessment icon} {assessment label} — {brief explanation: which paths missing, which files changed}</td></tr>
-</table>
+
+────────────────────────────────────────
+{assessment icon} {assessment label} — {brief explanation}
+================================================================
 ```
 
-**Row 1 — Header:** Section heading, position counter, and user-modified date if tagged. Bold via `<th>`.
+**Line 1-3 — Header:** `=` separator, section heading with position counter, `=` separator.
 
-**Row 2 — Raw content:** The exact text from the file inside `<pre>` tags. Do NOT interpret the content — no strikethrough on missing paths, no added formatting, no modifications. Show it verbatim. The `<pre>` tag preserves line breaks and prevents markdown interpretation.
+**Middle — Raw content:** The exact text from the file in a code fence. Do NOT interpret the content — no strikethrough on missing paths, no added formatting. Show it verbatim.
 
-**Row 3 — Assessment:** The agent's analysis with icon, label, and brief explanation.
+**Bottom — Assessment:** The agent's analysis with icon, label, and brief explanation. Closed with `=` separator.
 
 ---
 
