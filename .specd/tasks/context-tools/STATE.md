@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -60,7 +60,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-17 |
 | CONTEXT.md | Created | 2026-02-17 |
-| DECISIONS.md | 3 decisions | 2026-02-17 |
+| DECISIONS.md | 6 decisions | 2026-02-17 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | phases/ | Not started | — |
@@ -69,9 +69,9 @@
 
 ## Decision Count
 
-- **Active:** 3
+- **Active:** 6
 - **Superseded:** 0
-- **Total:** 3
+- **Total:** 6
 
 ---
 
