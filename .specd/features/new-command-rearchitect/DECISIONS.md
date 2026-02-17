@@ -25,37 +25,38 @@
 
 ---
 
-### DEC-002: One plan per step
+### DEC-002: One plan per phase
 
 **Date:** 2026-02-17
 **Status:** Active
 **Context:** Current structure has phases with multiple plans each, which is confusing for users to review
-**Decision:** Replace `plans/phase-NN/NN-PLAN.md` with `steps/step-NN/PLAN.md` — exactly one PLAN.md per step
+**Decision:** Each phase gets exactly one `PLAN.md` at `phases/phase-NN/PLAN.md`. Phases should be kept small.
 **Rationale:**
-- Easier for users to review one file per step
+- Easier for users to review one file per phase
 - Simpler mental model
-- Can create more steps if granularity is needed
+- Create more phases if granularity is needed
 **Implications:**
 - Plan template updated
-- ROADMAP.md references steps instead of phases
-- STATE.md tracks steps instead of phases/plans
-- `plan-feature` workflow (now `plan`) creates steps instead of phases
+- ROADMAP.md references phases with single plans
+- STATE.md tracks phases (no plan-level tracking needed)
+- Plan workflow creates more, smaller phases
 
 ---
 
-### DEC-003: Auto-mode as default
+### DEC-003: Interactive mode is default, auto is opt-in
 
 **Date:** 2026-02-17
 **Status:** Active
-**Context:** Current workflow prompts user at every stage transition (discuss→research→plan→execute)
-**Decision:** `/specd:continue` runs in auto-mode by default, advancing through stages without prompting. `--no-auto` flag restores interactive behavior.
+**Context:** Initially considered auto as default, but user wants to test auto behavior before pushing to all users
+**Decision:** Interactive mode (current behavior) is the default. Two opt-in flags:
+- `--semi-auto` — Auto-runs discuss→research→plan, pauses for user after each phase execution + review
+- `--auto` — Runs everything, only stops if review finds issues or task is complete
 **Rationale:**
-- Users who know what they want shouldn't be slowed down
-- Interactive mode still available when needed
+- Safer default for users
+- Allows testing auto behavior with a flag
 **Implications:**
-- `continue` workflow needs auto-advance logic
-- Need heuristics for when to skip stages (e.g., skip research for small tasks?)
-- `$ARGUMENTS` parsing needs to handle `--no-auto` flag
+- `continue` workflow needs argument parsing for `--semi-auto` and `--auto`
+- Three distinct control flows in the continue workflow
 
 ---
 
@@ -73,11 +74,45 @@
 
 ---
 
+### DEC-005: Code review agent runs after every phase execution
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Need quality gate after execution. Reference library has two review patterns (automated semantic + user-guided git-diff).
+**Decision:** Code review agent runs automatically after every phase execution, regardless of mode. Combines both approaches: Claude inspects code vs plan intent, presents findings with git diff, user approves or requests revisions.
+**Rationale:**
+- Catches deviations before they compound
+- User always sees what was built before moving on
+- Fix plans use decimal phases (e.g., `phase-01.1/PLAN.md`)
+**Implications:**
+- New `review.md` workflow and command
+- Execute workflow triggers review automatically after completion
+- Review loop: execute → review → fix plan → execute fix → re-review
+
+---
+
+### DEC-006: Keep "phases" naming (not "steps")
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Considered renaming phases to steps, but introduces unnecessary new terminology
+**Decision:** Keep `phases/phase-NN/PLAN.md` structure. Just simplify to one PLAN.md per phase.
+**Rationale:**
+- Avoids confusion with two naming schemes
+- Phases is already established in the codebase
+**Implications:**
+- No naming migration needed for phase references
+- Fix plans in decimal phases: `phases/phase-01.1/PLAN.md`
+
+---
+
 ## Decision Log
 
 | ID | Date | Title | Status |
 |----|------|-------|--------|
 | DEC-001 | 2026-02-17 | Rename features to tasks | Active |
-| DEC-002 | 2026-02-17 | One plan per step | Active |
-| DEC-003 | 2026-02-17 | Auto-mode as default | Active |
+| DEC-002 | 2026-02-17 | One plan per phase | Active |
+| DEC-003 | 2026-02-17 | Interactive mode is default, auto is opt-in | Active |
 | DEC-004 | 2026-02-17 | No backward compatibility | Active |
+| DEC-005 | 2026-02-17 | Code review agent runs after every phase execution | Active |
+| DEC-006 | 2026-02-17 | Keep "phases" naming (not "steps") | Active |

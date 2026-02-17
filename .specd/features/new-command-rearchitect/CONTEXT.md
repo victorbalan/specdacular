@@ -5,9 +5,11 @@
 
 ## Discussion Summary
 
-User wants to simplify the specdacular command structure and planning hierarchy. Three main changes: (1) flatten plans so each step has exactly one PLAN.md, (2) rename `features/` to `tasks/` and shorten commands from `/specd:feature:*` to `/specd:*`, (3) make auto-mode the default for `/specd:continue` so the lifecycle runs without interactive prompts at each transition.
+User wants to simplify the specdacular command structure and planning hierarchy. Key changes: (1) flatten plans so each phase has exactly one PLAN.md, (2) rename `features/` to `tasks/` and shorten commands from `/specd:feature:*` to `/specd:*`, (3) add `--semi-auto` and `--auto` flags to `/specd:continue` (interactive is default), (4) add a code review agent that runs after every phase execution.
 
-Task type classification (small/medium/big/bug) was discussed but explicitly deferred — the structure won't change per type yet.
+Task type classification (small/medium/big/bug) was discussed but explicitly deferred.
+
+Investigated reference library review patterns — two approaches exist (automated semantic review and user-guided git-diff review). The new review workflow will combine both: Claude inspects code against plan intent, presents findings with git diff, user approves or requests revisions, fix plans go in decimal phases.
 
 ---
 
@@ -23,19 +25,33 @@ Task type classification (small/medium/big/bug) was discussed but explicitly def
 
 **Question:** How should plans be organized?
 
-**Resolution:** `steps/step-NN/PLAN.md` — one plan file per step. Steps should be kept small. No more multiple plans per phase.
+**Resolution:** `phases/phase-NN/PLAN.md` — one plan file per phase. Phases should be kept small. No more multiple plans per phase.
 
 ### Auto-mode behavior
 
 **Question:** Should the workflow auto-advance through stages?
 
-**Resolution:** Yes, auto-mode is the default. `--no-auto` flag on `/specd:continue` restores the current interactive behavior.
+**Resolution:** Interactive is the default. Two opt-in flags:
+- `--semi-auto` — Auto-runs discuss→research→plan, then executes phase-by-phase with review + user approval after each
+- `--auto` — Runs everything until task completion, only stops if review finds issues
 
 ### Backward compatibility
 
 **Question:** Support existing `.specd/features/` layouts?
 
 **Resolution:** No. Clean break, no migration.
+
+### Code review
+
+**Question:** Should code be reviewed after execution?
+
+**Resolution:** Yes. A code review agent runs after every phase execution in all modes. It inspects code against plan intent, presents findings, and can generate fix plans in decimal phases (e.g., `phases/phase-01.1/PLAN.md`).
+
+### Naming: steps vs phases
+
+**Question:** Should the plan folders be called "steps" or "phases"?
+
+**Resolution:** Keep "phases" naming. Folder structure: `phases/phase-01/PLAN.md`. Simpler and avoids introducing new terminology.
 
 ---
 
@@ -53,13 +69,12 @@ Task type classification (small/medium/big/bug) was discussed but explicitly def
 
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
-| 2026-02-17 | Folder rename, plan simplification, command rename, auto-mode | FEATURE.md created |
+| 2026-02-17 | Folder rename, plan simplification, command rename, auto-mode, code review, naming | FEATURE.md created, 6 decisions |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Auto-mode implementation details — How does the workflow decide when to skip research vs. run it? Does it always run all stages, or does it use heuristics?
 - [ ] Workflow efficiency improvements — User wants to investigate current workflows/agents for streamlining beyond just renaming
 
 ---

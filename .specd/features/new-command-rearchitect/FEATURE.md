@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Rearchitect specdacular's command structure and planning workflow. Renames `features/` to `tasks/`, flattens plan hierarchy to one PLAN.md per step, simplifies commands from `/specd:feature:*` to `/specd:*`, and makes auto-mode (no interactive prompts between stages) the default behavior.
+Rearchitect specdacular's command structure and planning workflow. Renames `features/` to `tasks/`, flattens plan hierarchy to one PLAN.md per phase, simplifies commands from `/specd:feature:*` to `/specd:*`, adds a code review agent after every phase execution, and introduces `--semi-auto` and `--auto` flags for `/specd:continue`.
 
 ## Technical Requirements
 
@@ -14,16 +14,18 @@ Rearchitect specdacular's command structure and planning workflow. Renames `feat
 - [ ] `commands/specd/research.md` — Replaces `research-feature.md`
 - [ ] `commands/specd/plan.md` — Replaces `plan-feature.md`
 - [ ] `commands/specd/execute.md` — Replaces `execute-plan.md`
+- [ ] `commands/specd/review.md` — New: code review command (also runs automatically after execution)
 - [ ] `specdacular/workflows/new.md` — Replaces `new-feature.md`
 - [ ] `specdacular/workflows/continue.md` — Replaces `continue-feature.md`
 - [ ] `specdacular/workflows/discuss.md` — Replaces `discuss-feature.md`
 - [ ] `specdacular/workflows/research.md` — Replaces `research-feature.md`
 - [ ] `specdacular/workflows/plan.md` — Replaces `plan-feature.md`
 - [ ] `specdacular/workflows/execute.md` — Replaces `execute-plan.md`
+- [ ] `specdacular/workflows/review.md` — New: code review workflow
 - [ ] `specdacular/templates/tasks/` — Replaces `templates/features/`, updated for new structure
-- [ ] Updated `STATE.md` template — References `steps/` instead of `plans/phase-NN/`
-- [ ] Updated `ROADMAP.md` template — References steps instead of phases/plans
-- [ ] Updated `PLAN.md` template — One per step, contains all tasks
+- [ ] Updated `STATE.md` template — References `phases/phase-NN/` (one PLAN.md each)
+- [ ] Updated `ROADMAP.md` template — References phases with single plans
+- [ ] Updated `PLAN.md` template — One per phase, contains all tasks for that phase
 
 ### Must Integrate With
 
@@ -37,18 +39,22 @@ Rearchitect specdacular's command structure and planning workflow. Renames `feat
 ### Constraints
 
 - Zero dependencies — No new npm packages
-- Backward compatibility is NOT required — This is a clean break, old `features/` structure won't be supported
-- Steps must be small — Each step gets exactly one PLAN.md with focused tasks
-- Auto-mode default — `continue` runs discuss→research→plan→execute without prompting unless `--no-auto` is passed
+- Backward compatibility is NOT required — Clean break
+- One PLAN.md per phase — Phases kept small and focused
+- Code review agent runs after every phase execution (all modes)
+- Interactive mode is the default — `--semi-auto` and `--auto` are opt-in flags
 
 ---
 
 ## Success Criteria
 
 - [ ] `/specd:new my-task` creates `.specd/tasks/my-task/` with FEATURE.md, CONTEXT.md, DECISIONS.md, CHANGELOG.md, STATE.md, config.json
-- [ ] `/specd:continue my-task` auto-runs through stages without prompting at each transition
-- [ ] `/specd:continue my-task --no-auto` prompts at each stage transition (current behavior)
-- [ ] `/specd:plan my-task` creates `steps/step-01/PLAN.md`, `steps/step-02/PLAN.md`, etc. — one plan file per step
+- [ ] `/specd:continue my-task` prompts at each stage transition (default interactive)
+- [ ] `/specd:continue my-task --semi-auto` auto-runs discuss→research→plan, then executes phase-by-phase with review + user approval after each
+- [ ] `/specd:continue my-task --auto` runs everything until task completion, only stops if review finds issues
+- [ ] `/specd:plan my-task` creates `phases/phase-01/PLAN.md`, `phases/phase-02/PLAN.md`, etc.
+- [ ] After every phase execution, code review agent runs and presents findings to user
+- [ ] Review can generate fix plans in decimal phases (e.g., `phases/phase-01.1/PLAN.md`)
 - [ ] Old `feature:*` commands are removed
 - [ ] `bin/install.js` installs the new command/workflow filenames correctly
 - [ ] Help command shows updated command names
@@ -67,7 +73,7 @@ Rearchitect specdacular's command structure and planning workflow. Renames `feat
 ## Initial Context
 
 ### User Need
-The current workflow is too verbose — phases with multiple plans are confusing. Commands are long (`/specd:feature:new`). The interactive prompting at every stage transition slows down users who want to just run through the whole lifecycle.
+The current workflow is too verbose — multiple plans per phase are confusing. Commands are long (`/specd:feature:new`). Users want automated progression through stages with code review built in.
 
 ### Integration Points
 - All command files in `commands/specd/`
@@ -75,8 +81,10 @@ The current workflow is too verbose — phases with multiple plans are confusing
 - Templates in `specdacular/templates/`
 - Installer in `bin/install.js`
 - Help and status commands
+- Reference library review patterns (`.agents/skills/specd-phase-review/`, `.agents/skills/specd-feature-review/`)
 
 ### Key Constraints
-- One PLAN.md per step (no multi-plan phases)
-- Auto-mode is the default for `/specd:continue`
-- Steps should be small and focused
+- One PLAN.md per phase (no multi-plan phases)
+- Interactive mode is default; `--semi-auto` and `--auto` are flags
+- Code review runs after every phase execution regardless of mode
+- Phases should be small and focused

@@ -31,7 +31,7 @@
 
 | Date | Focus | Outcome |
 |------|-------|---------|
-| 2026-02-17 | Initial discussion | FEATURE.md created, 4 decisions |
+| 2026-02-17 | Initial discussion | FEATURE.md created, 6 decisions |
 
 ---
 
@@ -50,9 +50,9 @@
 
 ## Decision Count
 
-- **Active:** 4
+- **Active:** 6
 - **Superseded:** 0
-- **Total:** 4
+- **Total:** 6
 
 ---
 
