@@ -11,15 +11,7 @@
 | `/specd:new [name]` | Initialize a task, start first discussion |
 | `/specd:continue [name] [--semi-auto\|--auto]` | Continue task lifecycle — picks up where you left off |
 
-### Direct Access
-
-| Command | Description |
-|---------|-------------|
-| `/specd:discuss [name]` | Deepen discussion — explore gray areas, record decisions |
-| `/specd:research [name]` | Research implementation patterns with parallel agents |
-| `/specd:plan [name]` | Create execution phases from task context |
-| `/specd:execute [name]` | Execute the next phase's plan |
-| `/specd:review [name]` | Review executed phase — inspect code, approve, or request fixes |
+| `/specd:toolbox [name]` | Advanced operations: discuss, research, plan, execute, review |
 
 ### Utilities
 
@@ -39,7 +31,7 @@
 /specd:new → /specd:continue → continue → continue → done
 ```
 
-**You only need two commands:**
+**You only need three commands:**
 
 1. **`/specd:new [name]`** — Start here. Creates task folder, asks initial questions.
 2. **`/specd:continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
@@ -47,6 +39,12 @@
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
    - Modes: interactive (default), `--semi-auto` (auto through planning, pause after review), `--auto` (run everything)
+3. **`/specd:toolbox [name]`** — Advanced operations menu:
+   - **Discuss** — Explore open questions, record decisions
+   - **Research** — Spawn parallel agents for patterns/pitfalls
+   - **Plan** — Create execution phases
+   - **Execute** — Execute the next phase
+   - **Review** — Review executed phase, approve or request fixes
 
 ### Quick Start
 
