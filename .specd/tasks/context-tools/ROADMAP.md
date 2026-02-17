@@ -4,17 +4,18 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Phases | 3 |
-| Current Phase | 1 |
-| Status | Not Started |
+| Total Phases | 4 |
+| Current Phase | 4 |
+| Status | Phases 1-3 Complete |
 
 ---
 
 ## Phases
 
-- [ ] **Phase 1: Context Status Dashboard** — Read context files, extract timestamps, display staleness dashboard
-- [ ] **Phase 2: Context Review and Add** — Section-by-section review with edit/remove/re-map, guided content addition
-- [ ] **Phase 3: Toolbox Integration** — Wire workflows into /specd:toolbox menu, verify installation
+- [x] **Phase 1: Context Status Dashboard** — Read context files, extract timestamps, display staleness dashboard
+- [x] **Phase 2: Context Review and Add** — Section-by-section review with edit/remove/re-map, guided content addition
+- [x] **Phase 3: Toolbox Integration** — Wire workflows into /specd:toolbox menu, verify installation
+- [ ] **Phase 4: Context Review Improvements** — Show all sections with assessment, use specd-codebase-mapper agent for re-mapping, consistent diff template
 
 ---
 
@@ -85,7 +86,31 @@ Phase 2: Context Review and Add
     ↓
 Phase 3: Toolbox Integration
 └── PLAN.md (2 tasks)
+    ↓
+Phase 4: Context Review Improvements
+└── PLAN.md (3 tasks)
 ```
+
+---
+
+### Phase 4: Context Review Improvements
+
+**Goal:** Every section is shown to the user with an up-to-date assessment (no auto-skipping). Re-mapping uses a dedicated `specd-codebase-mapper` agent with file-type-specific focus, matching the map-codebase process. Changes displayed using a consistent template.
+
+**Creates:**
+- `specdacular/templates/context-review-diff.md` — Consistent display template for section reviews and re-map diffs
+
+**Modifies:**
+- `specdacular/workflows/context-review.md` — Add assessment logic, use mapper agent, reference template
+
+**Plan:** `phases/phase-04/PLAN.md`
+
+**Success Criteria:**
+1. Every section shown to user with ✅/⚠️/🔄 assessment
+2. Re-mapping uses `specd-codebase-mapper` with correct focus (map/patterns/structure/concerns)
+3. Diff display follows template for consistency
+
+**Dependencies:** Phase 2 complete
 
 ---
 
@@ -94,6 +119,7 @@ Phase 3: Toolbox Integration
 | Decision | Impact on Phases |
 |----------|------------------|
 | DEC-003: Toolbox integration | Phase 3 modifies toolbox instead of creating new commands |
-| DEC-009: Inline Task for re-mapping | Phase 2 uses general-purpose Task, no new agent file needed |
+| DEC-009: ~~Inline Task for re-mapping~~ SUPERSEDED by DEC-011 | Phase 4 uses specd-codebase-mapper agent instead |
+| DEC-011: Use specd-codebase-mapper for re-mapping | Phase 4 uses dedicated mapper agent with file-type focus |
 | DEC-010: Skip task validation | All phases validate `.specd/codebase/` instead of task name |
 | DEC-008: Git checkpoint | Phase 2 review workflow creates checkpoint before destructive ops |

@@ -127,10 +127,10 @@
 - Review workflow must commit current state before starting section walk
 - Commit message: `docs: pre-review checkpoint for {file}`
 
-### DEC-009: Targeted re-mapping via inline Task prompt, not new agent
+### DEC-009: ~~Targeted re-mapping via inline Task prompt, not new agent~~
 
 **Date:** 2026-02-17
-**Status:** Active
+**Status:** Superseded by DEC-011
 **Context:** Research suggested either a new `specd-section-remapper` agent or inline Task prompt for single-section re-mapping
 **Decision:** Use inline Task prompt (general-purpose agent) rather than creating a new named agent
 **Rationale:**
@@ -153,6 +153,22 @@
 **Implications:**
 - Context workflows use their own validation step: check `.specd/codebase/` exists
 - If missing, suggest `/specd:map-codebase`
+
+### DEC-011: Use specd-codebase-mapper agent for section re-mapping
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** DEC-009 used a general-purpose agent for re-mapping. The map-codebase workflow already has file-type-specific prompts for the specd-codebase-mapper agent. Re-mapping should use the same agent and logic for consistency.
+**Decision:** Use `specd-codebase-mapper` agent with file-type-specific focus (map/patterns/structure/concerns) for section re-mapping, matching the map-codebase process.
+**Rationale:**
+- Same agent that created the content re-analyzes it — consistent quality
+- File-type-specific focus ensures the agent knows what kind of content to produce
+- Spawning a separate agent keeps context clean and matches the map-codebase pattern
+**Implications:**
+- Re-map action in context-review.md uses `subagent_type: "specd-codebase-mapper"` instead of `"general-purpose"`
+- Must map file name to focus: MAP.md→map, PATTERNS.md→patterns, STRUCTURE.md→structure, CONCERNS.md→concerns
+- Agent prompt scoped to single section with codebase exploration
+- Supersedes DEC-009
 
 ---
 
@@ -178,3 +194,4 @@
 | DEC-008 | 2026-02-17 | Git checkpoint before destructive review actions | Active |
 | DEC-009 | 2026-02-17 | Targeted re-mapping via inline Task prompt, not new agent | Active |
 | DEC-010 | 2026-02-17 | Context workflows skip task validation | Active |
+| DEC-011 | 2026-02-17 | Use specd-codebase-mapper for section re-mapping | Active |
