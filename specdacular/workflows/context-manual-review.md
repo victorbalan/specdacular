@@ -188,9 +188,9 @@ Continue to update_timestamps.
 <step name="walk_sections">
 Walk through every section in document order, one at a time.
 
-For each section: display it using show_section (below). After the user acts on it, move to the next section automatically.
+For each section in order: run the **show_section** step exactly as written below (same assessment, same display format, same AskUserQuestion options). The only addition: include "Done for now" as a 5th option. If selected, stop walking and return to show_section_list.
 
-Add a "Done for now" option alongside the per-section actions. If selected, stop walking and return to show_section_list.
+After the user acts on a section, move to the next section automatically.
 
 After all sections are walked, return to show_section_list.
 </step>
