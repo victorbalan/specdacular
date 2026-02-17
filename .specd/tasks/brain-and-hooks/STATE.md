@@ -15,8 +15,8 @@
 - [ ] All gray areas resolved
 
 ### Research
-- [ ] Research conducted
-- [ ] Findings documented in RESEARCH.md
+- [x] Research conducted
+- [x] Findings documented in RESEARCH.md
 
 ### Planning
 - [ ] Phases derived
@@ -54,7 +54,7 @@
 | FEATURE.md | Created | 2026-02-17 |
 | CONTEXT.md | Created | 2026-02-17 |
 | DECISIONS.md | 10 decisions | 2026-02-17 |
-| RESEARCH.md | Not started | — |
+| RESEARCH.md | Complete | 2026-02-17 |
 | ROADMAP.md | Not started | — |
 | phases/ | Not started | — |
 
@@ -70,7 +70,7 @@
 
 ## Next Steps
 
-One minor gray area remains (hook file discovery). Otherwise ready for research or planning.
+Research complete. Hook discovery gray area resolved. Ready for planning.
 
 **Resume:** `/specd:continue brain-and-hooks` — Picks up where you left off.
 

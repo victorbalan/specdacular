@@ -57,11 +57,14 @@ Key architectural decisions: nested pipelines (main lifecycle + phase-execution 
 
 ## Deferred Questions
 
-### Hook file discovery
+### Hook file discovery — RESOLVED by research
 
-**Reason:** Need to decide during planning — does the brain look for hooks in `.specd/hooks/` by convention, or only from pipeline.json paths?
-**Default for now:** Pipeline.json defines hook paths explicitly
-**Revisit when:** Planning phase
+**Resolution:** Convention-plus-explicit hybrid. Priority order:
+1. Explicit path in pipeline.json step's `hooks.pre` / `hooks.post` field (if set)
+2. Convention discovery: `.specd/hooks/pre-{step-name}.md` / `.specd/hooks/post-{step-name}.md` (if file exists)
+3. No hook (null / nothing found)
+
+**Rationale:** Surveyed Buildkite (both), Jenkins (explicit only), GitHub Actions (explicit only). Convention fallback makes simple hooks work with just a file drop; explicit config enables full control. Matches existing specdacular convention-based patterns.
 
 ---
 
@@ -75,7 +78,7 @@ Key architectural decisions: nested pipelines (main lifecycle + phase-execution 
 
 ## Gray Areas Remaining
 
-- [ ] Hook file discovery — convention-based vs explicit paths only
+- [x] Hook file discovery — resolved by research: convention fallback + explicit override
 
 ---
 
