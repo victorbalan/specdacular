@@ -37,7 +37,7 @@ Always write dates as `YYYY-MM-DD`. Never write times. Never write month names.
 Two tag types for tracking how sections were last modified:
 
 - `<!-- USER_MODIFIED: YYYY-MM-DD -->` — Section was manually edited by the user
-- `<!-- AUTO_MODIFIED: YYYY-MM-DD -->` — Section was updated via re-map agent
+- `<!-- AUTO_GENERATED: YYYY-MM-DD -->` — Section was updated via re-map agent
 
 Placement: On its own line immediately after the section heading. No blank line between heading and tag.
 
@@ -56,7 +56,7 @@ Never place the tag on the same line as the heading. Never add more than one tag
 - A `###` section runs from its heading until the next `###`, `##`, or end of file
 - Ignore `#` (document title) — it is not a reviewable section
 - Code fences (```) do NOT start new sections even if they contain `#` characters
-- `<!-- USER_MODIFIED: ... -->` and `<!-- AUTO_MODIFIED: ... -->` tags inside fenced code blocks are NOT real tags — only detect tags outside code fences
+- `<!-- USER_MODIFIED: ... -->` and `<!-- AUTO_GENERATED: ... -->` tags inside fenced code blocks are NOT real tags — only detect tags outside code fences
 
 ## Timestamp Lines
 
@@ -76,7 +76,7 @@ If `Last Reviewed:` or `Last Modified:` lines don't exist yet, add them after th
 For EVERY section reviewed, you MUST add or update the tag immediately — not later, not at the end:
 
 - **User edits a section** → `<!-- USER_MODIFIED: {today} -->`
-- **Re-map accepted** → `<!-- AUTO_MODIFIED: {today} -->`
+- **Re-map accepted** → `<!-- AUTO_GENERATED: {today} -->`
 - **Section confirmed unchanged** → `<!-- REVIEWED: {today} -->`
 
 Also update the file's `Last Modified: {today}` timestamp at the top if any content changed (edit or re-map).
@@ -308,7 +308,7 @@ Use AskUserQuestion:
   - "Keep current" — Keep existing content unchanged
   - "Edit manually" — Tell me what to change
 
-If "Accept new": Replace section content with agent's output. Add or update tag to `<!-- AUTO_MODIFIED: {today} -->`. Mark modifications made.
+If "Accept new": Replace section content with agent's output. Add or update tag to `<!-- AUTO_GENERATED: {today} -->`. Mark modifications made.
 
 If "Keep current": Move to next section.
 
