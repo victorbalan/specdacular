@@ -25,8 +25,10 @@ npx specdacular
   - [Utilities](#utilities)
 - [The Flow in Detail](#the-flow-in-detail)
 - [How It Works](#how-it-works)
+  - [The Brain](#the-brain)
+  - [Pipeline Configuration](#pipeline-configuration)
+  - [Hooks](#hooks)
   - [Parallel Agents](#parallel-agents)
-  - [Task Flow](#task-flow)
 - [Multi-Project Support](#multi-project-support)
 - [Project Structure](#project-structure)
 - [Philosophy](#philosophy)
@@ -195,13 +197,14 @@ Opens a menu with: Discuss, Research, Plan, Execute, Review. Useful when you wan
 - `STATE.md` — Progress tracking
 - `config.json` — Task configuration
 
-**`continue`** is the smart state machine. It reads `config.json` and `STATE.md` to determine where the task is, shows a status summary, and offers the natural next step. After each action it loops back — you keep going until you choose to stop. Under the hood it delegates to these stages:
+**`continue`** delegates to the brain — a config-driven orchestrator that reads `pipeline.json` and drives the lifecycle. It determines the next step from task state, executes pre-hooks → step workflow → post-hooks, updates state, and loops. The default pipeline stages:
 
 - **Discussion** — Probes gray areas, records decisions. Context accumulates across sessions.
 - **Research** — Spawns 3 parallel agents: codebase integration, external patterns, and pitfalls. Output: `RESEARCH.md`.
 - **Planning** — Creates `ROADMAP.md` with phases derived from dependency analysis, plus one `phases/phase-NN/PLAN.md` per phase. Plans are self-contained prompts for an implementing agent.
-- **Phase execution** — Implements plans with verification after each task, commits per task, and progress tracking in `STATE.md`.
-- **Phase review** — Code review agent inspects executed code against plan intent using semantic analysis and git diff. Generates fix plans (decimal phases like `phase-01.1`) if needed.
+- **Phase execution** — Nested sub-pipeline that loops per phase: execute → review → revise. Implements plans with verification, commits per task, and progress tracking.
+- **Phase review** — Code review agent inspects executed code against plan intent. Generates fix plans (decimal phases like `phase-01.1`) if needed.
+- **Revise** — Collects feedback from review, creates fix plans, signals brain to re-execute.
 
 **`toolbox`** provides direct access to advanced operations outside the normal flow:
 
@@ -214,6 +217,145 @@ Opens a menu with: Discuss, Research, Plan, Execute, Review. Useful when you wan
 ---
 
 ## How It Works
+
+### The Brain
+
+The brain (`brain.md`) is a config-driven orchestrator that reads `pipeline.json` and drives the entire task lifecycle. Step workflows are pure execution — they do their work and return. The brain decides what comes next.
+
+```
+                        ┌─────────────────────┐
+                        │       BRAIN         │
+                        │  (config-driven     │
+                        │   orchestrator)     │
+                        └────────┬────────────┘
+                                 │
+                    ┌────────────┼────────────┐
+                    ▼            ▼            ▼
+              Read State   Load Pipeline   Check Mode
+                    │            │            │
+                    └────────────┼────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │      Main Pipeline      │
+                    │                         │
+                    │  discuss → research →   │
+                    │  plan → phase-execution │
+                    └────────────┬────────────┘
+                                 │
+                         ┌───────┴───────┐
+                         ▼               │
+              ┌─────────────────────┐    │
+              │  Phase-Execution    │    │
+              │  Sub-Pipeline       │    │
+              │                     │    │
+              │  execute → review → │    │
+              │  revise  ──loop──┘  │    │
+              │                     │    │
+              │  Per phase, repeats │    │
+              │  until all phases   │    │
+              │  complete           │    │
+              └─────────────────────┘    │
+                         │               │
+                         └───────────────┘
+                                 │
+                                 ▼
+                          TASK COMPLETE
+```
+
+**The brain loop:**
+1. Read current state (`config.json`, `STATE.md`)
+2. Determine next step from pipeline config
+3. Execute pre-hooks → step workflow → post-hooks
+4. Update state → loop back
+
+**Execution modes:**
+
+| Mode | Behavior |
+|------|----------|
+| **Interactive** (default) | Prompts at each stage transition |
+| **Semi-auto** (`--semi-auto`) | Auto-runs steps where `pause_in_semi_auto: false`, pauses where `true` |
+| **Auto** (`--auto`) | Runs everything, only stops on errors or task completion |
+
+### Pipeline Configuration
+
+The pipeline is defined in `pipeline.json` — nothing is hardcoded. The default pipeline ships with Specdacular and can be fully replaced by placing a `.specd/pipeline.json` in your project (full replace, not merge).
+
+**Default pipeline structure:**
+
+```json
+{
+  "schema_version": "1.0",
+  "mode": "interactive",
+  "pipelines": {
+    "main": [
+      { "name": "discuss",  "workflow": "discuss.md",  "pause_in_semi_auto": false },
+      { "name": "research", "workflow": "research.md", "pause_in_semi_auto": false },
+      { "name": "plan",     "workflow": "plan.md",     "pause_in_semi_auto": false },
+      { "name": "phase-execution", "pipeline": "phase-execution" }
+    ],
+    "phase-execution": [
+      { "name": "execute", "workflow": "execute.md", "pause_in_semi_auto": true },
+      { "name": "review",  "workflow": "review.md",  "pause_in_semi_auto": true },
+      { "name": "revise",  "workflow": "revise.md",  "pause_in_semi_auto": true }
+    ]
+  },
+  "hooks": { "pre-step": null, "post-step": null }
+}
+```
+
+**Customization options:**
+- **Swap workflows:** Point any step's `workflow` to your own `.md` file
+- **Enable/disable steps:** Set `"enabled": false` on any step
+- **Change mode:** Set `"mode": "semi-auto"` or `"auto"` as default
+- **Add hooks:** Configure pre/post hooks per step or globally
+- **Full replace:** Drop `.specd/pipeline.json` to replace the entire pipeline
+
+### Hooks
+
+Hooks are markdown workflow files (`.md`) that run before and after pipeline steps. They can read and modify task files just like any other workflow.
+
+```
+  Global pre-step hook
+         │
+         ▼
+  Step pre-hook
+         │
+         ▼
+  ┌─────────────┐
+  │  Step runs   │
+  │  (discuss,   │
+  │   execute,   │
+  │   etc.)      │
+  └──────┬──────┘
+         │
+         ▼
+  Step post-hook
+         │
+         ▼
+  Global post-step hook
+```
+
+**Configuration in pipeline.json:**
+
+```json
+{
+  "name": "execute",
+  "workflow": "execute.md",
+  "hooks": {
+    "pre": { "workflow": ".specd/hooks/pre-execute.md", "mode": "inline", "optional": false },
+    "post": { "workflow": ".specd/hooks/post-execute.md", "mode": "subagent", "optional": true }
+  }
+}
+```
+
+**Hook modes:**
+- **`inline`** — Runs in the brain's context (can see all state)
+- **`subagent`** — Spawns a separate agent (fresh context, isolated)
+
+**Convention fallback:** If no hooks are configured explicitly, the brain checks for `.specd/hooks/pre-{step}.md` and `.specd/hooks/post-{step}.md` automatically.
+
+**Error handling:** Required hooks (`optional: false`) stop the pipeline on failure. Optional hooks log a warning and continue.
 
 ### Parallel Agents
 
@@ -239,46 +381,6 @@ Specdacular spawns specialized agents that run simultaneously:
 - Fresh 200k context per agent (no token pollution)
 - Faster execution (parallel, not sequential)
 - Agents write directly to files
-
-### Task Flow
-
-```
-/specd:new              /specd:continue
-      │                           │
-      ▼                           ▼
- Create task             ┌─── Read state ◀──────────────┐
- First discussion        │    Show status                │
- Offer to continue       │    Offer next step            │
-      │                  │         │                     │
-      ▼                  │         ▼                     │
- "Keep discussing?"      │   ┌──────────────┐           │
-  Yes → discuss loop     │   │  Execute the │           │
-  No  → continue         │   │  next action │           │
-                         │   └──────────────┘           │
-                         │         │                     │
-                         │    ┌────┴────┐                │
-                         │    │ Discuss │ Research       │
-                         │    │ Plan    │ Execute        │
-                         │    │ Review  │                │
-                         │    └────┬────┘                │
-                         │         │                     │
-                         │         ▼                     │
-                         │   "Continue or stop?"         │
-                         │    Continue ──────────────────┘
-                         │    Stop → clean exit
-                         │
-                         └─── No tasks? → /specd:new
-```
-
-**Under the hood,** `continue` delegates to specialized workflows:
-
-```
-discussion  → discuss workflow
-research    → research workflow (3 parallel agents)
-planning    → plan workflow
-execution   → execute workflow
-review      → review workflow (code review agent)
-```
 
 ---
 
@@ -329,6 +431,11 @@ Planning creates per-project roadmaps plus a cross-project dependency graph (`DE
 ```
 your-project/
 ├── .specd/
+│   ├── pipeline.json          # Optional — custom pipeline (full replace)
+│   ├── hooks/                 # Optional — convention-based hooks
+│   │   ├── pre-execute.md
+│   │   └── post-review.md
+│   │
 │   ├── codebase/              # From /specd:map-codebase
 │   │   ├── MAP.md
 │   │   ├── PATTERNS.md
