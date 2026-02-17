@@ -96,6 +96,10 @@ Arguments: $ARGUMENTS
 @~/.claude/specdacular/workflows/context-status.md
 @~/.claude/specdacular/workflows/context-review.md
 @~/.claude/specdacular/workflows/context-add.md
+
+**Context templates (nested @ refs don't resolve — must be listed here):**
+@~/.claude/specdacular/templates/context/section-display.md
+@~/.claude/specdacular/templates/context/review-diff.md
 </context>
 
 <success_criteria>
