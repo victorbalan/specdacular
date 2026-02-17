@@ -6,27 +6,18 @@ Template for displaying a single section of a codebase context file to the user 
 
 ## Section Display
 
-Display each section as three parts: header table, raw content, then assessment.
+Display each section as a single-column table with three rows.
 
-**Part 1 — Header table:**
+| **{## or ###} {Section Title}** [{current}/{total}] {If USER_MODIFIED: "· User modified: YYYY-MM-DD"} |
+|:-------------------------------------------------------------------------------------------------------|
+| `{exact section content from the file — no modifications, no strikethrough, no interpretation}` |
+| {assessment icon} {assessment label} — {brief explanation: which paths missing, which files changed} |
 
-| **{## or ###} {Section Title}** [{current}/{total}] |
-|:-----------------------------------------------------|
-| {If USER_MODIFIED: "User modified: YYYY-MM-DD"} |
+**Row 1 — Header:** Section heading, position counter, and user-modified date if tagged.
 
-**Part 2 — Raw content (code fence to prevent markdown interpretation):**
+**Row 2 — Raw content:** The exact text from the file wrapped in backticks. Do NOT interpret the content — no strikethrough on missing paths, no added formatting, no modifications. Show it verbatim.
 
-````
-```
-{exact section content copied from the file — no modifications, no strikethrough, no interpretation}
-```
-````
-
-**Part 3 — Agent assessment:**
-
-> **Assessment:** {✅ Up to date | ⚠️ Potentially stale | 🔄 Changed since last review}
->
-> {Brief explanation: which paths are missing, which files changed, etc.}
+**Row 3 — Assessment:** The agent's analysis with icon, label, and brief explanation.
 
 ---
 
