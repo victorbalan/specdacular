@@ -131,20 +131,6 @@ Use AskUserQuestion:
 
 **Extract `Last Reviewed` date** from the selected file for assessment logic. Store as `LAST_REVIEWED_DATE`. If no `Last Reviewed:` line exists, set to `null`.
 
-Continue to git_checkpoint.
-</step>
-
-<step name="git_checkpoint">
-Create a git checkpoint before any changes.
-
-@~/.claude/specdacular/references/commit-docs.md
-
-- **$FILES:** `.specd/codebase/{selected file}`
-- **$MESSAGE:** `docs: pre-review checkpoint for {file}`
-- **$LABEL:** `pre-review checkpoint`
-
-Note: If there are no changes to commit (file is clean), skip the commit silently.
-
 Continue to parse_sections.
 </step>
 
