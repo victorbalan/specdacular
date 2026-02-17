@@ -2,13 +2,13 @@
 
 ## Phase Selection
 
-Determine which phase to work on. Requires a feature name to be already selected.
+Determine which phase to work on. Requires a task name to be already selected.
 
 **Read available phases:**
-Read `.specd/features/{feature-name}/ROADMAP.md` and extract the phase list with status.
+Read `.specd/tasks/{task-name}/ROADMAP.md` and extract the phase list with status.
 
 ```bash
-[ -f ".specd/features/{feature-name}/ROADMAP.md" ] || { echo "No roadmap found. Run /specd:feature:continue to create one."; exit 1; }
+[ -f ".specd/tasks/{task-name}/ROADMAP.md" ] || { echo "No roadmap found. Run /specd:continue to create one."; exit 1; }
 ```
 
 Parse the ROADMAP.md "Phases" section to get:
