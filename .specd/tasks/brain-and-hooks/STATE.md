@@ -43,7 +43,7 @@
 
 | Date | Focus | Outcome |
 |------|-------|---------|
-| 2026-02-17 | Initial discussion | Brain + hooks architecture defined, 4 decisions recorded |
+| 2026-02-17 | Full architecture discussion | Brain + hooks + nested pipelines defined, 10 decisions |
 
 ---
 
@@ -53,7 +53,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-17 |
 | CONTEXT.md | Created | 2026-02-17 |
-| DECISIONS.md | 4 decisions | 2026-02-17 |
+| DECISIONS.md | 10 decisions | 2026-02-17 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | phases/ | Not started | — |
@@ -62,15 +62,15 @@
 
 ## Decision Count
 
-- **Active:** 4
+- **Active:** 10
 - **Superseded:** 0
-- **Total:** 4
+- **Total:** 10
 
 ---
 
 ## Next Steps
 
-Continue discussing gray areas (hook output contract, review step, hook execution model, error handling) or move to research/planning.
+One minor gray area remains (hook file discovery). Otherwise ready for research or planning.
 
 **Resume:** `/specd:continue brain-and-hooks` — Picks up where you left off.
 

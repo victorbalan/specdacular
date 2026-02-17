@@ -5,7 +5,9 @@
 
 ## Discussion Summary
 
-Discussed the need to split specdacular's workflow system into a centralized orchestrator ("the brain") and a hook system. The brain owns all flow control and state transitions, reading a `pipeline.json` config that defines step order, enabled/disabled flags, and workflow file references. Users can fully replace the pipeline by providing their own `.specd/pipeline.json`. Hooks are markdown workflow files that run pre/post each step, receiving full task context and influencing subsequent steps.
+Discussed rearchitecting specdacular into a config-driven orchestrator ("the brain") with a hook system. The brain replaces `continue.md` as the central dispatcher — same modes (interactive/semi-auto/auto), same state-based routing, same user prompts, but driven by `pipeline.json` instead of hardcoded logic.
+
+Key architectural decisions: nested pipelines (main lifecycle + phase-execution loop), hooks as markdown workflows with configurable execution mode (inline/subagent) and optional flag, full replace semantics for user pipeline overrides, and extracting revise as a separate step from review.
 
 ---
 
@@ -15,48 +17,50 @@ Discussed the need to split specdacular's workflow system into a centralized orc
 
 **Question:** What exactly is the "brain" and how does it relate to existing workflows?
 
-**Resolution:** The brain is a central orchestrator workflow (`brain.md`) that reads `pipeline.json` and dispatches to individual step workflows. It absorbs flow control from `continue.md` and individual step workflows. Steps become pure "do the work" units with no knowledge of what comes next.
+**Resolution:** The brain is `continue.md` reimagined as a config-driven orchestrator. It absorbs all flow control from continue.md and individual step workflows. Steps become pure "do the work" units. Same behavior, driven by pipeline.json.
 
-**Related Decisions:** DEC-001
+**Related Decisions:** DEC-001, DEC-010
 
 ### What format are hooks?
 
 **Question:** Should hooks be shell scripts, markdown workflows, or both?
 
-**Resolution:** Hooks are markdown workflow files only. This keeps everything in the same paradigm — hooks are just workflow steps that the brain executes, with full access to task context.
+**Resolution:** Markdown workflow files only. Hooks are just workflow steps — they can modify any task file directly, no special output contract.
 
-**Related Decisions:** DEC-002
+**Related Decisions:** DEC-002, DEC-005
+
+### How does hook execution work?
+
+**Question:** Should hooks run inline or as subagents?
+
+**Resolution:** Configurable per hook. `"mode": "inline"` (default) runs in brain's context, `"mode": "subagent"` spawns a Task agent. Also supports `"optional": true` to continue on failure.
+
+**Related Decisions:** DEC-006, DEC-007
 
 ### How does pipeline customization work?
 
 **Question:** Can users partially override the pipeline or must they replace it entirely?
 
-**Resolution:** Full replace. If `.specd/pipeline.json` exists, it's used instead of the default. No merge semantics. Simpler mental model.
+**Resolution:** Full replace. `.specd/pipeline.json` replaces default entirely. Default at `specdacular/pipeline.json`.
 
-**Related Decisions:** DEC-003
+**Related Decisions:** DEC-003, DEC-004
 
-### Where does the default pipeline live?
+### How does the per-phase loop work?
 
-**Question:** Where is the default pipeline.json stored and how does override resolution work?
+**Question:** Execute and review loop per phase — how to model this?
 
-**Resolution:** Default at `specdacular/pipeline.json` (copied during install). User override at `.specd/pipeline.json`. Brain checks `.specd/pipeline.json` first, falls back to installed default.
+**Resolution:** Nested pipelines. Main pipeline has `"pipeline": "phase-execution"` step. Phase-execution sub-pipeline (execute → review → revise) loops per phase from ROADMAP.md.
 
-**Related Decisions:** DEC-004
+**Related Decisions:** DEC-008, DEC-009
 
 ---
 
 ## Deferred Questions
 
-### Hook output contract
+### Hook file discovery
 
-**Reason:** Need to design during planning — how exactly does a hook's output get fed into the next step
-**Default for now:** Hooks can write to CONTEXT.md or a hook-output location
-**Revisit when:** Planning phase
-
-### Review step design
-
-**Reason:** Review is listed as a pipeline step but doesn't exist yet as a workflow
-**Default for now:** Disabled in default pipeline.json
+**Reason:** Need to decide during planning — does the brain look for hooks in `.specd/hooks/` by convention, or only from pipeline.json paths?
+**Default for now:** Pipeline.json defines hook paths explicitly
 **Revisit when:** Planning phase
 
 ---
@@ -65,16 +69,13 @@ Discussed the need to split specdacular's workflow system into a centralized orc
 
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
-| 2026-02-17 | Brain concept, hooks format, pipeline config, customization model | 4 decisions recorded, core architecture defined |
+| 2026-02-17 | Brain concept, hooks, pipeline config, nested pipelines, modes, revise extraction | 10 decisions recorded, architecture fully defined |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Hook output contract — How hook output flows into the next step
-- [ ] Review step — Needs to be designed (currently disabled by default)
-- [ ] Hook execution model — Does the brain execute hooks inline or as subagents?
-- [ ] Error handling — What happens when a hook or step fails?
+- [ ] Hook file discovery — convention-based vs explicit paths only
 
 ---
 
