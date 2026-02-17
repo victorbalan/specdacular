@@ -154,30 +154,11 @@ Continue to walk_sections.
 <step name="walk_sections">
 Walk through each section in document order. Every section is shown to the user — never skip.
 
-**For each section, first perform an assessment:**
+**For each section, assess and display using the section display template:**
 
-Use the assessment logic from `@specdacular/templates/context/section-display.md`:
+@~/.claude/specdacular/templates/context/section-display.md
 
-1. Extract file paths from the section content (anything in backticks that looks like a file path — contains `/` or `.` extension)
-2. Check if those paths exist:
-   ```bash
-   # For each extracted path
-   test -f "{path}" && echo "exists" || echo "missing"
-   ```
-3. If `LAST_REVIEWED_DATE` is set, check git activity on referenced files:
-   ```bash
-   git log --oneline --since="{LAST_REVIEWED_DATE}" -- {paths} 2>/dev/null | head -5
-   ```
-4. Classify:
-   - Any path missing → ⚠️ **Potentially stale**
-   - Git commits found after Last Reviewed → 🔄 **Changed since last review**
-   - All paths exist and no recent changes → ✅ **Up to date**
-   - No `Last Reviewed` date → ⚠️ **Potentially stale** (never reviewed)
-   - No file paths in section → ✅ **Up to date** (cannot verify, assume ok)
-
-**Display the section:**
-
-Read `specdacular/templates/context/section-display.md` and follow its Section Display format exactly. Do not improvise a different format.
+Follow the Section Display format from the template above exactly. Do not improvise a different format.
 
 **After displaying, use AskUserQuestion:**
 - header: "{current}/{total}"
