@@ -156,7 +156,7 @@ Walk through each section in document order. Every section is shown to the user 
 
 **For each section, first perform an assessment:**
 
-Use the assessment logic from `@specdacular/templates/context-review-diff.md`:
+Use the assessment logic from `@specdacular/templates/context/section-display.md`:
 
 1. Extract file paths from the section content (anything in backticks that looks like a file path — contains `/` or `.` extension)
 2. Check if those paths exist:
@@ -175,7 +175,7 @@ Use the assessment logic from `@specdacular/templates/context-review-diff.md`:
    - No `Last Reviewed` date → ⚠️ **Potentially stale** (never reviewed)
    - No file paths in section → ✅ **Up to date** (cannot verify, assume ok)
 
-**Display using template format** (`@specdacular/templates/context-review-diff.md` — Section Review Display):
+**Display using template format** (`@specdacular/templates/context/section-display.md`):
 ```
 ───────────────────────────────────────────────────────
 {## or ###} {Section Title}  [{current}/{total}]
@@ -278,7 +278,7 @@ Do NOT wrap in code fences or add explanation.
 
 **After agent returns:**
 
-Present using the Re-map Diff Display format from `@specdacular/templates/context-review-diff.md`:
+Present using the Re-map Diff Display format from `@specdacular/templates/context/review-diff.md`:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -389,7 +389,8 @@ End workflow.
 - Git checkpoint created before changes
 - Every section shown with ✅/⚠️/🔄 assessment (no auto-skipping)
 - Assessment checks file path existence and git activity since last review
-- Display follows template format from `specdacular/templates/context-review-diff.md`
+- Section display follows `specdacular/templates/context/section-display.md`
+- Re-map diff display follows `specdacular/templates/context/review-diff.md`
 - User can confirm, edit, remove, or re-map each section
 - Edits add USER_MODIFIED tag with date
 - Removes warn about child sections
