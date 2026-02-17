@@ -57,12 +57,12 @@ Then present the menu using AskUserQuestion:
   - "Execute / Review" — Execute next phase or review executed phase
 
 Based on selection, delegate to the appropriate workflow:
-- Discuss → @~/.claude/specdacular/workflows/discuss.md
-- Research → @~/.claude/specdacular/workflows/research.md
-- Plan → @~/.claude/specdacular/workflows/plan.md
+- Discuss → follow the discuss.md workflow
+- Research → follow the research.md workflow
+- Plan → follow the plan.md workflow
 - Execute / Review → Check `config.json` → `phases.current_status`:
-  - If "executed" → @~/.claude/specdacular/workflows/review.md
-  - Otherwise → @~/.claude/specdacular/workflows/execute.md
+  - If "executed" → follow the review.md workflow
+  - Otherwise → follow the execute.md workflow
 
 ---
 
@@ -77,13 +77,25 @@ No task name needed. Present the menu using AskUserQuestion:
   - "Add" — Add new content to a context file
 
 Based on selection, delegate to the appropriate workflow:
-- Status → @~/.claude/specdacular/workflows/context-status.md
-- Review → @~/.claude/specdacular/workflows/context-review.md
-- Add → @~/.claude/specdacular/workflows/context-add.md
+- Status → follow the context-status.md workflow
+- Review → follow the context-review.md workflow
+- Add → follow the context-add.md workflow
 </execution_context>
 
 <context>
 Arguments: $ARGUMENTS
+
+**Task workflows:**
+@~/.claude/specdacular/workflows/discuss.md
+@~/.claude/specdacular/workflows/research.md
+@~/.claude/specdacular/workflows/plan.md
+@~/.claude/specdacular/workflows/execute.md
+@~/.claude/specdacular/workflows/review.md
+
+**Context workflows:**
+@~/.claude/specdacular/workflows/context-status.md
+@~/.claude/specdacular/workflows/context-review.md
+@~/.claude/specdacular/workflows/context-add.md
 </context>
 
 <success_criteria>
