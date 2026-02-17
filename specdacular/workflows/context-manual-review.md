@@ -165,20 +165,34 @@ Show the user a numbered list of all sections with their tag status, then let th
 
 Use AskUserQuestion:
 - header: "{file}"
-- question: "Select a section to review, or add new content"
+- question: "How would you like to review?"
 - options:
-  - "Select section" — Enter a section number to review
+  - "Select section" — Pick a section by number
+  - "Walk all" — Go through every section in order
   - "Add new section" — Add new content to this file
   - "Done" — Finish reviewing this file
 
 **If "Select section":**
-Ask which section number. Continue to show_section.
+Ask which section number. Continue to show_section. After the action, return to show_section_list.
+
+**If "Walk all":**
+Continue to walk_sections.
 
 **If "Add new section":**
 Continue to add_content.
 
 **If "Done":**
 Continue to update_timestamps.
+</step>
+
+<step name="walk_sections">
+Walk through every section in document order, one at a time.
+
+For each section: display it using show_section (below). After the user acts on it, move to the next section automatically.
+
+Add a "Done for now" option alongside the per-section actions. If selected, stop walking and return to show_section_list.
+
+After all sections are walked, return to show_section_list.
 </step>
 
 <step name="show_section">
