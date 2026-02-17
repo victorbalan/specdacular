@@ -141,18 +141,19 @@ Read the selected file and build a section list.
    - Whether a `<!-- USER_MODIFIED: YYYY-MM-DD -->` tag exists on the line after the heading
    - The USER_MODIFIED date if present
    - The section content (everything from after the heading/tag until the next heading of same or higher level)
-4. Count total sections
-5. For `##` sections, count their `###` children
+   - Parent `##` heading (for `###` sections)
+4. **Exclude empty parent sections:** If a `##` section has no content of its own (only `###` children), do NOT count it as a reviewable section. Instead, store its heading text as the parent label for its children.
+5. Count only reviewable sections (sections with actual content)
 
 ```
-Found {N} sections in {file} ({X} top-level, {Y} subsections)
+Found {N} reviewable sections in {file}
 ```
 
 Continue to walk_sections.
 </step>
 
 <step name="walk_sections">
-Walk through each section in document order. Every section is shown to the user — never skip.
+Walk through each reviewable section in document order. Every section with content is shown — skip empty parents.
 
 **For each section, assess and display using the section display template:**
 

@@ -8,7 +8,7 @@ Template for displaying a single section of a codebase context file to the user 
 
 ```
 ================================================================
-{## or ###} {Section Title}  [{current}/{total}]{If USER_MODIFIED: "  · User modified: YYYY-MM-DD"}
+{If ### subsection: "## {Parent Title} > "}{## or ###} {Section Title}  [{current}/{total}]{If USER_MODIFIED: "  · User modified: YYYY-MM-DD"}
 ================================================================
 
 {exact section content from the file — verbatim, no modifications, no strikethrough, no interpretation}
@@ -18,11 +18,13 @@ Template for displaying a single section of a codebase context file to the user 
 ================================================================
 ```
 
-**Line 1-3 — Header:** `=` separator, section heading with position counter, `=` separator.
+**Header:** `=` separator, section heading with position counter, `=` separator. For `###` subsections, prefix with the parent `##` heading and ` > ` to show context.
 
 **Middle — Raw content:** The exact text from the file in a code fence. Do NOT interpret the content — no strikethrough on missing paths, no added formatting. Show it verbatim.
 
 **Bottom — Assessment:** The agent's analysis with icon, label, and brief explanation. Closed with `=` separator.
+
+**Empty parent sections** (## with no content, only ### children) are NOT displayed as reviewable sections. Their heading is shown as a prefix on child sections instead.
 
 ---
 
