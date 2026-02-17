@@ -175,24 +175,11 @@ Use the assessment logic from `@specdacular/templates/context/section-display.md
    - No `Last Reviewed` date → ⚠️ **Potentially stale** (never reviewed)
    - No file paths in section → ✅ **Up to date** (cannot verify, assume ok)
 
-**DISPLAY FORMAT — follow exactly, do not improvise:**
+**Display the section:**
 
-You MUST output a markdown table with exactly 3 rows and 1 column. No other format is acceptable.
+Read `specdacular/templates/context/section-display.md` and follow its Section Display format exactly. Do not improvise a different format.
 
-Row 1: The section heading with position counter.
-Row 2: The EXACT text from the file inside backticks. Copy it verbatim. Do NOT add strikethrough. Do NOT mark missing paths. Do NOT modify, summarize, or interpret the content.
-Row 3: Your assessment with icon and brief explanation.
-
-Example output:
-
-| **## Entry Points** [1/12] |
-|:---|
-| `bin/install.js — CLI installer, handles global/local installation...` |
-| ⚠️ Potentially stale — 8 referenced command files are missing (new-feature.md, discuss-feature.md, etc.) |
-
-If the section has a USER_MODIFIED tag, append to row 1: `· User modified: YYYY-MM-DD`
-
-**After the table, use AskUserQuestion:**
+**After displaying, use AskUserQuestion:**
 - header: "{current}/{total}"
 - question: "What would you like to do with this section?"
 - options:
