@@ -77,9 +77,7 @@
 
 ## Next Steps
 
-All phases executed. Ready for review.
-
-**Resume:** `/specd:continue brain-and-hooks` — Picks up where you left off.
+Task complete. All phases executed, reviewed, and approved.
 
 ---
 
