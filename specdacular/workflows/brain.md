@@ -183,10 +183,17 @@ Commit state:
 - **$MESSAGE:** `docs({task-name}): starting {step-name}`
 - **$LABEL:** `state transition`
 
-<!-- HOOK EXECUTION — Phase 2 will add:
-1. Execute global hooks.pre-step (if configured)
-2. Execute step.hooks.pre (if configured)
--->
+**Execute pre-hooks:**
+@~/.claude/specdacular/references/execute-hooks.md
+
+Run pre-hooks in order:
+1. Global `hooks.pre-step` from pipeline.json (if configured)
+2. Step's `hooks.pre` from the step config (if configured)
+3. Convention fallback: check `.specd/hooks/pre-{step-name}.md` (if file exists and no explicit config)
+
+For each hook, use the execution logic from the reference.
+
+If a required pre-hook fails, stop pipeline and save state. Do NOT dispatch the step.
 
 **Dispatch step workflow:**
 Resolve the workflow path from the step's `workflow` field.
@@ -197,10 +204,17 @@ Pass $TASK_NAME as context.
 
 **After step returns:**
 
-<!-- HOOK EXECUTION — Phase 2 will add:
-3. Execute step.hooks.post (if configured)
-4. Execute global hooks.post-step (if configured)
--->
+**Execute post-hooks:**
+@~/.claude/specdacular/references/execute-hooks.md
+
+Run post-hooks in order:
+1. Step's `hooks.post` from the step config (if configured)
+2. Convention fallback: check `.specd/hooks/post-{step-name}.md` (if file exists and no explicit config)
+3. Global `hooks.post-step` from pipeline.json (if configured)
+
+For each hook, use the execution logic from the reference.
+
+If a required post-hook fails, stop pipeline and save state.
 
 Continue to update_state.
 </step>

@@ -3,7 +3,7 @@ Review executed phase by comparing plan intent against actual code. Combines sem
 
 **Core principle:** Claude inspects first, then shows findings to user. User decides.
 
-**Output:** Phase approved (advance to next) or fix plans in decimal phases (e.g., phase-01.1/)
+**Output:** Review findings presented, user choice recorded for brain routing (approve, revise, or stop).
 </purpose>
 
 <philosophy>
@@ -15,10 +15,6 @@ Plans describe intent. Code implements intent. Check whether intent was fulfille
 ## Inspect, Then Show
 
 Claude reads the code and compares against the plan first. Then presents findings with the git diff. The user gets a curated view, not a raw dump.
-
-## Fix Plans, Not Inline Fixes
-
-When the user reports issues, create proper PLAN.md files in decimal phases. These get executed through the same execute workflow.
 
 ## Deviations Are Neutral
 
@@ -32,16 +28,7 @@ A deviation means code differs from plan. It might be an improvement. The review
 @~/.claude/specdacular/references/validate-task.md
 
 Use extended validation. Also check:
-- `config.json` → `phases.current_status` must be "executed"
 - `config.json` → `phases.phase_start_commit` must exist
-
-**If status is not "executed":**
-```
-Phase {N} is not ready for review (status: {status}).
-
-Run /specd:continue {task-name} to get to the right step.
-```
-End workflow.
 
 Continue to load_context.
 </step>
@@ -53,14 +40,14 @@ Load all context including the current phase's PLAN.md.
 
 **Read phase plan:**
 ```bash
-PHASE_NUM=$(cat .specd/tasks/$TASK_NAME/config.json | grep -o '"current": [0-9]*' | grep -o '[0-9]*')
-PHASE_DIR=".specd/tasks/$TASK_NAME/phases/phase-$(printf '%02d' $PHASE_NUM)"
+PHASE_NUM=$(cat $TASK_DIR/config.json | grep -o '"current": [0-9]*' | grep -o '[0-9]*')
+PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $PHASE_NUM)"
 cat "$PHASE_DIR/PLAN.md"
 ```
 
 **Get phase start commit:**
 ```bash
-cat .specd/tasks/$TASK_NAME/config.json | grep phase_start_commit
+cat $TASK_DIR/config.json | grep phase_start_commit
 ```
 
 Continue to inspect_code.
@@ -156,121 +143,11 @@ Use AskUserQuestion:
   - "I have concerns" — Describe issues
   - "Stop for now" — Come back later
 
-**If "Looks good":**
-Continue to approve_phase.
-
-**If "I want to revise" or "I have concerns":**
-Continue to collect_feedback.
-
-**If "Stop for now":**
-```
-Progress saved. Phase stays in "executed" state.
-Resume review with /specd:continue {task-name}
-```
-End workflow.
-</step>
-
-<step name="collect_feedback">
-Gather specific feedback from user.
-
-```
-Tell me what needs fixing. You can describe:
-- Bugs or incorrect behavior
-- Approach you'd prefer changed
-- Missing functionality
-- Code quality issues
-
-Describe as many issues as you want — I'll create a fix plan for all of them.
-```
-
-Wait for user response. Follow up to understand each issue clearly.
-
-Continue to create_fix_plan.
-</step>
-
-<step name="create_fix_plan">
-Create a fix plan in a decimal phase.
-
-**Determine fix phase number:**
-```bash
-ls -d .specd/tasks/$TASK_NAME/phases/phase-$CURRENT.* 2>/dev/null | sort -V | tail -1
-```
-- If no decimal phases → create `phase-{N}.1/`
-- If `phase-{N}.1/` exists → create `phase-{N}.2/`, etc.
-
-**Create fix phase directory and PLAN.md:**
-```bash
-mkdir -p .specd/tasks/$TASK_NAME/phases/phase-{N.M}/
-```
-
-Write `PLAN.md` using standard plan format:
-- Objective: Address review feedback for Phase {N}
-- Tasks: One per issue reported, with clear fix description and verification
-
-**Update ROADMAP.md:**
-Add fix phase entry after the parent phase.
-
-**Commit:**
-@~/.claude/specdacular/references/commit-docs.md
-- **$FILES:** fix plan directory + ROADMAP.md
-- **$MESSAGE:** `docs({task-name}): create fix plan phase-{N.M}`
-- **$LABEL:** `fix plan`
-
-**Offer execution:**
-Use AskUserQuestion:
-- header: "Fix Plan"
-- question: "Execute the fix plan now?"
-- options:
-  - "Execute" — Run the fix plan
-  - "Stop for now" — Come back later
-
-**If "Execute":**
-Execute fix plan via:
-@~/.claude/specdacular/workflows/execute.md
-
-After fix execution, loop back to the validate step of this review workflow (re-review with updated diff).
-
-**If "Stop for now":**
-```
-Fix plan saved. Resume with /specd:continue {task-name}
-```
-End workflow.
-</step>
-
-<step name="approve_phase">
-Mark phase as completed and advance.
-
-**Update config.json:**
-- Set `phases.current_status` to "completed"
-- Increment `phases.completed`
-- Advance `phases.current` to next phase
-- Reset `phases.phase_start_commit` to null
-- Set new phase status to "pending"
-
-**Update STATE.md:**
-- Mark phase as complete in execution progress
-
-**Add review cycle to STATE.md:**
-```markdown
-| {N} | 1 | {date} | {summary} | {fix plans or "—"} | clean |
-```
-
-**Commit:**
-@~/.claude/specdacular/references/commit-docs.md
-- **$FILES:** config.json + STATE.md
-- **$MESSAGE:** `docs({task-name}): phase {N} approved`
-- **$LABEL:** `phase approved`
-
-**Present:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- PHASE {N} COMPLETE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Phase {N}: {phase-name} approved.
-{If more phases: "Next: Phase {N+1}: {next-phase-name}"}
-{If all phases done: "All phases complete! Task '{task-name}' is done."}
-```
+**Record the user's choice** so the brain can route accordingly.
+The brain reads this choice and handles:
+- "Looks good" → brain approves phase (updates config.json, advances)
+- "I want to revise" / "I have concerns" → brain dispatches revise.md
+- "Stop for now" → brain saves state, exits
 
 End workflow (caller handles continuation).
 </step>
@@ -282,8 +159,6 @@ End workflow (caller handles continuation).
 - Git diff presented to user
 - Per-task status with icons (✅ ⚠️ ❌)
 - User can approve, revise, or stop
-- Fix plans created in decimal phases when needed
-- Fix plans execute through same execute workflow
-- Review loops after fix execution
-- Phase advances only after explicit user approval
+- User's choice recorded for brain routing
+- Phase advances only through brain (not in this workflow)
 </success_criteria>
