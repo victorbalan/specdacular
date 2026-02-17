@@ -81,7 +81,7 @@ For EVERY section reviewed, you MUST add or update the tag immediately — not l
 
 Also update the file's `Last Modified: {today}` timestamp at the top if any content changed (edit or re-map).
 
-When the review session ends (all sections processed or "Approve all remaining"), you MUST update `Last Reviewed: {today}` at the top of the file.
+When the review session ends (all sections processed or "Done for now"), you MUST update `Last Reviewed: {today}` at the top of the file.
 
 Never skip tagging. Never defer to a later step.
 
@@ -188,12 +188,12 @@ Follow the Section Display format from the template above exactly. Do not improv
   - "Edit" — Tell me what to change
   - "Remove" — Delete this section
   - "Re-map" — Re-run the mapper for this section and compare
-  - "Approve all remaining" — Mark all remaining sections as reviewed
+  - "Done for now" — Mark all remaining sections as reviewed
 
 **If Confirm:**
 Move to next section.
 
-**If Approve all remaining:**
+**If Done for now:**
 Skip all remaining sections. Continue to update_timestamps.
 
 **If Edit:**
@@ -316,7 +316,7 @@ If "Edit manually": Ask user what to change. Apply edit. Add/update USER_MODIFIE
 
 Move to next section.
 
-Continue to update_timestamps after all sections processed (or "Approve all remaining" selected).
+Continue to update_timestamps after all sections processed (or "Done for now" selected).
 </step>
 
 <step name="update_timestamps">
@@ -389,7 +389,7 @@ End workflow.
 - Removes warn about child sections
 - Re-map spawns `specd-codebase-mapper` agent with file-type-specific focus (DEC-011)
 - Re-map diff displayed using template format with key differences summary
-- "Approve all remaining" escape hatch available
+- "Done for now" escape hatch available
 - Timestamps updated after review
 - Changes committed
 - Summary shown

@@ -58,4 +58,4 @@ After displaying the section, prompt the user with:
 | Edit | User describes what to change |
 | Remove | Delete this section (warns about children) |
 | Re-map | Spawn mapper agent, show diff |
-| Approve all remaining | Skip remaining sections |
+| Done for now | Skip remaining sections |
