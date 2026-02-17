@@ -35,6 +35,12 @@ Continue to load_context.
 
 Load all task context including RESEARCH.md if available.
 
+**Check for orchestrator mode:**
+Read config.json. If `"orchestrator": true`:
+Hand off to orchestrator workflow:
+@~/.claude/specdacular/workflows/orchestrator/plan.md
+End main workflow.
+
 Continue to assess_readiness.
 </step>
 

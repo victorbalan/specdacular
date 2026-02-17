@@ -70,6 +70,24 @@ After loading, apply mode override:
 - Otherwise use pipeline.json's `mode` field
 - If neither, default to `"interactive"`
 
+**Check for orchestrator mode:**
+Read `.specd/config.json` (project-level, not task-level). If it has `"type": "orchestrator"`:
+- Set `$ORCHESTRATOR_MODE = true`
+- Log: `Orchestrator mode: multi-project task management active.`
+
+**How orchestrator mode works with the brain:**
+
+The brain runs the same pipeline for orchestrator tasks. The difference is that step workflows detect orchestrator mode internally and hand off to specialized orchestrator workflows:
+- `new.md` → detects orchestrator → delegates to `orchestrator/new.md` (multi-project task creation)
+- `plan.md` → detects orchestrator → delegates to `orchestrator/plan.md` (cross-project phasing)
+- `discuss.md`, `research.md` → work at orchestrator level (system-wide discussion/research)
+- `execute.md` → for orchestrator tasks, reads DEPENDENCIES.md to determine cross-project phase order. Executes phases per-project respecting dependency graph.
+- `review.md`, `revise.md` → work per-project within the orchestrator's coordination
+
+The brain does NOT need different routing for orchestrator mode. The pipeline is the same — orchestrator awareness lives in the step workflows that need it. The brain's job is to drive the pipeline; the steps handle multi-project specifics.
+
+**Important:** When in orchestrator mode, the phase-execution loop may need to coordinate across projects. The brain reads the orchestrator task's DEPENDENCIES.md to understand cross-project phase ordering, and dispatches execute/review/revise per project in dependency order.
+
 Continue to main_loop.
 </step>
 
