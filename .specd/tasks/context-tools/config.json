@@ -8,6 +8,7 @@
     "total": 4,
     "completed": 3,
     "current": 4,
-    "current_status": "pending"
+    "current_status": "executing",
+    "phase_start_commit": "ffd3afb4e7e2f5d5cc80b4cee1a57b74c4d713da"
   }
 }
