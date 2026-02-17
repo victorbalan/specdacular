@@ -9,23 +9,26 @@ Commit `.specd/` documentation changes, respecting the user's auto-commit settin
 - `$MESSAGE` — the commit message
 - `$LABEL` — short label for the skip message (e.g., "discussion updates", "plan complete", "feature completion")
 
-**Check auto-commit setting:**
+**IMPORTANT — You MUST check the auto-commit setting BEFORE running any git commands. Do NOT skip this check.**
+
+**Step 1: Read the setting (MANDATORY):**
 
 ```bash
 cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
 ```
 
-**If `auto_commit_docs` is `false`:**
-Do NOT run git commands. Instead print:
+Read the value of `auto_commit_docs` from the output.
+
+**Step 2: If `auto_commit_docs` is `false` → STOP. Do NOT commit.**
+
+Print this message and move on to the next workflow step:
 
 ```
 Auto-commit disabled for docs — $LABEL not committed.
 Modified files: $FILES
 ```
 
-Then skip ahead to the next step in your workflow.
-
-**If `auto_commit_docs` is `true` or not set (default):**
+**Step 3: If `auto_commit_docs` is `true` or not set (default true) → commit:**
 
 ```bash
 git add $FILES

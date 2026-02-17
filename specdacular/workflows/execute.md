@@ -1,14 +1,14 @@
 <purpose>
-Execute the next phase's PLAN.md. Runs tasks with verification, handles deviations, commits after each task, and automatically triggers review when the phase is complete.
+Execute the current phase's PLAN.md. Runs tasks with verification, handles deviations, commits after each task. Does NOT trigger review — the brain handles that.
 
-**Output:** Implemented code, CHANGELOG.md entries, automatic review trigger
+**Output:** Implemented code, CHANGELOG.md entries
 </purpose>
 
 <philosophy>
 
 ## One Phase at a Time
 
-Execute one phase's PLAN.md, then review before moving on. Never skip review.
+Execute one phase's PLAN.md. The brain decides what happens after.
 
 ## Verify Each Task
 
@@ -49,31 +49,21 @@ Continue to find_phase.
 </step>
 
 <step name="find_phase">
-Find the next phase to execute.
+Find the phase to execute.
 
 **Read config.json:**
 - `phases.current` — current phase number
-- `phases.current_status` — pending, executing, executed, completed
-
-**If current_status is "executed":**
-Phase is done but not reviewed. Trigger review:
-@~/.claude/specdacular/workflows/review.md
-End this workflow.
-
-**If current_status is "completed":**
-Advance to next phase:
-- Increment `phases.current`
-- Set `phases.current_status` to "pending"
+- `phases.current_status` — should be "pending" or "executing"
 
 **Find PLAN.md:**
 ```bash
-PHASE_DIR=".specd/tasks/$TASK_NAME/phases/phase-$(printf '%02d' $CURRENT_PHASE)"
+PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $CURRENT_PHASE)"
 [ -f "$PHASE_DIR/PLAN.md" ] || { echo "no plan"; exit 1; }
 ```
 
 **Also check for fix plans (decimal phases):**
 ```bash
-ls -d .specd/tasks/$TASK_NAME/phases/phase-$CURRENT_PHASE.* 2>/dev/null
+ls -d $TASK_DIR/phases/phase-$(printf '%02d' $CURRENT_PHASE).* 2>/dev/null
 ```
 If fix plans exist and are incomplete, execute those first.
 
@@ -85,21 +75,11 @@ Continue to record_start.
 <step name="record_start">
 Record phase execution start.
 
-**If status is "pending" (first time executing this phase):**
+**If this is a fresh start (not resuming):**
 ```bash
 git rev-parse HEAD
 ```
-Store as `phases.phase_start_commit` in config.json.
-Set `phases.current_status` to "executing".
-
-Commit config update:
-```bash
-git add .specd/tasks/{task-name}/config.json
-git commit -m "docs({task-name}): start phase {N} execution"
-```
-
-**If status is already "executing":**
-Resuming — phase_start_commit already recorded.
+Store as `phases.phase_start_commit` in config.json if not already set.
 
 Continue to execute_tasks.
 </step>
@@ -137,29 +117,23 @@ Continue to phase_complete.
 </step>
 
 <step name="phase_complete">
-Mark phase as executed and trigger review.
-
-**Update config.json:**
-- Set `phases.current_status` to "executed"
+Mark phase execution as done.
 
 **Update STATE.md:**
-- Add phase to Completed Phases table
+- Add phase to Completed Phases table (or update if fix phase)
 - Update current phase info
 
 **Commit state:**
 @~/.claude/specdacular/references/commit-docs.md
-- **$FILES:** `.specd/tasks/{task-name}/STATE.md .specd/tasks/{task-name}/config.json .specd/tasks/{task-name}/CHANGELOG.md`
+- **$FILES:** `$TASK_DIR/STATE.md $TASK_DIR/CHANGELOG.md`
 - **$MESSAGE:** `docs({task-name}): phase {N} executed`
 - **$LABEL:** `phase execution complete`
 
-**Automatically trigger review:**
 ```
-Phase {N} execution complete. Starting code review...
+Phase {N} execution complete.
 ```
 
-@~/.claude/specdacular/workflows/review.md
-
-End workflow (review takes over).
+End workflow (caller handles continuation).
 </step>
 
 </process>
@@ -169,6 +143,5 @@ End workflow (review takes over).
 - Each task verified after implementation
 - Deviations logged in CHANGELOG.md
 - Code committed after each task
-- Phase marked as "executed" in config.json
-- Review automatically triggered after completion
+- Ends cleanly without dispatching review
 </success_criteria>

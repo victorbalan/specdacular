@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "mode": "interactive",
+  "pipelines": {
+    "main": [
+      {
+        "name": "discuss",
+        "enabled": true,
+        "workflow": "discuss.md",
+        "pause_in_semi_auto": false,
+        "hooks": {
+          "pre": null,
+          "post": null
+        }
+      },
+      {
+        "name": "research",
+        "enabled": true,
+        "workflow": "research.md",
+        "pause_in_semi_auto": false,
+        "hooks": {
+          "pre": null,
+          "post": null
+        }
+      },
+      {
+        "name": "plan",
+        "enabled": true,
+        "workflow": "plan.md",
+        "pause_in_semi_auto": false,
+        "hooks": {
+          "pre": null,
+          "post": null
+        }
+      },
+      {
+        "name": "phase-execution",
+        "pipeline": "phase-execution"
+      }
+    ],
+    "phase-execution": [
+      {
+        "name": "execute",
+        "enabled": true,
+        "workflow": "execute.md",
+        "pause_in_semi_auto": true,
+        "hooks": {
+          "pre": null,
+          "post": null
+        }
+      },
+      {
+        "name": "review",
+        "enabled": true,
+        "workflow": "review.md",
+        "pause_in_semi_auto": true,
+        "hooks": {
+          "pre": null,
+          "post": null
+        }
+      },
+      {
+        "name": "revise",
+        "enabled": true,
+        "workflow": "revise.md",
+        "pause_in_semi_auto": true,
+        "hooks": {
+          "pre": null,
+          "post": null
+        }
+      }
+    ]
+  },
+  "hooks": {
+    "pre-step": null,
+    "post-step": null
+  }
+}

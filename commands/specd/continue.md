@@ -14,22 +14,25 @@ allowed-tools:
 ---
 
 <objective>
-Smart state machine that reads current task state and drives the entire lifecycle. One command from discussion through execution and review.
+Config-driven orchestrator that reads pipeline.json and drives the entire task lifecycle. One command from discussion through execution and review.
 
 **Modes:**
 - **Default (interactive):** Prompts at each stage transition
-- **--semi-auto:** Auto-runs discuss→research→plan, pauses after each phase execution + review
-- **--auto:** Runs everything, only stops on review issues or task completion
+- **--semi-auto:** Auto-runs steps where `pause_in_semi_auto: false`, pauses where `true`
+- **--auto:** Runs everything, only stops on errors or task completion
 
 **How it works:**
 1. Select task (from argument or picker)
-2. Read current state
-3. Determine natural next step
-4. Execute it (delegating to workflows)
-5. Loop back — offer the next step or stop
+2. Load pipeline.json (user override or default)
+3. Read current state → determine next step
+4. Execute pre-hooks → step → post-hooks
+5. Update state → loop back or stop
 
-**Covers the full lifecycle:**
-- Discussion → Research → Planning → Execution → Review → Next phase
+**Pipeline customization:**
+- Place `.specd/pipeline.json` to fully replace the default pipeline
+- Swap any step's workflow to a custom `.md` file
+- Enable/disable steps
+- Add pre/post hooks (markdown workflow files)
 </objective>
 
 <execution_context>
@@ -39,21 +42,27 @@ Smart state machine that reads current task state and drives the entire lifecycl
 <context>
 Task name and flags: $ARGUMENTS
 
+**Pipeline config:**
+@.specd/pipeline.json (user override, if exists)
+@~/.claude/specdacular/pipeline.json (default)
+
 **Scans for tasks:**
 @.specd/tasks/*/config.json
 
-**Delegates to workflows:**
+**Delegates to brain which dispatches:**
 @~/.claude/specdacular/workflows/discuss.md
 @~/.claude/specdacular/workflows/research.md
 @~/.claude/specdacular/workflows/plan.md
 @~/.claude/specdacular/workflows/execute.md
 @~/.claude/specdacular/workflows/review.md
+@~/.claude/specdacular/workflows/revise.md
 </context>
 
 <success_criteria>
 - [ ] Task selected (from argument or picker)
+- [ ] Pipeline loaded and validated
 - [ ] Current state accurately assessed
-- [ ] Correct next action offered/executed
+- [ ] Correct next step dispatched with hooks
 - [ ] Mode flags (--semi-auto, --auto) respected
 - [ ] User can stop at any natural boundary
 </success_criteria>

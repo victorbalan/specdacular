@@ -609,6 +609,20 @@ Continue to commit_orchestrator_map.
 <step name="commit_orchestrator_map">
 Commit all mapping results (orchestrator + all sub-projects).
 
+**IMPORTANT — Check auto-commit setting first:**
+
+```bash
+cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
+```
+
+**If `auto_commit_docs` is `false`:** Do NOT commit. Print:
+```
+Auto-commit disabled for docs — orchestrator codebase map not committed.
+```
+Skip to orchestrator_completion.
+
+**If `auto_commit_docs` is `true` or not set (default):**
+
 ```bash
 # Add orchestrator docs and config
 git add .specd/codebase/*.md .specd/config.json
