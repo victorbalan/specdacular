@@ -97,6 +97,63 @@
 - No configuration needed for thresholds
 - No alerts or warnings, just information
 
+### DEC-007: Semantic diff summaries over raw line diffs
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Research found that LLM-regenerated content causes "style drift" — phrasing changes even when facts are identical, making raw diffs misleading
+**Decision:** Show both current and re-mapped content in readable fenced blocks, with a semantic "Key differences" summary focusing on factual changes (added/removed/changed information)
+**Rationale:**
+- Raw unified diffs create noise from phrasing differences
+- Users need to compare meaning, not exact wording
+- Pre-warn users about style drift
+**Implications:**
+- Review workflow must present side-by-side content with semantic summary
+- Agent must be instructed to summarize factual differences
+**References:**
+- Research: style drift pitfall, diff display pattern
+
+### DEC-008: Git checkpoint before destructive review actions
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Research identified that section removal has no recovery path in a workflow-only system
+**Decision:** Create a git commit checkpoint at the start of a review session before any destructive operations
+**Rationale:**
+- Provides recovery via `git checkout` if user removes wrong section
+- Low cost (one commit), high safety value
+- Follows existing review.md pattern of committing at boundaries
+**Implications:**
+- Review workflow must commit current state before starting section walk
+- Commit message: `docs: pre-review checkpoint for {file}`
+
+### DEC-009: Targeted re-mapping via inline Task prompt, not new agent
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Research suggested either a new `specd-section-remapper` agent or inline Task prompt for single-section re-mapping
+**Decision:** Use inline Task prompt (general-purpose agent) rather than creating a new named agent
+**Rationale:**
+- Avoids adding a new agent file for a narrow use case
+- The prompt is specific enough to work without a dedicated role definition
+- Can always extract to a named agent later if reuse grows
+**Implications:**
+- No new agent files needed
+- Task prompt in context-review.md must include section heading, current content, USER_MODIFIED context, and scope constraints
+
+### DEC-010: Context workflows skip task validation
+
+**Date:** 2026-02-17
+**Status:** Active
+**Context:** Research found that context operations work on project-level `.specd/codebase/` docs, not task-specific docs
+**Decision:** Context workflows validate that `.specd/codebase/` exists instead of validating a task name
+**Rationale:**
+- Context files are project-scoped, not task-scoped
+- Using validate-task.md would incorrectly require a task name
+**Implications:**
+- Context workflows use their own validation step: check `.specd/codebase/` exists
+- If missing, suggest `/specd:map-codebase`
+
 ---
 
 ## Superseded Decisions
@@ -117,3 +174,7 @@
 | DEC-004 | 2026-02-17 | USER_MODIFIED tag placement after section header | Active |
 | DEC-005 | 2026-02-17 | Walk both ## and ### levels during review | Active |
 | DEC-006 | 2026-02-17 | Simple date display for staleness, no thresholds | Active |
+| DEC-007 | 2026-02-17 | Semantic diff summaries over raw line diffs | Active |
+| DEC-008 | 2026-02-17 | Git checkpoint before destructive review actions | Active |
+| DEC-009 | 2026-02-17 | Targeted re-mapping via inline Task prompt, not new agent | Active |
+| DEC-010 | 2026-02-17 | Context workflows skip task validation | Active |
