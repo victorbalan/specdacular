@@ -170,7 +170,6 @@ Use AskUserQuestion:
 - options:
   - "Select section" — Pick a section by number
   - "Walk all" — Go through every section in order
-  - "Add new section" — Add new content to this file
   - "Done" — Finish reviewing this file
 
 **If "Select section":**
@@ -178,9 +177,6 @@ Ask the user: "Which section number?" — the section list is already displayed 
 
 **If "Walk all":**
 Continue to walk_sections.
-
-**If "Add new section":**
-Continue to add_content.
 
 **If "Done":**
 Continue to update_timestamps.
@@ -338,66 +334,6 @@ If "Edit manually": Ask user what to change. Apply edit. Add/update USER_MODIFIE
 Return to show_section_list.
 </step>
 
-<step name="add_content">
-Add new content to the file.
-
-Ask: "What do you want to add? Describe the information — I'll suggest where it belongs."
-
-Wait for user response.
-
-**Check for duplicates:**
-Search the current file for key terms from the user's description using Grep.
-
-**If similar content found:**
-```
-Similar content already exists in: {## Section}
-{relevant excerpt, 2-3 lines}
-```
-
-Use AskUserQuestion:
-- header: "Duplicate?"
-- question: "Similar content exists. What would you like to do?"
-- options:
-  - "Add anyway" — Add as new content
-  - "Update existing" — Edit the existing section instead
-  - "Cancel" — Don't add
-
-If "Update existing": Show the section, ask what to change. Apply edit, add USER_MODIFIED tag. Return to show_section_list.
-If "Cancel": Return to show_section_list.
-
-**Identify best section:**
-Based on the content, determine which existing section it fits under, or propose creating a new section.
-
-**Confirm placement:**
-```
-I'll add this to:
-
-**Section:** {## Section} → {### Subsection if applicable}
-{If new section: "New section: ## {proposed title}"}
-
-**Content to add:**
-
-{formatted content that will be written}
-```
-
-Use AskUserQuestion:
-- header: "Placement"
-- question: "Add content here?"
-- options:
-  - "Confirm" — Add it here
-  - "Different section" — Show other options
-  - "Cancel" — Don't add
-
-If "Different section": Show all sections and let user pick.
-If "Cancel": Return to show_section_list.
-
-**Write content:**
-1. If adding to existing section: Append content at end of section, add/update `<!-- USER_MODIFIED: {today} -->` tag.
-2. If creating new section: Add heading at appropriate location, add `<!-- USER_MODIFIED: {today} -->` tag, add content.
-
-Mark modifications made. Re-parse sections. Return to show_section_list.
-</step>
-
 <step name="update_timestamps">
 Update the file's document-level timestamps.
 
@@ -460,7 +396,6 @@ End workflow.
 - User selects a context file to review
 - Section list shown with tag status
 - User picks which section to review (not auto-walked)
-- User can add new content from the same flow
 - Section display follows `specdacular/templates/context/section-display.md`
 - Re-map diff display follows `specdacular/templates/context/review-diff.md`
 - User can confirm, edit, remove, or re-map each section

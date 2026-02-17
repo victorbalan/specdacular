@@ -19,7 +19,7 @@ allowed-tools:
 Toolbox with two subdomains:
 
 1. **tasks** — Task lifecycle operations (requires task name): discuss, research, plan, execute, review
-2. **context** — Codebase context management (no task name): status, review
+2. **context** — Codebase context management (no task name): review, add
 </objective>
 
 <execution_context>
@@ -36,7 +36,7 @@ Use AskUserQuestion:
 - question: "Which toolbox?"
 - options:
   - "Tasks" — Discuss, research, plan, execute, or review a task
-  - "Context" — View status, review, or add to codebase context
+  - "Context" — Review or add to codebase context
 
 ---
 
@@ -72,12 +72,12 @@ No task name needed. Present the menu using AskUserQuestion:
 - header: "Context"
 - question: "What would you like to do with codebase context?"
 - options:
-  - "Status" — View dashboard of all context files
-  - "Review" — Select sections to review, edit, or add new content
+  - "Review" — Walk through and review a context file section by section
+  - "Add" — Add new content to a context file
 
 Based on selection, delegate to the appropriate workflow:
-- Status → follow the context-status.md workflow
 - Review → follow the context-manual-review.md workflow
+- Add → follow the context-add.md workflow
 </execution_context>
 
 <context>
@@ -91,8 +91,8 @@ Arguments: $ARGUMENTS
 @~/.claude/specdacular/workflows/review.md
 
 **Context workflows:**
-@~/.claude/specdacular/workflows/context-status.md
 @~/.claude/specdacular/workflows/context-manual-review.md
+@~/.claude/specdacular/workflows/context-add.md
 </context>
 
 <success_criteria>
