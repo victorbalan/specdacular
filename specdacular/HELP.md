@@ -8,9 +8,18 @@
 
 | Command | Description |
 |---------|-------------|
-| `/specd:feature:new [name]` | Initialize a feature, start first discussion |
-| `/specd:feature:continue [name]` | Continue feature lifecycle — picks up where you left off |
-| `/specd:feature:toolbox [name]` | Advanced operations: discuss, research, plan, review, insert |
+| `/specd:new [name]` | Initialize a task, start first discussion |
+| `/specd:continue [name] [--semi-auto\|--auto]` | Continue task lifecycle — picks up where you left off |
+
+### Direct Access
+
+| Command | Description |
+|---------|-------------|
+| `/specd:discuss [name]` | Deepen discussion — explore gray areas, record decisions |
+| `/specd:research [name]` | Research implementation patterns with parallel agents |
+| `/specd:plan [name]` | Create execution phases from task context |
+| `/specd:execute [name]` | Execute the next phase's plan |
+| `/specd:review [name]` | Review executed phase — inspect code, approve, or request fixes |
 
 ### Utilities
 
@@ -18,37 +27,32 @@
 |---------|-------------|
 | `/specd:map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
 | `/specd:config` | Configure auto-commit settings for docs and code |
-| `/specd:status [--all]` | Show feature status dashboard |
+| `/specd:status [--all]` | Show task status dashboard |
 | `/specd:help` | Show this help |
 | `/specd:update` | Update Specdacular to the latest version |
 
 ---
 
-## Feature Flow
+## Task Flow
 
 ```
-/specd:feature:new → /specd:feature:continue → continue → continue → done
+/specd:new → /specd:continue → continue → continue → done
 ```
 
-**You only need three commands:**
+**You only need two commands:**
 
-1. **`/specd:feature:new [name]`** — Start here. Creates feature folder, asks initial questions.
-2. **`/specd:feature:continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
+1. **`/specd:new [name]`** — Start here. Creates task folder, asks initial questions.
+2. **`/specd:continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
    - Discussion → Research → Planning → Phase Execution → Review
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
-3. **`/specd:feature:toolbox [name]`** — Advanced operations menu:
-   - **Discuss** — Explore open questions (feature or phase level)
-   - **Research** — Spawn parallel agents for patterns/pitfalls
-   - **Plan** — Create implementation plans
-   - **Review** — Review executed work, report issues
-   - **Insert phase** — Add a phase mid-development (decimal numbering)
+   - Modes: interactive (default), `--semi-auto` (auto through planning, pause after review), `--auto` (run everything)
 
 ### Quick Start
 
 ```
-/specd:feature:new user-dashboard
-/specd:feature:continue user-dashboard
+/specd:new user-dashboard
+/specd:continue user-dashboard
 ```
 
 After initialization, just keep running `continue`. It figures out what's next.

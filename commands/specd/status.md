@@ -9,7 +9,7 @@ allowed-tools:
 ---
 
 <objective>
-Display a dashboard showing all features and their current status, stage, plan progress, and recommended next action.
+Display a dashboard showing all tasks and their current status, stage, plan progress, and recommended next action.
 
 - By default, hide completed features
 - With `--all` flag, show completed features in a separate section
