@@ -30,11 +30,12 @@ Always write dates as `YYYY-MM-DD`. Never write times. Never write month names.
 
 ## Section Tags
 
-Three tag types for tracking section state:
+Two tag types for tracking section state:
 
 - `<!-- USER_MODIFIED: YYYY-MM-DD -->` — Section was manually edited by the user
-- `<!-- AUTO_GENERATED: YYYY-MM-DD -->` — Section was updated via re-map agent
-- `<!-- REVIEWED: YYYY-MM-DD -->` — Section was confirmed unchanged during review
+- `<!-- AUTO_GENERATED: YYYY-MM-DD -->` — Section was generated or updated via mapper agent
+
+Sections with no tag are treated as AUTO_GENERATED with today's date. When displaying untagged sections, tell the user: "No tag found — will default to AUTO_GENERATED with today's date." Then add the tag.
 
 Placement: On its own line immediately after the section heading. No blank line between heading and tag.
 
@@ -74,7 +75,7 @@ For EVERY section acted on, you MUST add or update the tag immediately — not l
 
 - **User edits a section** → `<!-- USER_MODIFIED: {today} -->`
 - **Re-map accepted** → `<!-- AUTO_GENERATED: {today} -->`
-- **Section confirmed unchanged** → `<!-- REVIEWED: {today} -->`
+- **Section confirmed unchanged** → Update existing tag's date to today (keep same tag type). If no tag exists, add `<!-- AUTO_GENERATED: {today} -->`
 
 Also update the file's `Last Modified: {today}` timestamp at the top if any content changed (edit, remove, or re-map).
 
@@ -138,7 +139,7 @@ Read the selected file and build a section list.
 3. For each heading, capture:
    - Heading level (## or ###)
    - Heading text
-   - Whether a tag exists on the line after the heading (USER_MODIFIED, AUTO_GENERATED, or REVIEWED)
+   - Whether a tag exists on the line after the heading (USER_MODIFIED or AUTO_GENERATED)
    - The tag type and date if present
    - The section content (everything from after the heading/tag until the next heading of same or higher level)
    - Parent `##` heading (for `###` sections)
@@ -157,7 +158,7 @@ Show the user a numbered list of all sections with their tag status, then let th
 ================================================================
 
 {For each section:}
-{N}. {If ### subsection: "{Parent} > "}{heading}  {If tagged: "({tag type}: {date})" else "(unreviewed)"}
+{N}. {If ### subsection: "{Parent} > "}{heading}  {If tagged: "({tag type}: {date})" else "(no tag)"}
 {...}
 
 ================================================================
@@ -216,7 +217,7 @@ Follow the Section Display format from the template above exactly. Do not improv
   - "Re-map" — Re-run the mapper for this section and compare
 
 **If Confirm:**
-Add or update `<!-- REVIEWED: {today} -->` tag. Return to show_section_list.
+Update the existing tag's date to today (keep the same tag type). If the section has no tag, add `<!-- AUTO_GENERATED: {today} -->`. Return to show_section_list.
 
 **If Edit:**
 Ask: "What should I change in this section?"
@@ -465,7 +466,7 @@ End workflow.
 - User can confirm, edit, remove, or re-map each section
 - Edits add USER_MODIFIED tag with date
 - Re-map accepts add AUTO_GENERATED tag with date
-- Confirms add REVIEWED tag with date
+- Confirms update the tag date to today (or add AUTO_GENERATED if untagged)
 - Removes warn about child sections
 - Re-map spawns `specd-codebase-mapper` agent with file-type-specific focus
 - Timestamps updated after review
