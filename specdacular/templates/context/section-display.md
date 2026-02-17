@@ -6,30 +6,31 @@ Template for displaying a single section of a codebase context file to the user 
 
 ## Section Display
 
+Display each section as three parts: header table, raw content, then assessment.
+
+**Part 1 — Header table:**
+
 | **{## or ###} {Section Title}** [{current}/{total}] |
 |:-----------------------------------------------------|
-| {assessment} {If USER_MODIFIED: "· User modified: YYYY-MM-DD"} |
-| {raw section content from the file} |
+| {If USER_MODIFIED: "User modified: YYYY-MM-DD"} |
 
-### Variables
+**Part 2 — Raw content (code fence to prevent markdown interpretation):**
 
-| Variable | Description |
-|----------|-------------|
-| `{## or ###}` | The heading level prefix from the original markdown |
-| `{Section Title}` | The heading text without the `#` prefix |
-| `{current}/{total}` | Position in the review walk (e.g., "3/12") |
-| `{assessment}` | One of the assessment values below |
-| `{section content}` | The section body, rendered for readability |
+````
+```
+{exact section content copied from the file — no modifications, no strikethrough, no interpretation}
+```
+````
 
-### Assessment Values
+**Part 3 — Agent assessment:**
 
-| Icon | Label | Meaning |
-|------|-------|---------|
-| ✅ | Up to date | Referenced files exist, no changes since last review |
-| ⚠️ | Potentially stale | Referenced files changed or paths missing |
-| 🔄 | Changed since last review | Files documented by this section were modified after `Last Reviewed` date |
+> **Assessment:** {✅ Up to date | ⚠️ Potentially stale | 🔄 Changed since last review}
+>
+> {Brief explanation: which paths are missing, which files changed, etc.}
 
-### Assessment Logic
+---
+
+## Assessment Logic
 
 1. **Extract file paths** from the section content (backtick-wrapped strings containing `/` or a `.` extension)
 2. **Check path existence:**
@@ -47,7 +48,9 @@ Template for displaying a single section of a codebase context file to the user 
    - No `Last Reviewed` date → ⚠️ Potentially stale (never reviewed)
    - No file paths in section → ✅ Up to date (cannot verify)
 
-### User Actions
+---
+
+## User Actions
 
 After displaying the section, prompt the user with:
 

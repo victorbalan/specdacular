@@ -177,10 +177,21 @@ Use the assessment logic from `@specdacular/templates/context/section-display.md
 
 **Display using template format** (`@specdacular/templates/context/section-display.md`):
 
+**Part 1 — Header table:**
+
 | **{## or ###} {Section Title}** [{current}/{total}] |
 |:-----------------------------------------------------|
-| {✅ Up to date · ⚠️ Potentially stale · 🔄 Changed since last review} {If USER_MODIFIED: "· User modified: YYYY-MM-DD"} |
-| {raw section content from the file} |
+| {If USER_MODIFIED: "User modified: YYYY-MM-DD"} |
+
+**Part 2 — Raw content (use a code fence to prevent markdown interpretation):**
+
+Show the exact section content from the file inside a code fence. Do NOT add strikethrough, do NOT mark missing paths, do NOT modify the content in any way.
+
+**Part 3 — Agent assessment:**
+
+> **Assessment:** {✅ Up to date | ⚠️ Potentially stale | 🔄 Changed since last review}
+>
+> {Brief explanation: which paths are missing, which files changed, etc.}
 
 **Use AskUserQuestion:**
 - header: "{current}/{total}"
