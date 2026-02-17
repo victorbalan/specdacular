@@ -176,16 +176,11 @@ Use the assessment logic from `@specdacular/templates/context/section-display.md
    - No file paths in section → ✅ **Up to date** (cannot verify, assume ok)
 
 **Display using template format** (`@specdacular/templates/context/section-display.md`):
-```
-───────────────────────────────────────────────────────
-{## or ###} {Section Title}  [{current}/{total}]
-{If USER_MODIFIED: "User modified: YYYY-MM-DD"}
-───────────────────────────────────────────────────────
 
-**Assessment:** {✅ Up to date | ⚠️ Potentially stale | 🔄 Changed since last review}
-
-{section content, formatted for readability}
-```
+| **{## or ###} {Section Title}** [{current}/{total}] |
+|:-----------------------------------------------------|
+| {✅ Up to date · ⚠️ Potentially stale · 🔄 Changed since last review} {If USER_MODIFIED: "· User modified: YYYY-MM-DD"} |
+| {raw section content from the file} |
 
 **Use AskUserQuestion:**
 - header: "{current}/{total}"

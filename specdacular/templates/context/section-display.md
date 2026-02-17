@@ -6,16 +6,10 @@ Template for displaying a single section of a codebase context file to the user 
 
 ## Section Display
 
-```
-───────────────────────────────────────────────────────
-{## or ###} {Section Title}  [{current}/{total}]
-{If USER_MODIFIED: "User modified: YYYY-MM-DD"}
-───────────────────────────────────────────────────────
-
-**Assessment:** {assessment}
-
-{section content, formatted for readability}
-```
+| **{## or ###} {Section Title}** [{current}/{total}] |
+|:-----------------------------------------------------|
+| {assessment} {If USER_MODIFIED: "· User modified: YYYY-MM-DD"} |
+| {raw section content from the file} |
 
 ### Variables
 

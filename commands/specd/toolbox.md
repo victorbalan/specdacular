@@ -76,12 +76,10 @@ No task name needed. Present the menu using AskUserQuestion:
   - "Review" — Walk through and review a context file section by section
   - "Add" — Add new content to a context file
 
-Based on selection, read and follow the appropriate workflow:
-- Status → Read `~/.claude/specdacular/workflows/context-status.md` and follow its process
-- Review → Read `~/.claude/specdacular/workflows/context-review.md` and follow its process
-- Add → Read `~/.claude/specdacular/workflows/context-add.md` and follow its process
-
-IMPORTANT: Use the Read tool to load the selected workflow file, then execute its <process> steps in order. Do NOT improvise — the workflow file contains the complete process.
+Based on selection, delegate to the appropriate workflow:
+- Status → @~/.claude/specdacular/workflows/context-status.md
+- Review → @~/.claude/specdacular/workflows/context-review.md
+- Add → @~/.claude/specdacular/workflows/context-add.md
 </execution_context>
 
 <context>
