@@ -8,7 +8,7 @@ Template for displaying a single section of a codebase context file to the user 
 
 ```
 ================================================================
-{If ### subsection: "## {Parent Title} > "}{## or ###} {Section Title}  [{current}/{total}]{If USER_MODIFIED: "  · User modified: YYYY-MM-DD"}
+{If ### subsection: "## {Parent Title} > "}{## or ###} {Section Title}  [{current}/{total}]{If tagged: "  · {USER_MODIFIED|AUTO_MODIFIED|REVIEWED}: YYYY-MM-DD"}
 ================================================================
 
 {exact section content from the file — verbatim, no modifications, no strikethrough, no interpretation}

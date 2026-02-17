@@ -32,9 +32,12 @@ Create a git checkpoint before any destructive operations. Warn about child sect
 
 Always write dates as `YYYY-MM-DD`. Never write times. Never write month names.
 
-## USER_MODIFIED Tag Format
+## Section Tags
 
-Exact format: `<!-- USER_MODIFIED: YYYY-MM-DD -->`
+Two tag types for tracking how sections were last modified:
+
+- `<!-- USER_MODIFIED: YYYY-MM-DD -->` — Section was manually edited by the user
+- `<!-- AUTO_MODIFIED: YYYY-MM-DD -->` — Section was updated via re-map agent
 
 Placement: On its own line immediately after the section heading. No blank line between heading and tag.
 
@@ -45,7 +48,7 @@ Placement: On its own line immediately after the section heading. No blank line 
 Content here...
 ```
 
-Never place the tag on the same line as the heading. Never add more than one tag per section. If a tag already exists, replace it.
+Never place the tag on the same line as the heading. Never add more than one tag per section. If a tag already exists, replace it with the appropriate tag type and today's date.
 
 ## Section Boundaries
 
@@ -53,7 +56,7 @@ Never place the tag on the same line as the heading. Never add more than one tag
 - A `###` section runs from its heading until the next `###`, `##`, or end of file
 - Ignore `#` (document title) — it is not a reviewable section
 - Code fences (```) do NOT start new sections even if they contain `#` characters
-- `<!-- USER_MODIFIED: ... -->` tags inside fenced code blocks are NOT real tags — only detect tags outside code fences
+- `<!-- USER_MODIFIED: ... -->` and `<!-- AUTO_MODIFIED: ... -->` tags inside fenced code blocks are NOT real tags — only detect tags outside code fences
 
 ## Timestamp Lines
 
@@ -67,6 +70,22 @@ Last Modified: 2026-02-17
 ```
 
 If `Last Reviewed:` or `Last Modified:` lines don't exist yet, add them after the `Generated:` line (or `**Analysis Date:**` line for CONCERNS.md).
+
+## After Every Reviewed Section
+
+For EVERY section reviewed, you MUST add or update the tag immediately — not later, not at the end:
+
+- **User edits a section** → `<!-- USER_MODIFIED: {today} -->`
+- **Re-map accepted** → `<!-- AUTO_MODIFIED: {today} -->`
+- **Section confirmed unchanged** → `<!-- REVIEWED: {today} -->`
+
+Also update the file's `Last Modified: {today}` timestamp at the top if any content changed (edit or re-map).
+
+When the review session ends (all sections processed or "Approve all remaining"), you MUST update `Last Reviewed: {today}` at the top of the file.
+
+Never skip tagging. Never defer to a later step.
+
+Never skip these. Never defer them to a later step.
 
 </critical_rules>
 
@@ -289,7 +308,7 @@ Use AskUserQuestion:
   - "Keep current" — Keep existing content unchanged
   - "Edit manually" — Tell me what to change
 
-If "Accept new": Replace section content with agent's output. Remove any USER_MODIFIED tag (content is now machine-generated). Mark modifications made.
+If "Accept new": Replace section content with agent's output. Add or update tag to `<!-- AUTO_MODIFIED: {today} -->`. Mark modifications made.
 
 If "Keep current": Move to next section.
 
