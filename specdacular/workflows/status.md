@@ -29,7 +29,7 @@ cat .specd/config.json 2>/dev/null
 
 ### 3. Check for features directory
 
-Use Glob to check if `.specd/tasks/*/config.json` matches anything.
+Use Glob to check if `.specd/tasks/*/config.json` or `.specd/features/*/config.json` matches anything (check both for backwards compatibility).
 
 **If mode = orchestrator and no root features:**
 Also check sub-project features — scan each project path for `{project-path}/.specd/tasks/*/config.json`. If features found in sub-projects, continue (there's something to show).

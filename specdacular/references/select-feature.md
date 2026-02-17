@@ -8,7 +8,14 @@ Determine which task to work on.
 Use as task name. Normalize to kebab-case (lowercase, hyphens).
 
 ```bash
-[ -d ".specd/tasks/$ARGUMENTS" ] || { echo "not found"; exit 1; }
+# Check tasks/ first, fall back to features/ for backwards compat
+if [ -d ".specd/tasks/$ARGUMENTS" ]; then
+  TASK_DIR=".specd/tasks/$ARGUMENTS"
+elif [ -d ".specd/features/$ARGUMENTS" ]; then
+  TASK_DIR=".specd/features/$ARGUMENTS"
+else
+  echo "not found"; exit 1
+fi
 ```
 
 **If task not found:**
@@ -19,9 +26,9 @@ Available tasks:
 ```
 
 ```bash
-ls -d .specd/tasks/*/ 2>/dev/null | while read dir; do
+{ ls -d .specd/tasks/*/ 2>/dev/null; ls -d .specd/features/*/ 2>/dev/null; } | while read dir; do
   basename "$dir"
-done
+done | sort -u
 ```
 
 End workflow.
@@ -30,8 +37,8 @@ End workflow.
 Scan for in-progress tasks:
 
 ```bash
-# List task directories with config.json
-for dir in .specd/tasks/*/config.json; do
+# List task directories with config.json (check both locations)
+for dir in .specd/tasks/*/config.json .specd/features/*/config.json; do
   [ -f "$dir" ] && echo "$dir"
 done
 ```

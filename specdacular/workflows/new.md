@@ -52,10 +52,10 @@ Ask: "What's the name of this task?"
 
 **Validate:**
 - Task name should be kebab-case
-- Check if `.specd/tasks/{name}/` already exists
+- Check if task already exists (in either `.specd/tasks/` or `.specd/features/`)
 
 ```bash
-[ -d ".specd/tasks/$TASK_NAME" ] && echo "exists"
+{ [ -d ".specd/tasks/$TASK_NAME" ] || [ -d ".specd/features/$TASK_NAME" ]; } && echo "exists"
 ```
 
 **If task exists:**

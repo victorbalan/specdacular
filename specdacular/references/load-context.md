@@ -6,6 +6,7 @@ Load all context files for a task. Use after validation.
 
 **Before using this reference, you must have ready:**
 - `$TASK_NAME` — the task name
+- `$TASK_DIR` — resolved task directory (from validate-task, either `.specd/tasks/$TASK_NAME` or `.specd/features/$TASK_NAME`)
 - `$PHASE` (optional) — phase number, if loading phase-specific context
 
 ### Always Load
@@ -20,11 +21,11 @@ Load all context files for a task. Use after validation.
 
 ```bash
 # Read all required files
-cat .specd/tasks/$TASK_NAME/FEATURE.md
-cat .specd/tasks/$TASK_NAME/CONTEXT.md
-cat .specd/tasks/$TASK_NAME/DECISIONS.md
-cat .specd/tasks/$TASK_NAME/STATE.md
-cat .specd/tasks/$TASK_NAME/config.json
+cat $TASK_DIR/FEATURE.md
+cat $TASK_DIR/CONTEXT.md
+cat $TASK_DIR/DECISIONS.md
+cat $TASK_DIR/STATE.md
+cat $TASK_DIR/config.json
 ```
 
 ### Load If Exists
@@ -37,15 +38,15 @@ cat .specd/tasks/$TASK_NAME/config.json
 
 ```bash
 # Check and read optional files
-[ -f ".specd/tasks/$TASK_NAME/RESEARCH.md" ] && cat .specd/tasks/$TASK_NAME/RESEARCH.md
-[ -f ".specd/tasks/$TASK_NAME/ROADMAP.md" ] && cat .specd/tasks/$TASK_NAME/ROADMAP.md
-[ -f ".specd/tasks/$TASK_NAME/CHANGELOG.md" ] && cat .specd/tasks/$TASK_NAME/CHANGELOG.md
+[ -f "$TASK_DIR/RESEARCH.md" ] && cat $TASK_DIR/RESEARCH.md
+[ -f "$TASK_DIR/ROADMAP.md" ] && cat $TASK_DIR/ROADMAP.md
+[ -f "$TASK_DIR/CHANGELOG.md" ] && cat $TASK_DIR/CHANGELOG.md
 ```
 
 ### Phase-Specific Context (when $PHASE is set)
 
 ```bash
-PHASE_DIR=".specd/tasks/$TASK_NAME/phases/phase-$(printf '%02d' $PHASE)"
+PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $PHASE)"
 
 # Read phase plan
 [ -f "$PHASE_DIR/PLAN.md" ] && cat "$PHASE_DIR/PLAN.md"
