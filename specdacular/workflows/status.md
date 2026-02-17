@@ -1,4 +1,4 @@
-# Workflow: Feature Status Dashboard
+# Workflow: Task Status Dashboard
 
 ## Input
 
@@ -8,7 +8,7 @@
 
 ### 1. Parse arguments
 
-Check if `$ARGUMENTS` contains `--all`. If so, completed features will be shown in a separate section.
+Check if `$ARGUMENTS` contains `--all`. If so, completed tasks will be shown in a separate section.
 
 ### 2. Detect orchestrator mode
 
@@ -29,24 +29,24 @@ cat .specd/config.json 2>/dev/null
 
 ### 3. Check for features directory
 
-Use Glob to check if `.specd/features/*/config.json` matches anything.
+Use Glob to check if `.specd/tasks/*/config.json` matches anything.
 
 **If mode = orchestrator and no root features:**
-Also check sub-project features — scan each project path for `{project-path}/.specd/features/*/config.json`. If features found in sub-projects, continue (there's something to show).
+Also check sub-project features — scan each project path for `{project-path}/.specd/tasks/*/config.json`. If features found in sub-projects, continue (there's something to show).
 
 **If no features found anywhere:** output the following and stop:
 
 ```
-No features found. Start one with `/specd:feature:new [name]`.
+No tasks found. Start one with `/specd:new [name]`.
 ```
 
 ### 4. Gather feature data
 
 #### If mode = project (single-project, unchanged):
 
-For each feature directory in `.specd/features/`:
+For each feature directory in `.specd/tasks/`:
 
-1. **Read `config.json`** — extract: `feature_name`, `created`, `stage`, `phases_count`, `plans_count`
+1. **Read `config.json`** — extract: `task_name`, `created`, `stage`, `phases_count`, `plans_count`
 2. **Read `STATE.md`** — extract:
    - **Authoritative stage**: Look for `**Stage:** <value>` in the Current Position section. This overrides `config.json` stage. A feature is complete when stage is `complete`.
    - **Plan completion**: From the `Plan Status` table, count rows with Status = `Complete` vs total rows. Format as `completed/total` (e.g. `5/8`). If no Plan Status table or no rows, use `—`.
@@ -56,15 +56,15 @@ For each feature directory in `.specd/features/`:
 
 **Step 4a: Gather root features (same as single-project).**
 
-For each feature directory in `.specd/features/`, extract feature_name, created, stage, plans, next_action using the same logic as single-project mode.
+For each feature directory in `.specd/tasks/`, extract task_name, created, stage, plans, next_action using the same logic as single-project mode.
 
 **Step 4b: For each root feature, check for sub-project features.**
 
 Read each root feature's `config.json`. If it has a `projects` array (orchestrator feature):
 
 For each project entry `{name, path}` in the feature's `projects` array:
-1. Check if `{path}/.specd/features/{feature_name}/` exists
-2. If yes, read `{path}/.specd/features/{feature_name}/config.json` and `{path}/.specd/features/{feature_name}/STATE.md`
+1. Check if `{path}/.specd/tasks/{task_name}/` exists
+2. If yes, read `{path}/.specd/tasks/{task_name}/config.json` and `{path}/.specd/tasks/{task_name}/STATE.md`
 3. Extract the same fields: stage (from STATE.md `**Stage:**`), plan completion, next action
 4. Store as a sub-feature of the parent orchestrator feature, tagged with the project name
 
@@ -73,7 +73,7 @@ Mark this root feature as an "orchestrator feature" (has sub-project children).
 **Step 4c: Scan for standalone sub-project features.**
 
 For each project in the repo-level `.specd/config.json` `projects` array:
-1. Use Glob to find `{project-path}/.specd/features/*/config.json`
+1. Use Glob to find `{project-path}/.specd/tasks/*/config.json`
 2. For each feature found, check if it was already captured as a sub-feature of an orchestrator feature in step 4b
 3. If NOT already captured, gather its data (same extraction logic) and store as a standalone feature, grouped by project name/path
 
@@ -100,7 +100,7 @@ Sort active features by stage priority (highest first), then by created date (ol
 **Output header:**
 
 ```
-# Feature Status
+# Task Status
 
 _{total} features, {in_progress} in progress_
 ```
@@ -116,13 +116,13 @@ _{total} features, {in_progress} in progress_
 - `Plans` shows the completed/total count from Plan Status table, or `—` if pre-planning
 - `Next Action` is the extracted recommendation from STATE.md Next Steps
 
-**If `--all` flag is NOT set and there are completed features:**
+**If `--all` flag is NOT set and there are completed tasks:**
 
 ```
-Run `/specd:status --all` to include completed features.
+Run `/specd:status --all` to include completed tasks.
 ```
 
-**If `--all` flag IS set and there are completed features, add:**
+**If `--all` flag IS set and there are completed tasks, add:**
 
 ```
 ### Completed
@@ -141,7 +141,7 @@ Where `Completed` date comes from the `**Last Updated:**` field in STATE.md.
 **Output header:**
 
 ```
-# Feature Status
+# Task Status
 
 _{total} features, {in_progress} in progress — orchestrator mode_
 ```
@@ -190,7 +190,7 @@ Only show active standalone features (not complete/abandoned, unless `--all`).
 **If `--all` flag is NOT set and there are completed/abandoned features (root or sub-project):**
 
 ```
-Run `/specd:status --all` to include completed features.
+Run `/specd:status --all` to include completed tasks.
 ```
 
 **If `--all` flag IS set and there are completed/abandoned features, add:**

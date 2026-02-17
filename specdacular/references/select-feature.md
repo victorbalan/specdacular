@@ -1,25 +1,25 @@
-<shared name="select_feature">
+<shared name="select_task">
 
-## Feature Selection
+## Task Selection
 
-Determine which feature to work on.
+Determine which task to work on.
 
 **If $ARGUMENTS provided:**
-Use as feature name. Normalize to kebab-case (lowercase, hyphens).
+Use as task name. Normalize to kebab-case (lowercase, hyphens).
 
 ```bash
-[ -d ".specd/features/$ARGUMENTS" ] || { echo "not found"; exit 1; }
+[ -d ".specd/tasks/$ARGUMENTS" ] || { echo "not found"; exit 1; }
 ```
 
-**If feature not found:**
+**If task not found:**
 ```
-Feature '{name}' not found.
+Task '{name}' not found.
 
-Available features:
+Available tasks:
 ```
 
 ```bash
-ls -d .specd/features/*/ 2>/dev/null | while read dir; do
+ls -d .specd/tasks/*/ 2>/dev/null | while read dir; do
   basename "$dir"
 done
 ```
@@ -27,31 +27,31 @@ done
 End workflow.
 
 **If no arguments:**
-Scan for in-progress features:
+Scan for in-progress tasks:
 
 ```bash
-# List feature directories with config.json
-for dir in .specd/features/*/config.json; do
+# List task directories with config.json
+for dir in .specd/tasks/*/config.json; do
   [ -f "$dir" ] && echo "$dir"
 done
 ```
 
 Read each `config.json` and filter where `stage != "complete"`.
 
-**If no features found:**
+**If no tasks found:**
 ```
-No features in progress.
+No tasks in progress.
 
-Start one with /specd:feature:new
+Start one with /specd:new
 ```
 End workflow.
 
-**If features found:**
+**If tasks found:**
 Use AskUserQuestion:
-- header: "Feature"
-- question: "Which feature would you like to work on?"
-- options: List each feature with its current stage (e.g., "my-feature (discussion)", "other-feature (execution)")
+- header: "Task"
+- question: "Which task would you like to work on?"
+- options: List each task with its current stage (e.g., "my-task (discussion)", "other-task (execution)")
 
-Use the selected feature name.
+Use the selected task name.
 
 </shared>

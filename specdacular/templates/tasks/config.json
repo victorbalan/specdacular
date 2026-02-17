@@ -1,0 +1,15 @@
+{
+  "task_name": "{name}",
+  "created": "{date}",
+  "stage": "discussion",
+  "discussion_sessions": 1,
+  "decisions_count": 0,
+  "phases": {
+    "total": 0,
+    "completed": 0,
+    "current": 1
+  },
+  "execution": {
+    "auto_commit": false
+  }
+}

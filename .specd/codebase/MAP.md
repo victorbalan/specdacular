@@ -118,7 +118,7 @@ Generated: 2026-02-04
 3. `assess_readiness` — Verify enough context to plan
 4. `derive_phases` — Based on dependencies (types→API→UI pattern)
 5. `break_into_tasks` — 2-3 tasks per plan, sized for agent execution
-6. `write_plan_files` — Create .specd/features/{name}/plans/phase-{NN}/{NN}-PLAN.md
+6. `write_plan_files` — Create .specd/tasks/{name}/plans/phase-{NN}/{NN}-PLAN.md
 7. `write_roadmap` — Write ROADMAP.md with phase overview
 8. `commit` — Commit plans
 9. `completion` — Present execution instructions
@@ -163,7 +163,7 @@ Generated: 2026-02-04
 
 ## Key Types & Configs
 
-**Feature Configuration** (`.specd/features/{name}/config.json`)
+**Feature Configuration** (`.specd/tasks/{name}/config.json`)
 ```json
 {
   "discussion_sessions": number,
