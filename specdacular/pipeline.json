@@ -33,6 +33,14 @@
     ],
     "phase-execution": [
       {
+        "name": "plan",
+        "workflow": "phase-plan.md",
+        "hooks": {
+          "pre": null,
+          "post": null
+        }
+      },
+      {
         "name": "execute",
         "workflow": "execute.md",
         "pause": true,

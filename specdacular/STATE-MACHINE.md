@@ -82,11 +82,13 @@ This is the complete decision table. The brain evaluates top-to-bottom and takes
 │   RESEARCH.md exists       │ plan         │ main               │
 ├────────────────────────────┼──────────────┼────────────────────┤
 │ stage=planning             │              │                    │
-│   no phases/ dir           │ plan         │ main               │
-│   phases/ exists           │ execute      │ phase-execution    │
+│   no ROADMAP.md            │ plan         │ main               │
+│   ROADMAP.md exists        │ plan         │ phase-execution    │
 ├────────────────────────────┼──────────────┼────────────────────┤
 │ stage=execution            │              │                    │
-│   current_status=pending   │ execute      │ phase-execution    │
+│   current_status=pending   │              │                    │
+│     no PLAN.md             │ plan         │ phase-execution    │
+│     PLAN.md exists         │ execute      │ phase-execution    │
 │   current_status=executing │ execute      │ phase-execution    │
 │   current_status=executed  │ review       │ phase-execution    │
 │   current_status=completed │ next phase   │ phase-execution    │
@@ -132,20 +134,20 @@ This is the complete decision table. The brain evaluates top-to-bottom and takes
               └──────────┬──────────┘
                          │
                          ▼
-              ┌─────────────────────────────────────┐
-              │         EXECUTION (per phase)        │
-              │                                     │
-              │  ┌─────────┐  ┌────────┐  ┌───────┐│
-              │  │ execute  │─▶│ review │─▶│revise ││
-              │  └─────────┘  └────────┘  └───┬───┘│
-              │       ▲                       │    │
-              │       └───────────────────────┘    │
-              │              (fix loop)            │
-              │                                    │
-              │  Phase done? ──▶ Next phase ─┐     │
-              │       ▲                      │     │
-              │       └──────────────────────┘     │
-              └──────────────────┬──────────────────┘
+              ┌──────────────────────────────────────────┐
+              │          EXECUTION (per phase)             │
+              │                                            │
+              │  ┌──────┐  ┌─────────┐  ┌────────┐  ┌───────┐│
+              │  │ plan │─▶│ execute │─▶│ review │─▶│revise ││
+              │  └──────┘  └─────────┘  └────────┘  └───┬───┘│
+              │                  ▲                       │    │
+              │                  └───────────────────────┘    │
+              │                         (fix loop)            │
+              │                                               │
+              │  Phase done? ──▶ Next phase ─┐                │
+              │       ▲                      │                │
+              │       └──────────────────────┘                │
+              └──────────────────┬─────────────────────────────┘
                                  │ all phases done
                                  ▼
                           ┌────────────┐
@@ -189,9 +191,8 @@ If you replace a step's workflow (e.g., `"workflow": ".specd/my-execute.md"`), y
 - Create `RESEARCH.md` in the task directory
 - The brain checks for this file to know research is done
 
-**Custom `plan` replacement:**
-- Create the `phases/` directory with phase subdirectories (`phase-01/`, `phase-02/`, etc.)
-- Each phase needs a `PLAN.md` inside it
+**Custom `plan` replacement (task-level, main pipeline):**
+- Create `ROADMAP.md` with phase goals (no PLAN.md files, no phase directories)
 - Set in config.json:
   ```json
   {
@@ -203,6 +204,11 @@ If you replace a step's workflow (e.g., `"workflow": ".specd/my-execute.md"`), y
     }
   }
   ```
+
+**Custom `plan` replacement (phase-level, phase-execution pipeline — `phase-plan.md`):**
+- Create `phases/phase-NN/` directory and `PLAN.md` for the current phase
+- Read phase goal from ROADMAP.md
+- Do NOT change config.json (brain checks PLAN.md existence to route)
 
 **Custom `execute` replacement:**
 - Do whatever execution work is needed for the current phase
@@ -232,7 +238,8 @@ If you replace a step's workflow (e.g., `"workflow": ".specd/my-execute.md"`), y
 |-----------|----------|---------------------|
 | discuss | Update gray areas in CONTEXT.md | discuss (if gray areas remain) or research |
 | research | Create RESEARCH.md | plan |
-| plan | Create phases/, set stage=execution | execute |
+| plan (task-level) | Create ROADMAP.md, set stage=execution | plan (phase-level) |
+| plan (phase-level) | Create phases/phase-NN/PLAN.md | execute |
 | execute | Set current_status=executed | review |
 | review (approved) | Set current_status=completed | next phase or complete |
 | review (revisions) | Keep current_status=executed | revise |
@@ -247,26 +254,41 @@ Each phase goes through its own mini-lifecycle within execution:
 ```
          pending
             │
-            ▼
-        executing ◀──────┐
-            │             │
-            ▼             │
-         executed         │
-            │             │
-            ▼             │
-        ┌────────┐        │
-        │ review │        │
-        └───┬────┘        │
-            │             │
-       ┌────┴─────┐       │
-       ▼          ▼       │
-   completed   revise ────┘
-       │       (creates
-       │        fix phase,
-       ▼        resets to
-   next phase   pending)
-   or DONE
+       ┌────┴─────┐
+       │ PLAN.md? │
+       └────┬─────┘
+            │
+     No ────┤──── Yes
+     │            │
+     ▼            │
+  ┌──────┐        │
+  │ plan │        │
+  └──┬───┘        │
+     │            │
+     └────┬───────┘
+          │
+          ▼
+      executing ◀──────┐
+          │             │
+          ▼             │
+       executed         │
+          │             │
+          ▼             │
+      ┌────────┐        │
+      │ review │        │
+      └───┬────┘        │
+          │             │
+     ┌────┴─────┐       │
+     ▼          ▼       │
+ completed   revise ────┘
+     │       (creates
+     │        fix phase,
+     ▼        resets to
+ next phase   pending)
+ or DONE
 ```
+
+The plan step uses `phase-plan.md` — a dedicated workflow that reads the phase goal from ROADMAP.md and creates a detailed PLAN.md for that phase only. This allows later phases to adapt based on earlier phase outcomes.
 
 **Decimal fix phases:** When revise creates `phase-01.1/`, the brain executes it before advancing to `phase-02/`. Multiple revisions create `phase-01.1`, `phase-01.2`, etc.
 
@@ -302,6 +324,11 @@ Full `pipeline.json` with all options:
       }
     ],
     "phase-execution": [
+      {
+        "name": "plan",
+        "workflow": "phase-plan.md",
+        "hooks": { "pre": null, "post": null }
+      },
       {
         "name": "execute",
         "workflow": "execute.md",
