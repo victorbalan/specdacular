@@ -32,7 +32,8 @@ Extract from CONTEXT.md:
 | stage=discussion, gray areas = 0 | `research` (or `plan` if user skips) | main |
 | stage=research, no RESEARCH.md | `research` | main |
 | stage=planning, no phases dir | `plan` | main |
-| stage=planning or execution, phases.current_status=pending | `execute` | phase-execution |
+| stage=planning or execution, phases.current_status=pending, no PLAN.md | `plan` | phase-execution |
+| stage=planning or execution, phases.current_status=pending, PLAN.md exists | `execute` | phase-execution |
 | stage=execution, phases.current_status=executing | `execute` (resume) | phase-execution |
 | stage=execution, phases.current_status=executed | `review` | phase-execution |
 | stage=execution, phases.current_status=completed | check more phases | phase-execution |
@@ -74,11 +75,25 @@ $NEXT_PIPELINE = "main"
 If phases exist, advance to execution.
 
 **5. Execution — phases.current_status = "pending":**
+
+Check if the current phase already has a PLAN.md (just-in-time planning):
+```bash
+PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $CURRENT)"
+[ -f "$PHASE_DIR/PLAN.md" ] && echo "has_plan"
+```
+
+If no PLAN.md — phase needs planning first:
+```
+$NEXT_STEP = "plan"
+$NEXT_PIPELINE = "phase-execution"
+```
+plan.md detects stage=execution and creates a detailed PLAN.md for this phase only, reading the goal from ROADMAP.md.
+
+If PLAN.md exists — phase is planned, ready to execute:
 ```
 $NEXT_STEP = "execute"
 $NEXT_PIPELINE = "phase-execution"
 ```
-This is a new phase ready to start.
 
 **6. Execution — phases.current_status = "executing":**
 ```
