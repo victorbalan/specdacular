@@ -138,7 +138,8 @@ After each step, you can continue or stop. Resume anytime with `/specd:continue`
 **Execution modes:**
 
 ```
-/specd:continue user-dashboard                # Default — auto-runs to execution, pauses at phase steps
+/specd:continue user-dashboard                # Default — auto-runs, pauses at phase steps
+/specd:continue user-dashboard --interactive  # Prompt at every step with skip/jump options
 /specd:continue user-dashboard --auto         # Run everything, stop only on review issues
 ```
 
@@ -167,7 +168,7 @@ Opens a menu with task operations (Discuss, Research, Plan, Execute, Review) and
 | Command | Description |
 |---------|-------------|
 | `/specd:new [name]` | Initialize a task, start first discussion |
-| `/specd:continue [name] [--auto]` | **Drive the entire lifecycle** — picks up where you left off |
+| `/specd:continue [name] [--interactive\|--auto]` | **Drive the entire lifecycle** — picks up where you left off |
 | `/specd:toolbox [tasks name\|context]` | Task operations or codebase context management |
 
 ### Codebase Documentation
@@ -278,7 +279,8 @@ The brain (`brain.md`) is a config-driven orchestrator that reads `pipeline.json
 
 | Mode | Behavior |
 |------|----------|
-| **Default** | Auto-runs steps, pauses where `pause: true` |
+| **Default** | Auto-runs steps, pauses where `pause: true`. Smart-skips unnecessary steps. |
+| **Interactive** (`--interactive`) | Prompts at each stage transition with skip/jump options |
 | **Auto** (`--auto`) | Runs everything, only stops on errors or task completion |
 
 ### Pipeline Configuration

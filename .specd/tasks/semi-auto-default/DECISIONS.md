@@ -4,9 +4,13 @@
 **Decision:** Semi-auto behavior becomes the default. No flag needed.
 **Rationale:** It's the most useful mode — auto-runs mundane steps, pauses for important ones. Making it default removes friction.
 
-## DEC-002: Remove interactive mode
-**Decision:** Remove the interactive mode concept entirely.
-**Rationale:** Prompting at every single stage transition adds friction without value. Users who want control can set `pause: true` on specific steps.
+## DEC-002: Interactive mode as opt-in flag
+**Decision:** Keep interactive mode but make it opt-in via `--interactive` flag instead of the default.
+**Rationale:** Some users want to be prompted at every transition. Making it a flag keeps it available without being the default friction.
+
+## DEC-005: Smart step skipping
+**Decision:** Brain evaluates whether a step adds value and skips it if not (e.g., skip research on trivial phases).
+**Rationale:** Not every phase needs research. The brain should be intelligent about this rather than blindly running every step.
 
 ## DEC-003: Remove `enabled` field
 **Decision:** Steps are enabled by presence in the pipeline config. Remove/comment to disable.

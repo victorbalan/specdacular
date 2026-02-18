@@ -1,7 +1,7 @@
 ---
 name: specd:continue
 description: Continue task lifecycle — picks up where you left off
-argument-hint: "[task-name] [--auto]"
+argument-hint: "[task-name] [--interactive|--auto]"
 allowed-tools:
   - Read
   - Write
@@ -17,7 +17,8 @@ allowed-tools:
 Config-driven orchestrator that reads pipeline.json and drives the entire task lifecycle. One command from discussion through execution and review.
 
 **Modes:**
-- **Default:** Auto-runs steps, pauses where `pause: true`
+- **Default:** Auto-runs steps, pauses where `pause: true`. Smart-skips unnecessary steps.
+- **--interactive:** Prompts at every stage transition with skip/jump options
 - **--auto:** Runs everything, only stops on errors or task completion
 
 **How it works:**
@@ -61,6 +62,6 @@ Task name and flags: $ARGUMENTS
 - [ ] Pipeline loaded and validated
 - [ ] Current state accurately assessed
 - [ ] Correct next step dispatched with hooks
-- [ ] Mode flag (--auto) respected
+- [ ] Mode flags (--interactive, --auto) respected
 - [ ] User can stop at any natural boundary
 </success_criteria>

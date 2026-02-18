@@ -9,7 +9,7 @@
 | Command | Description |
 |---------|-------------|
 | `/specd:new [name]` | Initialize a task, start first discussion |
-| `/specd:continue [name] [--auto]` | Continue task lifecycle — picks up where you left off |
+| `/specd:continue [name] [--interactive\|--auto]` | Continue task lifecycle — picks up where you left off |
 
 | `/specd:toolbox [tasks <name>\|context]` | Task operations or context management |
 
@@ -38,7 +38,7 @@
    - Discussion → Research → Planning → Phase Execution → Review
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
-   - Modes: default (auto-runs to execution, pauses at phase steps), `--auto` (run everything)
+   - Modes: default (auto-runs, pauses at phase steps), `--interactive` (prompt at each step), `--auto` (run everything)
 3. **`/specd:toolbox`** — Two subdomains:
    - **`/specd:toolbox tasks <name>`** — Task operations:
      - Discuss, Research, Plan, Execute, Review
@@ -70,7 +70,8 @@ The `continue` command is powered by the **brain** — a config-driven orchestra
 
 | Mode | Behavior |
 |------|----------|
-| **Default** | Auto-runs steps, pauses where `pause: true` |
+| **Default** | Auto-runs steps, pauses where `pause: true`. Smart-skips unnecessary steps. |
+| **Interactive** (`--interactive`) | Prompts at each stage transition with skip/jump options |
 | **Auto** (`--auto`) | Runs everything, only stops on errors or task completion |
 
 ---

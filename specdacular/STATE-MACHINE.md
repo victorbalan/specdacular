@@ -336,7 +336,7 @@ Full `pipeline.json` with all options:
 | `name` | yes | — | Step identifier, used for routing and hook discovery |
 | `workflow` | yes* | — | Markdown file to execute (* not needed if `pipeline` is set) |
 | `pipeline` | — | — | Reference a sub-pipeline instead of a workflow |
-| `pause` | no | `false` | Whether default mode pauses here (ignored in `--auto`) |
+| `pause` | no | `false` | Whether default mode pauses here (ignored in `--auto`, always prompts in `--interactive`) |
 | `hooks.pre` | no | `null` | Pre-hook config or `null` for convention fallback |
 | `hooks.post` | no | `null` | Post-hook config or `null` for convention fallback |
 

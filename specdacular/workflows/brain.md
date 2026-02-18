@@ -1,10 +1,11 @@
 <purpose>
-Config-driven orchestrator that replaces continue.md's hardcoded flow control. Reads pipeline.json, determines the next step based on task state, handles modes (default/auto), dispatches step workflows, executes hooks, and manages state transitions.
+Config-driven orchestrator that replaces continue.md's hardcoded flow control. Reads pipeline.json, determines the next step based on task state, handles modes (default/interactive/auto), dispatches step workflows, executes hooks, and manages state transitions.
 
 The brain is the single source of truth for workflow orchestration. Step workflows just do their job and return — the brain decides what comes next.
 
 **Modes:**
-- **Default:** Auto-runs steps, pauses where `pause: true`
+- **Default:** Auto-runs steps, pauses where `pause: true`. Smart about skipping unnecessary steps.
+- **Interactive (`--interactive`):** Prompts at each stage transition with skip/jump options
 - **Auto (`--auto`):** Runs everything, only stops on errors or task completion
 </purpose>
 
@@ -35,11 +36,14 @@ Parse arguments to extract task name and mode.
 
 **Parse $ARGUMENTS:**
 - Extract task name (first argument, or only argument without --)
+- Check for `--interactive` flag
 - Check for `--auto` flag
-- Default mode: if `--auto` present → auto mode, otherwise → default mode
+- If `--interactive` → interactive mode
+- If `--auto` → auto mode
+- Otherwise → default mode
 
 ```
-Mode: {default | auto}
+Mode: {default | interactive | auto}
 Task: {task-name}
 ```
 
@@ -60,6 +64,7 @@ Continue to resolve_pipeline.
 Load and validate the pipeline configuration.
 
 After loading, apply mode:
+- If `--interactive` flag was set, use interactive mode
 - If `--auto` flag was set, use auto mode
 - Otherwise use default mode (auto-run, pause at `pause: true` steps)
 
@@ -120,7 +125,7 @@ Mode-based dispatch decision.
 
 **Default mode:**
 Check the step's `pause` field:
-- If `false` or absent: auto-proceed (no prompt)
+- If `false` or absent: auto-proceed (no prompt). But first, evaluate if the step adds value — if not, skip it (see smart skipping below).
 - If `true`: prompt user before proceeding
 
 When pausing, present current state and ask what to do:
@@ -144,6 +149,41 @@ For review step:
 For revise step:
 - Dispatch directly (revise has its own user interaction)
 
+**Interactive mode (`--interactive`):**
+Prompt at every stage transition, regardless of `pause` field.
+
+Use AskUserQuestion with step-appropriate options:
+
+For discuss step:
+- "Discuss" (Recommended) — Dive into gray areas
+- "Skip to research" — Move on without resolving
+- "Skip to planning" — Jump straight to planning
+
+For research step:
+- "Research" (Recommended) — Investigate implementation patterns
+- "Skip to planning" — Plan without research
+- "Discuss more" — Continue discussion
+
+For plan step:
+- "Plan" (Recommended) — Create phases and PLAN.md files
+- "Research first" — Run research before planning
+- "Discuss more" — Continue discussion
+
+For execute step:
+- "Execute" (Recommended) — Start/resume phase execution
+- "Research this phase" — Research patterns before executing
+- "Review plan" — Read the PLAN.md first
+- "Stop for now" — Come back later
+
+For review step:
+- Dispatch directly (review has its own user interaction)
+
+For revise step:
+- Dispatch directly (revise has its own user interaction)
+
+**Auto mode (`--auto`):**
+Proceed without prompting. Apply smart skipping (see below). Only stop on errors or task completion.
+
 **If user chooses "Stop for now":**
 Save state and exit:
 ```
@@ -158,8 +198,21 @@ End workflow.
 **If user chooses "Research this phase":**
 Set `$NEXT_STEP = "research"` and continue to dispatch. The brain already knows `phases.current` — research.md will detect execution stage and scope research to the current phase. After research returns, brain loops back (stage is still "execution", status still "pending") and routes to execute again.
 
-**Auto mode (`--auto`):**
-Proceed without prompting. Only stop on errors or task completion.
+**If user chooses an alternative (e.g., "Skip to research"):**
+Update `$NEXT_STEP` accordingly and continue to dispatch.
+
+**Smart step skipping (default and auto modes):**
+Before dispatching a step, evaluate whether it adds value. Skip if:
+- **discuss:** No gray areas remaining in CONTEXT.md → skip, advance to research
+- **research (task-level):** Task is straightforward (few files, clear requirements, no external dependencies) → skip, advance to plan
+- **research (phase-level):** Phase has ≤3 simple tasks with clear instructions → skip, proceed to execute
+
+When skipping, log:
+```
+Skipping {step}: {reason}
+```
+
+In interactive mode, don't auto-skip — instead recommend skipping: mark the skip option as "(Recommended)" and the step as the alternative.
 
 Continue to execute_hooks_and_step.
 </step>
@@ -308,8 +361,9 @@ End workflow.
 - Pipeline loaded from .specd/pipeline.json or installed default
 - Pipeline validated (schema version, references, workflow paths)
 - State-based routing matches all 8 state combinations
-- Default mode auto-runs, pauses at `pause: true` steps
-- Auto mode proceeds without prompting, stops on errors
+- Default mode auto-runs, pauses at `pause: true` steps, smart-skips unnecessary steps
+- Interactive mode prompts at each transition with skip/jump options
+- Auto mode proceeds without prompting, smart-skips, stops on errors
 - Phase-execution sub-pipeline loops correctly per phase
 - Decimal fix phases handled
 - State saved before dispatch for reliable resume
