@@ -14,13 +14,16 @@ Simplify the mode system. Semi-auto becomes the default behavior (no flag). Only
 - **Remove `mode` field from pipeline.json**: no longer needed (default is semi-auto, only override is `--auto`)
 
 ### Pipeline Config Cleanup
-- **Replace `pause_in_semi_auto`** with `pause` (boolean) — cleaner name since semi-auto is the default
+- **Replace `pause_in_semi_auto`** with `pause` (boolean, defaults to `false`) — cleaner name
 - **Remove `enabled` field** from all steps — if a step shouldn't run, remove/comment it from the config
 - Brain skip logic for `enabled: false` is removed
+- **Remove `mode` field** from pipeline.json
 
-### Current Pause Defaults (preserved)
-- Main pipeline: discuss (`pause: false`), research (`pause: false`), plan (`pause: false`)
-- Phase-execution: execute (`pause: true`), review (`pause: true`), revise (`pause: true`)
+### Pause Behavior
+- Normal mode: brain checks `pause` field — if `true`, prompt user; if `false`/absent, auto-proceed
+- `--auto` mode: ignores `pause` entirely, runs everything
+- Main pipeline steps: `pause` absent (auto-run)
+- Phase-execution steps: `pause: true` (prompt user)
 
 ## Files to Modify
 

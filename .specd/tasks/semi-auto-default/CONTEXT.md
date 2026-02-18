@@ -12,4 +12,4 @@
 
 ## Gray Areas Remaining
 
-- [ ] Should the `pause` field default to `false` or `true` when omitted from config? (Currently `pause_in_semi_auto` defaults to `false`)
+_None — all resolved._

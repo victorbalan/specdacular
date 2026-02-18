@@ -13,5 +13,5 @@
 **Rationale:** Cleaner config. A boolean that's always `true` is noise.
 
 ## DEC-004: Rename `pause_in_semi_auto` → `pause`
-**Decision:** Shorter, cleaner field name since semi-auto is now the only pauseable mode.
-**Rationale:** The field name referenced a mode that no longer exists as a named concept.
+**Decision:** Replace with `pause` (boolean, defaults to `false`). In normal mode, `pause: true` steps prompt the user. In `--auto`, all pauses are skipped.
+**Rationale:** Cleaner name. The old name referenced a mode concept that no longer exists.
