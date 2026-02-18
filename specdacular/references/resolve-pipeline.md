@@ -54,9 +54,9 @@ For each step in all pipelines, if a step has `"pipeline": "{name}"`:
 - If not: error with `"Pipeline step '{step.name}' references pipeline '{name}' which doesn't exist in pipelines object."`
 
 **3. Check workflow references:**
-For each enabled step with a `"workflow"` field:
+For each step with a `"workflow"` field:
 - Check the value is a non-empty string
-- If empty: error with `"Step '{step.name}' is enabled but has no workflow specified."`
+- If empty: error with `"Step '{step.name}' has no workflow specified."`
 
 **4. Warn on missing standard steps (non-blocking):**
 Check if these step names exist in any pipeline: discuss, plan, execute, review.

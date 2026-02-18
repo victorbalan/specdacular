@@ -138,8 +138,8 @@ After each step, you can continue or stop. Resume anytime with `/specd:continue`
 **Execution modes:**
 
 ```
-/specd:continue user-dashboard                # Interactive (default) — pause after each step
-/specd:continue user-dashboard --semi-auto    # Auto through planning, pause after review
+/specd:continue user-dashboard                # Default — auto-runs, pauses at phase steps
+/specd:continue user-dashboard --interactive  # Prompt at every step with skip/jump options
 /specd:continue user-dashboard --auto         # Run everything, stop only on review issues
 ```
 
@@ -168,7 +168,7 @@ Opens a menu with task operations (Discuss, Research, Plan, Execute, Review) and
 | Command | Description |
 |---------|-------------|
 | `/specd:new [name]` | Initialize a task, start first discussion |
-| `/specd:continue [name] [--semi-auto\|--auto]` | **Drive the entire lifecycle** — picks up where you left off |
+| `/specd:continue [name] [--interactive\|--auto]` | **Drive the entire lifecycle** — picks up where you left off |
 | `/specd:toolbox [tasks name\|context]` | Task operations or codebase context management |
 
 ### Codebase Documentation
@@ -279,8 +279,8 @@ The brain (`brain.md`) is a config-driven orchestrator that reads `pipeline.json
 
 | Mode | Behavior |
 |------|----------|
-| **Interactive** (default) | Prompts at each stage transition |
-| **Semi-auto** (`--semi-auto`) | Auto-runs steps where `pause_in_semi_auto: false`, pauses where `true` |
+| **Default** | Auto-runs steps, pauses where `pause: true`. Smart-skips unnecessary steps. |
+| **Interactive** (`--interactive`) | Prompts at each stage transition with skip/jump options |
 | **Auto** (`--auto`) | Runs everything, only stops on errors or task completion |
 
 ### Pipeline Configuration
@@ -292,18 +292,17 @@ The pipeline is defined in `pipeline.json` — nothing is hardcoded. The default
 ```json
 {
   "schema_version": "1.0",
-  "mode": "interactive",
   "pipelines": {
     "main": [
-      { "name": "discuss",  "workflow": "discuss.md",  "pause_in_semi_auto": false },
-      { "name": "research", "workflow": "research.md", "pause_in_semi_auto": false },
-      { "name": "plan",     "workflow": "plan.md",     "pause_in_semi_auto": false },
+      { "name": "discuss",  "workflow": "discuss.md" },
+      { "name": "research", "workflow": "research.md" },
+      { "name": "plan",     "workflow": "plan.md" },
       { "name": "phase-execution", "pipeline": "phase-execution" }
     ],
     "phase-execution": [
-      { "name": "execute", "workflow": "execute.md", "pause_in_semi_auto": true },
-      { "name": "review",  "workflow": "review.md",  "pause_in_semi_auto": true },
-      { "name": "revise",  "workflow": "revise.md",  "pause_in_semi_auto": true }
+      { "name": "execute", "workflow": "execute.md", "pause": true },
+      { "name": "review",  "workflow": "review.md",  "pause": true },
+      { "name": "revise",  "workflow": "revise.md",  "pause": true }
     ]
   },
   "hooks": { "pre-step": null, "post-step": null }
@@ -312,8 +311,6 @@ The pipeline is defined in `pipeline.json` — nothing is hardcoded. The default
 
 **Customization options:**
 - **Swap workflows:** Point any step's `workflow` to your own `.md` file
-- **Enable/disable steps:** Set `"enabled": false` on any step
-- **Change mode:** Set `"mode": "semi-auto"` or `"auto"` as default
 - **Add hooks:** Configure pre/post hooks per step or globally
 - **Full replace:** Drop `.specd/pipeline.json` to replace the entire pipeline
 
