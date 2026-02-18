@@ -1,12 +1,11 @@
 <purpose>
-Config-driven orchestrator that replaces continue.md's hardcoded flow control. Reads pipeline.json, determines the next step based on task state, handles modes (interactive/semi-auto/auto), dispatches step workflows, executes hooks, and manages state transitions.
+Config-driven orchestrator that replaces continue.md's hardcoded flow control. Reads pipeline.json, determines the next step based on task state, handles modes (default/auto), dispatches step workflows, executes hooks, and manages state transitions.
 
 The brain is the single source of truth for workflow orchestration. Step workflows just do their job and return — the brain decides what comes next.
 
 **Modes:**
-- **Interactive (default):** Prompts at each stage transition
-- **Semi-auto:** Auto-runs steps where `pause_in_semi_auto: false`, pauses where `true`
-- **Auto:** Runs everything, only stops on errors or task completion
+- **Default:** Auto-runs steps, pauses where `pause: true`
+- **Auto (`--auto`):** Runs everything, only stops on errors or task completion
 </purpose>
 
 <philosophy>
@@ -17,7 +16,7 @@ All flow control lives here. Step workflows are pure execution — they do their
 
 ## Config-Driven
 
-The pipeline comes from pipeline.json, not hardcoded logic. Users can swap steps, disable steps, add hooks, or replace the entire pipeline.
+The pipeline comes from pipeline.json, not hardcoded logic. Users can swap steps, add hooks, or replace the entire pipeline.
 
 ## State Machine
 
@@ -36,16 +35,11 @@ Parse arguments to extract task name and mode.
 
 **Parse $ARGUMENTS:**
 - Extract task name (first argument, or only argument without --)
-- Check for `--semi-auto` flag
 - Check for `--auto` flag
-- Default mode: use pipeline.json's `mode` field
-
-**CLI flags override pipeline.json mode.**
-
-Priority: CLI flag → pipeline.json `mode` → `"interactive"` default.
+- Default mode: if `--auto` present → auto mode, otherwise → default mode
 
 ```
-Mode: {interactive | semi-auto | auto}
+Mode: {default | auto}
 Task: {task-name}
 ```
 
@@ -65,10 +59,9 @@ Continue to resolve_pipeline.
 
 Load and validate the pipeline configuration.
 
-After loading, apply mode override:
-- If CLI flag was set (--semi-auto or --auto), use that regardless of pipeline.json mode
-- Otherwise use pipeline.json's `mode` field
-- If neither, default to `"interactive"`
+After loading, apply mode:
+- If `--auto` flag was set, use auto mode
+- Otherwise use default mode (auto-run, pause at `pause: true` steps)
 
 **Check for orchestrator mode:**
 Read `.specd/config.json` (project-level, not task-level). If it has `"type": "orchestrator"`:
@@ -110,9 +103,6 @@ The core orchestration loop. Repeats until task is complete or user stops.
 4. **Find step config in pipeline:**
    Look up `$NEXT_STEP` in `$PIPELINE.pipelines.$NEXT_PIPELINE`.
 
-   If step has `"enabled": false`:
-   Skip to the next step in the pipeline array. If no next step, advance stage.
-
 5. **Prompt or proceed:**
    Continue to prompt_or_proceed.
 
@@ -128,30 +118,19 @@ Continue to prompt_or_proceed.
 <step name="prompt_or_proceed">
 Mode-based dispatch decision.
 
-**Interactive mode:**
-Present current state and ask what to do.
+**Default mode:**
+Check the step's `pause` field:
+- If `false` or absent: auto-proceed (no prompt)
+- If `true`: prompt user before proceeding
+
+When pausing, present current state and ask what to do:
 
 ```
 **Current state:** {stage description}
-{Additional context based on step — e.g., gray areas count, phase number}
+{Additional context based on step — e.g., phase number}
 ```
 
 Use AskUserQuestion with step-appropriate options:
-
-For discuss step:
-- "Discuss" (Recommended) — Dive into gray areas
-- "Skip to research" — Move on without resolving
-- "Skip to planning" — Jump straight to planning
-
-For research step:
-- "Research" (Recommended) — Investigate implementation patterns
-- "Skip to planning" — Plan without research
-- "Discuss more" — Continue discussion
-
-For plan step:
-- "Plan" (Recommended) — Create phases and PLAN.md files
-- "Research first" — Run research before planning
-- "Discuss more" — Continue discussion
 
 For execute step:
 - "Execute" (Recommended) — Start/resume phase execution
@@ -179,15 +158,7 @@ End workflow.
 **If user chooses "Research this phase":**
 Set `$NEXT_STEP = "research"` and continue to dispatch. The brain already knows `phases.current` — research.md will detect execution stage and scope research to the current phase. After research returns, brain loops back (stage is still "execution", status still "pending") and routes to execute again.
 
-**If user chooses an alternative (e.g., "Skip to research"):**
-Update `$NEXT_STEP` accordingly and continue to dispatch.
-
-**Semi-auto mode:**
-Check the step's `pause_in_semi_auto` flag:
-- If `false`: auto-proceed (no prompt)
-- If `true`: prompt user (same as interactive mode)
-
-**Auto mode:**
+**Auto mode (`--auto`):**
 Proceed without prompting. Only stop on errors or task completion.
 
 Continue to execute_hooks_and_step.
@@ -247,7 +218,7 @@ Update state based on which step just completed.
 **After discuss completes:**
 - Stage stays at "discussion"
 - Re-read CONTEXT.md to check if gray areas are resolved
-- If all resolved, advance stage to "research" (or "planning" if research disabled)
+- If all resolved, advance stage to "research"
 
 **After research completes:**
 - Set stage to "planning" in config.json
@@ -336,9 +307,8 @@ End workflow.
 <success_criteria>
 - Pipeline loaded from .specd/pipeline.json or installed default
 - Pipeline validated (schema version, references, workflow paths)
-- State-based routing matches all 8 state combinations from continue.md
-- Interactive mode prompts at each transition with correct options
-- Semi-auto mode uses pause_in_semi_auto flag per step
+- State-based routing matches all 8 state combinations
+- Default mode auto-runs, pauses at `pause: true` steps
 - Auto mode proceeds without prompting, stops on errors
 - Phase-execution sub-pipeline loops correctly per phase
 - Decimal fix phases handled

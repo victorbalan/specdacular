@@ -44,26 +44,23 @@ Extract from CONTEXT.md:
 $NEXT_STEP = "discuss"
 $NEXT_PIPELINE = "main"
 ```
-In interactive mode, offer alternatives: "Skip to research", "Skip to planning"
-
 **2. Discussion stage, no gray areas:**
 ```
 $NEXT_STEP = "research"
 $NEXT_PIPELINE = "main"
 ```
-Check if research step is enabled in pipeline. If disabled, skip to "plan".
-In interactive mode, offer: "Research" (recommended), "Skip to planning", "Discuss more"
+Auto-proceed to research.
 
 **3. Research stage:**
 ```bash
 [ -f "$TASK_DIR/RESEARCH.md" ] && echo "has_research"
 ```
-If no RESEARCH.md and research step is enabled:
+If no RESEARCH.md:
 ```
 $NEXT_STEP = "research"
 $NEXT_PIPELINE = "main"
 ```
-If RESEARCH.md exists or research disabled, advance to plan.
+If RESEARCH.md exists, advance to plan.
 
 **4. Planning stage, no phases:**
 ```bash
@@ -130,10 +127,7 @@ To find a step by name in a pipeline array:
 ```
 For each step in $PIPELINE.pipelines.{pipeline_name}:
   If step.name == $NEXT_STEP:
-    If step.enabled == false:
-      Skip to next step in pipeline order
-    Else:
-      Return step (workflow path, hooks config)
+    Return step (workflow path, hooks config)
 ```
 
 If step not found in pipeline → error:

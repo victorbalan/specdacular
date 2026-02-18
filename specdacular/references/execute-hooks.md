@@ -124,6 +124,4 @@ The full hook execution sequence around a step:
 5. Global hooks.post-step   (if configured)
 ```
 
-**Important:** Do NOT execute any hooks for disabled steps (`"enabled": false`). If a step is skipped, its hooks are also skipped.
-
 </shared>

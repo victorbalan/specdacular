@@ -10,11 +10,11 @@ This is a thin entry point — the brain does all the work.
 Pass all arguments through to the brain.
 
 The brain handles:
-- Argument parsing (task name, --semi-auto, --auto flags)
+- Argument parsing (task name, --auto flag)
 - Task validation
 - Pipeline resolution (pipeline.json)
 - State-based routing
-- Mode handling (interactive/semi-auto/auto)
+- Mode handling (default/auto)
 - Hook execution
 - Step dispatch
 - State transitions
