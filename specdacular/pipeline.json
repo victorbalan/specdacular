@@ -34,7 +34,7 @@
     "phase-execution": [
       {
         "name": "plan",
-        "workflow": "plan.md",
+        "workflow": "phase-plan.md",
         "hooks": {
           "pre": null,
           "post": null

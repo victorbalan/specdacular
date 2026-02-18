@@ -137,9 +137,11 @@ When pausing, present current state and ask what to do:
 
 Use AskUserQuestion with step-appropriate options:
 
+For plan step (phase-execution pipeline — phase-plan.md):
+- Auto-proceed (no pause). Plan has no pause field.
+
 For execute step:
 - "Execute" (Recommended) — Start/resume phase execution
-- "Research this phase" — Research patterns before executing
 - "Review plan" — Read the PLAN.md first
 - "Stop for now" — Come back later
 
@@ -164,14 +166,18 @@ For research step:
 - "Skip to planning" — Plan without research
 - "Discuss more" — Continue discussion
 
-For plan step:
-- "Plan" (Recommended) — Create phases and PLAN.md files
+For plan step (main pipeline — task-level):
+- "Plan" (Recommended) — Create roadmap with phase goals
 - "Research first" — Run research before planning
 - "Discuss more" — Continue discussion
 
+For plan step (phase-execution pipeline — phase-plan.md):
+- "Plan this phase" (Recommended) — Create detailed PLAN.md
+- "Skip to execute" — Execute without explicit planning
+- "Stop for now" — Come back later
+
 For execute step:
 - "Execute" (Recommended) — Start/resume phase execution
-- "Research this phase" — Research patterns before executing
 - "Review plan" — Read the PLAN.md first
 - "Stop for now" — Come back later
 
@@ -195,9 +201,6 @@ Progress saved. Pick up where you left off anytime:
 ```
 End workflow.
 
-**If user chooses "Research this phase":**
-Set `$NEXT_STEP = "research"` and continue to dispatch. The brain already knows `phases.current` — research.md will detect execution stage and scope research to the current phase. After research returns, brain loops back (stage is still "execution", status still "pending") and routes to execute again.
-
 **If user chooses an alternative (e.g., "Skip to research"):**
 Update `$NEXT_STEP` accordingly and continue to dispatch.
 
@@ -205,7 +208,6 @@ Update `$NEXT_STEP` accordingly and continue to dispatch.
 Before dispatching a step, evaluate whether it adds value. Skip if:
 - **discuss:** No gray areas remaining in CONTEXT.md → skip, advance to research
 - **research (task-level):** Task is straightforward (few files, clear requirements, no external dependencies) → skip, advance to plan
-- **research (phase-level):** Phase has ≤3 simple tasks with clear instructions → skip, proceed to execute
 
 When skipping, log:
 ```
@@ -276,10 +278,14 @@ Update state based on which step just completed.
 **After research completes:**
 - Set stage to "planning" in config.json
 
-**After plan completes:**
-- Stage should already be "planning" (plan.md sets it)
-- Check if phases were created
-- If phases exist, set stage to "execution", set `phases.current_status: "pending"`
+**After plan completes (task-level — main pipeline):**
+- plan.md sets stage to "execution" and phases info in config.json
+- Brain loops back, routing picks up phase-execution pipeline
+
+**After plan completes (phase-level — phase-execution pipeline, phase-plan.md):**
+- phase-plan.md creates PLAN.md but does NOT change config.json
+- Status stays "pending" but PLAN.md now exists
+- Brain loops back, routing sees pending + PLAN.md exists → routes to execute
 
 **After execute completes:**
 - Set `phases.current_status: "executed"` in config.json
@@ -309,7 +315,7 @@ Handle the phase-execution sub-pipeline loop.
 When the brain reaches the `phase-execution` pipeline reference in the main pipeline:
 
 1. Read ROADMAP.md and config.json to determine current phase
-2. Enter the phase-execution sub-pipeline (execute → review → revise)
+2. Enter the phase-execution sub-pipeline (plan → execute → review → revise)
 3. After each iteration through the sub-pipeline:
    - If review approved and more phases remain: advance `phases.current`, set status "pending", loop
    - If review approved and no more phases: exit sub-pipeline, task complete

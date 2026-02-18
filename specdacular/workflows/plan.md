@@ -1,7 +1,7 @@
 <purpose>
-Create execution phases from task context. Derives phases based on dependencies, creates one PLAN.md per phase, and writes ROADMAP.md.
+Create a high-level execution roadmap from task context. Derives phases based on dependencies and writes ROADMAP.md with phase goals. Does NOT create PLAN.md files or phase directories — those are created just-in-time by phase-plan.md when each phase starts.
 
-**Output:** `phases/phase-NN/PLAN.md` files, ROADMAP.md, updated STATE.md
+**Output:** ROADMAP.md, updated STATE.md, config.json
 </purpose>
 
 <philosophy>
@@ -98,36 +98,7 @@ Break the task into ordered phases based on dependencies.
 - Each task creates or modifies 1-3 files
 - If a phase has >5 tasks, split it
 
-```bash
-mkdir -p .specd/tasks/{task-name}/phases
-```
-
-Continue to write_plans.
-</step>
-
-<step name="write_plans">
-Write one PLAN.md for each phase.
-
-For each phase:
-
-```bash
-mkdir -p .specd/tasks/{task-name}/phases/phase-$(printf '%02d' $N)
-```
-
-Write `phases/phase-NN/PLAN.md` using template from:
-`~/.claude/specdacular/templates/tasks/PLAN.md`
-
-Fill in:
-- YAML frontmatter: task name, phase number, dependencies, creates, modifies
-- Objective: what the phase accomplishes
-- Context: reference codebase patterns, relevant decisions, research findings
-- Tasks: 2-5 tasks with clear actions, verification, and done-when criteria
-
-**Each task should include:**
-- Files affected
-- Clear action description
-- Verification command
-- Done-when checklist
+**Do NOT create phase directories or PLAN.md files.** Those are created just-in-time by `phase-plan.md` when each phase starts execution. This allows later phases to adapt based on what happened in earlier phases.
 
 Continue to write_roadmap.
 </step>
@@ -151,9 +122,10 @@ Update STATE.md and config.json.
 - Update documents status
 
 **config.json:**
-- Set `stage` to `"planning"`
+- Set `stage` to `"execution"`
 - Set `phases.total` to phase count
 - Set `phases.current` to 1
+- Set `phases.current_status` to `"pending"`
 
 Continue to commit.
 </step>
@@ -161,7 +133,7 @@ Continue to commit.
 <step name="commit">
 @~/.claude/specdacular/references/commit-docs.md
 
-- **$FILES:** `.specd/tasks/{task-name}/ROADMAP.md .specd/tasks/{task-name}/phases/ .specd/tasks/{task-name}/STATE.md .specd/tasks/{task-name}/config.json`
+- **$FILES:** `.specd/tasks/{task-name}/ROADMAP.md .specd/tasks/{task-name}/STATE.md .specd/tasks/{task-name}/config.json`
 - **$MESSAGE:** `docs({task-name}): create roadmap and phase plans` with phase summary
 - **$LABEL:** `planning complete`
 
@@ -194,8 +166,9 @@ End workflow (caller handles continuation).
 
 <success_criteria>
 - Phases derived from task requirements and dependencies
-- One PLAN.md per phase with clear tasks
-- ROADMAP.md created with phase overview
-- STATE.md updated to planning stage
+- ROADMAP.md created with phase goals and scope (no PLAN.md files)
+- No phase directories created (just-in-time by phase-plan.md)
+- STATE.md updated
+- config.json set to execution stage with phases info
 - Changes committed
 </success_criteria>
