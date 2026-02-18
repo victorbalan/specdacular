@@ -9,7 +9,7 @@
 | Command | Description |
 |---------|-------------|
 | `/specd:new [name]` | Initialize a task, start first discussion |
-| `/specd:continue [name] [--semi-auto\|--auto]` | Continue task lifecycle — picks up where you left off |
+| `/specd:continue [name] [--auto]` | Continue task lifecycle — picks up where you left off |
 
 | `/specd:toolbox [tasks <name>\|context]` | Task operations or context management |
 
@@ -38,7 +38,7 @@
    - Discussion → Research → Planning → Phase Execution → Review
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
-   - Modes: interactive (default), `--semi-auto` (auto through planning, pause after review), `--auto` (run everything)
+   - Modes: default (auto-runs to execution, pauses at phase steps), `--auto` (run everything)
 3. **`/specd:toolbox`** — Two subdomains:
    - **`/specd:toolbox tasks <name>`** — Task operations:
      - Discuss, Research, Plan, Execute, Review
@@ -70,8 +70,7 @@ The `continue` command is powered by the **brain** — a config-driven orchestra
 
 | Mode | Behavior |
 |------|----------|
-| **Interactive** (default) | Prompts at each stage transition |
-| **Semi-auto** (`--semi-auto`) | Auto-runs steps where `pause_in_semi_auto: false`, pauses where `true` |
+| **Default** | Auto-runs steps, pauses where `pause: true` |
 | **Auto** (`--auto`) | Runs everything, only stops on errors or task completion |
 
 ---
@@ -84,8 +83,6 @@ The pipeline is defined in `pipeline.json` — nothing is hardcoded. The default
 
 **Customization options:**
 - **Swap workflows:** Point any step's `workflow` to your own `.md` file
-- **Enable/disable steps:** Set `"enabled": false` on any step
-- **Change mode:** Set `"mode": "semi-auto"` or `"auto"` as default
 - **Add hooks:** Configure pre/post hooks per step or globally
 - **Full replace:** Drop `.specd/pipeline.json` to replace the entire pipeline
 
