@@ -3,8 +3,8 @@
   "discussion_sessions": 1,
   "decisions_count": 4,
   "phases": {
-    "current": 1,
-    "current_status": "pending",
+    "current": 2,
+    "current_status": "executed",
     "total": 2,
     "completed": 0,
     "phase_start_commit": null
