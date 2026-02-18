@@ -129,8 +129,8 @@ That's it. `continue` reads the current state and guides you through each stage:
 
 1. **Discussion** — Probes gray areas until clear
 2. **Research** — Spawns parallel agents for patterns/pitfalls
-3. **Planning** — Creates roadmap with phases, one PLAN.md per phase
-4. **Phase execution** — Implements with progress tracking
+3. **Planning** — Creates roadmap with phase goals
+4. **Phase execution** — Plans each phase just-in-time, then implements with progress tracking
 5. **Phase review** — Code review agent compares plans against actual code
 
 After each step, you can continue or stop. Resume anytime with `/specd:continue`.
@@ -202,8 +202,8 @@ Opens a menu with task operations (Discuss, Research, Plan, Execute, Review) and
 
 - **Discussion** — Probes gray areas, records decisions. Context accumulates across sessions.
 - **Research** — Spawns 3 parallel agents: codebase integration, external patterns, and pitfalls. Output: `RESEARCH.md`.
-- **Planning** — Creates `ROADMAP.md` with phases derived from dependency analysis, plus one `phases/phase-NN/PLAN.md` per phase. Plans are self-contained prompts for an implementing agent.
-- **Phase execution** — Nested sub-pipeline that loops per phase: execute → review → revise. Implements plans with verification, commits per task, and progress tracking.
+- **Planning** — Creates `ROADMAP.md` with phases derived from dependency analysis. Phase goals only — no detailed PLAN.md files yet.
+- **Phase execution** — Nested sub-pipeline that loops per phase: plan → execute → review → revise. Each phase gets just-in-time planning (detailed PLAN.md from ROADMAP.md goal), then implementation with verification, commits per task, and progress tracking. Later phases can adapt based on earlier execution.
 - **Phase review** — Code review agent inspects executed code against plan intent. Generates fix plans (decimal phases like `phase-01.1`) if needed.
 - **Revise** — Collects feedback from review, creates fix plans, signals brain to re-execute.
 
@@ -255,8 +255,9 @@ The brain (`brain.md`) is a config-driven orchestrator that reads `pipeline.json
               │  Phase-Execution    │    │
               │  Sub-Pipeline       │    │
               │                     │    │
-              │  execute → review → │    │
-              │  revise  ──loop──┘  │    │
+              │  plan → execute →   │    │
+              │  review → revise   │    │
+              │      ──loop──┘     │    │
               │                     │    │
               │  Per phase, repeats │    │
               │  until all phases   │    │
@@ -300,6 +301,7 @@ The pipeline is defined in `pipeline.json` — nothing is hardcoded. The default
       { "name": "phase-execution", "pipeline": "phase-execution" }
     ],
     "phase-execution": [
+      { "name": "plan",    "workflow": "phase-plan.md" },
       { "name": "execute", "workflow": "execute.md", "pause": true },
       { "name": "review",  "workflow": "review.md",  "pause": true },
       { "name": "revise",  "workflow": "revise.md",  "pause": true }
