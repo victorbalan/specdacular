@@ -2,19 +2,18 @@
 Generated: 2026-02-04
 
 ## Entry Points
+<!-- AUTO_GENERATED: 2026-02-17 -->
 
 **Installation & Setup**
 - `bin/install.js` — CLI installer, handles global/local installation, hooks setup, settings.json configuration
 
 **Claude Code Commands** (executed via `/specd:*`)
 - `commands/specd/map-codebase.md` — Spawn 4 parallel mapper agents to analyze codebase
-- `commands/specd/new-feature.md` — Initialize feature folder and start first discussion
-- `commands/specd/discuss-feature.md` — Continue/deepen feature discussion (repeatable)
-- `commands/specd/research-feature.md` — Spawn parallel research agents for implementation patterns
-- `commands/specd/plan-feature.md` — Create executable task plans from feature context
-- `commands/specd/discuss-phase.md` — Discuss specific phase before execution
-- `commands/specd/research-phase.md` — Research patterns for specific phase
-- `commands/specd/execute-plan.md` — Execute plan with progress tracking and deviation logging
+- `commands/specd/new.md` — Initialize a new task and start the first discussion
+- `commands/specd/continue.md` — Continue task lifecycle, picks up where you left off (supports `--semi-auto`/`--auto`)
+- `commands/specd/status.md` — Show feature status dashboard (supports `--all`)
+- `commands/specd/toolbox.md` — Advanced task operations and context management
+- `commands/specd/config.md` — Create or update `.specd/config.json` with commit settings
 - `commands/specd/update.md` — Update specdacular to latest version
 - `commands/specd/help.md` — Display all commands and usage guide
 
@@ -25,6 +24,7 @@ Generated: 2026-02-04
 ## Core Modules
 
 ### Installation System (`bin/install.js`)
+<!-- AUTO_GENERATED: 2026-02-17 -->
 
 **Main Functions**
 - `getGlobalDir(): string` — Returns Claude config directory (CLAUDE_CONFIG_DIR or ~/.claude)
@@ -46,6 +46,7 @@ Generated: 2026-02-04
 6. Writes VERSION file with package version
 
 ### Session Hooks (`hooks/`)
+<!-- AUTO_GENERATED: 2026-02-17 -->
 
 **Update Checker** (`specd-check-update.js`)
 - `spawn()` — Spawns background node process to check npm registry
@@ -79,65 +80,84 @@ Generated: 2026-02-04
 8. `completion` — Present summary with line counts
 
 ### Feature Planning (`specdacular/workflows/`)
+<!-- AUTO_GENERATED: 2026-02-17 -->
 
-**new-feature.md**
-1. `validate` — Check name, check if exists
-2. `codebase_context` — Look for .specd/config.json or .specd/codebase/
-3. `first_discussion` — "What are you building?"
-4. `write_feature` — Write FEATURE.md with technical requirements
-5. `write_context` — Write CONTEXT.md with discussion state
-6. `initialize_decisions` — Write DECISIONS.md
-7. `initialize_changelog` — Write CHANGELOG.md (for execution-time decisions)
-8. `initialize_state` — Write STATE.md
-9. `commit` — Commit feature folder
-10. `completion` — Present options: discuss-feature, research-feature, plan-feature
+**new.md**
+1. `validate` — Check name, kebab-case, check if exists in `.specd/tasks/` or `.specd/features/`
+2. `codebase_context` — Read `.specd/config.json`; if orchestrator type, hand off to `orchestrator/new.md`; else check `.specd/codebase/*.md`
+3. `first_discussion` — "What's the {task-name} task?" — conversational exploration, 4-6 exchanges
+4. `write_feature` — Create `.specd/tasks/{name}/` with FEATURE.md, CONTEXT.md, DECISIONS.md, CHANGELOG.md, STATE.md, config.json
+5. `commit` — Commit task folder
+6. `continuation_offer` — Offer to keep discussing gray areas (inline) or stop; if continuing, hand off to `discuss.md`
 
-**discuss-feature.md**
-1. `validate` — Check feature exists
-2. `load_context` — Read FEATURE.md, CONTEXT.md, DECISIONS.md, STATE.md, RESEARCH.md
-3. `show_state` — Display what's established, previous discussions, active decisions
-4. `identify_gray_areas` — Derive feature-specific unclear areas
-5. `probe_area` — 4 questions then check, clarify until clear
-6. `record_decisions` — Add new DEC-XXX entries to DECISIONS.md
-7. `update_context` — Add resolved questions to CONTEXT.md
-8. `update_state` — Increment discussion sessions, update gray areas count
-9. `commit` — Commit updates
-10. `completion` — Present session summary, next options
+**discuss.md**
+1. `validate` — Check task exists
+2. `load_context` — Read FEATURE.md, CONTEXT.md, DECISIONS.md, STATE.md, optionally RESEARCH.md
+3. `show_state` — Display session number, decisions count, gray areas list
+4. `identify_focus` — Pick highest-impact gray area (unblocking, risk, user interest)
+5. `probe_area` — 4 questions then check, mark resolved or defer
+6. `record_decisions` — Add DEC-{NNN} entries to DECISIONS.md immediately as discovered
+7. `update_context` — Move resolved items out of gray areas, add discussion history entry
+8. `update_state` — Increment discussion sessions, update gray areas, update config.json
+9. `commit` — Commit CONTEXT.md, DECISIONS.md, STATE.md, config.json
+10. `completion` — Present session summary (resolved count, new decisions, remaining)
 
-**research-feature.md**
+**research.md**
 - Spawns 3 parallel agents:
-  1. Codebase Integration (Explore agent) — Where to put code, what to reuse
-  2. External Patterns (feature-researcher agent) — Libraries, architecture patterns
-  3. Pitfalls (feature-researcher agent) — Common mistakes, gotchas
-- Synthesizes findings into RESEARCH.md
+  1. Codebase Integration — Where to put code, what to reuse
+  2. Implementation Patterns — Libraries, standard approaches
+  3. Pitfalls — Common mistakes, gotchas
+- Synthesizes findings into RESEARCH.md via `synthesize-research.md` reference
 - Records library/pattern decisions in DECISIONS.md
+- Updates STATE.md; commits
 
-**plan-feature.md**
-1. `validate` — Check feature has sufficient context
-2. `load_context` — Read FEATURE.md, CONTEXT.md, DECISIONS.md, RESEARCH.md, codebase docs
-3. `assess_readiness` — Verify enough context to plan
-4. `derive_phases` — Based on dependencies (types→API→UI pattern)
-5. `break_into_tasks` — 2-3 tasks per plan, sized for agent execution
-6. `write_plan_files` — Create .specd/tasks/{name}/plans/phase-{NN}/{NN}-PLAN.md
-7. `write_roadmap` — Write ROADMAP.md with phase overview
-8. `commit` — Commit plans
-9. `completion` — Present execution instructions
+**plan.md**
+1. `validate` — Check task exists
+2. `load_context` — Read all context; if `"orchestrator": true` in config, hand off to `orchestrator/plan.md`
+3. `assess_readiness` — Require FEATURE.md "Must Create" items and some resolved gray areas; warn if no RESEARCH.md
+4. `derive_phases` — Order by dependencies (types→models→APIs→UI); 2-5 tasks per phase; create `.specd/tasks/{name}/phases/`
+5. `write_plans` — Write `phases/phase-NN/PLAN.md` per phase (YAML frontmatter + tasks with verification)
+6. `write_roadmap` — Write ROADMAP.md
+7. `update_state` — Set stage to planning, set phases.total and phases.current in config.json
+8. `commit` — Commit ROADMAP.md, phases/, STATE.md, config.json
+9. `completion` — Present phase list with task counts and dependency diagram
 
-**discuss-phase.md / research-phase.md**
-- Phase-specific versions of discuss/research
-- Dive deeper into specific phase before execution
+**execute.md**
+1. `validate` — Extended validation (phases and ROADMAP exist)
+2. `load_context` — Read all context + global `.specd/config.json` for `auto_commit_code`/`auto_commit_docs`
+3. `find_phase` — Read `phases.current` and `phases.current_status` from config.json; handle "executed" (trigger review), "completed" (advance); also checks for decimal fix phases
+4. `record_start` — Store `phases.phase_start_commit`, set status to "executing", commit config update
+5. `execute_tasks` — Implement each task, verify (max 2 fix attempts), log deviations to CHANGELOG.md, commit after each task
+6. `phase_complete` — Mark status "executed", commit STATE.md + CHANGELOG.md, automatically trigger `review.md`
 
-**execute-plan.md**
-1. `validate` — Check feature exists with plans
-2. `load_context` — Read STATE.md, DECISIONS.md, RESEARCH.md, ROADMAP.md, codebase docs
-3. `find_plan` — First incomplete or specified plan
-4. `execute_tasks` — With verification and deviation handling
-   - Auto-fix blockers/bugs → log to CHANGELOG.md
-   - Ask about architectural changes → wait for user
-   - Run verification after each task
-   - Stop on verification failure → ask user (retry/skip/stop)
-   - Commit after each task
-5. `complete_plan` — Update STATE.md, suggest next
+**review.md**
+1. `validate` — Check `phases.current_status` = "executed" and `phase_start_commit` exists
+2. `load_context` — Read current phase PLAN.md and `phase_start_commit` from config.json
+3. `inspect_code` — `git diff {phase_start_commit}..HEAD`; per-task classify: ✅ Match / ⚠️ Deviation / ❌ Incomplete
+4. `present_findings` — Show diff stat, per-task status icons, detail on deviations/incomplete
+5. `gather_feedback` — AskUserQuestion: "Looks good" / "I want to revise" / "Stop for now"
+6. `collect_feedback` — Free-form issue description from user
+7. `create_fix_plan` — Create `phases/phase-{N.M}/PLAN.md` decimal fix phase; update ROADMAP.md; offer to execute immediately
+8. `approve_phase` — Set status "completed", advance current phase, update STATE.md, commit
+
+**continue.md** (main lifecycle driver)
+- Modes: interactive (default), `--semi-auto`, `--auto`
+- Reads state from config.json + STATE.md + CONTEXT.md, routes to appropriate workflow:
+  - Gray areas remain → `discuss.md`
+  - No gray areas, no research → `research.md`
+  - Research done, no phases → `plan.md`
+  - Phase pending → `execute.md`
+  - Phase executing → resume `execute.md`
+  - Phase executed → `review.md`
+  - All phases complete → task complete
+- Semi-auto: auto-advances discuss→research→plan, pauses after each execute + review
+- Auto: runs everything, stops only on review issues or completion
+
+**status.md**
+- Reads `.specd/tasks/*/config.json` and STATE.md; checks `.specd/features/*/` for backwards compatibility
+- Orchestrator mode: also scans sub-project features per `.specd/config.json` `projects` array
+- Outputs task table: Feature, Stage, Plans (completed/total), Created, Next Action
+- `--all` flag includes completed tasks section
 
 ## Agents
 

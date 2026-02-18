@@ -66,7 +66,7 @@ Three commands drive the entire task lifecycle:
 
 `continue` reads your task's current state and offers the natural next step. You never need to remember which command comes next.
 
-`toolbox` gives you direct access to advanced operations — discuss, research, plan, execute, review — when you want to jump to a specific action outside the normal flow.
+`toolbox` gives you direct access to advanced operations — discuss, research, plan, execute, review — and codebase context management (status dashboard, section-by-section review with edit/re-map/add).
 
 Works with single projects and multi-project setups (monorepos, multi-repo). In multi-project mode, features are discussed at the system level and routed to the relevant sub-projects, with cross-project dependency tracking and contract validation.
 
@@ -157,7 +157,7 @@ Scans for in-progress tasks and shows a picker.
 /specd:toolbox user-dashboard
 ```
 
-Opens a menu with: Discuss, Research, Plan, Execute, Review. Useful when you want to jump to a specific action outside the normal flow.
+Opens a menu with task operations (Discuss, Research, Plan, Execute, Review) and context management (Status, Review). Useful when you want to jump to a specific action outside the normal flow.
 
 ---
 
@@ -169,13 +169,14 @@ Opens a menu with: Discuss, Research, Plan, Execute, Review. Useful when you wan
 |---------|-------------|
 | `/specd:new [name]` | Initialize a task, start first discussion |
 | `/specd:continue [name] [--semi-auto\|--auto]` | **Drive the entire lifecycle** — picks up where you left off |
-| `/specd:toolbox [name]` | Advanced operations: discuss, research, plan, execute, review |
+| `/specd:toolbox [tasks name\|context]` | Task operations or codebase context management |
 
 ### Codebase Documentation
 
 | Command | Description |
 |---------|-------------|
 | `/specd:map-codebase` | Analyze codebase with parallel agents |
+| `/specd:toolbox context` | Status dashboard or section-by-section review |
 
 ### Utilities
 
@@ -206,13 +207,18 @@ Opens a menu with: Discuss, Research, Plan, Execute, Review. Useful when you wan
 - **Phase review** — Code review agent inspects executed code against plan intent. Generates fix plans (decimal phases like `phase-01.1`) if needed.
 - **Revise** — Collects feedback from review, creates fix plans, signals brain to re-execute.
 
-**`toolbox`** provides direct access to advanced operations outside the normal flow:
+**`toolbox`** provides direct access to advanced operations outside the normal flow. Two subdomains:
 
+**Tasks** (`/specd:toolbox tasks my-feature`):
 - **Discuss** — Explore open questions, record decisions
 - **Research** — Spawn parallel agents for patterns/pitfalls
 - **Plan** — Create execution phases from task context
 - **Execute** — Execute the next phase's plan
 - **Review** — Review executed phase, approve or request fixes
+
+**Context** (`/specd:toolbox context`):
+- **Status** — Dashboard showing all context files with freshness indicators
+- **Review** — Section-by-section review of any context file: confirm, edit, remove, re-map (spawns a mapper agent to regenerate a section), or add new content. Sections are tracked with `AUTO_GENERATED` and `USER_MODIFIED` tags with dates.
 
 ---
 

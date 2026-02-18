@@ -11,7 +11,7 @@
 | `/specd:new [name]` | Initialize a task, start first discussion |
 | `/specd:continue [name] [--semi-auto\|--auto]` | Continue task lifecycle — picks up where you left off |
 
-| `/specd:toolbox [name]` | Advanced operations: discuss, research, plan, execute, review |
+| `/specd:toolbox [tasks <name>\|context]` | Task operations or context management |
 
 ### Utilities
 
@@ -39,12 +39,11 @@
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
    - Modes: interactive (default), `--semi-auto` (auto through planning, pause after review), `--auto` (run everything)
-3. **`/specd:toolbox [name]`** — Advanced operations menu:
-   - **Discuss** — Explore open questions, record decisions
-   - **Research** — Spawn parallel agents for patterns/pitfalls
-   - **Plan** — Create execution phases
-   - **Execute** — Execute the next phase
-   - **Review** — Review executed phase, approve or request fixes
+3. **`/specd:toolbox`** — Two subdomains:
+   - **`/specd:toolbox tasks <name>`** — Task operations:
+     - Discuss, Research, Plan, Execute, Review
+   - **`/specd:toolbox context`** — Context management:
+     - Status, Review, Add
 
 ### Quick Start
 

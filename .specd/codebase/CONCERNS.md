@@ -1,6 +1,7 @@
 # Codebase Concerns
 
 **Analysis Date:** 2026-02-04
+Last Modified: 2026-02-17
 
 ## Gotchas
 
@@ -68,6 +69,15 @@
 - Critical: Workflows depend on exact placeholder syntax for search/replace
 - Don't change: `{name}` → `{feature_name}` will break every workflow that fills templates
 - Impact: Mismatched placeholders = workflows write broken documents
+
+### Don't Manually Edit `.claude/` Files During Development
+<!-- USER_MODIFIED: 2026-02-17 -->
+
+**Issue:** The `.claude/` directory is generated output — it's created by `bin/install.js` from the source files in `commands/`, `specdacular/`, `hooks/`, etc. During development, agents should never manually modify files under `.claude/`.
+
+- Instead: Run `node bin/install.js --local` to sync changes from source files into `.claude/`
+- Source of truth: `commands/`, `specdacular/`, `hooks/`, `agents/` directories
+- Impact: Manual edits to `.claude/` will be overwritten on next install and create confusing diffs
 
 ## Anti-patterns
 
