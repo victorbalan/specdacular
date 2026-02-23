@@ -6,9 +6,9 @@
   "decisions_count": 7,
   "phases": {
     "total": 4,
-    "current": 2,
+    "current": 3,
     "current_status": "pending",
-    "completed": 1,
+    "completed": 2,
     "phase_start_commit": null
   }
 }
