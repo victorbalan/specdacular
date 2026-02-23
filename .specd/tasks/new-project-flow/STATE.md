@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** discussion
+**Stage:** execution
 **Last Updated:** 2026-02-23
 
 ---
@@ -19,8 +19,8 @@
 - [ ] Findings documented in RESEARCH.md
 
 ### Planning
-- [ ] Phases derived
-- [ ] Plans created
+- [x] Phases derived
+- [ ] Plans created (just-in-time per phase)
 
 ### Execution
 - [ ] Phase 1 complete
@@ -63,7 +63,7 @@
 | CONTEXT.md | Created | 2026-02-23 |
 | DECISIONS.md | 7 decisions | 2026-02-23 |
 | RESEARCH.md | Not started | — |
-| ROADMAP.md | Not started | — |
+| ROADMAP.md | Created | 2026-02-23 |
 | phases/ | Not started | — |
 
 ---
@@ -78,7 +78,7 @@
 
 ## Next Steps
 
-Gray areas remain around research agent design, `/specd.continue` routing, scaffolding details, and requirements scoping UX. Continue discussing or move to research.
+All gray areas resolved. Roadmap created with 4 phases. Ready for phase 1 execution.
 
 **Resume:** `/specd.continue new-project-flow` — Picks up where you left off.
 

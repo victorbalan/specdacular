@@ -15,7 +15,7 @@ A new `/specd.new-project` command that guides users from "I have an idea" to "I
 
 ### Must Integrate With
 
-- `specdacular/workflows/continue.md` — Must recognize `project` task type and route through project stages (questioning → research → requirements → roadmap → scaffold)
+- `specdacular/workflows/continue.md` — No changes needed (DEC-006: standalone command)
 - `.specd/config.json` — Orchestrator config: `"type": "orchestrator"` with `projects` array listing sub-projects
 - `specdacular/workflows/new.md` — Existing `codebase_context` step already checks for orchestrator mode; new-project scaffolded sub-projects feed into this
 - `agents/specd-codebase-mapper.md` — Not used during new-project (no codebase yet), but scaffolded projects will use it later
