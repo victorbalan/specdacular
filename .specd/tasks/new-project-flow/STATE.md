@@ -20,7 +20,7 @@
 
 ### Planning
 - [x] Phases derived
-- [ ] Plans created (just-in-time per phase)
+- [x] Phase 1 plan created
 
 ### Execution
 - [ ] Phase 1 complete
@@ -64,7 +64,7 @@
 | DECISIONS.md | 7 decisions | 2026-02-23 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Created | 2026-02-23 |
-| phases/ | Not started | — |
+| phases/phase-01/PLAN.md | Created | 2026-02-23 |
 
 ---
 
