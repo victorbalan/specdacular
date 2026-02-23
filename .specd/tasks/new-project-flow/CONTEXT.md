@@ -1,7 +1,7 @@
 # Context: new-project-flow
 
 **Last Updated:** 2026-02-23
-**Sessions:** 1
+**Sessions:** 2
 
 ## Discussion Summary
 
@@ -41,6 +41,38 @@ Discussed creating a `/specd.new-project` command for greenfield projects. The e
 
 **Resolution:** Both. User can state them upfront ("I need a React frontend and a Node API") or they can emerge from research/discussion ("architecture research suggests a separate worker service").
 
+### Research agent design?
+
+**Question:** Reuse existing feature-researcher pattern or create dedicated project-researcher agents?
+
+**Resolution:** Single research agent covering all 4 domains (stack, features, architecture, pitfalls), adapted from GSD's `gsd-project-researcher`. One agent writes 5 files to `.specd/tasks/project/research/`. Opinionated output with confidence levels.
+
+**Related Decisions:** DEC-003 (updated)
+
+### How does continue route project tasks?
+
+**Question:** How does `/specd.continue` route project-type tasks through different stages?
+
+**Resolution:** It doesn't. `/specd.new-project` is a standalone command with its own sequential flow. No pipeline integration, no brain routing. After scaffolding, sub-projects use normal `/specd.continue`.
+
+**Related Decisions:** DEC-006
+
+### What gets scaffolded per sub-project?
+
+**Question:** What exactly gets created per sub-project directory?
+
+**Resolution:** `.specd/config.json` + `.specd/tasks/setup/FEATURE.md` seeded from system-level research/requirements. The setup task runs through normal task lifecycle to actually create boilerplate/code.
+
+**Related Decisions:** DEC-005
+
+### Requirements scoping UX?
+
+**Question:** How does the user scope v1 features?
+
+**Resolution:** Multi-select from research findings. Show features by category (table stakes, differentiators), user picks v1/later/out-of-scope. Write REQUIREMENTS.md from choices.
+
+**Related Decisions:** DEC-007
+
 ---
 
 ## Deferred Questions
@@ -64,15 +96,13 @@ Discussed creating a `/specd.new-project` command for greenfield projects. The e
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
 | 2026-02-23 | Project vision, multi-project support, GSD reference, artifact structure | FEATURE.md created, core decisions made |
+| 2026-02-23 | Research agent design, continue routing, scaffolding, requirements UX | All 4 gray areas resolved, 3 new decisions |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Exact research agent design — Reuse existing feature-researcher agent pattern or create dedicated project-researcher agents?
-- [ ] How `/specd.continue` routes project-type tasks — What stages does it recognize and how does it advance?
-- [ ] Scaffolding details — What exactly gets created per sub-project directory? Just `.specd/config.json` or also git init, README, etc.?
-- [ ] Requirements scoping UX — How does the user scope v1 features? Multi-select per category like GSD, or conversational?
+None — all resolved in session 2.
 
 ---
 

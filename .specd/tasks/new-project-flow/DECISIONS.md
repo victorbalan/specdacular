@@ -36,18 +36,19 @@
 - Every `/specd.new-project` creates an orchestrator config
 - Single-project setups have a small amount of overhead but gain consistency
 
-### DEC-003: Parallel research agents for greenfield projects
+### DEC-003: Single research agent covering all 4 domains
 
-**Date:** 2026-02-23
+**Date:** 2026-02-23 (updated 2026-02-23)
 **Status:** Active
 **Context:** Greenfield projects have no codebase to learn from. Need to gather domain knowledge before making decisions.
-**Decision:** Spawn 4 parallel research agents: stack, features, architecture, pitfalls. Similar to GSD's approach but adapted to specd's agent patterns.
+**Decision:** One research agent covers all 4 domains (stack, features, architecture, pitfalls), adapted from GSD's `gsd-project-researcher` pattern. Writes SUMMARY.md, STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md to `.specd/tasks/project/research/`.
 **Rationale:**
-- Parallel execution saves time
-- Covers the four key dimensions a greenfield project needs answered
-- Research findings feed directly into requirements and roadmap phases
+- GSD's proven single-agent approach works well
+- Opinionated output ("Use X because Y") over option listing
+- Confidence levels with source hierarchy ensure quality
+- SUMMARY.md includes roadmap implications, directly feeding next stages
 **Implications:**
-- Need to create or adapt research agent definitions
+- Create one agent definition file adapted from GSD's project-researcher
 - Research output goes to `.specd/tasks/project/research/`
 - Research synthesis feeds into REQUIREMENTS.md creation
 
@@ -65,6 +66,50 @@
 - New command file and workflow needed
 - Help command needs updating
 - No changes to existing `/specd.new`
+
+### DEC-005: Sub-projects get a pre-populated setup task
+
+**Date:** 2026-02-23
+**Status:** Active
+**Context:** Need to decide what gets scaffolded per sub-project directory when new-project completes.
+**Decision:** Each sub-project gets `.specd/config.json` + `.specd/tasks/setup/FEATURE.md` seeded from system-level research/requirements. No raw boilerplate or code scaffolding — setup executes through the normal task lifecycle (discuss → plan → execute).
+**Rationale:**
+- Research already figured out the stack/libs — setup task has real context
+- User can customize before executing (change their mind about a library)
+- It's just a regular specd task — no special machinery needed
+- Keeps new-project focused on planning, not code generation
+**Implications:**
+- FEATURE.md template needs to support setup-type tasks
+- Each sub-project's setup task is independently runnable via `/specd.continue setup`
+
+### DEC-006: Standalone command, no pipeline integration
+
+**Date:** 2026-02-23
+**Status:** Active
+**Context:** Whether new-project should integrate with the brain/pipeline system or be self-contained.
+**Decision:** `/specd.new-project` is a standalone command that runs its own flow (questioning → research → requirements → roadmap → scaffold) and exits. No brain, no pipeline, no state machine. After scaffolding, users use `/specd.new` and `/specd.continue` on individual sub-projects.
+**Rationale:**
+- Simpler — no need for project task types or stage routing changes
+- The flow is linear and always the same, no need for pipeline flexibility
+- Keeps the brain/pipeline system focused on feature task execution
+**Implications:**
+- No changes to brain.md or pipeline.json
+- One workflow file handles the entire flow sequentially
+- No resume support mid-flow (acceptable for a one-time setup command)
+
+### DEC-007: Requirements scoping via multi-select from research
+
+**Date:** 2026-02-23
+**Status:** Active
+**Context:** How the user scopes v1 features — conversational or structured selection.
+**Decision:** Show researched features organized by category (table stakes, differentiators, anti-features), let user multi-select what's v1 vs later vs out-of-scope. Write REQUIREMENTS.md from their choices.
+**Rationale:**
+- Research already produces categorized FEATURES.md — natural to select from it
+- Structured selection is faster and more consistent than freeform conversation
+- Matches GSD's proven pattern
+**Implications:**
+- Workflow needs to parse research FEATURES.md and present as selectable options
+- REQUIREMENTS.md template needs v1/later/out-of-scope sections with REQ-IDs
 
 ---
 
@@ -84,3 +129,6 @@
 | DEC-002 | 2026-02-23 | Multi-project support via orchestrator mode | Active |
 | DEC-003 | 2026-02-23 | Parallel research agents for greenfield projects | Active |
 | DEC-004 | 2026-02-23 | Separate command, not a mode of /specd.new | Active |
+| DEC-005 | 2026-02-23 | Sub-projects get a pre-populated setup task | Active |
+| DEC-006 | 2026-02-23 | Standalone command, no pipeline integration | Active |
+| DEC-007 | 2026-02-23 | Requirements scoping via multi-select from research | Active |

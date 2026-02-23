@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -51,6 +51,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-02-23 | Initial discussion | FEATURE.md created, 4 decisions recorded |
+| 2026-02-23 | Gray area resolution | All 4 gray areas resolved, 3 new decisions (DEC-005–007) |
 
 ---
 
@@ -60,7 +61,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-02-23 |
 | CONTEXT.md | Created | 2026-02-23 |
-| DECISIONS.md | 4 decisions | 2026-02-23 |
+| DECISIONS.md | 7 decisions | 2026-02-23 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | phases/ | Not started | — |
@@ -69,9 +70,9 @@
 
 ## Decision Count
 
-- **Active:** 4
+- **Active:** 7
 - **Superseded:** 0
-- **Total:** 4
+- **Total:** 7
 
 ---
 
