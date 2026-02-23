@@ -409,23 +409,240 @@ Show research summary and indicate next steps.
 - `.specd/tasks/project/research/PITFALLS.md`
 - `.specd/tasks/project/research/SUMMARY.md`
 
-## What's Next
-
-Requirements scoping and roadmap stages are coming soon.
-For now, review the research files to see what the agents found.
 ```
 
-End workflow.
+Continue to requirements.
 </step>
 
 <step name="requirements">
-<!-- Phase 3: Multi-select scoping from research → REQUIREMENTS.md -->
-Not yet implemented. See Phase 3 in ROADMAP.md.
+Scope v1 features from research findings via multi-select.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ REQUIREMENTS SCOPING: {project-name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Read research FEATURES.md:**
+```bash
+cat .specd/tasks/project/research/FEATURES.md
+```
+Parse features by category: table stakes, differentiators, nice-to-have, anti-features.
+
+**Present features for scoping using AskUserQuestion with multiSelect: true.**
+
+For each category, present features in batches of up to 4 (AskUserQuestion limit):
+
+**Table Stakes:**
+```
+**Table Stakes** — Users expect these. Deselect only if you have a reason.
+```
+Use AskUserQuestion:
+- header: "Table Stakes"
+- question: "Which table stakes features should be in v1?"
+- multiSelect: true
+- options: up to 4 features per batch (label: feature name, description: brief description)
+- Mark all as recommended for table stakes
+
+If >4 table stakes features, use multiple AskUserQuestion calls.
+
+**Differentiators:**
+```
+**Differentiators** — These set your project apart. Pick what matters for v1.
+```
+Use AskUserQuestion:
+- header: "Differentiators"
+- question: "Which differentiator features should be in v1?"
+- multiSelect: true
+- options: up to 4 per batch
+
+**Nice-to-Have:**
+```
+**Nice-to-Have** — These can wait for v2+. Include any you want in v1.
+```
+Use AskUserQuestion:
+- header: "Nice-to-Have"
+- question: "Any nice-to-have features to include in v1?"
+- multiSelect: true
+- options: up to 4 per batch
+
+**After all selections:**
+
+Compile results:
+- Selected features → v1 requirements with REQ-IDs (REQ-001, REQ-002, ...)
+- Unselected table stakes/differentiators → v2+ with rationale "Deferred by user during scoping"
+- Unselected nice-to-haves → v2+
+- Anti-features from research → out of scope
+
+**Write REQUIREMENTS.md:**
+Use template at `~/.claude/specdacular/templates/tasks/REQUIREMENTS.md`
+Write to `.specd/tasks/project/REQUIREMENTS.md`.
+
+**Show summary:**
+```
+**v1 Scope:**
+- {count} table stakes
+- {count} differentiators
+- {count} nice-to-haves
+Total: {count} requirements
+
+**Deferred to v2+:** {count}
+**Out of scope:** {count}
+```
+
+**Commit:**
+@~/.claude/specdacular/references/commit-docs.md
+
+- **$FILES:** `.specd/tasks/project/REQUIREMENTS.md`
+- **$MESSAGE:** `docs(project): requirements scoped — {count} v1 requirements`
+- **$LABEL:** `requirements scoped`
+
+Continue to roadmap.
 </step>
 
 <step name="roadmap">
-<!-- Phase 3: Generate ROADMAP.md from requirements -->
-Not yet implemented. See Phase 3 in ROADMAP.md.
+Generate a phased roadmap from requirements, research, and architecture findings.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GENERATING ROADMAP: {project-name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Read context:**
+- `.specd/tasks/project/REQUIREMENTS.md` — v1 requirements with REQ-IDs
+- `.specd/tasks/project/research/ARCHITECTURE.md` — service boundaries, sub-projects
+- `.specd/tasks/project/research/STACK.md` — technology choices
+- `.specd/tasks/project/research/SUMMARY.md` — roadmap implications
+
+**Identify sub-projects:**
+From architecture research service boundaries and questioning context:
+- Each service/boundary = potential sub-project
+- If user specified sub-projects during questioning, use those
+- Single-service projects still get one sub-project entry (DEC-002: always orchestrator mode)
+
+**Generate phases:**
+Order by dependency:
+1. Project setup / infrastructure (environment, CI/CD, shared config)
+2. Data model / core types (shared across services)
+3. API / backend services (data layer before consumers)
+4. Frontend / UI (consumes APIs)
+5. Integration / cross-service features
+6. Polish / optimization
+
+Map each phase to the REQ-IDs it satisfies. Assign phases to sub-projects.
+
+**Write ROADMAP.md:**
+Write to `.specd/tasks/project/ROADMAP.md`:
+
+```markdown
+# Roadmap: {project-name}
+
+## Overview
+
+| Metric | Value |
+|--------|-------|
+| Total Phases | {count} |
+| Sub-Projects | {count} |
+| v1 Requirements | {count} |
+
+---
+
+## Sub-Projects
+
+| Name | Type | Technology | Description |
+|------|------|-----------|-------------|
+| {name} | {frontend/backend/worker/etc.} | {stack} | {what it does} |
+
+---
+
+## Phases
+
+{For each phase:}
+- [ ] **Phase {N}: {Name}** — {goal} ({REQ-IDs})
+
+---
+
+## Phase Details
+
+### Phase {N}: {Name}
+
+**Goal:** {what this phase accomplishes}
+**Sub-project:** {which sub-project this targets}
+**Requirements:** {REQ-IDs this phase satisfies}
+
+**Creates:**
+- {key deliverables}
+
+**Dependencies:** {earlier phases this depends on}
+
+**Success Criteria:**
+1. {testable criterion}
+
+---
+
+## Execution Order
+
+{Dependency diagram}
+
+---
+
+## Requirements Coverage
+
+| REQ-ID | Feature | Phase |
+|--------|---------|-------|
+| REQ-001 | {name} | Phase {N} |
+```
+
+**Update config.json:**
+```json
+{
+  "stage": "roadmap",
+  ...
+}
+```
+
+**Commit:**
+@~/.claude/specdacular/references/commit-docs.md
+
+- **$FILES:** `.specd/tasks/project/ROADMAP.md .specd/tasks/project/config.json`
+- **$MESSAGE:** `docs(project): roadmap created — {N} phases, {N} sub-projects`
+- **$LABEL:** `roadmap created`
+
+Continue to roadmap_complete.
+</step>
+
+<step name="roadmap_complete">
+Show roadmap summary and indicate next steps.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ROADMAP COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Project:** {project-name}
+
+**Sub-projects:** {list}
+**Phases:** {count}
+**Requirements covered:** {count}/{total}
+
+{For each phase:}
+Phase {N}: {Name} — {goal}
+  Sub-project: {name}
+  Requirements: {REQ-IDs}
+
+## Created
+
+- `.specd/tasks/project/REQUIREMENTS.md` — {count} v1 requirements
+- `.specd/tasks/project/ROADMAP.md` — {count} phases
+
+## What's Next
+
+Scaffolding stage is coming soon — will create sub-project directories and seed setup tasks.
+For now, review the roadmap and requirements.
+```
+
+End workflow.
 </step>
 
 <step name="scaffold">
@@ -442,6 +659,9 @@ Not yet implemented. See Phase 4 in ROADMAP.md.
 - 4 research agents spawn in parallel after PROJECT.md is written
 - Each agent writes its findings (STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md)
 - SUMMARY.md synthesized from all 4 outputs
+- Requirements scoped via multi-select from research FEATURES.md
+- REQUIREMENTS.md written with REQ-IDs, v1/v2/out-of-scope sections
+- Roadmap generated with phases mapped to REQ-IDs and sub-projects
 - All files committed to git
 - Clean exit with next steps indicated
 </success_criteria>
