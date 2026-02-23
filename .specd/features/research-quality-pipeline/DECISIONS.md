@@ -43,7 +43,7 @@
 **Implications:**
 - `map-codebase` workflow must write `metadata.json` after generation
 - All workflows that load codebase docs should check staleness
-- Warning format: "Codebase docs may be stale (generated at {sha}, now {commits} commits behind). Consider `/specd.map-codebase --refresh`."
+- Warning format: "Codebase docs may be stale (generated at {sha}, now {commits} commits behind). Consider `/specd.codebase.map --refresh`."
 
 ---
 

@@ -26,7 +26,7 @@ Create new command files with updated names, each pointing to its corresponding 
 ## Context
 
 **Reference these files:**
-- `@commands/specd.map-codebase.md` — Pattern to follow for command file structure
+- `@commands/specd.codebase.map.md` — Pattern to follow for command file structure
 - `@.specd/codebase/PATTERNS.md` — Command file structure pattern
 - `@commands/specd.help.md` — Current help to update
 - `@commands/specd.status.md` — Current status to update

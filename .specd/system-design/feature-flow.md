@@ -419,7 +419,7 @@ Plans reference these directly:
 @.specd/codebase/STRUCTURE.md#components
 ```
 
-If codebase docs don't exist, suggest `/specd.map-codebase` first.
+If codebase docs don't exist, suggest `/specd.codebase.map` first.
 
 ---
 

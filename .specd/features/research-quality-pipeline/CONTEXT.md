@@ -47,7 +47,7 @@ Analyzed the research-to-planning pipeline in Specdacular. Found that confidence
 
 **Details:**
 - Compare `git_sha` in `metadata.json` against current HEAD
-- If >50 commits ahead: "Codebase docs may be stale. Consider `/specd.map-codebase --refresh`."
+- If >50 commits ahead: "Codebase docs may be stale. Consider `/specd.codebase.map --refresh`."
 - 50 is a rough heuristic — can be adjusted based on experience
 - Warning only, never blocks execution
 

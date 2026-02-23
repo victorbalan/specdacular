@@ -23,7 +23,7 @@ Research across three dimensions confirms the migration is feasible and well-ali
 | `specd.help` | (static output, no workflow) |
 | `specd.status` | `workflows/status.md` |
 | `specd.update` | (custom process in command) |
-| `specd.map-codebase` | `workflows/map-codebase.md` |
+| `specd.codebase.map` | `workflows/map-codebase.md` |
 | `specd.blueprint` | `workflows/blueprint.md` |
 | `specd.feature:new` | `workflows/new-feature.md` |
 | `specd.feature:discuss` | `workflows/discuss-feature.md` |

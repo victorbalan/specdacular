@@ -35,7 +35,7 @@ Task name: $ARGUMENTS
 **Codebase context discovery:**
 1. Check for `.specd/config.json` — if exists, read `codebase_docs` path
 2. If no config, check for `.specd/codebase/` (default location)
-3. If neither found, offer `/specd.map-codebase`
+3. If neither found, offer `/specd.codebase.map`
 
 **Referenced docs (when available):**
 - `MAP.md` — System structure

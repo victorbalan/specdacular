@@ -1,7 +1,7 @@
 ---
 name: specd.toolbox
-description: "Advanced task operations and context management"
-argument-hint: "[tasks <task-name>|context]"
+description: "Advanced task operations"
+argument-hint: "[<task-name>]"
 allowed-tools:
   - Read
   - Write
@@ -16,33 +16,14 @@ allowed-tools:
 ---
 
 <objective>
-Toolbox with two subdomains:
-
-1. **tasks** — Task lifecycle operations (requires task name): discuss, research, plan, execute, review
-2. **context** — Codebase context management (no task name): review, add
+Task lifecycle operations: discuss, research, plan, execute, review.
 </objective>
 
 <execution_context>
-**Parse $ARGUMENTS to determine subdomain:**
+**Parse $ARGUMENTS as task name.**
 
-- If starts with "tasks" → extract remaining words as task name, go to Tasks flow
-- If starts with "context" → go to Context flow
-- If a bare word that matches a directory in `.specd/tasks/` or `.specd/features/` → treat as `tasks {name}`
-- If empty or unrecognized → ask user which subdomain
-
-**If subdomain unclear, ask:**
-Use AskUserQuestion:
-- header: "Toolbox"
-- question: "Which toolbox?"
-- options:
-  - "Tasks" — Discuss, research, plan, execute, or review a task
-  - "Context" — Review or add to codebase context
-
----
-
-## Tasks Flow
-
-Requires a task name. If not provided after "tasks", check `.specd/tasks/` for available tasks. If only one task exists, use it automatically. If multiple, ask.
+- If a bare word that matches a directory in `.specd/tasks/` or `.specd/features/` → use as task name
+- If empty → check `.specd/tasks/` for available tasks. If only one task exists, use it automatically. If multiple, ask.
 
 Validate using:
 @~/.claude/specdacular/references/validate-task.md
@@ -64,40 +45,19 @@ Based on selection, delegate to the appropriate workflow:
 - Execute → @~/.claude/specdacular/workflows/execute.md
 - Review → @~/.claude/specdacular/workflows/review.md
 
----
-
-## Context Flow
-
-No task name needed. Present the menu using AskUserQuestion:
-- header: "Context"
-- question: "What would you like to do with codebase context?"
-- options:
-  - "Review" — Walk through and review a context file section by section
-  - "Add" — Add new content to a context file
-
-Based on selection, delegate to the appropriate workflow:
-- Review → follow the context-manual-review.md workflow
-- Add → follow the context-add.md workflow
 </execution_context>
 
 <context>
 Arguments: $ARGUMENTS
 
-**Task workflows:**
 @~/.claude/specdacular/workflows/discuss.md
 @~/.claude/specdacular/workflows/research.md
 @~/.claude/specdacular/workflows/plan.md
 @~/.claude/specdacular/workflows/execute.md
 @~/.claude/specdacular/workflows/review.md
-
-**Context workflows:**
-@~/.claude/specdacular/workflows/context-manual-review.md
-@~/.claude/specdacular/workflows/context-add.md
 </context>
 
 <success_criteria>
-- [ ] Subdomain selected (tasks or context) — from argument or prompt
-- [ ] For tasks: task validated and operation menu shown
-- [ ] For context: context operation menu shown
+- [ ] Task validated and operation menu shown
 - [ ] Selected operation executed via correct workflow
 </success_criteria>

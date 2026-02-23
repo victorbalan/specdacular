@@ -37,7 +37,7 @@ specdacular/
 │   ├── agents/             # Installed agents
 │   └── specdacular/        # Installed core
 └── .specd/                 # User-generated documentation
-    ├── codebase/           # From /specd.map-codebase
+    ├── codebase/           # From /specd.codebase.map
     └── features/           # From feature commands
 ```
 
@@ -67,7 +67,7 @@ allowed-tools:
 ```
 
 **Key points:**
-- Command file name should match command name (e.g., `map-codebase.md` → `/specd.map-codebase`)
+- Command file name should match command name (e.g., `map-codebase.md` → `/specd.codebase.map`)
 - Include `<execution_context>` pointing to workflow: `@~/.claude/specdacular/workflows/{workflow}.md`
 - Keep command files brief (2-3 screens max) — delegate to workflows
 - Use `$ARGUMENTS` to access user-provided arguments
@@ -84,7 +84,7 @@ The actual logic for commands. Commands reference workflows via `<execution_cont
 
 **Format:** Structured markdown with `<process>`, `<step>`, `<critical_rules>` sections
 
-**Naming:** Match command name (e.g., `map-codebase.md` implements `/specd.map-codebase`)
+**Naming:** Match command name (e.g., `map-codebase.md` implements `/specd.codebase.map`)
 
 ### `agents/` — Agent Definitions
 
@@ -157,7 +157,7 @@ JavaScript files executed at session start or for statusline.
 **DO NOT add source files here.** This directory is created by commands in user projects.
 
 **Structure created by commands:**
-- `.specd/codebase/` — Created by `/specd.map-codebase`
+- `.specd/codebase/` — Created by `/specd.codebase.map`
   - `MAP.md`, `PATTERNS.md`, `STRUCTURE.md`, `CONCERNS.md`
 - `.specd/tasks/{name}/` — Created by `/specd.new`
   - Task planning documents

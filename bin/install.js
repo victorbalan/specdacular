@@ -306,10 +306,17 @@ function install(isGlobal) {
   const commandsDir = path.join(targetDir, 'commands');
   fs.mkdirSync(commandsDir, { recursive: true });
 
-  // Remove old commands/specd/ directory if it exists (pre-0.9.3 format)
+  // Remove old commands/specd/ directory if it exists (pre-0.10.0 format)
   const oldSpecDir = path.join(commandsDir, 'specd');
   if (fs.existsSync(oldSpecDir)) {
     fs.rmSync(oldSpecDir, { recursive: true });
+  }
+
+  // Remove old specd.*.md command files before copying new ones
+  for (const file of fs.readdirSync(commandsDir)) {
+    if (file.startsWith('specd.') && file.endsWith('.md')) {
+      fs.unlinkSync(path.join(commandsDir, file));
+    }
   }
 
   const commandsSrc = path.join(src, 'commands');
@@ -460,7 +467,7 @@ function install(isGlobal) {
   ${green}Done!${reset} Launch Claude Code and run ${cyan}/specd.help${reset}.
 
   ${yellow}Commands:${reset}
-    /specd.map-codebase  - Analyze and document your codebase
+    /specd.codebase.map  - Analyze and document your codebase
     /specd.update        - Update to latest version
     /specd.help          - Show all commands
 `);

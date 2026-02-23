@@ -43,7 +43,7 @@ Create the workflow file following the standard `<purpose>`, `<philosophy>`, `<p
 
 **Steps in the workflow:**
 
-1. **validate** — Check `.specd/codebase/` exists. If not, suggest `/specd.map-codebase`.
+1. **validate** — Check `.specd/codebase/` exists. If not, suggest `/specd.codebase.map`.
 
 2. **read_files** — Read all 4 files (MAP.md, PATTERNS.md, STRUCTURE.md, CONCERNS.md). For each file:
    - Extract document-level timestamps: `Generated:`, `Last Reviewed:`, `Last Modified:` (or `**Analysis Date:**` for backwards compat)

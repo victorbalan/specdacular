@@ -7,9 +7,9 @@ Workflows are markdown files that define agent behaviors. Commands are thin wrap
 
 **Command file structure:**
 ```markdown
-// From commands/specd.map-codebase.md:1-24
+// From commands/specd.codebase.map.md:1-24
 ---
-name: specd.map-codebase
+name: specd.codebase.map
 description: Analyze codebase with parallel agents to produce AI-optimized documentation
 argument-hint: ""
 allowed-tools:
@@ -52,7 +52,7 @@ color: cyan
 <role>
 You are a codebase mapper optimized for AI consumption. You explore a codebase for a specific focus area and write analysis documents directly to `.specd/codebase/`.
 
-You are spawned by `/specd.map-codebase` with one of four focus areas:
+You are spawned by `/specd.codebase.map` with one of four focus areas:
 - **map**: Create navigation map → write MAP.md
 - **patterns**: Extract code patterns → write PATTERNS.md
 - **structure**: Document organization → write STRUCTURE.md
@@ -461,7 +461,7 @@ modifies:
 **Workflow files:** Reference other markdown files with `@` prefix.
 
 ```markdown
-// From commands/specd.map-codebase.md:22-24
+// From commands/specd.codebase.map.md:22-24
 <execution_context>
 @~/.claude/specdacular/workflows/map-codebase.md
 </execution_context>

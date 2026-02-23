@@ -11,13 +11,14 @@
 | `/specd.new [name]` | Initialize a task, start first discussion |
 | `/specd.continue [name] [--interactive\|--auto]` | Continue task lifecycle — picks up where you left off |
 
-| `/specd.toolbox [tasks <name>\|context]` | Task operations or context management |
+| `/specd.toolbox [<name>]` | Advanced task operations |
 
 ### Utilities
 
 | Command | Description |
 |---------|-------------|
-| `/specd.map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
+| `/specd.codebase.map` | Analyze codebase with parallel agents → AI-optimized docs |
+| `/specd.codebase.review` | Review and edit codebase context files section by section |
 | `/specd.config` | Configure auto-commit settings for docs and code |
 | `/specd.status [--all]` | Show task status dashboard |
 | `/specd.help` | Show this help |
@@ -39,11 +40,8 @@
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
    - Modes: default (auto-runs, pauses at phase steps), `--interactive` (prompt at each step), `--auto` (run everything)
-3. **`/specd.toolbox`** — Two subdomains:
-   - **`/specd.toolbox tasks <name>`** — Task operations:
-     - Discuss, Research, Plan, Execute, Review
-   - **`/specd.toolbox context`** — Context management:
-     - Status, Review, Add
+3. **`/specd.toolbox [name]`** — Direct access to task operations: Discuss, Research, Plan, Execute, Review
+4. **`/specd.codebase.review`** — Review and edit codebase context files section by section
 
 ### Quick Start
 
@@ -121,7 +119,7 @@ Hooks are markdown workflow files that run before and after pipeline steps. They
 ## Codebase Documentation
 
 ```
-/specd.map-codebase
+/specd.codebase.map
 ```
 
 Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`:

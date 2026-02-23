@@ -53,7 +53,7 @@ ls .specd/codebase/*.md 2>/dev/null
 ```
 No codebase context files found.
 
-Run /specd.map-codebase to generate codebase documentation.
+Run /specd.codebase.map to generate codebase documentation.
 ```
 End workflow.
 

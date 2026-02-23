@@ -35,7 +35,7 @@
 - `specdacular/agents/specd-codebase-mapper.md` — Agent instructions for atomic rule output format
 
 **Success Criteria:**
-1. Running `/specd.map-codebase` produces `.specd/codebase/rules/` directory
+1. Running `/specd.codebase.map` produces `.specd/codebase/rules/` directory
 2. Each rule file follows Vercel template (property table + incorrect/correct examples)
 3. `_sections.md` lists categories with impact levels and filename prefixes
 4. `version.json` written with `{ "version": 2 }`

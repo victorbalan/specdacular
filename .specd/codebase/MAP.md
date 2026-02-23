@@ -8,7 +8,7 @@ Generated: 2026-02-04
 - `bin/install.js` — CLI installer, handles global/local installation, hooks setup, settings.json configuration
 
 **Claude Code Commands** (executed via `/specd.*`)
-- `commands/specd.map-codebase.md` — Spawn 4 parallel mapper agents to analyze codebase
+- `commands/specd.codebase.map.md` — Spawn 4 parallel mapper agents to analyze codebase
 - `commands/specd.new.md` — Initialize a new task and start the first discussion
 - `commands/specd.continue.md` — Continue task lifecycle, picks up where you left off (supports `--semi-auto`/`--auto`)
 - `commands/specd.status.md` — Show feature status dashboard (supports `--all`)
@@ -162,7 +162,7 @@ Generated: 2026-02-04
 ## Agents
 
 **specd-codebase-mapper** (`agents/specd-codebase-mapper.md`)
-- Spawned by: `/specd.map-codebase`
+- Spawned by: `/specd.codebase.map`
 - Focus areas: `map`, `patterns`, `structure`, `concerns`
 - Writes documents directly to `.specd/codebase/`
 - Returns confirmation only (minimal context transfer)

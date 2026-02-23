@@ -44,7 +44,7 @@ Add context management commands (`context:review`, `context:add`, `context:statu
 
 ## Out of Scope
 
-- [X] Full codebase re-mapping — Already handled by `/specd.map-codebase`
+- [X] Full codebase re-mapping — Already handled by `/specd.codebase.map`
 - [X] Automatic staleness detection/alerts — Just show timestamps, don't nag
 - [X] Version history of context files — Git handles this
 - [X] New standalone commands — Everything goes through toolbox

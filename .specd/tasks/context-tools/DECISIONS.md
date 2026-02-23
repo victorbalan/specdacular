@@ -152,7 +152,7 @@
 - Using validate-task.md would incorrectly require a task name
 **Implications:**
 - Context workflows use their own validation step: check `.specd/codebase/` exists
-- If missing, suggest `/specd.map-codebase`
+- If missing, suggest `/specd.codebase.map`
 
 ### DEC-011: Use specd-codebase-mapper agent for section re-mapping
 

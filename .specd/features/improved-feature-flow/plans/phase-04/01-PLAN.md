@@ -135,7 +135,7 @@ Rewrite the help output to document the new simplified command surface:
 
 | Command | Description |
 |---------|-------------|
-| `/specd.map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
+| `/specd.codebase.map` | Analyze codebase with parallel agents → AI-optimized docs |
 | `/specd.status [--all]` | Show feature status dashboard |
 | `/specd.help` | Show this help |
 | `/specd.update` | Update Specdacular to the latest version |
@@ -176,7 +176,7 @@ After initialization, just keep running `continue`. It figures out what's next.
 ## Codebase Documentation
 
 ```
-/specd.map-codebase
+/specd.codebase.map
 ```
 
 Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`:

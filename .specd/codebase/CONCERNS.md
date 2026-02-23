@@ -9,7 +9,7 @@ Last Modified: 2026-02-17
 
 **Issue:** Commands reference workflows using `@~/.claude/specdacular/workflows/` but install.js modifies paths based on install type.
 
-- Files: `commands/specd.map-codebase.md`, `bin/install.js`
+- Files: `commands/specd.codebase.map.md`, `bin/install.js`
 - How it works: During installation, `copyWithPathReplacement()` (line 107-129 in `bin/install.js`) replaces `~/.claude/` with either `~/.claude/` (global) or `./.claude/` (local)
 - Safe modification: When adding new commands, always use `@~/.claude/specdacular/` in source files. The installer will rewrite paths during installation.
 - Impact: If you hardcode `.claude/` instead of `~/.claude/`, local installs will break
