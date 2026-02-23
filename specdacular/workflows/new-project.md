@@ -636,18 +636,148 @@ Phase {N}: {Name} — {goal}
 - `.specd/tasks/project/REQUIREMENTS.md` — {count} v1 requirements
 - `.specd/tasks/project/ROADMAP.md` — {count} phases
 
-## What's Next
-
-Scaffolding stage is coming soon — will create sub-project directories and seed setup tasks.
-For now, review the roadmap and requirements.
 ```
 
-End workflow.
+Continue to scaffold.
 </step>
 
 <step name="scaffold">
-<!-- Phase 4: Create orchestrator config, sub-project dirs, seed setup tasks -->
-Not yet implemented. See Phase 4 in ROADMAP.md.
+Create orchestrator config, sub-project directories, and seed setup tasks.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SCAFFOLDING: {project-name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Read context:**
+- `.specd/tasks/project/ROADMAP.md` — sub-projects list, phases per sub-project
+- `.specd/tasks/project/REQUIREMENTS.md` — v1 requirements for seeding setup tasks
+- `.specd/tasks/project/research/STACK.md` — technology per sub-project
+- `.specd/tasks/project/research/ARCHITECTURE.md` — service responsibilities
+
+**Create orchestrator config at root:**
+Write `.specd/config.json`:
+```json
+{
+  "type": "orchestrator",
+  "project_name": "{project-name}",
+  "created": "{date}",
+  "projects": [
+    {
+      "name": "{sub-project-name}",
+      "path": "{sub-project-name}/",
+      "type": "{frontend|backend|worker|etc.}"
+    }
+  ]
+}
+```
+
+Note: If `.specd/config.json` already exists (e.g., with auto-commit settings), merge the orchestrator fields into it rather than overwriting.
+
+**For each sub-project from ROADMAP.md:**
+
+1. Create directory structure:
+```bash
+mkdir -p {sub-project-name}/.specd/tasks/setup
+```
+
+2. Write sub-project `.specd/config.json`:
+```json
+{
+  "type": "project",
+  "project_name": "{sub-project-name}",
+  "orchestrator": "../",
+  "created": "{date}"
+}
+```
+
+3. Write `.specd/tasks/setup/FEATURE.md` seeded from system-level research.
+Use the FEATURE.md template (`~/.claude/specdacular/templates/tasks/FEATURE.md`) filled with:
+
+- **What This Is:** Initial setup for {sub-project-name} — {description from ROADMAP.md}. Creates project structure, installs dependencies, configures development environment.
+
+- **Must Create:** Based on STACK.md recommendations for this sub-project:
+  - Project configuration files (package.json, tsconfig, etc.)
+  - Directory structure per ARCHITECTURE.md recommendations
+  - Development environment config (linting, formatting, testing)
+  - Basic entry point / hello world
+
+- **Must Integrate With:** Other sub-projects per ARCHITECTURE.md:
+  - Shared types/interfaces if identified
+  - API contracts between services
+  - Orchestrator config at root
+
+- **Constraints:** From STACK.md and ARCHITECTURE.md:
+  - Specific technology versions
+  - Architecture patterns to follow
+  - Coding standards
+
+- **Success Criteria:**
+  - Project initializes without errors
+  - Dev server/process starts
+  - Tests run (even if just a placeholder)
+  - Linting passes
+
+4. Show per sub-project:
+```
+Created: {sub-project-name}/
+├── .specd/config.json
+└── .specd/tasks/setup/FEATURE.md
+```
+
+**Update project config.json:**
+```json
+{
+  "stage": "complete",
+  ...
+}
+```
+
+**Commit:**
+@~/.claude/specdacular/references/commit-docs.md
+
+- **$FILES:** `.specd/config.json` plus all sub-project `.specd/` directories
+- **$MESSAGE:** `docs(project): scaffold {N} sub-projects` with list of sub-project names
+- **$LABEL:** `scaffolding complete`
+
+Continue to completion.
+</step>
+
+<step name="completion">
+Show final project summary with all artifacts and next steps.
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ PROJECT COMPLETE: {project-name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## Artifacts
+
+- `.specd/tasks/project/PROJECT.md` — Project vision
+- `.specd/tasks/project/research/` — Stack, features, architecture, pitfalls
+- `.specd/tasks/project/REQUIREMENTS.md` — {count} v1 requirements
+- `.specd/tasks/project/ROADMAP.md` — {count} phases
+- `.specd/config.json` — Orchestrator config
+
+## Sub-Projects
+
+{For each sub-project:}
+**{name}/** — {description}
+└── Ready: `/specd.continue setup` to begin
+
+## Next Steps
+
+For each sub-project, run the setup task:
+
+  cd {sub-project-name}
+  /specd.continue setup
+
+This will walk through setting up the project using the
+research findings and requirements from this session.
+```
+
+End workflow.
 </step>
 
 </process>
@@ -662,6 +792,8 @@ Not yet implemented. See Phase 4 in ROADMAP.md.
 - Requirements scoped via multi-select from research FEATURES.md
 - REQUIREMENTS.md written with REQ-IDs, v1/v2/out-of-scope sections
 - Roadmap generated with phases mapped to REQ-IDs and sub-projects
+- Orchestrator config created at root with projects array
+- Sub-project directories created with config and seeded setup FEATURE.md
 - All files committed to git
-- Clean exit with next steps indicated
+- Completion banner shows all artifacts and next steps per sub-project
 </success_criteria>
