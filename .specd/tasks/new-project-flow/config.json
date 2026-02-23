@@ -1,14 +1,13 @@
 {
   "task_name": "new-project-flow",
   "created": "2026-02-23",
-  "stage": "execution",
+  "stage": "complete",
   "discussion_sessions": 2,
   "decisions_count": 7,
   "phases": {
     "total": 4,
     "current": 4,
-    "current_status": "pending",
-    "completed": 3,
-    "phase_start_commit": null
+    "current_status": "completed",
+    "completed": 4
   }
 }
