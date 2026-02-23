@@ -161,40 +161,261 @@ Commit the project initialization.
 - **$MESSAGE:** `docs(project): initialize project — {project-name}` with brief vision summary
 - **$LABEL:** `project initialization`
 
-Continue to research_stub.
+Continue to research.
 </step>
 
-<step name="research_stub">
-Research stage — not yet implemented.
+<step name="research">
+Spawn 4 parallel research agents to investigate the project domain.
+
+**Show banner:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ RESEARCHING: {project-name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Spawning 4 research agents...
+```
+
+**Prepare context:**
+Read `.specd/tasks/project/PROJECT.md` and `.specd/tasks/project/CONTEXT.md`.
+Build `$PROJECT_CONTEXT` combining: vision, problem, users, goals, constraints, open questions.
+
+**Spawn 4 agents using Task tool with `run_in_background: true`:**
+
+All agents use `subagent_type: "general-purpose"` and `model: "sonnet"`.
+
+**Agent 1 — Stack:**
+```
+Task(
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  description: "Stack research"
+  run_in_background: true
+  prompt: "First, read {install-path}/specdacular/agents/project-researcher.md for your role.
+
+<focus_area>Stack</focus_area>
+
+<project_context>
+$PROJECT_CONTEXT
+</project_context>
+
+<research_questions>
+1. What's the best technology stack for this type of project?
+2. What frameworks and libraries are recommended for each layer?
+3. What infrastructure (hosting, CI/CD, monitoring) fits best?
+4. What are the key version requirements and compatibility concerns?
+</research_questions>
+
+Return findings in the Stack Research output format from your role definition."
+)
+```
+
+**Agent 2 — Features:**
+```
+Task(
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  description: "Features research"
+  run_in_background: true
+  prompt: "First, read {install-path}/specdacular/agents/project-researcher.md for your role.
+
+<focus_area>Features</focus_area>
+
+<project_context>
+$PROJECT_CONTEXT
+</project_context>
+
+<research_questions>
+1. What features are table stakes (users expect them)?
+2. What features would differentiate this project?
+3. What features should wait for v2+?
+4. What anti-features should be explicitly avoided?
+</research_questions>
+
+Return findings in the Features Research output format from your role definition."
+)
+```
+
+**Agent 3 — Architecture:**
+```
+Task(
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  description: "Architecture research"
+  run_in_background: true
+  prompt: "First, read {install-path}/specdacular/agents/project-researcher.md for your role.
+
+<focus_area>Architecture</focus_area>
+
+<project_context>
+$PROJECT_CONTEXT
+</project_context>
+
+<research_questions>
+1. What architecture pattern fits this project (monolith, microservices, modular)?
+2. What are the natural service boundaries?
+3. What does the data model look like?
+4. What directory structure is recommended?
+</research_questions>
+
+Return findings in the Architecture Research output format from your role definition."
+)
+```
+
+**Agent 4 — Pitfalls:**
+```
+Task(
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  description: "Pitfalls research"
+  run_in_background: true
+  prompt: "First, read {install-path}/specdacular/agents/project-researcher.md for your role.
+
+<focus_area>Pitfalls</focus_area>
+
+<project_context>
+$PROJECT_CONTEXT
+</project_context>
+
+<research_questions>
+1. What do teams commonly get wrong when building this type of project?
+2. What are the performance and scalability pitfalls?
+3. What security concerns are specific to this domain?
+4. What architectural mistakes lead to rewrites?
+</research_questions>
+
+Return findings in the Pitfalls Research output format from your role definition."
+)
+```
+
+**Wait for all agents to complete.**
+
+```
+Research agents complete:
+- Stack: {✓ | ✗}
+- Features: {✓ | ✗}
+- Architecture: {✓ | ✗}
+- Pitfalls: {✓ | ✗}
+```
+
+Continue to write_research.
+</step>
+
+<step name="write_research">
+Write research findings to files and synthesize a summary.
+
+**Create research directory:**
+```bash
+mkdir -p .specd/tasks/project/research
+```
+
+**Write individual research files from agent outputs:**
+- `.specd/tasks/project/research/STACK.md` — Stack agent findings
+- `.specd/tasks/project/research/FEATURES.md` — Features agent findings
+- `.specd/tasks/project/research/ARCHITECTURE.md` — Architecture agent findings
+- `.specd/tasks/project/research/PITFALLS.md` — Pitfalls agent findings
+
+**Synthesize SUMMARY.md:**
+Read all 4 files and write `.specd/tasks/project/research/SUMMARY.md` containing:
+
+```markdown
+# Research Summary: {project-name}
+
+## Key Recommendation
+
+{One paragraph: the single most important takeaway from research}
+
+## Stack
+
+{2-3 sentence summary of recommended stack}
+
+## Features
+
+- **Table stakes:** {count} features identified
+- **Differentiators:** {count} features identified
+- **v2+:** {count} features deferred
+
+## Architecture
+
+{2-3 sentence summary of recommended architecture}
+
+## Pitfalls
+
+- **Critical:** {count} — {brief list}
+- **Moderate:** {count}
+- **Minor:** {count}
+
+## Confidence
+
+| Area | Level | Notes |
+|------|-------|-------|
+| Stack | {level} | {brief note} |
+| Features | {level} | {brief note} |
+| Architecture | {level} | {brief note} |
+| Pitfalls | {level} | {brief note} |
+
+## Roadmap Implications
+
+{How research findings should influence requirements and phasing}
+```
+
+**Update config.json:**
+```json
+{
+  "stage": "research",
+  ...
+}
+```
+
+Continue to commit_research.
+</step>
+
+<step name="commit_research">
+Commit research files.
+
+@~/.claude/specdacular/references/commit-docs.md
+
+- **$FILES:** `.specd/tasks/project/research/ .specd/tasks/project/config.json`
+- **$MESSAGE:** `docs(project): research complete — {project-name}` with key findings summary
+- **$LABEL:** `research findings`
+
+Continue to research_complete.
+</step>
+
+<step name="research_complete">
+Show research summary and indicate next steps.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- PROJECT INITIALIZED
+ RESEARCH COMPLETE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 **Project:** {project-name}
 
+**Key recommendation:** {one-liner from SUMMARY.md}
+
+**Findings:**
+- Stack: {brief summary}
+- Features: {brief summary}
+- Architecture: {brief summary}
+- Pitfalls: {brief summary}
+
+**Confidence:** {overall level}
+
 ## Created
 
-- `.specd/tasks/project/PROJECT.md` — Project vision and goals
-- `.specd/tasks/project/CONTEXT.md` — Discussion context
-- `.specd/tasks/project/DECISIONS.md` — {N} decisions recorded
-- `.specd/tasks/project/config.json` — Project configuration
+- `.specd/tasks/project/research/STACK.md`
+- `.specd/tasks/project/research/FEATURES.md`
+- `.specd/tasks/project/research/ARCHITECTURE.md`
+- `.specd/tasks/project/research/PITFALLS.md`
+- `.specd/tasks/project/research/SUMMARY.md`
 
 ## What's Next
 
-Research, requirements, roadmap, and scaffolding stages are coming soon.
-For now, you have a solid PROJECT.md capturing your vision.
+Requirements scoping and roadmap stages are coming soon.
+For now, review the research files to see what the agents found.
 ```
 
 End workflow.
-</step>
-
-<!-- Future stages (Phase 2-4) will replace these stubs -->
-
-<step name="research">
-<!-- Phase 2: Spawn 4 parallel research agents for stack, features, architecture, pitfalls -->
-Not yet implemented. See Phase 2 in ROADMAP.md.
 </step>
 
 <step name="requirements">
@@ -218,6 +439,9 @@ Not yet implemented. See Phase 4 in ROADMAP.md.
 - Questioning produces PROJECT.md with clear vision, goals, users, constraints
 - Project directory created at `.specd/tasks/project/`
 - CONTEXT.md and DECISIONS.md initialized from discussion
+- 4 research agents spawn in parallel after PROJECT.md is written
+- Each agent writes its findings (STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md)
+- SUMMARY.md synthesized from all 4 outputs
 - All files committed to git
 - Clean exit with next steps indicated
 </success_criteria>
