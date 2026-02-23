@@ -9,6 +9,7 @@
 | Command | Description |
 |---------|-------------|
 | `/specd.new [name]` | Initialize a task, start first discussion |
+| `/specd.new-project [name]` | Bootstrap a new project from idea to structured plan |
 | `/specd.continue [name] [--interactive\|--auto]` | Continue task lifecycle — picks up where you left off |
 
 | `/specd.toolbox [<name>]` | Advanced task operations |
@@ -30,6 +31,11 @@
 
 ```
 /specd.new → /specd.continue → continue → continue → done
+```
+
+**For new projects (greenfield):**
+```
+/specd.new-project → (questioning → research → requirements → roadmap → scaffold)
 ```
 
 **You only need three commands:**
