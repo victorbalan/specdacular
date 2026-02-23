@@ -78,7 +78,7 @@
 
 ## Next Steps
 
-**Resume:** `/specd:continue phase-execution` — Picks up where you left off.
+**Resume:** `/specd.continue phase-execution` — Picks up where you left off.
 
 ---
 

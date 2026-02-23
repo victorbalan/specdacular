@@ -14,7 +14,7 @@ Add context management commands (`context:review`, `context:add`, `context:statu
 
 ### Must Integrate With
 
-- `commands/specd/toolbox.md` — Add Context Review, Context Add, Context Status as new menu options
+- `commands/specd.toolbox.md` — Add Context Review, Context Add, Context Status as new menu options
 - `.specd/codebase/*.md` (MAP.md, PATTERNS.md, STRUCTURE.md, CONCERNS.md) — Read, parse sections, edit in place
 - `agents/specd-codebase-mapper.md` — Spawn for targeted single-section re-mapping
 - `specdacular/workflows/map-codebase.md` — Reuse mapper agent pattern for targeted re-runs
@@ -25,13 +25,13 @@ Add context management commands (`context:review`, `context:add`, `context:statu
 - **USER_MODIFIED tags** — Manual edits must be tagged with `<!-- USER_MODIFIED: YYYY-MM-DD -->` so re-mapping can respect them
 - **Targeted re-mapping** — Re-run mapper for a single section, not the whole file. Pass USER_MODIFIED context to the mapper agent so it considers user changes
 - **Zero dependencies** — No new npm packages or external tools. Pure workflow/command changes
-- **Toolbox integration** — These are toolbox operations, not standalone `/specd:context:*` commands
+- **Toolbox integration** — These are toolbox operations, not standalone `/specd.context:*` commands
 
 ---
 
 ## Success Criteria
 
-- [ ] `/specd:toolbox` shows Context Review, Context Add, Context Status as options
+- [ ] `/specd.toolbox` shows Context Review, Context Add, Context Status as options
 - [ ] `context:review` walks through a selected file section by section with readable display
 - [ ] User can confirm, manually edit (adds USER_MODIFIED tag), or remove any section
 - [ ] User can re-run mapper for a single section and see diff against current content
@@ -44,7 +44,7 @@ Add context management commands (`context:review`, `context:add`, `context:statu
 
 ## Out of Scope
 
-- [X] Full codebase re-mapping — Already handled by `/specd:map-codebase`
+- [X] Full codebase re-mapping — Already handled by `/specd.map-codebase`
 - [X] Automatic staleness detection/alerts — Just show timestamps, don't nag
 - [X] Version history of context files — Git handles this
 - [X] New standalone commands — Everything goes through toolbox
@@ -57,7 +57,7 @@ Add context management commands (`context:review`, `context:add`, `context:statu
 Users want manual control over the AI-generated codebase documentation. Map-codebase is automatic but sometimes sections need correction, removal, or additions that only the user knows about.
 
 ### Integration Points
-- Toolbox menu (`commands/specd/toolbox.md`) — new options added
+- Toolbox menu (`commands/specd.toolbox.md`) — new options added
 - Codebase mapper agent (`agents/specd-codebase-mapper.md`) — spawned for targeted re-mapping
 - Context files (`.specd/codebase/*.md`) — read/write with section parsing
 

@@ -1,5 +1,5 @@
 ---
-name: specd:update
+name: specd.update
 description: Update Specdacular to the latest version
 allowed-tools:
   - Bash

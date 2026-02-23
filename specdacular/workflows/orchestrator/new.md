@@ -234,7 +234,7 @@ Use AskUserQuestion:
 - question: "Want to keep discussing the open areas, or come back later?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with `/specd:continue {task-name}`
+  - "Stop for now" — Come back with `/specd.continue {task-name}`
 
 **If Keep discussing:**
 Execute the discuss workflow:
@@ -248,7 +248,7 @@ Use AskUserQuestion:
 - question: "Discussion looks solid. Want to keep going or come back later?"
 - options:
   - "Continue" — Move to next step
-  - "Stop for now" — Come back with `/specd:continue {task-name}`
+  - "Stop for now" — Come back with `/specd.continue {task-name}`
 
 **If Continue:**
 Hand off to continue workflow:
@@ -258,7 +258,7 @@ Hand off to continue workflow:
 ```
 Progress saved. Pick up where you left off anytime:
 
-/specd:continue {task-name}
+/specd.continue {task-name}
 ```
 
 End workflow.

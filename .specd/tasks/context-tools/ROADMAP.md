@@ -14,7 +14,7 @@
 
 - [x] **Phase 1: Context Status Dashboard** — Read context files, extract timestamps, display staleness dashboard
 - [x] **Phase 2: Context Review and Add** — Section-by-section review with edit/remove/re-map, guided content addition
-- [x] **Phase 3: Toolbox Integration** — Wire workflows into /specd:toolbox menu, verify installation
+- [x] **Phase 3: Toolbox Integration** — Wire workflows into /specd.toolbox menu, verify installation
 - [ ] **Phase 4: Context Review Improvements** — Show all sections with assessment, use specd-codebase-mapper agent for re-mapping, consistent diff template
 
 ---
@@ -59,10 +59,10 @@
 
 ### Phase 3: Toolbox Integration
 
-**Goal:** All three context workflows are accessible from the `/specd:toolbox` menu and work through the standard installation flow.
+**Goal:** All three context workflows are accessible from the `/specd.toolbox` menu and work through the standard installation flow.
 
 **Modifies:**
-- `commands/specd/toolbox.md` — Add context management category
+- `commands/specd.toolbox.md` — Add context management category
 
 **Plan:** `phases/phase-03/PLAN.md`
 

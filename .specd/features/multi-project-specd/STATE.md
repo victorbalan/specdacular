@@ -95,7 +95,7 @@
 
 Phase 1 prepared and planned. Ready for execution.
 
-**Resume:** `/specd:feature:next multi-project-specd` — Picks up where you left off and guides the next step automatically.
+**Resume:** `/specd.feature:next multi-project-specd` — Picks up where you left off and guides the next step automatically.
 
 ---
 

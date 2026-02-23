@@ -25,7 +25,7 @@ Adds an orchestrator layer to Specdacular that coordinates feature planning and 
 - `specdacular/workflows/plan-feature.md` — Orchestrator wraps per-project planning with cross-project dependency tracking
 - `specdacular/workflows/execute-plan.md` — Orchestrator wraps per-project execution with contract validation after each phase
 - `specdacular/workflows/next-feature.md` — Orchestrator adds cross-project scheduling on top of per-project state
-- `commands/specd/*.md` — Commands may need awareness of orchestrator mode (to pass project argument)
+- `commands/specd.*.md` — Commands may need awareness of orchestrator mode (to pass project argument)
 - `.specd/config.json` — Must store project registry for orchestrator setups
 
 ### Constraints
@@ -57,7 +57,7 @@ Adds an orchestrator layer to Specdacular that coordinates feature planning and 
 - [X] Orchestrator as a project with its own code — For v1, orchestrator is coordination-only. Supporting the root directory as both orchestrator and project is deferred.
 - [X] Parallel execution of multiple sub-projects simultaneously — For v1, execution is sequential (one phase at a time). The orchestrator knows which phases are independent but doesn't run them in parallel.
 - [X] Auto-discovery of projects — For v1, projects are manually registered during setup. Auto-detection (scanning for package.json, go.mod, etc.) is deferred.
-- [X] New orchestrator-specific slash commands — Existing commands gain orchestrator awareness; no new `/specd:orchestrator:*` namespace.
+- [X] New orchestrator-specific slash commands — Existing commands gain orchestrator awareness; no new `/specd.orchestrator:*` namespace.
 
 ---
 

@@ -4,7 +4,7 @@ phase: 1
 plan: 01
 depends_on: []
 creates:
-  - commands/specd/phase/review.md
+  - commands/specd.phase/review.md
 modifies: []
 ---
 
@@ -12,19 +12,19 @@ modifies: []
 
 ## Objective
 
-Create the `/specd:phase:review` command definition file that follows the existing phase command pattern and references the review workflow.
+Create the `/specd.phase:review` command definition file that follows the existing phase command pattern and references the review workflow.
 
 ## Context
 
 **Reference these files:**
 - `@.specd/codebase/PATTERNS.md` — Command definition patterns
 - `@.specd/codebase/STRUCTURE.md` — Where command files go
-- `@commands/specd/phase/execute.md` — Primary pattern to follow (closest sibling command)
-- `@commands/specd/phase/prepare.md` — Secondary pattern reference
+- `@commands/specd.phase/execute.md` — Primary pattern to follow (closest sibling command)
+- `@commands/specd.phase/prepare.md` — Secondary pattern reference
 
 **Relevant Decisions:**
 - DEC-001: Claude inspects first, then user weighs in — command must invoke workflow that does both
-- DEC-002: Command named `phase:review` — file is `commands/specd/phase/review.md`
+- DEC-002: Command named `phase:review` — file is `commands/specd.phase/review.md`
 - DEC-006: Partial execution review supported — argument-hint reflects optional phase number
 
 **From Research:**
@@ -37,15 +37,15 @@ Create the `/specd:phase:review` command definition file that follows the existi
 
 ### Task 1: Create the review command file
 
-**Files:** `commands/specd/phase/review.md`
+**Files:** `commands/specd.phase/review.md`
 
 **Action:**
-Create the command definition following the exact pattern from `commands/specd/phase/execute.md`. The command is a thin wrapper that references the review workflow.
+Create the command definition following the exact pattern from `commands/specd.phase/execute.md`. The command is a thin wrapper that references the review workflow.
 
-Follow pattern from `commands/specd/phase/execute.md`:
+Follow pattern from `commands/specd.phase/execute.md`:
 ```yaml
 ---
-name: specd:phase:execute
+name: specd.phase:execute
 description: Execute a feature plan with progress tracking
 argument-hint: "[feature-name] [plan-path]"
 allowed-tools:
@@ -59,10 +59,10 @@ allowed-tools:
 ---
 ```
 
-Create `commands/specd/phase/review.md`:
+Create `commands/specd.phase/review.md`:
 ```markdown
 ---
-name: specd:phase:review
+name: specd.phase:review
 description: Review executed plans against actual code and identify deviations
 argument-hint: "[feature-name] [phase-number]"
 allowed-tools:
@@ -146,11 +146,11 @@ Phase number: $ARGUMENTS (second argument)
 **Verify:**
 ```bash
 # File exists and has correct frontmatter
-head -5 commands/specd/phase/review.md | grep "name: specd:phase:review"
+head -5 commands/specd.phase/review.md | grep "name: specd.phase:review"
 ```
 
 **Done when:**
-- [ ] `commands/specd/phase/review.md` exists
+- [ ] `commands/specd.phase/review.md` exists
 - [ ] Frontmatter has correct name, description, argument-hint, allowed-tools
 - [ ] Has `<objective>`, `<execution_context>`, `<context>`, `<process>`, `<success_criteria>` sections
 - [ ] `<execution_context>` references `@~/.claude/specdacular/workflows/review-phase.md`
@@ -165,14 +165,14 @@ After all tasks complete, verify the plan is done:
 
 ```bash
 # File exists with correct structure
-grep -c "<objective>\|<execution_context>\|<context>\|<process>\|<success_criteria>" commands/specd/phase/review.md
+grep -c "<objective>\|<execution_context>\|<context>\|<process>\|<success_criteria>" commands/specd.phase/review.md
 # Should output: 5
 
 # Correct workflow reference
-grep "review-phase.md" commands/specd/phase/review.md
+grep "review-phase.md" commands/specd.phase/review.md
 
 # Correct command name
-grep "specd:phase:review" commands/specd/phase/review.md
+grep "specd.phase:review" commands/specd.phase/review.md
 ```
 
 **Plan is complete when:**
@@ -193,11 +193,11 @@ When this plan is complete:
 
 2. Commit changes:
    ```bash
-   git add commands/specd/phase/review.md
+   git add commands/specd.phase/review.md
    git commit -m "feat(phase-review): create review command definition
 
    Plan 1.01 complete:
-   - Created /specd:phase:review command definition
+   - Created /specd.phase:review command definition
    - Follows existing phase command pattern (execute, prepare)
    - References review-phase workflow"
    ```

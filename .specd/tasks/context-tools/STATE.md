@@ -87,7 +87,7 @@
 
 Continue discussing gray areas or move to research/planning.
 
-**Resume:** `/specd:continue context-tools` — Picks up where you left off.
+**Resume:** `/specd.continue context-tools` — Picks up where you left off.
 
 ---
 

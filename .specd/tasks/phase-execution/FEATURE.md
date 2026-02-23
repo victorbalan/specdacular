@@ -50,7 +50,7 @@ Change the phase-execution pipeline so each phase runs its own mini-lifecycle (r
 - [X] Changes to research.md — Already supports phase-level detection
 - [X] Changes to execute.md — Still runs PLAN.md tasks as before
 - [X] Changes to review.md or revise.md — Unchanged
-- [X] New commands — Everything works through existing /specd:continue
+- [X] New commands — Everything works through existing /specd.continue
 
 ---
 

@@ -7,7 +7,7 @@ depends_on:
   - phase-01/02-PLAN.md
 creates: []
 modifies:
-  - commands/specd/help.md
+  - commands/specd.help.md
   - README.md
   - specdacular/templates/features/STATE.md
 ---
@@ -16,14 +16,14 @@ modifies:
 
 ## Objective
 
-Make the `/specd:phase:review` command discoverable in help and README, update feature flow diagrams to show the review loop, and add a Review Cycles section to the STATE.md template.
+Make the `/specd.phase:review` command discoverable in help and README, update feature flow diagrams to show the review loop, and add a Review Cycles section to the STATE.md template.
 
 ## Context
 
 **Reference these files:**
 - `@.specd/codebase/PATTERNS.md` — Documentation patterns
 - `@.specd/codebase/STRUCTURE.md` — Where files go
-- `@commands/specd/help.md` — Current help output (modify)
+- `@commands/specd.help.md` — Current help output (modify)
 - `@README.md` — Current README (modify)
 - `@specdacular/templates/features/STATE.md` — Current STATE template (modify)
 
@@ -43,22 +43,22 @@ Make the `/specd:phase:review` command discoverable in help and README, update f
 
 ### Task 1: Update help.md with phase:review command
 
-**Files:** `commands/specd/help.md`
+**Files:** `commands/specd.help.md`
 
 **Action:**
-Add `/specd:phase:review` to the Phase Commands table and update the Feature Flow diagram.
+Add `/specd.phase:review` to the Phase Commands table and update the Feature Flow diagram.
 
 **1. In the Phase Commands table (after `phase:execute`, before `phase:insert`):**
 
 Find:
 ```markdown
-| `/specd:phase:execute [feature] [plan]` | Execute a plan with progress tracking |
-| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
+| `/specd.phase:execute [feature] [plan]` | Execute a plan with progress tracking |
+| `/specd.phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
 ```
 
 Insert between them:
 ```markdown
-| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
+| `/specd.phase:review [feature] [phase]` | Review executed plans against actual code |
 ```
 
 **2. In the Feature Flow diagram, update the phase loop:**
@@ -89,17 +89,17 @@ Add after:
 
 Find:
 ```
-/specd:phase:execute user-dashboard      # Execute with progress tracking
+/specd.phase:execute user-dashboard      # Execute with progress tracking
 ```
 
 Add after:
 ```
-/specd:phase:review user-dashboard 1     # Review phase against actual code
+/specd.phase:review user-dashboard 1     # Review phase against actual code
 ```
 
 **Verify:**
 ```bash
-grep "phase:review" commands/specd/help.md | wc -l
+grep "phase:review" commands/specd.help.md | wc -l
 # Should be at least 4 (table + flow + description + quick start)
 ```
 
@@ -116,19 +116,19 @@ grep "phase:review" commands/specd/help.md | wc -l
 **Files:** `README.md`
 
 **Action:**
-Add `/specd:phase:review` to README Phase Commands table, update Feature Flow, and add review to Quick Start.
+Add `/specd.phase:review` to README Phase Commands table, update Feature Flow, and add review to Quick Start.
 
 **1. In Phase Commands table (after `phase:execute`, before `phase:insert`):**
 
 Find:
 ```markdown
-| `/specd:phase:execute [feature]` | Execute plans with progress tracking |
-| `/specd:phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
+| `/specd.phase:execute [feature]` | Execute plans with progress tracking |
+| `/specd.phase:insert [feature] [after] [desc]` | Insert a new phase after an existing one |
 ```
 
 Insert between them:
 ```markdown
-| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
+| `/specd.phase:review [feature] [phase]` | Review executed plans against actual code |
 ```
 
 **2. In the feature flow diagram at the top (What It Does section):**
@@ -147,12 +147,12 @@ Replace with:
 
 Find:
 ```
-/specd:phase:execute user-dashboard      # Execute with progress tracking
+/specd.phase:execute user-dashboard      # Execute with progress tracking
 ```
 
 Add after:
 ```
-/specd:phase:review user-dashboard 1     # Review phase against actual code
+/specd.phase:review user-dashboard 1     # Review phase against actual code
 ```
 
 **4. In the detailed Feature Flow diagram (ASCII art), add review step after execute in the phase loop:**
@@ -243,7 +243,7 @@ After all tasks complete, verify the plan is done:
 
 ```bash
 # help.md has phase:review
-grep -c "phase:review" commands/specd/help.md
+grep -c "phase:review" commands/specd.help.md
 # Should be >= 4
 
 # README has phase:review
@@ -255,13 +255,13 @@ grep "Review Cycles" specdacular/templates/features/STATE.md
 
 # All files modified
 git diff --name-only | sort
-# Should show: README.md, commands/specd/help.md, specdacular/templates/features/STATE.md
+# Should show: README.md, commands/specd.help.md, specdacular/templates/features/STATE.md
 ```
 
 **Plan is complete when:**
 - [ ] All tasks marked done
 - [ ] All verification commands pass
-- [ ] `/specd:help` shows `phase:review` in Phase Commands
+- [ ] `/specd.help` shows `phase:review` in Phase Commands
 - [ ] Feature flow diagrams show review loop
 - [ ] STATE.md template includes Review Cycles section
 
@@ -278,11 +278,11 @@ When this plan is complete:
 
 2. Commit changes:
    ```bash
-   git add commands/specd/help.md README.md specdacular/templates/features/STATE.md
+   git add commands/specd.help.md README.md specdacular/templates/features/STATE.md
    git commit -m "docs(phase-review): add review command to help, README, and templates
 
    Plan 2.01 complete:
-   - Added /specd:phase:review to help.md Phase Commands table
+   - Added /specd.phase:review to help.md Phase Commands table
    - Updated feature flow diagrams with review loop
    - Added phase:review to README commands and Quick Start
    - Added Review Cycles section to STATE.md template"

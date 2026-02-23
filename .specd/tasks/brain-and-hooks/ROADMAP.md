@@ -90,7 +90,7 @@
 **Goal:** Wire brain into command entry points, verify install path, end-to-end validation.
 
 **Modifies:**
-- `commands/specd/continue.md` — Update allowed-tools
+- `commands/specd.continue.md` — Update allowed-tools
 - `specdacular/workflows/brain.md` — Fix any gaps from review
 
 **Plan:** `phases/phase-04/PLAN.md`

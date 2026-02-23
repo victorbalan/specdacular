@@ -33,7 +33,7 @@ fi
 ```
 Task '{name}' not found.
 
-Run /specd:new {name} to create it.
+Run /specd.new {name} to create it.
 ```
 
 **If required files missing:**
@@ -41,7 +41,7 @@ Run /specd:new {name} to create it.
 Task '{name}' is missing required files:
 - {missing file}
 
-Run /specd:discuss {name} to rebuild context.
+Run /specd.discuss {name} to rebuild context.
 ```
 
 **Extended validation (for plan/execute/review):**
@@ -58,7 +58,7 @@ Run /specd:discuss {name} to rebuild context.
 ```
 Task '{name}' has no phases yet.
 
-Run /specd:plan {name} to create phases.
+Run /specd.plan {name} to create phases.
 ```
 
 **Optional file checks (note existence, don't fail):**

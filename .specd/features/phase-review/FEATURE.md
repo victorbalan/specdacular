@@ -2,13 +2,13 @@
 
 ## What This Is
 
-A post-execution review command (`/specd:phase:review`) that creates an iterative loop: execute → review → fix → review → done. Claude inspects executed plans against actual code, surfaces deviations, captures decisions, and generates corrective plans when needed. A phase isn't complete until the review says it is.
+A post-execution review command (`/specd.phase:review`) that creates an iterative loop: execute → review → fix → review → done. Claude inspects executed plans against actual code, surfaces deviations, captures decisions, and generates corrective plans when needed. A phase isn't complete until the review says it is.
 
 ## Technical Requirements
 
 ### Must Create
 
-- [ ] `commands/specd/phase-review.md` — Command definition with frontmatter
+- [ ] `commands/specd.phase-review.md` — Command definition with frontmatter
 - [ ] `specdacular/workflows/review-phase.md` — Workflow implementation
 
 ### Must Integrate With
@@ -19,7 +19,7 @@ A post-execution review command (`/specd:phase:review`) that creates an iterativ
 - `.specd/features/{name}/CHANGELOG.md` — Records deviations from original plans
 - `.specd/features/{name}/config.json` — Reads feature metadata
 - `specdacular/workflows/execute-plan.md` — Review feeds back into execution loop
-- `commands/specd/help.md` — Add new command to help output
+- `commands/specd.help.md` — Add new command to help output
 
 ### Constraints
 
@@ -32,7 +32,7 @@ A post-execution review command (`/specd:phase:review`) that creates an iterativ
 
 ## Success Criteria
 
-- [ ] `/specd:phase:review {feature} {phase}` inspects code against executed plans and presents findings
+- [ ] `/specd.phase:review {feature} {phase}` inspects code against executed plans and presents findings
 - [ ] Deviations between planned and actual code are surfaced automatically
 - [ ] User can flag additional issues beyond what Claude detects
 - [ ] New decisions are captured in DECISIONS.md

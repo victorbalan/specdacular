@@ -27,19 +27,19 @@
 **Goal:** Replace the current command surface with the new simplified structure. After this phase, users interact with `continue` and `toolbox` instead of individual feature/phase commands.
 
 **Creates:**
-- `commands/specd/continue-feature.md` — Main flow driver command (replaces next-feature)
-- `commands/specd/toolbox.md` — Command stub for toolbox menu
+- `commands/specd.continue-feature.md` — Main flow driver command (replaces next-feature)
+- `commands/specd.toolbox.md` — Command stub for toolbox menu
 - `specdacular/workflows/toolbox.md` — Toolbox workflow: presents AskUserQuestion menu with discuss/research/plan/review/insert, dispatches to corresponding workflow
 - `specdacular/workflows/continue-feature.md` — Renamed from next-feature.md with updated references
 
 **Modifies:**
-- `commands/specd/new-feature.md` — Update continuation references from `next` to `continue`
+- `commands/specd.new-feature.md` — Update continuation references from `next` to `continue`
 - `specdacular/workflows/new-feature.md` — Update references from `next` to `continue`
 - `specdacular/templates/features/STATE.md` — Update resume command reference
 
 **Success Criteria:**
-1. `/specd:feature:continue` drives the lifecycle identically to current `next`
-2. `/specd:feature:toolbox` presents menu with 5 options: discuss, research, plan, review, insert
+1. `/specd.feature:continue` drives the lifecycle identically to current `next`
+2. `/specd.feature:toolbox` presents menu with 5 options: discuss, research, plan, review, insert
 3. Discuss, research, plan from toolbox ask scope (feature vs specific phase) before dispatching
 4. All references to `next` updated to `continue`
 
@@ -96,24 +96,24 @@
 **Goal:** Remove all old command files and update the installer so autocomplete shows exactly 7 entries.
 
 **Deletes:**
-- `commands/specd/discuss-feature.md`
-- `commands/specd/research-feature.md`
-- `commands/specd/plan-feature.md`
-- `commands/specd/next-feature.md` (replaced by continue-feature)
-- `commands/specd/insert-phase.md`
-- `commands/specd/renumber-phase.md`
-- `commands/specd/review-phase.md`
-- `commands/specd/research-phase.md`
-- `commands/specd/prepare-phase.md`
-- `commands/specd/plan-phase.md`
-- `commands/specd/execute-plan.md`
+- `commands/specd.discuss-feature.md`
+- `commands/specd.research-feature.md`
+- `commands/specd.plan-feature.md`
+- `commands/specd.next-feature.md` (replaced by continue-feature)
+- `commands/specd.insert-phase.md`
+- `commands/specd.renumber-phase.md`
+- `commands/specd.review-phase.md`
+- `commands/specd.research-phase.md`
+- `commands/specd.prepare-phase.md`
+- `commands/specd.plan-phase.md`
+- `commands/specd.execute-plan.md`
 
 **Modifies:**
 - `bin/install.js` — Update file copy list to install only the 7 new commands
-- `commands/specd/help.md` — Rewrite command reference for new surface
+- `commands/specd.help.md` — Rewrite command reference for new surface
 
 **Success Criteria:**
-1. `commands/specd/` contains exactly 7 files: `new-feature.md`, `continue-feature.md`, `toolbox.md`, `map-codebase.md`, `status.md`, `help.md`, `update.md`
+1. `commands/specd.` contains exactly 7 files: `new-feature.md`, `continue-feature.md`, `toolbox.md`, `map-codebase.md`, `status.md`, `help.md`, `update.md`
 2. `bin/install.js` installs correct command set
 3. `help.md` documents new command surface accurately
 4. Local install (`npx specdacular --local`) produces correct autocomplete

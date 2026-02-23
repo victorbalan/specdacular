@@ -92,7 +92,7 @@ After completing the hook instructions, return a brief summary of what you did."
 Hook failed: {hook-file-name}
 Error: {description of what went wrong}
 
-Pipeline stopped. Resume with /specd:continue {task-name}
+Pipeline stopped. Resume with /specd.continue {task-name}
 ```
 - End workflow
 

@@ -43,7 +43,7 @@ Simplify the mode system. Semi-auto becomes the default behavior (no flag). Add 
 - `specdacular/STATE-MACHINE.md` — update pipeline config reference, remove `enabled` field docs
 - `specdacular/HELP.md` — update mode descriptions
 - `README.md` — update mode docs, pipeline examples, CLI flags
-- `commands/specd/continue.md` — update argument-hint and description
+- `commands/specd.continue.md` — update argument-hint and description
 
 ### Hooks Reference
 - `specdacular/references/execute-hooks.md` — remove disabled step hook skip logic

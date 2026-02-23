@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Extends the `/specd:status` command to support orchestrator mode — detecting multi-project repos and displaying orchestrator-level features alongside per-project features in a grouped hierarchy.
+Extends the `/specd.status` command to support orchestrator mode — detecting multi-project repos and displaying orchestrator-level features alongside per-project features in a grouped hierarchy.
 
 ## Technical Requirements
 
@@ -12,7 +12,7 @@ Extends the `/specd:status` command to support orchestrator mode — detecting m
 
 ### Must Integrate With
 
-- `commands/specd/status.md` — Existing command definition (may need updated description)
+- `commands/specd.status.md` — Existing command definition (may need updated description)
 - `specdacular/workflows/status.md` — Current single-project workflow (being extended)
 - `.specd/config.json` — Read `type` field to detect orchestrator mode and `projects` array for sub-project paths
 - `.specd/features/*/config.json` — Per-feature config, check `orchestrator: true` and `projects` array
@@ -49,7 +49,7 @@ Extends the `/specd:status` command to support orchestrator mode — detecting m
 ## Initial Context
 
 ### User Need
-When working in an orchestrator repo with multiple sub-projects, `/specd:status` only shows root-level features. Users need to see the full picture: orchestrator features and all sub-project features in one dashboard.
+When working in an orchestrator repo with multiple sub-projects, `/specd.status` only shows root-level features. Users need to see the full picture: orchestrator features and all sub-project features in one dashboard.
 
 ### Integration Points
 - `.specd/config.json` type field for orchestrator detection

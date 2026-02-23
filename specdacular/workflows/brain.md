@@ -197,7 +197,7 @@ Save state and exit:
 
 Progress saved. Pick up where you left off anytime:
 
-/specd:continue {task-name}
+/specd.continue {task-name}
 ```
 End workflow.
 
@@ -373,6 +373,6 @@ End workflow.
 - Phase-execution sub-pipeline loops correctly per phase
 - Decimal fix phases handled
 - State saved before dispatch for reliable resume
-- Stop/resume works at any point via /specd:continue
+- Stop/resume works at any point via /specd.continue
 - Hook execution points marked for Phase 2
 </success_criteria>

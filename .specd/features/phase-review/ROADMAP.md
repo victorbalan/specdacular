@@ -22,10 +22,10 @@
 
 ### Phase 1: Command & Core Workflow
 
-**Goal:** Create a working `/specd:phase:review` command that inspects executed plans against actual code, presents findings to the user, captures decisions and deviations, and generates corrective plans when needed.
+**Goal:** Create a working `/specd.phase:review` command that inspects executed plans against actual code, presents findings to the user, captures decisions and deviations, and generates corrective plans when needed.
 
 **Creates:**
-- `commands/specd/phase/review.md` — Command definition with frontmatter, objective, execution_context reference
+- `commands/specd.phase/review.md` — Command definition with frontmatter, objective, execution_context reference
 - `specdacular/workflows/review-phase.md` — Full workflow with 11 steps: validate, load_context, filter_plans, inspect_phase, present_findings, gather_user_input, record_decisions, generate_correctives, update_state, update_changelog, commit_and_next
 
 **Modifies:**
@@ -36,7 +36,7 @@
 2. `plans/phase-01/02-PLAN.md` — Create review workflow (all 11 steps, deviation detection, output formatting, corrective plan generation, state tracking)
 
 **Success Criteria:**
-1. `/specd:phase:review {feature} {phase}` runs without error on a feature with executed plans
+1. `/specd.phase:review {feature} {phase}` runs without error on a feature with executed plans
 2. Review reads plan frontmatter (`creates`/`modifies`) and inspects actual files
 3. Per-plan status table displayed with ✅/⚠️/❌/⏸️ icons
 4. Expanded detail sections shown for deviations and incomplete items
@@ -58,7 +58,7 @@
 - None
 
 **Modifies:**
-- `commands/specd/help.md` — Add `phase:review` to Phase Commands table, update feature flow diagram
+- `commands/specd.help.md` — Add `phase:review` to Phase Commands table, update feature flow diagram
 - `README.md` — Add `phase:review` to Phase Commands table, update Quick Start and Flow sections
 - `specdacular/templates/features/STATE.md` — Add Review Cycles section template
 
@@ -66,7 +66,7 @@
 1. `plans/phase-02/01-PLAN.md` — Update help, README, and STATE.md template with review command and loop documentation
 
 **Success Criteria:**
-1. `/specd:help` shows `phase:review` in Phase Commands table
+1. `/specd.help` shows `phase:review` in Phase Commands table
 2. Feature flow in help.md shows the review loop: `execute → review → [fix → execute → review]*`
 3. README.md Phase Commands table includes `phase:review`
 4. README.md Quick Start shows review usage example

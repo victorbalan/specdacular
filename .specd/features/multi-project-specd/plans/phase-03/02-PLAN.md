@@ -318,7 +318,7 @@ Use AskUserQuestion:
 - question: "Want to keep discussing the open areas, or come back later?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd.feature:next {feature-name}
 
 **If Keep discussing:**
 Execute the discuss-feature workflow logic:
@@ -333,7 +333,7 @@ Use AskUserQuestion:
 - question: "Discussion looks solid. Want to keep going or come back later?"
 - options:
   - "Continue" — Move to the next step (research or planning)
-  - "Stop for now" — Come back with /specd:feature:next {feature-name}
+  - "Stop for now" — Come back with /specd.feature:next {feature-name}
 
 **If Continue:**
 Hand off to next-feature workflow:
@@ -345,7 +345,7 @@ Hand off to next-feature workflow:
 
 Progress saved. Pick up where you left off anytime:
 
-/specd:feature:next {feature-name}
+/specd.feature:next {feature-name}
 ```
 
 End workflow.

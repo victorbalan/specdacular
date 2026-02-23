@@ -16,27 +16,27 @@ Research across three dimensions confirms the migration is feasible and well-ali
 
 ### Current Structure (What We're Migrating From)
 
-**17 commands** in `commands/specd/`:
+**17 commands** in `commands/specd.`:
 
 | Command | Workflow Reference |
 |---------|-------------------|
-| `specd:help` | (static output, no workflow) |
-| `specd:status` | `workflows/status.md` |
-| `specd:update` | (custom process in command) |
-| `specd:map-codebase` | `workflows/map-codebase.md` |
-| `specd:blueprint` | `workflows/blueprint.md` |
-| `specd:feature:new` | `workflows/new-feature.md` |
-| `specd:feature:discuss` | `workflows/discuss-feature.md` |
-| `specd:feature:research` | `workflows/research-feature.md` |
-| `specd:feature:plan` | `workflows/plan-feature.md` |
-| `specd:feature:next` | `workflows/next-feature.md` |
-| `specd:phase:prepare` | `workflows/prepare-phase.md` |
-| `specd:phase:research` | `workflows/research-phase.md` |
-| `specd:phase:plan` | `workflows/plan-phase.md` |
-| `specd:phase:execute` | `workflows/execute-plan.md` |
-| `specd:phase:review` | `workflows/review-phase.md` |
-| `specd:phase:insert` | `workflows/insert-phase.md` |
-| `specd:phase:renumber` | `workflows/renumber-phases.md` |
+| `specd.help` | (static output, no workflow) |
+| `specd.status` | `workflows/status.md` |
+| `specd.update` | (custom process in command) |
+| `specd.map-codebase` | `workflows/map-codebase.md` |
+| `specd.blueprint` | `workflows/blueprint.md` |
+| `specd.feature:new` | `workflows/new-feature.md` |
+| `specd.feature:discuss` | `workflows/discuss-feature.md` |
+| `specd.feature:research` | `workflows/research-feature.md` |
+| `specd.feature:plan` | `workflows/plan-feature.md` |
+| `specd.feature:next` | `workflows/next-feature.md` |
+| `specd.phase:prepare` | `workflows/prepare-phase.md` |
+| `specd.phase:research` | `workflows/research-phase.md` |
+| `specd.phase:plan` | `workflows/plan-phase.md` |
+| `specd.phase:execute` | `workflows/execute-plan.md` |
+| `specd.phase:review` | `workflows/review-phase.md` |
+| `specd.phase:insert` | `workflows/insert-phase.md` |
+| `specd.phase:renumber` | `workflows/renumber-phases.md` |
 
 All use identical frontmatter pattern: `name`, `description`, `argument-hint`, `allowed-tools`.
 
@@ -54,7 +54,7 @@ All use identical frontmatter pattern: `name`, `description`, `argument-hint`, `
 
 | Current | New | Change |
 |---------|-----|--------|
-| `commands/specd/*.md` (17 files) | `SKILL.md` (1 router file) | Rewrite |
+| `commands/specd.*.md` (17 files) | `SKILL.md` (1 router file) | Rewrite |
 | `specdacular/workflows/*.md` (17 files) | `references/workflows/*.md` | Move + path update |
 | `specdacular/agents/*.md` (2 files) | `references/agents/*.md` | Move + path update |
 | `specdacular/templates/` | `assets/templates/` | Move + path update |
@@ -249,7 +249,7 @@ Rule files use property table format (not YAML frontmatter):
 ## Sources
 
 ### Codebase (from Explore)
-- All 17 command files in `commands/specd/`
+- All 17 command files in `commands/specd.`
 - All 17 workflow files in `specdacular/workflows/`
 - Agent definitions in `specdacular/agents/` and `.claude/agents/`
 - Templates in `specdacular/templates/`

@@ -4,19 +4,19 @@ phase: 3
 depends_on: [1, 2]
 creates: []
 modifies:
-  - commands/specd/toolbox.md
+  - commands/specd.toolbox.md
 ---
 
 # Phase 3: Toolbox Integration
 
 ## Objective
 
-Wire the three context workflows into the existing `/specd:toolbox` command menu so users can access Context Review, Context Add, and Context Status from the toolbox.
+Wire the three context workflows into the existing `/specd.toolbox` command menu so users can access Context Review, Context Add, and Context Status from the toolbox.
 
 ## Context
 
 **Reference these files:**
-- `@commands/specd/toolbox.md` — Current toolbox command to modify
+- `@commands/specd.toolbox.md` — Current toolbox command to modify
 - `@.specd/codebase/PATTERNS.md` — Command-to-workflow dispatch pattern
 
 **Relevant Decisions:**
@@ -34,7 +34,7 @@ Wire the three context workflows into the existing `/specd:toolbox` command menu
 
 ### Task 1: Update toolbox.md command
 
-**Files:** `commands/specd/toolbox.md`
+**Files:** `commands/specd.toolbox.md`
 
 **Action:**
 Modify the toolbox command to support context operations alongside task operations.
@@ -69,7 +69,7 @@ Also update the command description and objective to reflect the new context ope
 
 **Verify:**
 ```bash
-grep -q "Context management" commands/specd/toolbox.md && echo "updated"
+grep -q "Context management" commands/specd.toolbox.md && echo "updated"
 ```
 
 **Done when:**
@@ -110,7 +110,7 @@ grep -l "~/.claude/specdacular" specdacular/workflows/context-*.md | wc -l
 After all tasks complete:
 
 ```bash
-grep -q "Context management" commands/specd/toolbox.md && \
+grep -q "Context management" commands/specd.toolbox.md && \
 [ -f "specdacular/workflows/context-status.md" ] && \
 [ -f "specdacular/workflows/context-review.md" ] && \
 [ -f "specdacular/workflows/context-add.md" ] && \

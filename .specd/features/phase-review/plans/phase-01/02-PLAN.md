@@ -132,7 +132,7 @@ Validate feature exists, phase exists, and has execution history.
 
 **Check execution:**
 - STATE.md has at least one plan from this phase in the Completed Plans table
-- If no completed plans: show error and suggest running `/specd:phase:execute` first
+- If no completed plans: show error and suggest running `/specd.phase:execute` first
 
 **Check git state:**
 - Warn if uncommitted changes exist (review may not reflect actual state)
@@ -141,14 +141,14 @@ Validate feature exists, phase exists, and has execution history.
 ```
 Feature '{name}' not found.
 
-Run /specd:feature:new {name} to create it.
+Run /specd.feature:new {name} to create it.
 ```
 
 **If no executed plans:**
 ```
 No executed plans found for {feature} phase {N}.
 
-Run /specd:phase:execute {feature} to execute plans first.
+Run /specd.phase:execute {feature} to execute plans first.
 ```
 
 Continue to load_context.
@@ -577,7 +577,7 @@ Generated corrective plans:
 |------|----------|-------|-------|
 | {MM}-PLAN.md | Plan(s) {NN} | {title} | {file count} |
 
-These will be picked up by /specd:phase:execute automatically.
+These will be picked up by /specd.phase:execute automatically.
 ```
 
 Continue to update_state.
@@ -736,8 +736,8 @@ Status: {clean | fixes-pending}
 Review cycle {C} recorded. Corrective plans ready for execution.
 
 **Next steps:**
-- `/specd:phase:execute {feature}` — Execute corrective plans
-- Then `/specd:phase:review {feature} {N}` — Re-review after fixes
+- `/specd.phase:execute {feature}` — Execute corrective plans
+- Then `/specd.phase:review {feature} {N}` — Re-review after fixes
 ```
 
 **If status = `clean` and phase complete:**
@@ -753,8 +753,8 @@ Phase {N} is complete!
 
 **Next steps:**
 {If next phase exists:}
-- `/specd:phase:prepare {feature} {N+1}` — Prepare next phase
-- `/specd:phase:plan {feature} {N+1}` — Plan next phase
+- `/specd.phase:prepare {feature} {N+1}` — Prepare next phase
+- `/specd.phase:plan {feature} {N+1}` — Plan next phase
 
 {If last phase:}
 Feature '{feature}' implementation is complete!
@@ -770,8 +770,8 @@ Review STATE.md for full summary.
 Reviewed {M} of {N} plans. All reviewed plans are clean.
 
 **Next steps:**
-- `/specd:phase:execute {feature}` — Continue executing remaining plans
-- `/specd:phase:review {feature} {N}` — Re-review after more execution
+- `/specd.phase:execute {feature}` — Continue executing remaining plans
+- `/specd.phase:review {feature} {N}` — Re-review after more execution
 ```
 
 End workflow.

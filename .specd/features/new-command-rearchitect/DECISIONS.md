@@ -12,8 +12,8 @@
 
 **Date:** 2026-02-17
 **Status:** Active
-**Context:** Commands were verbose (`/specd:feature:new`) and folder name (`features/`) didn't fit all work types
-**Decision:** Rename `.specd/features/` to `.specd/tasks/` and shorten all commands from `/specd:feature:*` to `/specd:*`
+**Context:** Commands were verbose (`/specd.feature:new`) and folder name (`features/`) didn't fit all work types
+**Decision:** Rename `.specd/features/` to `.specd/tasks/` and shorten all commands from `/specd.feature:*` to `/specd.*`
 **Rationale:**
 - Shorter commands are faster to type
 - "Task" is more general than "feature" — covers bugs, refactors, etc.

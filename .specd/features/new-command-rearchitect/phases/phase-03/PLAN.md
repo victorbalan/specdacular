@@ -69,7 +69,7 @@ Rewrite `new-feature.md` as `new.md`. Key changes:
 - Reference `templates/tasks/` for document creation
 - **Remove orchestrator branches entirely** — those go in Phase 5
 - Single-project flow only: validate → codebase_context → first_discussion → write files → commit → completion
-- Offer continuation via `/specd:continue {task-name}`
+- Offer continuation via `/specd.continue {task-name}`
 
 The workflow should follow the same `<purpose>`, `<philosophy>`, `<process>` structure with `<step name="...">` blocks.
 
@@ -262,7 +262,7 @@ ls specdacular/workflows/{new,continue,discuss,research,plan,execute,review}.md
 grep -r "\.specd/features/" specdacular/workflows/{new,continue,discuss,research,plan,execute,review}.md && echo "FAIL" || echo "PASS"
 
 # No old command references
-grep -r "specd:feature:" specdacular/workflows/{new,continue,discuss,research,plan,execute,review}.md && echo "FAIL" || echo "PASS"
+grep -r "specd.feature:" specdacular/workflows/{new,continue,discuss,research,plan,execute,review}.md && echo "FAIL" || echo "PASS"
 
 # All use shared references
 for f in specdacular/workflows/{new,continue,discuss,research,plan,execute,review}.md; do
@@ -273,7 +273,7 @@ done
 
 **Plan is complete when:**
 - [ ] All 7 workflows exist with step-based structure
-- [ ] Zero references to `.specd/features/` or `/specd:feature:*`
+- [ ] Zero references to `.specd/features/` or `/specd.feature:*`
 - [ ] Shared references used (no duplicated validation/context/decision blocks)
 - [ ] continue.md supports --semi-auto and --auto
 - [ ] execute.md chains to review.md

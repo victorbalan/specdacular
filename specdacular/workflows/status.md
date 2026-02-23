@@ -37,7 +37,7 @@ Also check sub-project features — scan each project path for `{project-path}/.
 **If no features found anywhere:** output the following and stop:
 
 ```
-No tasks found. Start one with `/specd:new [name]`.
+No tasks found. Start one with `/specd.new [name]`.
 ```
 
 ### 4. Gather feature data
@@ -119,7 +119,7 @@ _{total} features, {in_progress} in progress_
 **If `--all` flag is NOT set and there are completed tasks:**
 
 ```
-Run `/specd:status --all` to include completed tasks.
+Run `/specd.status --all` to include completed tasks.
 ```
 
 **If `--all` flag IS set and there are completed tasks, add:**
@@ -190,7 +190,7 @@ Only show active standalone features (not complete/abandoned, unless `--all`).
 **If `--all` flag is NOT set and there are completed/abandoned features (root or sub-project):**
 
 ```
-Run `/specd:status --all` to include completed tasks.
+Run `/specd.status --all` to include completed tasks.
 ```
 
 **If `--all` flag IS set and there are completed/abandoned features, add:**

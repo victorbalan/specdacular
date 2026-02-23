@@ -5,13 +5,13 @@ plan: 01
 depends_on: []
 creates: []
 modifies:
-  - commands/specd/help.md
+  - commands/specd.help.md
 deletes:
-  - commands/specd/feature/discuss.md
-  - commands/specd/feature/research.md
-  - commands/specd/feature/plan.md
-  - commands/specd/feature/next.md
-  - commands/specd/phase/ (entire directory)
+  - commands/specd.feature/discuss.md
+  - commands/specd.feature/research.md
+  - commands/specd.feature/plan.md
+  - commands/specd.feature/next.md
+  - commands/specd.phase/ (entire directory)
   - specdacular/workflows/next-feature.md
 ---
 
@@ -36,37 +36,37 @@ Remove all old command files that are replaced by `continue` and `toolbox`, dele
 ### Task 1: Delete old feature command files
 
 **Action:**
-Delete these files from `commands/specd/feature/`:
+Delete these files from `commands/specd.feature/`:
 - `discuss.md` — replaced by toolbox "Discuss"
 - `research.md` — replaced by toolbox "Research"
 - `plan.md` — replaced by toolbox "Plan"
 - `next.md` — replaced by continue.md
 
 ```bash
-rm commands/specd/feature/discuss.md
-rm commands/specd/feature/research.md
-rm commands/specd/feature/plan.md
-rm commands/specd/feature/next.md
+rm commands/specd.feature/discuss.md
+rm commands/specd.feature/research.md
+rm commands/specd.feature/plan.md
+rm commands/specd.feature/next.md
 ```
 
 **Verify:**
 ```bash
-ls commands/specd/feature/
+ls commands/specd.feature/
 # Should show exactly: continue.md, new.md, toolbox.md
 ```
 
 **Done when:**
-- [ ] Only 3 files remain in `commands/specd/feature/`: new.md, continue.md, toolbox.md
+- [ ] Only 3 files remain in `commands/specd.feature/`: new.md, continue.md, toolbox.md
 
 ---
 
 ### Task 2: Delete all phase command files
 
 **Action:**
-Delete the entire `commands/specd/phase/` directory:
+Delete the entire `commands/specd.phase/` directory:
 
 ```bash
-rm -rf commands/specd/phase/
+rm -rf commands/specd.phase/
 ```
 
 These are all replaced by the `continue` flow and `toolbox`:
@@ -80,11 +80,11 @@ These are all replaced by the `continue` flow and `toolbox`:
 
 **Verify:**
 ```bash
-[ ! -d "commands/specd/phase" ] && echo "✓ phase dir removed" || echo "✗ still exists"
+[ ! -d "commands/specd.phase" ] && echo "✓ phase dir removed" || echo "✗ still exists"
 ```
 
 **Done when:**
-- [ ] `commands/specd/phase/` directory no longer exists
+- [ ] `commands/specd.phase/` directory no longer exists
 
 ---
 
@@ -111,7 +111,7 @@ rm specdacular/workflows/next-feature.md
 
 ### Task 4: Update help.md
 
-**Files:** `commands/specd/help.md`
+**Files:** `commands/specd.help.md`
 
 **Action:**
 Rewrite the help output to document the new simplified command surface:
@@ -127,35 +127,35 @@ Rewrite the help output to document the new simplified command surface:
 
 | Command | Description |
 |---------|-------------|
-| `/specd:feature:new [name]` | Initialize a feature, start first discussion |
-| `/specd:feature:continue [name]` | Continue feature lifecycle — picks up where you left off |
-| `/specd:feature:toolbox [name]` | Advanced operations: discuss, research, plan, review, insert |
+| `/specd.feature:new [name]` | Initialize a feature, start first discussion |
+| `/specd.feature:continue [name]` | Continue feature lifecycle — picks up where you left off |
+| `/specd.feature:toolbox [name]` | Advanced operations: discuss, research, plan, review, insert |
 
 ### Utilities
 
 | Command | Description |
 |---------|-------------|
-| `/specd:map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
-| `/specd:status [--all]` | Show feature status dashboard |
-| `/specd:help` | Show this help |
-| `/specd:update` | Update Specdacular to the latest version |
+| `/specd.map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
+| `/specd.status [--all]` | Show feature status dashboard |
+| `/specd.help` | Show this help |
+| `/specd.update` | Update Specdacular to the latest version |
 
 ---
 
 ## Feature Flow
 
 ```
-/specd:feature:new → /specd:feature:continue → continue → continue → done
+/specd.feature:new → /specd.feature:continue → continue → continue → done
 ```
 
 **You only need three commands:**
 
-1. **`/specd:feature:new [name]`** — Start here. Creates feature folder, asks initial questions.
-2. **`/specd:feature:continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
+1. **`/specd.feature:new [name]`** — Start here. Creates feature folder, asks initial questions.
+2. **`/specd.feature:continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
    - Discussion → Research → Planning → Phase Execution → Review
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
-3. **`/specd:feature:toolbox [name]`** — Advanced operations menu:
+3. **`/specd.feature:toolbox [name]`** — Advanced operations menu:
    - **Discuss** — Explore open questions (feature or phase level)
    - **Research** — Spawn parallel agents for patterns/pitfalls
    - **Plan** — Create implementation plans
@@ -165,8 +165,8 @@ Rewrite the help output to document the new simplified command surface:
 ### Quick Start
 
 ```
-/specd:feature:new user-dashboard
-/specd:feature:continue user-dashboard
+/specd.feature:new user-dashboard
+/specd.feature:continue user-dashboard
 ```
 
 After initialization, just keep running `continue`. It figures out what's next.
@@ -176,7 +176,7 @@ After initialization, just keep running `continue`. It figures out what's next.
 ## Codebase Documentation
 
 ```
-/specd:map-codebase
+/specd.map-codebase
 ```
 
 Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`:
@@ -194,7 +194,7 @@ Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`
 
 When an update is available, you'll see `update available` in your statusline. Run:
 ```
-/specd:update
+/specd.update
 ```
 Or manually: `npx specdacular@latest`
 
@@ -205,9 +205,9 @@ GitHub: https://github.com/vlad-ds/specdacular
 
 **Verify:**
 ```bash
-grep -q "feature:continue" commands/specd/help.md && echo "✓ continue documented"
-grep -q "feature:toolbox" commands/specd/help.md && echo "✓ toolbox documented"
-! grep -q "phase:execute" commands/specd/help.md && echo "✓ no old phase commands"
+grep -q "feature:continue" commands/specd.help.md && echo "✓ continue documented"
+grep -q "feature:toolbox" commands/specd.help.md && echo "✓ toolbox documented"
+! grep -q "phase:execute" commands/specd.help.md && echo "✓ no old phase commands"
 ```
 
 **Done when:**
@@ -224,19 +224,19 @@ After all tasks:
 
 ```bash
 # Command directory structure
-echo "=== commands/specd/ ==="
-ls commands/specd/
-echo "=== commands/specd/feature/ ==="
-ls commands/specd/feature/
+echo "=== commands/specd. ==="
+ls commands/specd.
+echo "=== commands/specd.feature/ ==="
+ls commands/specd.feature/
 
 # No phase directory
-[ ! -d "commands/specd/phase" ] && echo "✓ phase dir gone"
+[ ! -d "commands/specd.phase" ] && echo "✓ phase dir gone"
 
 # No old workflow
 [ ! -f "specdacular/workflows/next-feature.md" ] && echo "✓ next-feature gone"
 
 # Help is updated
-grep -q "feature:continue" commands/specd/help.md && echo "✓ help updated"
+grep -q "feature:continue" commands/specd.help.md && echo "✓ help updated"
 ```
 
 ---
@@ -245,12 +245,12 @@ grep -q "feature:continue" commands/specd/help.md && echo "✓ help updated"
 
 When this plan is complete, commit:
 ```bash
-git add -A commands/specd/ specdacular/workflows/next-feature.md
+git add -A commands/specd. specdacular/workflows/next-feature.md
 git commit -m "feat(improved-feature-flow): remove old commands, update help
 
 Plan 4.01 complete:
 - Deleted 4 old feature command files (discuss, research, plan, next)
-- Deleted entire commands/specd/phase/ directory (7 files)
+- Deleted entire commands/specd.phase/ directory (7 files)
 - Deleted old next-feature.md workflow
 - Rewrote help.md for new 3-command surface"
 ```

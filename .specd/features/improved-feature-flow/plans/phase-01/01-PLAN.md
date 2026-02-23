@@ -41,7 +41,7 @@ Extract the feature selection logic from `specdacular/workflows/next-feature.md`
 The reference should include:
 1. If `$ARGUMENTS` provided: validate feature exists, use as feature name
 2. If no arguments: scan `.specd/features/*/config.json` for in-progress features
-3. If no features found: tell user to run `/specd:feature:new`
+3. If no features found: tell user to run `/specd.feature:new`
 4. If features found: use AskUserQuestion to let user pick, showing feature name + current stage
 
 Write as a self-contained workflow step that can be `@`-included:
@@ -72,7 +72,7 @@ Read each config.json and filter where stage != "complete".
 ```
 No features in progress.
 
-Start one with /specd:feature:new
+Start one with /specd.feature:new
 ```
 End workflow.
 

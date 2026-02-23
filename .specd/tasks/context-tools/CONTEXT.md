@@ -42,7 +42,7 @@ User wants to add context management commands to specd's toolbox. Three operatio
 
 **Question:** Standalone commands or part of toolbox?
 
-**Resolution:** Part of the toolbox (`/specd:toolbox`), not standalone `/specd:context:*` commands.
+**Resolution:** Part of the toolbox (`/specd.toolbox`), not standalone `/specd.context:*` commands.
 
 **Details:**
 - Added as new options in the toolbox menu

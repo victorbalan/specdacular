@@ -49,7 +49,7 @@ process.stdin.on('end', () => {
       try {
         const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
         if (cache.update_available) {
-          specdUpdate = '\x1b[33m⬆ /specd:update\x1b[0m │ ';
+          specdUpdate = '\x1b[33m⬆ /specd.update\x1b[0m │ ';
         }
       } catch (e) {}
     }

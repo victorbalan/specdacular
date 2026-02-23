@@ -4,7 +4,7 @@ phase: 4
 depends_on: [1, 2, 3]
 creates: []
 modifies:
-  - commands/specd/continue.md
+  - commands/specd.continue.md
   - specdacular/workflows/brain.md
 ---
 
@@ -17,7 +17,7 @@ Wire the brain into the command entry point, ensure the installed command refere
 ## Context
 
 **Reference these files:**
-- `@commands/specd/continue.md` — Command entry point that invokes the workflow
+- `@commands/specd.continue.md` — Command entry point that invokes the workflow
 - `@specdacular/workflows/brain.md` — The brain (from Phases 1-3)
 - `@specdacular/workflows/continue.md` — Thinned workflow (from Phase 3)
 - `@bin/install.js` — Installer that copies files
@@ -37,7 +37,7 @@ Wire the brain into the command entry point, ensure the installed command refere
 
 ### Task 1: Update continue command entry point
 
-**Files:** `commands/specd/continue.md`
+**Files:** `commands/specd.continue.md`
 
 **Action:**
 Ensure the command file's `<execution_context>` points to the continue.md workflow (which now delegates to brain.md). Check that allowed-tools includes everything the brain needs (Read, Write, Bash, Glob, Grep, Task, AskUserQuestion, Edit).
@@ -46,7 +46,7 @@ The command should preserve its current argument-hint for task name and mode fla
 
 **Verify:**
 ```bash
-grep -q "execution_context" commands/specd/continue.md && echo "has execution context"
+grep -q "execution_context" commands/specd.continue.md && echo "has execution context"
 ```
 
 **Done when:**
@@ -97,7 +97,7 @@ Review brain.md for completeness and correctness:
 3. **Mode handling:** Interactive prompts match continue.md's original UX, semi-auto uses `pause_in_semi_auto`, auto proceeds
 4. **Hook execution:** Full hook lifecycle (resolution, inline/subagent, optional/required)
 5. **Phase loop:** Correctly advances phases, handles decimal phases, terminates when all complete
-6. **Stop/resume:** State saved correctly for `/specd:continue` resume
+6. **Stop/resume:** State saved correctly for `/specd.continue` resume
 7. **Error handling:** Step failure stops pipeline, optional hook failure logs and continues
 
 Fix any gaps found during review.

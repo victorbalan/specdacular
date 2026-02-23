@@ -95,7 +95,7 @@ Present:
 All plans for Phase {N} have been executed.
 Phase is pending review before advancing to Phase {N+1}.
 
-Resume with /specd:feature:continue {feature} for review.
+Resume with /specd.feature:continue {feature} for review.
 ```
 
 **Important:** Do NOT say "Feature is implemented" or advance to the next phase. The review gate (DEC-009) must happen first via the review-feature workflow.

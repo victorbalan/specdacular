@@ -1,5 +1,5 @@
 ---
-name: specd:config
+name: specd.config
 description: Create or update .specd/config.json with commit settings
 argument-hint: ""
 allowed-tools:

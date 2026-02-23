@@ -58,7 +58,7 @@
 2. Show progress dashboard with all projects
 3. One project unblocked → auto-suggest
 4. Multiple projects unblocked → AskUserQuestion with options
-5. Accept optional project argument: `/specd:feature:next feature-name project-name`
+5. Accept optional project argument: `/specd.feature:next feature-name project-name`
 6. After selection, delegate to execute-plan for that project
 7. Document one-session-at-a-time constraint (DEC-011)
 
@@ -68,7 +68,7 @@
 
 Users can always work directly in a sub-project without going through the orchestrator. Since sub-projects are fully independent (DEC-001):
 - Navigate to a sub-project's directory
-- Run `/specd:feature:next feature-name` directly
+- Run `/specd.feature:next feature-name` directly
 - Works as normal single-project flow — the sub-project's `.specd/` has all standard files
 - Useful when the user knows a feature only affects one project
 

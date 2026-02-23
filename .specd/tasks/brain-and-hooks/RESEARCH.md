@@ -340,7 +340,7 @@ However, one addition may be useful: tracking which hooks have run for the curre
 
 #### Resume Entry Point
 
-The existing `/specd:continue {task-name}` command is the resume entry point. With the brain:
+The existing `/specd.continue {task-name}` command is the resume entry point. With the brain:
 
 1. `continue.md` becomes a thin entry point that dispatches to `brain.md`
 2. `brain.md` reads state (same as current `continue.md`), finds pipeline position, continues

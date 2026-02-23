@@ -39,7 +39,7 @@ Update the installer for new file paths, remove all old files, and verify the fu
 **Action:**
 Update the installer to handle new file structure:
 
-1. **Commands directory:** Still copies `commands/specd/` — new filenames will be picked up automatically since it copies the whole directory. Verify old files won't be left behind (installer does `rmSync` before copy).
+1. **Commands directory:** Still copies `commands/specd.` — new filenames will be picked up automatically since it copies the whole directory. Verify old files won't be left behind (installer does `rmSync` before copy).
 
 2. **Workflows directory:** Still copies `specdacular/workflows/` — same. Verify `orchestrator/` subdirectory is copied.
 
@@ -84,28 +84,28 @@ grep "features" hooks/specd-statusline.js hooks/specd-check-update.js
 
 ### Task 3: Remove old command files
 
-**Files:** `commands/specd/`
+**Files:** `commands/specd.`
 
 **Action:**
 Remove old command files that have been replaced:
-- `commands/specd/new-feature.md`
-- `commands/specd/continue-feature.md` (if exists)
-- `commands/specd/discuss-feature.md`
-- `commands/specd/research-feature.md`
-- `commands/specd/plan-feature.md`
-- `commands/specd/execute-plan.md`
-- `commands/specd/discuss-phase.md`
-- `commands/specd/research-phase.md`
-- `commands/specd/plan-phase.md`
-- `commands/specd/review-feature.md` (if exists as command)
-- `commands/specd/review-phase.md` (if exists as command)
+- `commands/specd.new-feature.md`
+- `commands/specd.continue-feature.md` (if exists)
+- `commands/specd.discuss-feature.md`
+- `commands/specd.research-feature.md`
+- `commands/specd.plan-feature.md`
+- `commands/specd.execute-plan.md`
+- `commands/specd.discuss-phase.md`
+- `commands/specd.research-phase.md`
+- `commands/specd.plan-phase.md`
+- `commands/specd.review-feature.md` (if exists as command)
+- `commands/specd.review-phase.md` (if exists as command)
 
 First list what actually exists, then remove only files that exist.
 
 **Verify:**
 ```bash
 # No old feature commands remain
-ls commands/specd/*feature* commands/specd/*phase* 2>/dev/null && echo "FAIL: old files remain" || echo "PASS"
+ls commands/specd.*feature* commands/specd.*phase* 2>/dev/null && echo "FAIL: old files remain" || echo "PASS"
 ```
 
 **Done when:**
@@ -179,7 +179,7 @@ Verify no broken references exist anywhere in the codebase:
 grep -r "\.specd/features/" commands/ specdacular/ agents/ hooks/ bin/ --include="*.md" --include="*.js" && echo "FAIL: old paths found" || echo "PASS"
 
 # Check for old command references
-grep -r "specd:feature:" commands/ specdacular/ agents/ hooks/ bin/ --include="*.md" --include="*.js" && echo "FAIL: old commands found" || echo "PASS"
+grep -r "specd.feature:" commands/ specdacular/ agents/ hooks/ bin/ --include="*.md" --include="*.js" && echo "FAIL: old commands found" || echo "PASS"
 
 # Check for references to removed files
 grep -r "new-feature\.md\|continue-feature\.md\|discuss-feature\.md\|research-feature\.md\|plan-feature\.md\|execute-plan\.md" commands/ specdacular/ --include="*.md" && echo "FAIL: dead refs" || echo "PASS"
@@ -187,7 +187,7 @@ grep -r "new-feature\.md\|continue-feature\.md\|discuss-feature\.md\|research-fe
 
 **Done when:**
 - [ ] Zero references to `.specd/features/`
-- [ ] Zero references to `/specd:feature:*`
+- [ ] Zero references to `/specd.feature:*`
 - [ ] Zero references to removed files
 
 ---
@@ -198,14 +198,14 @@ Full end-to-end check:
 
 ```bash
 # New structure exists
-ls commands/specd/{new,continue,discuss,research,plan,execute,review}.md
+ls commands/specd.{new,continue,discuss,research,plan,execute,review}.md
 ls specdacular/workflows/{new,continue,discuss,research,plan,execute,review}.md
 ls specdacular/workflows/orchestrator/{new,plan}.md
 ls specdacular/references/{validate-task,load-context,record-decision,spawn-research-agents,synthesize-research}.md
 ls specdacular/templates/tasks/
 
 # Old structure removed
-ls commands/specd/*feature* commands/specd/*phase* 2>/dev/null && echo "FAIL" || echo "PASS"
+ls commands/specd.*feature* commands/specd.*phase* 2>/dev/null && echo "FAIL" || echo "PASS"
 ls specdacular/workflows/*feature* specdacular/workflows/*phase* 2>/dev/null && echo "FAIL" || echo "PASS"
 [ ! -d specdacular/templates/features/ ] && echo "PASS" || echo "FAIL"
 

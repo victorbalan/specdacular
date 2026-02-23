@@ -94,10 +94,10 @@ grep -q "select_target" specdacular/workflows/insert-phase.md && echo "✓ selec
 **Action:**
 
 1. In the `completion` step, replace old command references:
-   - Replace `/specd:phase:prepare` → `/specd:feature:continue` or `/specd:feature:toolbox`
-   - Replace `/specd:phase:plan` → `/specd:feature:continue` or `/specd:feature:toolbox`
-   - Replace `/specd:phase:execute` → `/specd:feature:continue`
-   - Remove `/specd:phase:renumber` reference (renumber is eliminated per DEC-006)
+   - Replace `/specd.phase:prepare` → `/specd.feature:continue` or `/specd.feature:toolbox`
+   - Replace `/specd.phase:plan` → `/specd.feature:continue` or `/specd.feature:toolbox`
+   - Replace `/specd.phase:execute` → `/specd.feature:continue`
+   - Remove `/specd.phase:renumber` reference (renumber is eliminated per DEC-006)
 
 2. In the `update_config` step, update from `phases_count` to `phases.total` to match the config.json structure used elsewhere.
 
@@ -109,8 +109,8 @@ grep -q "select_target" specdacular/workflows/insert-phase.md && echo "✓ selec
 
 **Verify:**
 ```bash
-! grep -q "specd:phase:renumber" specdacular/workflows/insert-phase.md && echo "✓ no renumber ref" || echo "✗ still has renumber"
-grep -q "specd:feature:continue" specdacular/workflows/insert-phase.md && echo "✓ continue ref" || echo "✗ MISSING"
+! grep -q "specd.phase:renumber" specdacular/workflows/insert-phase.md && echo "✓ no renumber ref" || echo "✗ still has renumber"
+grep -q "specd.feature:continue" specdacular/workflows/insert-phase.md && echo "✓ continue ref" || echo "✗ MISSING"
 grep -q "phases.total\|phases_count" specdacular/workflows/insert-phase.md && echo "✓ config field" || echo "✗ MISSING"
 ```
 
@@ -133,10 +133,10 @@ grep -q "select-feature" specdacular/workflows/insert-phase.md && echo "✓"
 grep -q "select_target" specdacular/workflows/insert-phase.md && echo "✓"
 
 # No old phase commands
-! grep -q "specd:phase:renumber" specdacular/workflows/insert-phase.md && echo "✓"
+! grep -q "specd.phase:renumber" specdacular/workflows/insert-phase.md && echo "✓"
 
 # References continue
-grep -q "specd:feature:continue" specdacular/workflows/insert-phase.md && echo "✓"
+grep -q "specd.feature:continue" specdacular/workflows/insert-phase.md && echo "✓"
 ```
 
 ---

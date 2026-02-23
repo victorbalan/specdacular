@@ -9,7 +9,7 @@ Last Modified: 2026-02-17
 
 **Issue:** Commands reference workflows using `@~/.claude/specdacular/workflows/` but install.js modifies paths based on install type.
 
-- Files: `commands/specd/map-codebase.md`, `bin/install.js`
+- Files: `commands/specd.map-codebase.md`, `bin/install.js`
 - How it works: During installation, `copyWithPathReplacement()` (line 107-129 in `bin/install.js`) replaces `~/.claude/` with either `~/.claude/` (global) or `./.claude/` (local)
 - Safe modification: When adding new commands, always use `@~/.claude/specdacular/` in source files. The installer will rewrite paths during installation.
 - Impact: If you hardcode `.claude/` instead of `~/.claude/`, local installs will break
@@ -56,7 +56,7 @@ Last Modified: 2026-02-17
 
 **Issue:** All `.md` files in `commands/`, `workflows/`, `agents/`, `templates/` are NOT documentation—they're executable prompts for Claude.
 
-- Files: All `.md` files in `commands/specd/`, `specdacular/workflows/`, `agents/`
+- Files: All `.md` files in `commands/specd.`, `specdacular/workflows/`, `agents/`
 - Format: YAML frontmatter + XML-like tags (`<purpose>`, `<step>`, `<process>`)
 - Gotcha: These files are read by Claude Code's command system. Markdown formatting errors = broken commands
 - Safe modification: Test every markdown change by running the command. A typo in `<execution_context>` breaks the entire workflow.
@@ -125,7 +125,7 @@ Write CONCERNS.md to .specd/codebase/ containing:
 **Anti-pattern:**
 ```markdown
 ---
-name: specd:my-command
+name: specd.my-command
 description: Does something
 ---
 
@@ -137,7 +137,7 @@ description: Does something
 **Correct pattern:**
 ```markdown
 ---
-name: specd:my-command
+name: specd.my-command
 description: Does something
 ---
 
@@ -146,7 +146,7 @@ description: Does something
 </execution_context>
 ```
 
-- Evidence: All commands in `commands/specd/*.md` have `<execution_context>` tag
+- Evidence: All commands in `commands/specd.*.md` have `<execution_context>` tag
 - Why: Commands are stubs. Real logic lives in workflows. Missing `<execution_context>` = broken command.
 
 ## Tech Debt
@@ -154,9 +154,9 @@ description: Does something
 ### Duplicate Directory Structures
 
 **Issue:** Commands and workflows exist in THREE locations:
-1. `commands/specd/*.md` (npm package source)
+1. `commands/specd.*.md` (npm package source)
 2. `specdacular/workflows/*.md` (npm package source)
-3. `.claude/commands/specd/*.md` (installed, with rewritten paths)
+3. `.claude/commands/specd.*.md` (installed, with rewritten paths)
 4. `.claude/specdacular/workflows/*.md` (installed, with rewritten paths)
 
 - Files: `bin/install.js` lines 291-316
@@ -173,7 +173,7 @@ description: Does something
 - Workaround: Manual test checklist:
   1. `npx . --global` (test global install)
   2. `npx . --local` (test local install)
-  3. In Claude Code: Run each `/specd:*` command
+  3. In Claude Code: Run each `/specd.*` command
   4. Check hooks: `node hooks/specd-statusline.js < test-input.json`
 - Fix approach: Add integration tests that install to temp directory and verify files created
 

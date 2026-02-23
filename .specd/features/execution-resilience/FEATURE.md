@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Git-based rollback, explicit resume protocol, and structured diagnostics for Specdacular's plan execution workflow. Enables clean recovery from verification failures, session crashes, and mid-execution problems. Adds a `specd:phase:rollback` command for reverting failed phases.
+Git-based rollback, explicit resume protocol, and structured diagnostics for Specdacular's plan execution workflow. Enables clean recovery from verification failures, session crashes, and mid-execution problems. Adds a `specd.phase:rollback` command for reverting failed phases.
 
 ## Technical Requirements
 
@@ -11,7 +11,7 @@ Git-based rollback, explicit resume protocol, and structured diagnostics for Spe
 - [ ] Git tagging protocol in `execute-plan.md` — Tag `specd/{feature}/phase-{N}/start` before execution and `specd/{feature}/phase-{N}/done` after successful completion
 - [ ] Resume protocol in `execute-plan.md` — Explicit steps to recover from interrupted sessions (read STATE.md, verify last commit, re-run verification, continue or diagnose)
 - [ ] Diagnostic mode for verification failures — Instead of "retry/skip/stop", provide: files modified, test output, likely cause, suggestion
-- [ ] `commands/specd/phase-rollback.md` — New command definition for `specd:phase:rollback {feature} {N}`
+- [ ] `commands/specd.phase-rollback.md` — New command definition for `specd.phase:rollback {feature} {N}`
 - [ ] `specdacular/workflows/rollback-phase.md` — Rollback workflow that resets to git tag, cleans STATE.md, preserves plans
 
 ### Must Integrate With
@@ -35,7 +35,7 @@ Git-based rollback, explicit resume protocol, and structured diagnostics for Spe
 
 - [ ] Before Phase N execution, `git tag specd/{feature}/phase-{N}/start` is created
 - [ ] After successful Phase N, `git tag specd/{feature}/phase-{N}/done` is created
-- [ ] `/specd:phase:rollback {feature} {N}` resets to pre-phase state, cleans STATE.md, preserves plans
+- [ ] `/specd.phase:rollback {feature} {N}` resets to pre-phase state, cleans STATE.md, preserves plans
 - [ ] Verification failures show: files modified, test output, likely cause, and actionable suggestion
 - [ ] Resume after interruption: reads STATE.md, verifies last task's commit, re-runs verification, continues or diagnoses
 - [ ] Rollback warns user before executing destructive git operations

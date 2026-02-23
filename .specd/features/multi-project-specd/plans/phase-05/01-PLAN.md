@@ -182,7 +182,7 @@ Use AskUserQuestion:
   - Are the project responsibilities correctly divided?
   - Should the feature be restructured?
 
-  Recommend: /specd:feature:discuss {feature-name} to reassess.
+  Recommend: /specd.feature:discuss {feature-name} to reassess.
   ```
   End workflow (user must explicitly resume).
 </step>
@@ -251,7 +251,7 @@ Update orchestrator state and present summary after contract review.
 
 ───────────────────────────────────────────────────────
 
-Resume with /specd:feature:next {feature-name}
+Resume with /specd.feature:next {feature-name}
 ```
 
 End workflow (returns to orchestrator scheduling via next).

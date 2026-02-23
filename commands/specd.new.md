@@ -1,5 +1,5 @@
 ---
-name: specd:new
+name: specd.new
 description: Initialize a new task and start the first discussion
 argument-hint: "[task-name]"
 allowed-tools:
@@ -22,7 +22,7 @@ Initialize a task folder and start the first discussion. Creates structure, asks
 - `.specd/tasks/{name}/STATE.md` — Progress tracking
 - `.specd/tasks/{name}/config.json` — Task configuration
 
-**This is the entry point.** After this, continue with `/specd:continue` to drive the entire lifecycle.
+**This is the entry point.** After this, continue with `/specd.continue` to drive the entire lifecycle.
 </objective>
 
 <execution_context>
@@ -35,7 +35,7 @@ Task name: $ARGUMENTS
 **Codebase context discovery:**
 1. Check for `.specd/config.json` — if exists, read `codebase_docs` path
 2. If no config, check for `.specd/codebase/` (default location)
-3. If neither found, offer `/specd:map-codebase`
+3. If neither found, offer `/specd.map-codebase`
 
 **Referenced docs (when available):**
 - `MAP.md` — System structure
@@ -61,5 +61,5 @@ Task name: $ARGUMENTS
 - [ ] STATE.md tracks current position
 - [ ] config.json created
 - [ ] Committed to git
-- [ ] User offered to continue with `/specd:continue`
+- [ ] User offered to continue with `/specd.continue`
 </success_criteria>

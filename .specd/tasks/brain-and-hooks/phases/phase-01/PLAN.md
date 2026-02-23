@@ -160,7 +160,7 @@ The brain does NOT handle hooks yet (Phase 2). Focus on:
 - Step dispatch via `@` reference to workflow files
 - State updates after step completion
 - Phase-execution loop logic (advance phase, check for more, handle decimal phases)
-- Stop/resume capability (save state, user resumes with /specd:continue)
+- Stop/resume capability (save state, user resumes with /specd.continue)
 
 **Verify:**
 ```bash

@@ -74,6 +74,6 @@
 **Recommended:** Research how other research/planning tools handle confidence propagation.
 
 **Options:**
-- `/specd:feature:discuss research-quality-pipeline` — Resolve remaining gray areas
-- `/specd:feature:research research-quality-pipeline` — Research confidence patterns
-- `/specd:feature:plan research-quality-pipeline` — Create roadmap with phase overview
+- `/specd.feature:discuss research-quality-pipeline` — Resolve remaining gray areas
+- `/specd.feature:research research-quality-pipeline` — Research confidence patterns
+- `/specd.feature:plan research-quality-pipeline` — Create roadmap with phase overview

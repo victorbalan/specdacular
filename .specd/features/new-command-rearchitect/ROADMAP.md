@@ -101,18 +101,18 @@
 **Goal:** Create new command files with updated names, pointing to new workflows.
 
 **Creates:**
-- `commands/specd/new.md`
-- `commands/specd/continue.md`
-- `commands/specd/discuss.md`
-- `commands/specd/research.md`
-- `commands/specd/plan.md`
-- `commands/specd/execute.md`
-- `commands/specd/review.md`
+- `commands/specd.new.md`
+- `commands/specd.continue.md`
+- `commands/specd.discuss.md`
+- `commands/specd.research.md`
+- `commands/specd.plan.md`
+- `commands/specd.execute.md`
+- `commands/specd.review.md`
 
 **Modifies:**
-- `commands/specd/help.md` — Updated command list
-- `commands/specd/status.md` — Read from `.specd/tasks/`
-- `commands/specd/toolbox.md` — Updated references
+- `commands/specd.help.md` — Updated command list
+- `commands/specd.status.md` — Read from `.specd/tasks/`
+- `commands/specd.toolbox.md` — Updated references
 
 **Plan:** `phases/phase-04/PLAN.md`
 
@@ -170,7 +170,7 @@
 2. Old command/workflow files removed
 3. `templates/features/` removed
 4. No broken `@` references in any workflow
-5. `/specd:new test-task` works end-to-end
+5. `/specd.new test-task` works end-to-end
 
 **Dependencies:** Phase 4 and 5 (all new files exist before removing old ones)
 

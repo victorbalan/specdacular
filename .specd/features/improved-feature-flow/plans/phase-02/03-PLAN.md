@@ -109,7 +109,7 @@ Use AskUserQuestion:
 - options:
   - "Review" — See what changed, approve or request fixes (recommended)
   - "Approve without review" — Mark phase complete and move on
-  - "Stop for now" — Come back with /specd:feature:continue
+  - "Stop for now" — Come back with /specd.feature:continue
 
 **If Review:**
 Execute the review-feature workflow logic:

@@ -8,48 +8,48 @@
 
 | Command | Description |
 |---------|-------------|
-| `/specd:new [name]` | Initialize a task, start first discussion |
-| `/specd:continue [name] [--interactive\|--auto]` | Continue task lifecycle — picks up where you left off |
+| `/specd.new [name]` | Initialize a task, start first discussion |
+| `/specd.continue [name] [--interactive\|--auto]` | Continue task lifecycle — picks up where you left off |
 
-| `/specd:toolbox [tasks <name>\|context]` | Task operations or context management |
+| `/specd.toolbox [tasks <name>\|context]` | Task operations or context management |
 
 ### Utilities
 
 | Command | Description |
 |---------|-------------|
-| `/specd:map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
-| `/specd:config` | Configure auto-commit settings for docs and code |
-| `/specd:status [--all]` | Show task status dashboard |
-| `/specd:help` | Show this help |
-| `/specd:update` | Update Specdacular to the latest version |
+| `/specd.map-codebase` | Analyze codebase with parallel agents → AI-optimized docs |
+| `/specd.config` | Configure auto-commit settings for docs and code |
+| `/specd.status [--all]` | Show task status dashboard |
+| `/specd.help` | Show this help |
+| `/specd.update` | Update Specdacular to the latest version |
 
 ---
 
 ## Task Flow
 
 ```
-/specd:new → /specd:continue → continue → continue → done
+/specd.new → /specd.continue → continue → continue → done
 ```
 
 **You only need three commands:**
 
-1. **`/specd:new [name]`** — Start here. Creates task folder, asks initial questions.
-2. **`/specd:continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
+1. **`/specd.new [name]`** — Start here. Creates task folder, asks initial questions.
+2. **`/specd.continue [name]`** — Picks up where you left off. Drives the entire lifecycle:
    - Discussion → Research → Planning → Phase Execution → Review
    - After each step, offers the next step or "stop for now"
    - Works across context windows — reads state fresh each time
    - Modes: default (auto-runs, pauses at phase steps), `--interactive` (prompt at each step), `--auto` (run everything)
-3. **`/specd:toolbox`** — Two subdomains:
-   - **`/specd:toolbox tasks <name>`** — Task operations:
+3. **`/specd.toolbox`** — Two subdomains:
+   - **`/specd.toolbox tasks <name>`** — Task operations:
      - Discuss, Research, Plan, Execute, Review
-   - **`/specd:toolbox context`** — Context management:
+   - **`/specd.toolbox context`** — Context management:
      - Status, Review, Add
 
 ### Quick Start
 
 ```
-/specd:new user-dashboard
-/specd:continue user-dashboard
+/specd.new user-dashboard
+/specd.continue user-dashboard
 ```
 
 After initialization, just keep running `continue`. It figures out what's next.
@@ -121,7 +121,7 @@ Hooks are markdown workflow files that run before and after pipeline steps. They
 ## Codebase Documentation
 
 ```
-/specd:map-codebase
+/specd.map-codebase
 ```
 
 Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`:
@@ -139,7 +139,7 @@ Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`
 
 When an update is available, you'll see `update available` in your statusline. Run:
 ```
-/specd:update
+/specd.update
 ```
 Or manually: `npx specdacular@latest`
 

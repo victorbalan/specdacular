@@ -70,7 +70,7 @@ For each project phase, determine status:
 - **not_started** — Phase exists but not yet prepared/planned
 
 **Check for optional project argument:**
-If arguments contain a project name (e.g., `/specd:feature:next feature-name project-name`):
+If arguments contain a project name (e.g., `/specd.feature:next feature-name project-name`):
 - Set target_project = project name
 - Validate project exists in feature config.json
 
@@ -256,7 +256,7 @@ Update the `<success_criteria>` section and add documentation about direct sub-p
 - Per-project progress dashboard displayed
 - Unblocked work computed from dependency graph
 - Auto-suggests when one phase ready, asks when multiple
-- Optional project argument: /specd:feature:next feature project
+- Optional project argument: /specd.feature:next feature project
 - Delegates to prepare/plan/execute based on phase readiness
 - One-session-at-a-time constraint documented (DEC-011)
 - Direct sub-project access always works (DEC-001)
@@ -331,7 +331,7 @@ When this plan is complete:
    - read_state: orchestrator state aggregation across projects
    - show_status: cross-project progress dashboard
    - orchestrator_schedule: dependency-aware work selection
-   - Optional project argument: /specd:feature:next feature project
+   - Optional project argument: /specd.feature:next feature project
    - One-session-at-a-time documented (DEC-011)"
    ```
 

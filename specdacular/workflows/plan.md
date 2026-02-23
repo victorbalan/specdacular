@@ -63,15 +63,15 @@ Missing:
 - {what's missing}
 
 Recommended next:
-- /specd:discuss {task-name} — Resolve gray areas
-- /specd:research {task-name} — Research implementation patterns
+- /specd.discuss {task-name} — Resolve gray areas
+- /specd.research {task-name} — Research implementation patterns
 ```
 End workflow.
 
 **If ready but RESEARCH.md missing:**
 ```
 Note: No research findings available. Plans will be based on discussion context only.
-Consider running /specd:research {task-name} first for better plans.
+Consider running /specd.research {task-name} first for better plans.
 ```
 
 Continue to derive_phases.

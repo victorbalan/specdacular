@@ -1,5 +1,5 @@
 ---
-name: specd:continue
+name: specd.continue
 description: Continue task lifecycle — picks up where you left off
 argument-hint: "[task-name] [--interactive|--auto]"
 allowed-tools:

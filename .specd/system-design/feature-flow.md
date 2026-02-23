@@ -144,7 +144,7 @@ Specific, testable conditions:
 
 ## CONTEXT.md - Resolved Gray Areas
 
-Output of `/specd:discuss-feature`. Records what was unclear and how it was resolved.
+Output of `/specd.discuss-feature`. Records what was unclear and how it was resolved.
 
 ```markdown
 # Context: {feature-name}
@@ -338,7 +338,7 @@ When complete, update:
 
 ## Workflow Commands
 
-### `/specd:new-feature [name]`
+### `/specd.new-feature [name]`
 
 Initialize feature with technical questioning.
 
@@ -354,7 +354,7 @@ Initialize feature with technical questioning.
 
 ---
 
-### `/specd:discuss-feature [name]`
+### `/specd.discuss-feature [name]`
 
 Clarify gray areas before planning. Like a technical design review.
 
@@ -369,7 +369,7 @@ Clarify gray areas before planning. Like a technical design review.
 
 ---
 
-### `/specd:research-feature [name]`
+### `/specd.research-feature [name]`
 
 Research before planning. Optional but recommended for unfamiliar domains.
 
@@ -383,7 +383,7 @@ Research before planning. Optional but recommended for unfamiliar domains.
 
 ---
 
-### `/specd:plan-feature [name]`
+### `/specd.plan-feature [name]`
 
 Create executable task plans.
 
@@ -398,7 +398,7 @@ Create executable task plans.
 
 ---
 
-### `/specd:execute-feature [name]` (future)
+### `/specd.execute-feature [name]` (future)
 
 Execute the plans. Could spawn agents or guide interactive execution.
 
@@ -419,7 +419,7 @@ Plans reference these directly:
 @.specd/codebase/STRUCTURE.md#components
 ```
 
-If codebase docs don't exist, suggest `/specd:map-codebase` first.
+If codebase docs don't exist, suggest `/specd.map-codebase` first.
 
 ---
 

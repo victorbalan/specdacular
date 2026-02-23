@@ -7,15 +7,15 @@ Generated: 2026-02-04
 **Installation & Setup**
 - `bin/install.js` — CLI installer, handles global/local installation, hooks setup, settings.json configuration
 
-**Claude Code Commands** (executed via `/specd:*`)
-- `commands/specd/map-codebase.md` — Spawn 4 parallel mapper agents to analyze codebase
-- `commands/specd/new.md` — Initialize a new task and start the first discussion
-- `commands/specd/continue.md` — Continue task lifecycle, picks up where you left off (supports `--semi-auto`/`--auto`)
-- `commands/specd/status.md` — Show feature status dashboard (supports `--all`)
-- `commands/specd/toolbox.md` — Advanced task operations and context management
-- `commands/specd/config.md` — Create or update `.specd/config.json` with commit settings
-- `commands/specd/update.md` — Update specdacular to latest version
-- `commands/specd/help.md` — Display all commands and usage guide
+**Claude Code Commands** (executed via `/specd.*`)
+- `commands/specd.map-codebase.md` — Spawn 4 parallel mapper agents to analyze codebase
+- `commands/specd.new.md` — Initialize a new task and start the first discussion
+- `commands/specd.continue.md` — Continue task lifecycle, picks up where you left off (supports `--semi-auto`/`--auto`)
+- `commands/specd.status.md` — Show feature status dashboard (supports `--all`)
+- `commands/specd.toolbox.md` — Advanced task operations and context management
+- `commands/specd.config.md` — Create or update `.specd/config.json` with commit settings
+- `commands/specd.update.md` — Update specdacular to latest version
+- `commands/specd.help.md` — Display all commands and usage guide
 
 **Session Hooks**
 - `hooks/specd-check-update.js` — SessionStart hook, checks npm for updates in background
@@ -38,7 +38,7 @@ Generated: 2026-02-04
 - `promptLocation(): void` — Interactive prompt for install location (global/local)
 
 **What It Does**
-1. Copies `commands/specd/` to `~/.claude/commands/specd/` or `.claude/commands/specd/`
+1. Copies `commands/specd.` to `~/.claude/commands/specd.` or `.claude/commands/specd.`
 2. Copies `agents/` to `~/.claude/agents/`
 3. Copies `specdacular/` to `~/.claude/specdacular/`
 4. Copies `hooks/` to `~/.claude/hooks/`
@@ -56,7 +56,7 @@ Generated: 2026-02-04
 
 **Statusline** (`specd-statusline.js`)
 - Reads JSON from stdin (Claude Code statusline protocol)
-- Displays: `[⬆ /specd:update │] model │ dirname [ctx-bar usage%]`
+- Displays: `[⬆ /specd.update │] model │ dirname [ctx-bar usage%]`
 - Context display: Scaled to 80% limit (80% real = 100% displayed)
 - Progress bar: 10 segments (█ filled, ░ empty)
 - Colors: green <63%, yellow <81%, orange <95%, red+blinking ≥95%
@@ -162,13 +162,13 @@ Generated: 2026-02-04
 ## Agents
 
 **specd-codebase-mapper** (`agents/specd-codebase-mapper.md`)
-- Spawned by: `/specd:map-codebase`
+- Spawned by: `/specd.map-codebase`
 - Focus areas: `map`, `patterns`, `structure`, `concerns`
 - Writes documents directly to `.specd/codebase/`
 - Returns confirmation only (minimal context transfer)
 
 **feature-researcher** (`specdacular/agents/feature-researcher.md`)
-- Spawned by: `/specd:research-feature`
+- Spawned by: `/specd.research-feature`
 - Research types: external patterns, pitfalls
 - Tool strategy: Context7 first, then WebFetch, then WebSearch with current year
 - Confidence levels: HIGH (Context7/official), MEDIUM (verified), LOW (unverified)
@@ -207,7 +207,7 @@ Generated: 2026-02-04
 
 ## File Structure Patterns
 
-**Commands** → `.claude/commands/specd/*.md`
+**Commands** → `.claude/commands/specd.*.md`
 - YAML frontmatter with name, description, argument-hint, allowed-tools
 - `<objective>`, `<execution_context>`, `<process>`, `<success_criteria>` sections
 
@@ -238,4 +238,4 @@ Generated: 2026-02-04
 3. Checks `npm view specdacular version`
 4. Writes result to cache
 5. Statusline reads cache on every render
-6. Shows `⬆ /specd:update` if newer available
+6. Shows `⬆ /specd.update` if newer available

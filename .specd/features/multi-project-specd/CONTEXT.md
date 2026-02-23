@@ -66,8 +66,8 @@ In session 2, resolved all five gray areas: orchestrator directory structure (sa
 **Resolution:** `next` accepts an optional project argument. Without it, the orchestrator auto-picks the next unblocked work or asks the user if multiple projects are ready. Shows a cross-project progress dashboard.
 
 **Details:**
-- `/specd:feature:next auth-system` — auto-picks or asks
-- `/specd:feature:next auth-system api` — explicitly targets API project
+- `/specd.feature:next auth-system` — auto-picks or asks
+- `/specd.feature:next auth-system api` — explicitly targets API project
 - After finishing a phase, returns to orchestrator level for cross-project review
 - Dashboard shows per-project progress with dependency status
 

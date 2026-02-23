@@ -70,11 +70,11 @@ Files to extract:
 **Resolution:** 12 source files total:
 
 **Command files (5):**
-- `commands/specd/feature/next.md` → rename to `continue.md`
-- `commands/specd/feature/new.md` — 2 refs
-- `commands/specd/feature/plan.md` — 1 ref
-- `commands/specd/feature/research.md` — 1 ref
-- `commands/specd/feature/discuss.md` — 1 ref
+- `commands/specd.feature/next.md` → rename to `continue.md`
+- `commands/specd.feature/new.md` — 2 refs
+- `commands/specd.feature/plan.md` — 1 ref
+- `commands/specd.feature/research.md` — 1 ref
+- `commands/specd.feature/discuss.md` — 1 ref
 
 **Workflow files (4):**
 - `specdacular/workflows/next-feature.md` → rename to `continue-feature.md` + ~12 internal refs

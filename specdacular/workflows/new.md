@@ -31,7 +31,7 @@ Keep asking until you understand:
 2. What it integrates with (existing code)
 3. Key constraints (technical, timeline, scope)
 
-You don't need to resolve everything — that's what `/specd:discuss` is for.
+You don't need to resolve everything — that's what `/specd.discuss` is for.
 
 ## Decisions Get Recorded
 
@@ -63,7 +63,7 @@ Use AskUserQuestion:
 - header: "Task Exists"
 - question: "Task '{name}' already exists. What would you like to do?"
 - options:
-  - "Resume" — Continue with existing task (suggest /specd:continue)
+  - "Resume" — Continue with existing task (suggest /specd.continue)
   - "Reset" — Delete and start fresh
   - "Different name" — Use a different name
 
@@ -150,7 +150,7 @@ Does that capture it, or should we dig into anything more?
 **When to move on:**
 - User confirms understanding is correct
 - You have enough for initial FEATURE.md
-- Further details can be discussed later with /specd:discuss
+- Further details can be discussed later with /specd.discuss
 
 Continue to write_feature.
 </step>
@@ -252,7 +252,7 @@ Use AskUserQuestion:
 - question: "Want to keep discussing the open areas, or come back later?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with /specd:continue {task-name}
+  - "Stop for now" — Come back with /specd.continue {task-name}
 
 **If Keep discussing:**
 Execute the discuss workflow logic:
@@ -266,7 +266,7 @@ Use AskUserQuestion:
 - question: "Discussion looks solid. Want to keep going or come back later?"
 - options:
   - "Continue" — Move to the next step (research or planning)
-  - "Stop for now" — Come back with /specd:continue {task-name}
+  - "Stop for now" — Come back with /specd.continue {task-name}
 
 **If Continue:**
 Hand off to continue workflow:
@@ -278,7 +278,7 @@ Hand off to continue workflow:
 
 Progress saved. Pick up where you left off anytime:
 
-/specd:continue {task-name}
+/specd.continue {task-name}
 ```
 
 End workflow.

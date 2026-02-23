@@ -80,7 +80,7 @@
 
 {What the user should do next based on current state.}
 
-**Resume:** `/specd:continue {task-name}` — Picks up where you left off.
+**Resume:** `/specd.continue {task-name}` — Picks up where you left off.
 
 ---
 

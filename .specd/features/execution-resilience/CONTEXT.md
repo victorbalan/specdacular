@@ -84,7 +84,7 @@ Analyzed execution failure modes in Specdacular's `execute-plan.md` workflow. Id
 - [ ] How to handle rollback when other (non-Specdacular) commits happened after the phase start tag
 - [ ] Whether diagnostic mode should attempt automated root cause analysis or just present data
 - [ ] How resume interacts with the deviation categories from workflow-validation feature
-- [ ] Whether to add a `specd:phase:status` command to show execution progress without modifying anything
+- [ ] Whether to add a `specd.phase:status` command to show execution progress without modifying anything
 
 ---
 

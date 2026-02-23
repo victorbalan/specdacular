@@ -49,7 +49,7 @@ Extract orchestrator-specific new-task logic from the old `new-feature.md`:
 
 Update all paths:
 - `.specd/features/` → `.specd/tasks/`
-- `/specd:feature:*` → `/specd:*`
+- `/specd.feature:*` → `/specd.*`
 - Use shared references where applicable
 
 **Done when:**

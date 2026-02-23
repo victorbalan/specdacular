@@ -6,7 +6,7 @@ depends_on:
   - 01
   - 02
 creates:
-  - commands/specd/feature/toolbox.md
+  - commands/specd.feature/toolbox.md
   - specdacular/workflows/toolbox.md
 modifies: []
 ---
@@ -15,12 +15,12 @@ modifies: []
 
 ## Objective
 
-Create the `/specd:feature:toolbox` command and workflow that presents a menu of advanced operations (discuss, research, plan, review, insert) with scope selection for discuss/research/plan.
+Create the `/specd.feature:toolbox` command and workflow that presents a menu of advanced operations (discuss, research, plan, review, insert) with scope selection for discuss/research/plan.
 
 ## Context
 
 **Reference these files:**
-- `@commands/specd/feature/continue.md` — Pattern for command file structure (from Plan 02)
+- `@commands/specd.feature/continue.md` — Pattern for command file structure (from Plan 02)
 - `@specdacular/references/select-feature.md` — Shared feature selection (from Plan 01)
 - `@specdacular/references/select-phase.md` — Shared phase selection (from Plan 01)
 - `@.specd/features/improved-feature-flow/plans/phase-01/CONTEXT.md` — Toolbox dispatch design
@@ -36,14 +36,14 @@ Create the `/specd:feature:toolbox` command and workflow that presents a menu of
 
 ### Task 1: Create toolbox command file
 
-**Files:** `commands/specd/feature/toolbox.md`
+**Files:** `commands/specd.feature/toolbox.md`
 
 **Action:**
-Create the command stub. Follow the exact pattern from `commands/specd/feature/continue.md`:
+Create the command stub. Follow the exact pattern from `commands/specd.feature/continue.md`:
 
 ```markdown
 ---
-name: specd:feature:toolbox
+name: specd.feature:toolbox
 description: Advanced feature operations — discuss, research, plan, review, insert
 argument-hint: "[feature-name]"
 allowed-tools:
@@ -95,12 +95,12 @@ Feature name: $ARGUMENTS
 
 **Verify:**
 ```bash
-[ -f "commands/specd/feature/toolbox.md" ] && grep -c "specd:feature:toolbox" commands/specd/feature/toolbox.md
+[ -f "commands/specd.feature/toolbox.md" ] && grep -c "specd.feature:toolbox" commands/specd.feature/toolbox.md
 ```
 
 **Done when:**
-- [ ] `commands/specd/feature/toolbox.md` exists
-- [ ] Frontmatter has `name: specd:feature:toolbox`
+- [ ] `commands/specd.feature/toolbox.md` exists
+- [ ] Frontmatter has `name: specd.feature:toolbox`
 - [ ] References `toolbox.md` workflow
 - [ ] Lists all 5 operations in objective
 
@@ -234,10 +234,10 @@ After all tasks complete:
 
 ```bash
 # Both files exist
-ls commands/specd/feature/toolbox.md specdacular/workflows/toolbox.md
+ls commands/specd.feature/toolbox.md specdacular/workflows/toolbox.md
 
 # Command references workflow
-grep "toolbox.md" commands/specd/feature/toolbox.md
+grep "toolbox.md" commands/specd.feature/toolbox.md
 
 # Workflow has all steps
 grep -c "step name=" specdacular/workflows/toolbox.md
@@ -262,7 +262,7 @@ When this plan is complete:
 
 2. Commit changes:
    ```bash
-   git add commands/specd/feature/toolbox.md specdacular/workflows/toolbox.md
+   git add commands/specd.feature/toolbox.md specdacular/workflows/toolbox.md
    git commit -m "feat(improved-feature-flow): create toolbox command + workflow
 
    Plan 1.03 complete:

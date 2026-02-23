@@ -3,7 +3,7 @@ task: context-tools
 phase: 4.2
 depends_on: [4]
 modifies:
-  - commands/specd/toolbox.md
+  - commands/specd.toolbox.md
 ---
 
 # Phase 4.2: Fix — Toolbox context-review routing
@@ -20,7 +20,7 @@ The toolbox command embeds 9+ workflow files via `@` references. When Claude nee
 
 ### Task 1: Replace @ references with Read-on-demand for context workflows
 
-**Files:** `commands/specd/toolbox.md`
+**Files:** `commands/specd.toolbox.md`
 
 **Action:**
 Remove `@` prefix from context workflow references so they are NOT auto-embedded. Add explicit instruction to Read the workflow file and follow its process.

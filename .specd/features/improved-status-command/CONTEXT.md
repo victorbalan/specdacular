@@ -5,7 +5,7 @@
 
 ## Discussion Summary
 
-Discussed extending `/specd:status` to support orchestrator (multi-project) mode. The current command only reads `.specd/features/` at the repo root, missing sub-project features entirely. Agreed on a grouped display format where orchestrator features show as parent rows with sub-project features indented underneath. Standalone sub-project features (not part of any orchestrator feature) appear in a separate "Project Features" section grouped by project.
+Discussed extending `/specd.status` to support orchestrator (multi-project) mode. The current command only reads `.specd/features/` at the repo root, missing sub-project features entirely. Agreed on a grouped display format where orchestrator features show as parent rows with sub-project features indented underneath. Standalone sub-project features (not part of any orchestrator feature) appear in a separate "Project Features" section grouped by project.
 
 ---
 

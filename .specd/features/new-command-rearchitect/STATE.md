@@ -63,4 +63,4 @@
 
 ## Next Steps
 
-**Resume:** `/specd:continue new-command-rearchitect` — Picks up where you left off and guides the next step automatically.
+**Resume:** `/specd.continue new-command-rearchitect` — Picks up where you left off and guides the next step automatically.

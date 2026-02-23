@@ -162,7 +162,7 @@ Present multi-project roadmap summary.
 
 ## What's Next
 
-/specd:continue {task-name} — Start executing phases
+/specd.continue {task-name} — Start executing phases
 ```
 
 End workflow.

@@ -75,7 +75,7 @@ Follow existing phase commands. Frontmatter:
 
 ```yaml
 ---
-name: specd:phase:review
+name: specd.phase:review
 description: Review executed plans against actual code and identify deviations
 argument-hint: "[feature-name] [phase-number]"
 allowed-tools:
@@ -111,7 +111,7 @@ Based on existing workflows (execute-plan, plan-phase, prepare-phase):
 
 Add to Phase Commands table between execute and insert:
 ```
-| `/specd:phase:review [feature] [phase]` | Review executed plans against actual code |
+| `/specd.phase:review [feature] [phase]` | Review executed plans against actual code |
 ```
 
 Update feature flow diagram to show review loop:

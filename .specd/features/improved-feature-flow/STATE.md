@@ -91,7 +91,7 @@
 
 All 4 phases complete. Feature implemented.
 
-**Resume:** `/specd:feature:continue improved-feature-flow` — Picks up where you left off and guides the next step automatically.
+**Resume:** `/specd.feature:continue improved-feature-flow` — Picks up where you left off and guides the next step automatically.
 
 ---
 

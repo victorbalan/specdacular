@@ -310,7 +310,7 @@ No cycles detected.
 
 The orchestrator will guide you through phases respecting cross-project dependencies.
 
-/specd:feature:next {feature-name} — Start executing phases
+/specd.feature:next {feature-name} — Start executing phases
 ```
 
 End workflow.

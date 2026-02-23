@@ -1,5 +1,5 @@
 ---
-name: specd:map-codebase
+name: specd.map-codebase
 description: Analyze codebase with parallel agents to produce AI-optimized documentation
 argument-hint: ""
 allowed-tools:

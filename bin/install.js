@@ -166,12 +166,26 @@ function uninstall(isGlobal) {
 
   let removedCount = 0;
 
-  // Remove specd commands
+  // Remove specd commands (both old directory format and new flat format)
   const specCommandsDir = path.join(targetDir, 'commands', 'specd');
   if (fs.existsSync(specCommandsDir)) {
     fs.rmSync(specCommandsDir, { recursive: true });
     removedCount++;
     console.log(`  ${green}✓${reset} Removed commands/specd/`);
+  }
+  const commandsDir = path.join(targetDir, 'commands');
+  if (fs.existsSync(commandsDir)) {
+    let cmdCount = 0;
+    for (const file of fs.readdirSync(commandsDir)) {
+      if (file.startsWith('specd.') && file.endsWith('.md')) {
+        fs.unlinkSync(path.join(commandsDir, file));
+        cmdCount++;
+      }
+    }
+    if (cmdCount > 0) {
+      removedCount++;
+      console.log(`  ${green}✓${reset} Removed ${cmdCount} specd commands`);
+    }
   }
 
   // Remove specdacular directory
@@ -292,14 +306,27 @@ function install(isGlobal) {
   const commandsDir = path.join(targetDir, 'commands');
   fs.mkdirSync(commandsDir, { recursive: true });
 
-  const specSrc = path.join(src, 'commands', 'specd');
-  const specDest = path.join(commandsDir, 'specd');
-  if (fs.existsSync(specSrc)) {
-    copyWithPathReplacement(specSrc, specDest, pathPrefix);
-    if (verifyInstalled(specDest, 'commands/specd')) {
-      console.log(`  ${green}✓${reset} Installed commands/specd`);
+  // Remove old commands/specd/ directory if it exists (pre-0.9.3 format)
+  const oldSpecDir = path.join(commandsDir, 'specd');
+  if (fs.existsSync(oldSpecDir)) {
+    fs.rmSync(oldSpecDir, { recursive: true });
+  }
+
+  const commandsSrc = path.join(src, 'commands');
+  if (fs.existsSync(commandsSrc)) {
+    let commandCount = 0;
+    for (const file of fs.readdirSync(commandsSrc)) {
+      if (file.startsWith('specd.') && file.endsWith('.md')) {
+        let content = fs.readFileSync(path.join(commandsSrc, file), 'utf8');
+        content = content.replace(/~\/\.claude\//g, pathPrefix);
+        fs.writeFileSync(path.join(commandsDir, file), content);
+        commandCount++;
+      }
+    }
+    if (commandCount > 0) {
+      console.log(`  ${green}✓${reset} Installed ${commandCount} specd commands`);
     } else {
-      failures.push('commands/specd');
+      failures.push('commands');
     }
   }
 
@@ -430,12 +457,12 @@ function install(isGlobal) {
   }
 
   console.log(`
-  ${green}Done!${reset} Launch Claude Code and run ${cyan}/specd:help${reset}.
+  ${green}Done!${reset} Launch Claude Code and run ${cyan}/specd.help${reset}.
 
   ${yellow}Commands:${reset}
-    /specd:map-codebase  - Analyze and document your codebase
-    /specd:update        - Update to latest version
-    /specd:help          - Show all commands
+    /specd.map-codebase  - Analyze and document your codebase
+    /specd.update        - Update to latest version
+    /specd.help          - Show all commands
 `);
 }
 

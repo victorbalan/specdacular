@@ -11,7 +11,7 @@ modifies:
   - specdacular/references/brain-routing.md
   - specdacular/references/execute-hooks.md
   - specdacular/references/resolve-pipeline.md
-  - commands/specd/continue.md
+  - commands/specd.continue.md
 ---
 
 ## Objective
@@ -108,9 +108,9 @@ Update the core pipeline config and brain orchestrator to implement the new two-
 **Done when:**
 - [ ] No `enabled` references
 
-### Task 7: Update commands/specd/continue.md
+### Task 7: Update commands/specd.continue.md
 
-**Files:** `commands/specd/continue.md`
+**Files:** `commands/specd.continue.md`
 
 **Action:**
 - Update `argument-hint` (line 4): `"[task-name] [--auto]"` (remove `--semi-auto`)

@@ -42,16 +42,16 @@
 
 **Date:** 2026-02-17
 **Status:** Active
-**Context:** Initially considered `/specd:context:*` standalone commands
-**Decision:** Add as operations in `/specd:toolbox` menu instead
+**Context:** Initially considered `/specd.context:*` standalone commands
+**Decision:** Add as operations in `/specd.toolbox` menu instead
 **Rationale:**
 - Keeps command namespace clean
 - Consistent with existing toolbox pattern for advanced operations
 - Reduces number of top-level commands
 **Implications:**
-- `commands/specd/toolbox.md` must be updated with new menu options
+- `commands/specd.toolbox.md` must be updated with new menu options
 - Workflows still live in separate files (`context-review.md`, `context-add.md`, `context-status.md`)
-- No new command files needed in `commands/specd/`
+- No new command files needed in `commands/specd.`
 
 ### DEC-004: USER_MODIFIED tag placement after section header
 
@@ -152,7 +152,7 @@
 - Using validate-task.md would incorrectly require a task name
 **Implications:**
 - Context workflows use their own validation step: check `.specd/codebase/` exists
-- If missing, suggest `/specd:map-codebase`
+- If missing, suggest `/specd.map-codebase`
 
 ### DEC-011: Use specd-codebase-mapper agent for section re-mapping
 

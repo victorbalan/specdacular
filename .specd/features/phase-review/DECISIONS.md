@@ -31,13 +31,13 @@
 **Date:** 2026-02-09
 **Status:** Active
 **Context:** Initial name was "verify-phase" but that implies binary pass/fail
-**Decision:** Name the command `/specd:phase:review` to match existing namespace pattern
+**Decision:** Name the command `/specd.phase:review` to match existing namespace pattern
 **Rationale:**
 - "Review" implies both inspection and conversation, which matches the feature's nature
 - Consistent with `phase:prepare`, `phase:plan`, `phase:execute`
 - "Verify" is too rigid — this is iterative refinement, not a gate check
 **Implications:**
-- Command file: `commands/specd/phase-review.md`
+- Command file: `commands/specd.phase-review.md`
 - Workflow file: `specdacular/workflows/review-phase.md`
 
 ---

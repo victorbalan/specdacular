@@ -16,7 +16,7 @@ Straightforward rename/remove across 8 active files. No dynamic logic depends on
 | `specdacular/references/brain-routing.md` | Remove `enabled` skip logic (line ~133), remove "research step is enabled" phrasing | HIGH |
 | `specdacular/references/execute-hooks.md` | Remove disabled step hook skip note (line 127) | HIGH |
 | `specdacular/references/resolve-pipeline.md` | Remove "enabled" phrasing | HIGH |
-| `commands/specd/continue.md` | Update argument-hint, update mode descriptions | HIGH |
+| `commands/specd.continue.md` | Update argument-hint, update mode descriptions | HIGH |
 | `specdacular/STATE-MACHINE.md` | Update pipeline config example, update step fields table | HIGH |
 | `specdacular/HELP.md` | Update modes table, remove enabled docs, update mode line | HIGH |
 | `README.md` | Update modes table, examples, pipeline JSON example | HIGH |

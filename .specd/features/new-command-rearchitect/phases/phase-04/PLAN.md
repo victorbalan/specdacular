@@ -4,17 +4,17 @@ phase: 4
 depends_on:
   - phase-03
 creates:
-  - commands/specd/new.md
-  - commands/specd/continue.md
-  - commands/specd/discuss.md
-  - commands/specd/research.md
-  - commands/specd/plan.md
-  - commands/specd/execute.md
-  - commands/specd/review.md
+  - commands/specd.new.md
+  - commands/specd.continue.md
+  - commands/specd.discuss.md
+  - commands/specd.research.md
+  - commands/specd.plan.md
+  - commands/specd.execute.md
+  - commands/specd.review.md
 modifies:
-  - commands/specd/help.md
-  - commands/specd/status.md
-  - commands/specd/toolbox.md
+  - commands/specd.help.md
+  - commands/specd.status.md
+  - commands/specd.toolbox.md
 ---
 
 # Phase 4: Commands
@@ -26,14 +26,14 @@ Create new command files with updated names, each pointing to its corresponding 
 ## Context
 
 **Reference these files:**
-- `@commands/specd/map-codebase.md` — Pattern to follow for command file structure
+- `@commands/specd.map-codebase.md` — Pattern to follow for command file structure
 - `@.specd/codebase/PATTERNS.md` — Command file structure pattern
-- `@commands/specd/help.md` — Current help to update
-- `@commands/specd/status.md` — Current status to update
-- `@commands/specd/toolbox.md` — Current toolbox to update
+- `@commands/specd.help.md` — Current help to update
+- `@commands/specd.status.md` — Current status to update
+- `@commands/specd.toolbox.md` — Current toolbox to update
 
 **Relevant Decisions:**
-- DEC-001: Commands become `/specd:new`, `/specd:continue`, etc.
+- DEC-001: Commands become `/specd.new`, `/specd.continue`, etc.
 - DEC-003: `continue` accepts `--semi-auto` and `--auto` flags
 
 ---
@@ -42,14 +42,14 @@ Create new command files with updated names, each pointing to its corresponding 
 
 ### Task 1: Create 7 new command files
 
-**Files:** `commands/specd/new.md`, `commands/specd/continue.md`, `commands/specd/discuss.md`, `commands/specd/research.md`, `commands/specd/plan.md`, `commands/specd/execute.md`, `commands/specd/review.md`
+**Files:** `commands/specd.new.md`, `commands/specd.continue.md`, `commands/specd.discuss.md`, `commands/specd.research.md`, `commands/specd.plan.md`, `commands/specd.execute.md`, `commands/specd.review.md`
 
 **Action:**
 Create each command as a thin wrapper following the pattern from `map-codebase.md`:
 
 ```yaml
 ---
-name: specd:{command-name}
+name: specd.{command-name}
 description: {Brief description}
 argument-hint: "{task-name} [flags]"
 allowed-tools:
@@ -81,7 +81,7 @@ Each command has:
 
 **Verify:**
 ```bash
-ls commands/specd/{new,continue,discuss,research,plan,execute,review}.md
+ls commands/specd.{new,continue,discuss,research,plan,execute,review}.md
 ```
 
 **Done when:**
@@ -93,13 +93,13 @@ ls commands/specd/{new,continue,discuss,research,plan,execute,review}.md
 
 ### Task 2: Update help.md
 
-**Files:** `commands/specd/help.md`
+**Files:** `commands/specd.help.md`
 
 **Action:**
 Update the help command to list new commands:
-- Replace all `/specd:feature:*` references with `/specd:*`
+- Replace all `/specd.feature:*` references with `/specd.*`
 - Remove phase-specific commands (discuss-phase, research-phase, etc.)
-- Add `/specd:review` to the command list
+- Add `/specd.review` to the command list
 - Update descriptions to match new command names
 - Update the workflow diagram to show the simplified lifecycle
 
@@ -112,7 +112,7 @@ Update the help command to list new commands:
 
 ### Task 3: Update status.md
 
-**Files:** `commands/specd/status.md`
+**Files:** `commands/specd.status.md`
 
 **Action:**
 Update to read from `.specd/tasks/` instead of `.specd/features/`:
@@ -128,7 +128,7 @@ Update to read from `.specd/tasks/` instead of `.specd/features/`:
 
 ### Task 4: Update toolbox.md
 
-**Files:** `commands/specd/toolbox.md`
+**Files:** `commands/specd.toolbox.md`
 
 **Action:**
 Update toolbox to reference new commands:
@@ -146,13 +146,13 @@ Update toolbox to reference new commands:
 
 ```bash
 # All new commands exist
-ls commands/specd/{new,continue,discuss,research,plan,execute,review}.md
+ls commands/specd.{new,continue,discuss,research,plan,execute,review}.md
 
 # No old paths in new commands
-grep -r "\.specd/features/" commands/specd/{new,continue,discuss,research,plan,execute,review,help,status,toolbox}.md && echo "FAIL" || echo "PASS"
+grep -r "\.specd/features/" commands/specd.{new,continue,discuss,research,plan,execute,review,help,status,toolbox}.md && echo "FAIL" || echo "PASS"
 
 # No old command names
-grep -r "specd:feature:" commands/specd/{new,continue,discuss,research,plan,execute,review,help,status,toolbox}.md && echo "FAIL" || echo "PASS"
+grep -r "specd.feature:" commands/specd.{new,continue,discuss,research,plan,execute,review,help,status,toolbox}.md && echo "FAIL" || echo "PASS"
 ```
 
 **Plan is complete when:**

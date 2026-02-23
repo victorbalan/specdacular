@@ -74,6 +74,6 @@
 **Recommended:** Research context loading patterns in other Agent Skills and LLM frameworks.
 
 **Options:**
-- `/specd:feature:discuss context-intelligence` — Resolve remaining gray areas
-- `/specd:feature:research context-intelligence` — Research context optimization patterns
-- `/specd:feature:plan context-intelligence` — Create roadmap with phase overview
+- `/specd.feature:discuss context-intelligence` — Resolve remaining gray areas
+- `/specd.feature:research context-intelligence` — Research context optimization patterns
+- `/specd.feature:plan context-intelligence` — Create roadmap with phase overview

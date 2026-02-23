@@ -1,5 +1,5 @@
 ---
-name: specd:help
+name: specd.help
 description: Show all specdacular commands and usage guide
 allowed-tools:
   - Read

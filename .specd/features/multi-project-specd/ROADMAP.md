@@ -159,7 +159,7 @@
 5. Replan cascade depth limited to 2 before forced pause (DEC-010)
 6. `next` in orchestrator mode reads all sub-project STATE.md + DEPENDENCIES.md to compute unblocked work
 7. Shows cross-project progress dashboard
-8. Accepts optional project argument: `/specd:feature:next feature-name project-name`
+8. Accepts optional project argument: `/specd.feature:next feature-name project-name`
 9. Auto-picks if one project unblocked, asks if multiple
 10. One-session-at-a-time documented (DEC-011)
 11. Single-project flow works exactly as before (no regression)

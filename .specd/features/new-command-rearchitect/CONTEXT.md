@@ -7,9 +7,9 @@
 
 User wants to simplify specdacular's command structure, planning hierarchy, and internal efficiency. Key changes:
 
-1. **Rename:** `features/` → `tasks/`, commands from `/specd:feature:*` → `/specd:*`
+1. **Rename:** `features/` → `tasks/`, commands from `/specd.feature:*` → `/specd.*`
 2. **Flatten plans:** One PLAN.md per phase at `phases/phase-NN/PLAN.md`. Phases kept small.
-3. **Auto flags:** `--semi-auto` and `--auto` on `/specd:continue` (interactive is default)
+3. **Auto flags:** `--semi-auto` and `--auto` on `/specd.continue` (interactive is default)
 4. **Code review:** Review agent runs after every phase execution in all modes
 5. **Deduplication:** Extract ~2,000 lines of duplicated workflow logic into shared references
 6. **Merge reviews:** Combine `review-feature.md` + `review-phase.md` into single `review.md`
@@ -24,7 +24,7 @@ Task type classification (small/medium/big/bug) was discussed but explicitly def
 ## Resolved Questions
 
 ### Folder and command naming
-**Resolution:** `.specd/tasks/`, commands `/specd:new`, `/specd:continue`, `/specd:discuss`, etc.
+**Resolution:** `.specd/tasks/`, commands `/specd.new`, `/specd.continue`, `/specd.discuss`, etc.
 
 ### Plan structure
 **Resolution:** `phases/phase-NN/PLAN.md` — one plan per phase, phases kept small.

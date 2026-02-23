@@ -1,5 +1,5 @@
 ---
-name: specd:status
+name: specd.status
 description: Show feature status dashboard
 argument-hint: "[--all]"
 allowed-tools:

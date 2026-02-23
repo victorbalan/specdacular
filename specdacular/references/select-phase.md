@@ -8,7 +8,7 @@ Determine which phase to work on. Requires a task name to be already selected.
 Read `.specd/tasks/{task-name}/ROADMAP.md` and extract the phase list with status.
 
 ```bash
-[ -f ".specd/tasks/{task-name}/ROADMAP.md" ] || { echo "No roadmap found. Run /specd:continue to create one."; exit 1; }
+[ -f ".specd/tasks/{task-name}/ROADMAP.md" ] || { echo "No roadmap found. Run /specd.continue to create one."; exit 1; }
 ```
 
 Parse the ROADMAP.md "Phases" section to get:

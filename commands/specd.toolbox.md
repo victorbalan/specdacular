@@ -1,5 +1,5 @@
 ---
-name: specd:toolbox
+name: specd.toolbox
 description: "Advanced task operations and context management"
 argument-hint: "[tasks <task-name>|context]"
 allowed-tools:

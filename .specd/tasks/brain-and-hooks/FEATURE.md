@@ -70,7 +70,7 @@ Rearchitect specdacular's workflow system into a config-driven orchestrator ("th
 - **State-based routing:** Read STATE.md + config.json to determine current position in pipeline
 - **User prompts:** Before dispatching any step in interactive mode, present what's about to happen and offer alternatives (skip, go back, stop)
 - **Phase loop:** The `phase-execution` sub-pipeline loops per phase from ROADMAP.md. Brain handles: review approves → next phase, review finds issues → revise → back to execute
-- **Stop/resume:** Save state at any point, user resumes with `/specd:continue`
+- **Stop/resume:** Save state at any point, user resumes with `/specd.continue`
 
 ### Constraints
 

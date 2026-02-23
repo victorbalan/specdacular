@@ -59,9 +59,9 @@ For monorepos and multi-repo setups, it maps each sub-project in parallel, then 
 Three commands drive the entire task lifecycle:
 
 ```
-/specd:new my-feature              # Initialize + first discussion
-/specd:continue my-feature         # Everything else — discussion, research, planning, execution, review
-/specd:toolbox my-feature          # Advanced operations menu
+/specd.new my-feature              # Initialize + first discussion
+/specd.continue my-feature         # Everything else — discussion, research, planning, execution, review
+/specd.toolbox my-feature          # Advanced operations menu
 ```
 
 `continue` reads your task's current state and offers the natural next step. You never need to remember which command comes next.
@@ -94,7 +94,7 @@ Choose:
 
 In Claude Code:
 ```
-/specd:help
+/specd.help
 ```
 
 ---
@@ -104,7 +104,7 @@ In Claude Code:
 ### Map a Codebase
 
 ```
-/specd:map-codebase
+/specd.map-codebase
 ```
 
 Creates `.specd/codebase/` with 4 AI-optimized documents. This gives Claude context about your codebase's architecture, patterns, structure, and gotchas. For multi-project setups, it detects sub-projects automatically and maps each one in parallel before producing system-level documentation.
@@ -114,7 +114,7 @@ Creates `.specd/codebase/` with 4 AI-optimized documents. This gives Claude cont
 **Step 1: Initialize**
 
 ```
-/specd:new user-dashboard
+/specd.new user-dashboard
 ```
 
 Creates `.specd/tasks/user-dashboard/` and starts the first discussion. Claude asks what you're building, follows the thread, and captures technical requirements. When done, offers to continue discussing or stop.
@@ -122,7 +122,7 @@ Creates `.specd/tasks/user-dashboard/` and starts the first discussion. Claude a
 **Step 2: Drive the lifecycle**
 
 ```
-/specd:continue user-dashboard
+/specd.continue user-dashboard
 ```
 
 That's it. `continue` reads the current state and guides you through each stage:
@@ -133,20 +133,20 @@ That's it. `continue` reads the current state and guides you through each stage:
 4. **Phase execution** — Plans each phase just-in-time, then implements with progress tracking
 5. **Phase review** — Code review agent compares plans against actual code
 
-After each step, you can continue or stop. Resume anytime with `/specd:continue`.
+After each step, you can continue or stop. Resume anytime with `/specd.continue`.
 
 **Execution modes:**
 
 ```
-/specd:continue user-dashboard                # Default — auto-runs, pauses at phase steps
-/specd:continue user-dashboard --interactive  # Prompt at every step with skip/jump options
-/specd:continue user-dashboard --auto         # Run everything, stop only on review issues
+/specd.continue user-dashboard                # Default — auto-runs, pauses at phase steps
+/specd.continue user-dashboard --interactive  # Prompt at every step with skip/jump options
+/specd.continue user-dashboard --auto         # Run everything, stop only on review issues
 ```
 
 **No argument? It picks for you:**
 
 ```
-/specd:continue
+/specd.continue
 ```
 
 Scans for in-progress tasks and shows a picker.
@@ -154,7 +154,7 @@ Scans for in-progress tasks and shows a picker.
 **Need a specific operation?**
 
 ```
-/specd:toolbox user-dashboard
+/specd.toolbox user-dashboard
 ```
 
 Opens a menu with task operations (Discuss, Research, Plan, Execute, Review) and context management (Status, Review). Useful when you want to jump to a specific action outside the normal flow.
@@ -167,25 +167,25 @@ Opens a menu with task operations (Discuss, Research, Plan, Execute, Review) and
 
 | Command | Description |
 |---------|-------------|
-| `/specd:new [name]` | Initialize a task, start first discussion |
-| `/specd:continue [name] [--interactive\|--auto]` | **Drive the entire lifecycle** — picks up where you left off |
-| `/specd:toolbox [tasks name\|context]` | Task operations or codebase context management |
+| `/specd.new [name]` | Initialize a task, start first discussion |
+| `/specd.continue [name] [--interactive\|--auto]` | **Drive the entire lifecycle** — picks up where you left off |
+| `/specd.toolbox [tasks name\|context]` | Task operations or codebase context management |
 
 ### Codebase Documentation
 
 | Command | Description |
 |---------|-------------|
-| `/specd:map-codebase` | Analyze codebase with parallel agents |
-| `/specd:toolbox context` | Status dashboard or section-by-section review |
+| `/specd.map-codebase` | Analyze codebase with parallel agents |
+| `/specd.toolbox context` | Status dashboard or section-by-section review |
 
 ### Utilities
 
 | Command | Description |
 |---------|-------------|
-| `/specd:config` | Configure auto-commit settings for docs and code |
-| `/specd:status [--all]` | Show task status dashboard |
-| `/specd:help` | Show available commands |
-| `/specd:update` | Update to latest version |
+| `/specd.config` | Configure auto-commit settings for docs and code |
+| `/specd.status [--all]` | Show task status dashboard |
+| `/specd.help` | Show available commands |
+| `/specd.update` | Update to latest version |
 
 ---
 
@@ -209,14 +209,14 @@ Opens a menu with task operations (Discuss, Research, Plan, Execute, Review) and
 
 **`toolbox`** provides direct access to advanced operations outside the normal flow. Two subdomains:
 
-**Tasks** (`/specd:toolbox tasks my-feature`):
+**Tasks** (`/specd.toolbox tasks my-feature`):
 - **Discuss** — Explore open questions, record decisions
 - **Research** — Spawn parallel agents for patterns/pitfalls
 - **Plan** — Create execution phases from task context
 - **Execute** — Execute the next phase's plan
 - **Review** — Review executed phase, approve or request fixes
 
-**Context** (`/specd:toolbox context`):
+**Context** (`/specd.toolbox context`):
 - **Status** — Dashboard showing all context files with freshness indicators
 - **Review** — Section-by-section review of any context file: confirm, edit, remove, re-map (spawns a mapper agent to regenerate a section), or add new content. Sections are tracked with `AUTO_GENERATED` and `USER_MODIFIED` tags with dates.
 
@@ -368,7 +368,7 @@ Specdacular spawns specialized agents that run simultaneously:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  /specd:map-codebase                    │
+│                  /specd.map-codebase                    │
 └─────────────────────────────────────────────────────────┘
                           │
           ┌───────────────┼───────────────┐
@@ -396,7 +396,7 @@ Specdacular supports monorepos and multi-repo setups through an orchestrator lay
 ### Setup
 
 ```
-/specd:map-codebase
+/specd.map-codebase
 ```
 
 When it detects multiple projects (via `package.json`, `go.mod`, `Cargo.toml`, etc.), it offers to enable multi-project mode. This:
@@ -423,8 +423,8 @@ Planning creates per-project roadmaps plus a cross-project dependency graph (`DE
 `continue` schedules across projects, respecting cross-project dependencies. After each phase, it performs contract review — comparing what was implemented against system-level expectations and flagging deviations before they cascade to downstream projects.
 
 ```
-/specd:continue auth-system       # Auto-picks next unblocked phase across projects
-/specd:continue auth-system api   # Target a specific sub-project
+/specd.continue auth-system       # Auto-picks next unblocked phase across projects
+/specd.continue auth-system api   # Target a specific sub-project
 ```
 
 ---
@@ -441,7 +441,7 @@ your-project/
 │   │   ├── pre-execute.md
 │   │   └── post-review.md
 │   │
-│   ├── codebase/              # From /specd:map-codebase
+│   ├── codebase/              # From /specd.map-codebase
 │   │   ├── MAP.md
 │   │   ├── PATTERNS.md
 │   │   ├── STRUCTURE.md
@@ -537,7 +537,7 @@ npx specdacular@latest
 
 Or in Claude Code:
 ```
-/specd:update
+/specd.update
 ```
 
 ---

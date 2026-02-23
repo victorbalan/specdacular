@@ -6,7 +6,7 @@
 
 | I want to add... | Put it in... |
 |------------------|--------------|
-| New slash command | `commands/specd/{command-name}.md` |
+| New slash command | `commands/specd.{command-name}.md` |
 | Command workflow implementation | `specdacular/workflows/{workflow-name}.md` |
 | New agent definition | `agents/{agent-name}.md` |
 | Feature template document | `specdacular/templates/features/{TEMPLATE}.md` |
@@ -22,7 +22,7 @@ specdacular/
 ├── bin/                    # Installation script (npm entry point)
 │   └── install.js          # Copies to ~/.claude/ or ./.claude/
 ├── commands/               # User-facing slash commands
-│   └── specd/              # /specd:* namespace
+│   └── specd/              # /specd.* namespace
 ├── agents/                 # Top-level agent definitions
 ├── hooks/                  # Session hooks (update check, statusline)
 ├── specdacular/            # Core resources copied during install
@@ -33,11 +33,11 @@ specdacular/
 │   │   └── codebase/       # Codebase mapping templates
 │   └── references/         # Shared reference docs (currently empty)
 ├── .claude/                # Local install artifacts (copied during dev)
-│   ├── commands/specd/     # Installed commands
+│   ├── commands/specd.     # Installed commands
 │   ├── agents/             # Installed agents
 │   └── specdacular/        # Installed core
 └── .specd/                 # User-generated documentation
-    ├── codebase/           # From /specd:map-codebase
+    ├── codebase/           # From /specd.map-codebase
     └── features/           # From feature commands
 ```
 
@@ -50,14 +50,14 @@ Entry point for `npx specdacular`. Contains:
 
 **Do not add** runtime code here. This is purely for installation.
 
-### `commands/specd/` — User Interface
+### `commands/specd.` — User Interface
 
 Slash command definitions that appear in Claude Code's command palette.
 
 **Format:** Markdown with YAML frontmatter
 ```yaml
 ---
-name: specd:command-name
+name: specd.command-name
 description: Brief description
 argument-hint: "[optional-arg]"
 allowed-tools:
@@ -67,7 +67,7 @@ allowed-tools:
 ```
 
 **Key points:**
-- Command file name should match command name (e.g., `map-codebase.md` → `/specd:map-codebase`)
+- Command file name should match command name (e.g., `map-codebase.md` → `/specd.map-codebase`)
 - Include `<execution_context>` pointing to workflow: `@~/.claude/specdacular/workflows/{workflow}.md`
 - Keep command files brief (2-3 screens max) — delegate to workflows
 - Use `$ARGUMENTS` to access user-provided arguments
@@ -84,7 +84,7 @@ The actual logic for commands. Commands reference workflows via `<execution_cont
 
 **Format:** Structured markdown with `<process>`, `<step>`, `<critical_rules>` sections
 
-**Naming:** Match command name (e.g., `map-codebase.md` implements `/specd:map-codebase`)
+**Naming:** Match command name (e.g., `map-codebase.md` implements `/specd.map-codebase`)
 
 ### `agents/` — Agent Definitions
 
@@ -121,7 +121,7 @@ Detailed workflows for agents defined in `agents/`. Not currently used but follo
 
 #### `templates/features/` — Feature Planning Templates
 
-Templates for feature documentation created by `/specd:new-feature`:
+Templates for feature documentation created by `/specd.new-feature`:
 - `FEATURE.md` — Technical requirements
 - `CONTEXT.md` — Discussion accumulation
 - `DECISIONS.md` — Decision log with rationale
@@ -157,9 +157,9 @@ JavaScript files executed at session start or for statusline.
 **DO NOT add source files here.** This directory is created by commands in user projects.
 
 **Structure created by commands:**
-- `.specd/codebase/` — Created by `/specd:map-codebase`
+- `.specd/codebase/` — Created by `/specd.map-codebase`
   - `MAP.md`, `PATTERNS.md`, `STRUCTURE.md`, `CONCERNS.md`
-- `.specd/tasks/{name}/` — Created by `/specd:new`
+- `.specd/tasks/{name}/` — Created by `/specd.new`
   - Task planning documents
 
 ### `.claude/` — Local Install Artifacts
@@ -184,22 +184,22 @@ Generated during development install (`npx specdacular --local`). Mirror of inst
 
 - Lowercase with hyphens for multi-word: `specdacular/`, not `Specdacular/`
 - Plural for collections: `commands/`, `agents/`, `workflows/`
-- Match command namespace: `commands/specd/` matches `/specd:*`
+- Match command namespace: `commands/specd.` matches `/specd.*`
 
 ## Where to Add New Code
 
 ### New Command
 
 **Primary code:**
-1. `commands/specd/{command-name}.md` — Command definition with frontmatter
+1. `commands/specd.{command-name}.md` — Command definition with frontmatter
 2. `specdacular/workflows/{workflow-name}.md` — Implementation logic
 
 **Steps:**
-1. Create command file in `commands/specd/`
+1. Create command file in `commands/specd.`
 2. Create workflow file in `specdacular/workflows/`
 3. Reference workflow in command: `@~/.claude/specdacular/workflows/{workflow}.md`
 4. Test locally: `npx specdacular --local`
-5. Update `commands/specd/help.md` with new command
+5. Update `commands/specd.help.md` with new command
 
 ### New Agent
 
@@ -244,7 +244,7 @@ Generated during development install (`npx specdacular --local`). Mirror of inst
 
 | Don't put... | Here... | Instead... |
 |--------------|---------|------------|
-| Implementation logic | `commands/specd/*.md` | `specdacular/workflows/*.md` |
+| Implementation logic | `commands/specd.*.md` | `specdacular/workflows/*.md` |
 | Templates | Agent definitions | `specdacular/templates/` |
 | Generated docs | Source directories | `.specd/` (in user projects) |
 | Runtime code | `bin/` | `hooks/` or workflows |

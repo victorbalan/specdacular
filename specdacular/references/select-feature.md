@@ -49,7 +49,7 @@ Read each `config.json` and filter where `stage != "complete"`.
 ```
 No tasks in progress.
 
-Start one with /specd:new
+Start one with /specd.new
 ```
 End workflow.
 

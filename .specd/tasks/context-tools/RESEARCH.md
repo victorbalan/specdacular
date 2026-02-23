@@ -25,7 +25,7 @@ Key risks center on section boundary ambiguity (must explicitly define whether p
 ### Patterns to Follow
 
 - **Workflow structure:** `<purpose>`, `<philosophy>`, `<process>` with named `<step>` elements, `<success_criteria>` — matches all existing workflows
-- **Toolbox dispatch:** Add menu options to `commands/specd/toolbox.md` AskUserQuestion, each pointing to a workflow via `@~/.claude/specdacular/workflows/context-*.md`
+- **Toolbox dispatch:** Add menu options to `commands/specd.toolbox.md` AskUserQuestion, each pointing to a workflow via `@~/.claude/specdacular/workflows/context-*.md`
 - **Commit pattern:** Use `commit-docs.md` reference with `$FILES`, `$MESSAGE`, `$LABEL` variables
 - **Agent spawning:** Use Task tool with `run_in_background: true` for targeted re-mapping (same pattern as map-codebase.md)
 
@@ -36,7 +36,7 @@ Key risks center on section boundary ambiguity (must explicitly define whether p
 | `specdacular/workflows/context-review.md` | Review workflow |
 | `specdacular/workflows/context-add.md` | Add workflow |
 | `specdacular/workflows/context-status.md` | Status dashboard workflow |
-| `commands/specd/toolbox.md` | Updated with 3 new menu options |
+| `commands/specd.toolbox.md` | Updated with 3 new menu options |
 
 ### Integration Points
 
@@ -206,7 +206,7 @@ Content here...
 ## Sources
 
 ### Codebase
-- `commands/specd/toolbox.md` — Toolbox menu pattern
+- `commands/specd.toolbox.md` — Toolbox menu pattern
 - `specdacular/workflows/discuss.md`, `research.md`, `execute.md`, `review.md` — Workflow structure patterns
 - `specdacular/references/commit-docs.md`, `validate-task.md`, `load-context.md` — Shared references
 - `agents/specd-codebase-mapper.md` — Mapper agent for re-mapping pattern

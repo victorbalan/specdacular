@@ -46,7 +46,7 @@ Create the `specdacular/templates/tasks/` directory. For each template in `specd
 
 **FEATURE.md** — Keep same structure. Update Quick Reference paths from `.specd/features/{feature-name}/` to `.specd/tasks/{task-name}/`. Replace `{feature-name}` placeholders with `{task-name}`.
 
-**CONTEXT.md** — Same structure. Update paths and references. Change "Feature:" to "Task:" in Quick Reference. Update resume command from `/specd:feature:continue` to `/specd:continue`.
+**CONTEXT.md** — Same structure. Update paths and references. Change "Feature:" to "Task:" in Quick Reference. Update resume command from `/specd.feature:continue` to `/specd.continue`.
 
 **DECISIONS.md** — Same structure. Update feature references to task references.
 
@@ -64,7 +64,7 @@ ls specdacular/templates/tasks/
 **Done when:**
 - [ ] All template files exist in `tasks/` directory
 - [ ] No references to `.specd/features/` remain
-- [ ] No references to `/specd:feature:*` commands remain
+- [ ] No references to `/specd.feature:*` commands remain
 
 ---
 
@@ -78,7 +78,7 @@ Adapt the STATE.md template:
 - The "Completed Plans" table becomes simpler — just phase number and PLAN.md status
 - Remove plan-level tracking (no "Plan: phase-01/02-PLAN.md" references)
 - Update "Current Plan" section to "Current Phase"
-- Update resume command to `/specd:continue {task-name}`
+- Update resume command to `/specd.continue {task-name}`
 - Reference `phases/phase-NN/PLAN.md` instead of `plans/phase-NN/NN-PLAN.md`
 
 Key changes from current template:
@@ -103,7 +103,7 @@ grep -c "tasks" specdacular/templates/tasks/STATE.md      # should be > 0
 **Done when:**
 - [ ] STATE.md uses single-plan-per-phase tracking
 - [ ] No `plans/phase-NN/NN-PLAN.md` references (uses `phases/phase-NN/PLAN.md`)
-- [ ] Resume command points to `/specd:continue`
+- [ ] Resume command points to `/specd.continue`
 
 ---
 
@@ -153,11 +153,11 @@ ls specdacular/templates/tasks/{FEATURE,CONTEXT,DECISIONS,CHANGELOG,STATE,ROADMA
 grep -r "\.specd/features/" specdacular/templates/tasks/ && echo "FAIL: old paths found" || echo "PASS: no old paths"
 
 # No old command references
-grep -r "specd:feature:" specdacular/templates/tasks/ && echo "FAIL: old commands found" || echo "PASS: no old commands"
+grep -r "specd.feature:" specdacular/templates/tasks/ && echo "FAIL: old commands found" || echo "PASS: no old commands"
 ```
 
 **Plan is complete when:**
 - [ ] All 9 template files exist in `tasks/`
-- [ ] Zero references to `.specd/features/` or `/specd:feature:*`
+- [ ] Zero references to `.specd/features/` or `/specd.feature:*`
 - [ ] STATE.md and ROADMAP.md use single-plan-per-phase structure
 - [ ] PLAN.md uses phase-only frontmatter

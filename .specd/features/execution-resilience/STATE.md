@@ -74,6 +74,6 @@
 **Recommended:** Research git tag patterns and execution recovery in other tools.
 
 **Options:**
-- `/specd:feature:discuss execution-resilience` — Resolve remaining gray areas
-- `/specd:feature:research execution-resilience` — Research recovery patterns
-- `/specd:feature:plan execution-resilience` — Create roadmap with phase overview
+- `/specd.feature:discuss execution-resilience` — Resolve remaining gray areas
+- `/specd.feature:research execution-resilience` — Research recovery patterns
+- `/specd.feature:plan execution-resilience` — Create roadmap with phase overview

@@ -79,7 +79,7 @@ specdacular/templates/features/
 
 **No changes needed:**
 - `bin/install.js` — existing `copyWithPathReplacement()` auto-handles new directories
-- `commands/specd/*.md` — commands delegate to workflows, no changes needed
+- `commands/specd.*.md` — commands delegate to workflows, no changes needed
 - `agents/specd-codebase-mapper.md` — reused as-is for per-project mapping
 - All sub-project templates — unchanged per DEC-001
 

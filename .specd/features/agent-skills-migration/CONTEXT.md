@@ -5,7 +5,7 @@
 
 ## Discussion Summary
 
-Analyzed Specdacular's current architecture against the Agent Skills open standard (agentskills.io). Identified that the current custom command system (YAML frontmatter in `commands/specd/*.md` pointing to monolithic workflows in `specdacular/workflows/*.md`) wastes context and limits interoperability. The Agent Skills standard offers progressive disclosure (50 tokens at startup vs thousands), cross-tool support, and standard validation tooling. Vercel's React Best Practices skill was studied as a reference implementation: 57 atomic rules, compact SKILL.md router, `_sections.md` for categories.
+Analyzed Specdacular's current architecture against the Agent Skills open standard (agentskills.io). Identified that the current custom command system (YAML frontmatter in `commands/specd.*.md` pointing to monolithic workflows in `specdacular/workflows/*.md`) wastes context and limits interoperability. The Agent Skills standard offers progressive disclosure (50 tokens at startup vs thousands), cross-tool support, and standard validation tooling. Vercel's React Best Practices skill was studied as a reference implementation: 57 atomic rules, compact SKILL.md router, `_sections.md` for categories.
 
 Session 2 studied the Vercel rules/ structure in depth (SKILL.md, rules/_sections.md, rules/_template.md, individual atomic rule files). Key insight: adopting the Agent Skills standard applies to both Specdacular's own packaging AND the codebase documentation output. Map-codebase should output atomic rules/ instead of monolithic PATTERNS.md, following the same Vercel pattern. Migration path uses version.json for format detection.
 

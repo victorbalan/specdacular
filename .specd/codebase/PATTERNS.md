@@ -7,9 +7,9 @@ Workflows are markdown files that define agent behaviors. Commands are thin wrap
 
 **Command file structure:**
 ```markdown
-// From commands/specd/map-codebase.md:1-24
+// From commands/specd.map-codebase.md:1-24
 ---
-name: specd:map-codebase
+name: specd.map-codebase
 description: Analyze codebase with parallel agents to produce AI-optimized documentation
 argument-hint: ""
 allowed-tools:
@@ -52,7 +52,7 @@ color: cyan
 <role>
 You are a codebase mapper optimized for AI consumption. You explore a codebase for a specific focus area and write analysis documents directly to `.specd/codebase/`.
 
-You are spawned by `/specd:map-codebase` with one of four focus areas:
+You are spawned by `/specd.map-codebase` with one of four focus areas:
 - **map**: Create navigation map → write MAP.md
 - **patterns**: Extract code patterns → write PATTERNS.md
 - **structure**: Document organization → write STRUCTURE.md
@@ -373,7 +373,7 @@ process.stdin.on('end', () => {
       try {
         const cache = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
         if (cache.update_available) {
-          specdUpdate = '\x1b[33m⬆ /specd:update\x1b[0m │ ';
+          specdUpdate = '\x1b[33m⬆ /specd.update\x1b[0m │ ';
         }
       } catch (e) {}
     }
@@ -461,7 +461,7 @@ modifies:
 **Workflow files:** Reference other markdown files with `@` prefix.
 
 ```markdown
-// From commands/specd/map-codebase.md:22-24
+// From commands/specd.map-codebase.md:22-24
 <execution_context>
 @~/.claude/specdacular/workflows/map-codebase.md
 </execution_context>
@@ -560,14 +560,14 @@ Validate feature exists and has plans.
 ```
 Feature '{name}' not found.
 
-Run /specd:new-feature {name} to create it.
+Run /specd.new-feature {name} to create it.
 ```
 
 **If no plans:**
 ```
 Feature '{name}' has no plans yet.
 
-Run /specd:plan-feature {name} to create plans.
+Run /specd.plan-feature {name} to create plans.
 ```
 ```
 
