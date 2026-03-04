@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -51,6 +51,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-03-04 | Initial discussion | FEATURE.md created, 2 decisions recorded |
+| 2026-03-04 | Commit granularity | Resolved: bundle into existing commits, DEC-003 |
 
 ---
 
@@ -69,15 +70,15 @@
 
 ## Decision Count
 
-- **Active:** 2
+- **Active:** 3
 - **Superseded:** 0
-- **Total:** 2
+- **Total:** 3
 
 ---
 
 ## Next Steps
 
-2 gray areas remain around commit granularity and message format. Can discuss further or proceed to research/planning.
+All gray areas resolved. Ready for research or planning.
 
 **Resume:** `/specd.continue rm-keep-discussing` — Picks up where you left off.
 

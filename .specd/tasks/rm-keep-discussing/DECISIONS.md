@@ -18,9 +18,9 @@
 - Users should be able to close the terminal at any time without data loss
 - `/specd.continue` already reads state to determine next step — incremental saves make this reliable
 **Implications:**
-- All workflow files need additional commit points within their step sequences
+- Existing commits in workflows widen their file scope to include STATE.md + config.json
+- No additional commits needed — state piggybacks on existing commit points
 - Must respect `auto_commit_docs` setting at each commit point
-- More git commits in history (small state-update commits)
 **References:**
 - `@specdacular/references/commit-docs.md`
 
@@ -45,6 +45,20 @@
 - `@specdacular/workflows/review.md`
 - `@specdacular/workflows/brain.md`
 
+### DEC-003: Bundle State Saves Into Existing Commits
+
+**Date:** 2026-03-04
+**Status:** Active
+**Context:** Incremental state saves could mean extra commits cluttering git history, or they could piggyback on commits already happening.
+**Decision:** Include STATE.md and config.json in the commits that workflows already make (e.g., discuss commits CONTEXT.md + DECISIONS.md → add STATE.md + config.json to that same commit). No separate state-only commits.
+**Rationale:**
+- No extra commit noise in git history
+- State is always consistent with the work it describes
+- Simpler implementation — just widen `git add` scope
+**Implications:**
+- Each workflow's commit step needs to add STATE.md + config.json to its file list
+- Commit messages stay as-is (they already describe the work done)
+
 ---
 
 ## Superseded Decisions
@@ -61,3 +75,4 @@
 |----|------|-------|--------|
 | DEC-001 | 2026-03-04 | Incremental state saves after every step | Active |
 | DEC-002 | 2026-03-04 | Remove all "keep discussing / stop for now" prompts | Active |
+| DEC-003 | 2026-03-04 | Bundle state saves into existing commits | Active |

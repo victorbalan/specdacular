@@ -1,7 +1,7 @@
 # Context: rm-keep-discussing
 
 **Last Updated:** 2026-03-04
-**Sessions:** 1
+**Sessions:** 2
 
 ## Discussion Summary
 
@@ -40,13 +40,13 @@ None identified.
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
 | 2026-03-04 | State persistence, stop prompts, auto-loop | Core approach defined: incremental state saves + remove stop prompts |
+| 2026-03-04 | Commit granularity, message format | Resolved: bundle state into existing commits, no extra commits |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Exact commit granularity — How often to commit within a single workflow (after every sub-step vs after each logical unit)?
-- [ ] Commit message format for incremental saves — Should they use a different format than end-of-workflow commits?
+None — all areas resolved.
 
 ---
 
