@@ -64,7 +64,7 @@
 | DECISIONS.md | 2 decisions | 2026-03-04 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Created | 2026-03-04 |
-| phases/ | Not started | — |
+| phases/ | Phase 1 planned | 2026-03-04 |
 
 ---
 
