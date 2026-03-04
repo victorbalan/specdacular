@@ -143,7 +143,6 @@ For plan step (phase-execution pipeline — phase-plan.md):
 For execute step:
 - "Execute" (Recommended) — Start/resume phase execution
 - "Review plan" — Read the PLAN.md first
-- "Stop for now" — Come back later
 
 For review step:
 - Dispatch directly (review has its own user interaction)
@@ -174,12 +173,10 @@ For plan step (main pipeline — task-level):
 For plan step (phase-execution pipeline — phase-plan.md):
 - "Plan this phase" (Recommended) — Create detailed PLAN.md
 - "Skip to execute" — Execute without explicit planning
-- "Stop for now" — Come back later
 
 For execute step:
 - "Execute" (Recommended) — Start/resume phase execution
 - "Review plan" — Read the PLAN.md first
-- "Stop for now" — Come back later
 
 For review step:
 - Dispatch directly (review has its own user interaction)
@@ -189,17 +186,6 @@ For revise step:
 
 **Auto mode (`--auto`):**
 Proceed without prompting. Apply smart skipping (see below). Only stop on errors or task completion.
-
-**If user chooses "Stop for now":**
-Save state and exit:
-```
-───────────────────────────────────────────────────────
-
-Progress saved. Pick up where you left off anytime:
-
-/specd.continue {task-name}
-```
-End workflow.
 
 **If user chooses an alternative (e.g., "Skip to research"):**
 Update `$NEXT_STEP` accordingly and continue to dispatch.

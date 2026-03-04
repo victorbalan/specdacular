@@ -132,7 +132,6 @@ Use AskUserQuestion:
 - options:
   - "Looks good" — Accept all, approve phase
   - "I want to revise" — Describe what needs fixing
-  - "Stop for now" — Come back later
 
 **If clean:**
 Use AskUserQuestion:
@@ -141,13 +140,11 @@ Use AskUserQuestion:
 - options:
   - "Looks good" — Approve phase
   - "I have concerns" — Describe issues
-  - "Stop for now" — Come back later
 
 **Record the user's choice** so the brain can route accordingly.
 The brain reads this choice and handles:
 - "Looks good" → brain approves phase (updates config.json, advances)
 - "I want to revise" / "I have concerns" → brain dispatches revise.md
-- "Stop for now" → brain saves state, exits
 
 End workflow (caller handles continuation).
 </step>
@@ -158,7 +155,7 @@ End workflow (caller handles continuation).
 - Plan intent compared against actual code (semantic review)
 - Git diff presented to user
 - Per-task status with icons (✅ ⚠️ ❌)
-- User can approve, revise, or stop
+- User can approve or revise
 - User's choice recorded for brain routing
 - Phase advances only through brain (not in this workflow)
 </success_criteria>

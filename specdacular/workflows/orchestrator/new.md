@@ -222,44 +222,5 @@ Present multi-project task creation summary.
 {2-3 sentence system-level summary}
 ```
 
-Continue to continuation_offer.
-</step>
-
-<step name="continuation_offer">
-Offer to continue or stop.
-
-**If gray areas remain:**
-Use AskUserQuestion:
-- header: "Continue?"
-- question: "Want to keep discussing the open areas, or come back later?"
-- options:
-  - "Keep discussing" — Dive into the gray areas now
-  - "Stop for now" — Come back with `/specd.continue {task-name}`
-
-**If Keep discussing:**
-Execute the discuss workflow:
-@~/.claude/specdacular/workflows/discuss.md
-
-After discussion completes, return to this step.
-
-**If no gray areas remain:**
-Use AskUserQuestion:
-- header: "Continue?"
-- question: "Discussion looks solid. Want to keep going or come back later?"
-- options:
-  - "Continue" — Move to next step
-  - "Stop for now" — Come back with `/specd.continue {task-name}`
-
-**If Continue:**
-Hand off to continue workflow:
-@~/.claude/specdacular/workflows/continue.md
-
-**If Stop for now:**
-```
-Progress saved. Pick up where you left off anytime:
-
-/specd.continue {task-name}
-```
-
 End workflow.
 </step>
