@@ -110,7 +110,7 @@ Execute each task from the PLAN.md.
 
 5. **Commit:**
    @~/.claude/specdacular/references/commit-code.md
-   - **$FILES:** files created/modified by this task
+   - **$FILES:** files created/modified by this task + `$TASK_DIR/STATE.md $TASK_DIR/config.json`
    - **$MESSAGE:** `feat({task-name}): {task summary}`
 
 Continue to phase_complete.
@@ -125,7 +125,7 @@ Mark phase execution as done.
 
 **Commit state:**
 @~/.claude/specdacular/references/commit-docs.md
-- **$FILES:** `$TASK_DIR/STATE.md $TASK_DIR/CHANGELOG.md`
+- **$FILES:** `$TASK_DIR/STATE.md $TASK_DIR/CHANGELOG.md $TASK_DIR/config.json`
 - **$MESSAGE:** `docs({task-name}): phase {N} executed`
 - **$LABEL:** `phase execution complete`
 
