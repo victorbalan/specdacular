@@ -1,7 +1,13 @@
 {
   "task_name": "rm-keep-discussing",
   "created": "2026-03-04",
-  "stage": "discussion",
+  "stage": "execution",
   "discussion_sessions": 2,
-  "decisions_count": 3
+  "decisions_count": 3,
+  "phases": {
+    "total": 2,
+    "current": 1,
+    "current_status": "pending",
+    "completed": 0
+  }
 }
