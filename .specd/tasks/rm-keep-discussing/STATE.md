@@ -30,12 +30,13 @@
 ## Execution Progress
 
 ### Current Phase
-- Phase: none
-- Started: —
+- Phase: 1
+- Started: 2026-03-04
 
 ### Completed Phases
 | Phase | Completed | Tasks | Deviations |
 |-------|-----------|-------|------------|
+| 1 | 2026-03-04 | 4 (3 verified ok, 1 modified) | 0 |
 
 ---
 
@@ -78,7 +79,7 @@
 
 ## Next Steps
 
-Roadmap created. Ready for phase 1 execution.
+Phase 1 executed. Ready for review.
 
 **Resume:** `/specd.continue rm-keep-discussing` — Picks up where you left off.
 
