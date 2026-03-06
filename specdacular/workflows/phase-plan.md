@@ -6,21 +6,6 @@ This is the phase-level counterpart to plan.md (which creates the high-level ROA
 **Output:** `phases/phase-NN/PLAN.md`, updated STATE.md
 </purpose>
 
-<philosophy>
-
-## Just-In-Time Planning
-
-Plans are created when the phase starts, not upfront. This means the plan can account for deviations, discoveries, and changes from earlier phases.
-
-## Small and Focused
-
-One phase, one PLAN.md. 2-5 tasks. Each task creates or modifies 1-3 files.
-
-## Self-Contained Plans
-
-Each PLAN.md should have enough context that the executing agent doesn't need to ask questions. Reference decisions, research, and codebase patterns.
-
-</philosophy>
 
 <process>
 
@@ -132,11 +117,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- Phase directory created
-- PLAN.md written with detailed tasks from ROADMAP.md goal
-- Previous phase outcomes considered in planning
-- STATE.md updated
-- Changes committed
-- config.json NOT modified (brain manages state)
-</success_criteria>

@@ -4,21 +4,6 @@ Guide the user to add new content to a codebase context file (.specd/codebase/*.
 Output: Updated context file with new content added to the correct section.
 </purpose>
 
-<philosophy>
-
-## Guide, Don't Assume
-
-The agent suggests where content should go, but the user confirms before anything is written. Never auto-place content.
-
-## Check for Duplicates
-
-Before adding, search existing context files for similar content. Avoid creating duplicate documentation.
-
-## Minimal Touch
-
-Add the content where it belongs. Don't reorganize surrounding sections or rewrite adjacent content.
-
-</philosophy>
 
 <critical_rules>
 
@@ -119,7 +104,7 @@ Continue to confirm_placement.
 </step>
 
 <step name="confirm_placement">
-Show the user where content will be placed and get confirmation.
+Show the user where content will be placed and get confirmation. Never auto-place content — always confirm with the user before writing.
 
 ```
 I'll add this to:
@@ -174,7 +159,7 @@ Continue to write_content.
 </step>
 
 <step name="write_content">
-Insert content at the chosen location.
+Insert content at the chosen location. Do not reorganize surrounding sections or rewrite adjacent content.
 
 1. **If adding to existing section:**
    - Append the new content at the end of the section (before the next heading)
@@ -229,14 +214,3 @@ End workflow.
 </step>
 
 </process>
-
-<success_criteria>
-- User describes what to add
-- Duplicate check performed across all context files
-- Target file and section identified
-- User confirms placement before writing
-- Content written with USER_MODIFIED tag
-- Last Modified timestamp updated
-- Changes committed
-- Summary shown
-</success_criteria>

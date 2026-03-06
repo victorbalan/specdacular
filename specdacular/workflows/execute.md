@@ -4,25 +4,6 @@ Execute the current phase's PLAN.md. Runs tasks with verification, handles devia
 **Output:** Implemented code, CHANGELOG.md entries
 </purpose>
 
-<philosophy>
-
-## One Phase at a Time
-
-Execute one phase's PLAN.md. The brain decides what happens after.
-
-## Verify Each Task
-
-After each task, run the verification command. If it fails, attempt to fix. If fix fails, stop and ask the user.
-
-## Log Deviations
-
-If implementation differs from plan, log it in CHANGELOG.md. Deviations are neutral — they might be improvements.
-
-## Commit Granularly
-
-Commit after each task (or logical group of closely related tasks). Small commits make review easier.
-
-</philosophy>
 
 <process>
 
@@ -120,10 +101,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- Phase PLAN.md tasks executed in order
-- Each task verified after implementation
-- Deviations logged in CHANGELOG.md
-- Code committed after each task
-- Ends cleanly without dispatching review
-</success_criteria>

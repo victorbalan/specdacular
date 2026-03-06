@@ -4,24 +4,6 @@ Research implementation patterns for a task. Spawns three parallel agents to inv
 **Output:** `.specd/tasks/{task-name}/RESEARCH.md`, updated DECISIONS.md
 </purpose>
 
-<philosophy>
-
-## Three Dimensions
-
-Research covers three complementary angles:
-1. **Codebase Integration** — How this fits with existing code
-2. **Implementation Patterns** — Standard approaches and libraries
-3. **Pitfalls** — What commonly goes wrong
-
-## Confidence Over Quantity
-
-Mark findings with confidence levels. A few HIGH-confidence findings are more valuable than many LOW-confidence ones.
-
-## Decisions From Research
-
-When research reveals clear choices (library X over Y, pattern A over B), record them as decisions immediately.
-
-</philosophy>
 
 <process>
 
@@ -106,7 +88,7 @@ Continue to synthesize.
 <step name="synthesize">
 @~/.claude/specdacular/references/synthesize-research.md
 
-Combine agent outputs into `$RESEARCH_OUTPUT`.
+Combine agent outputs into `$RESEARCH_OUTPUT`. Mark findings with confidence levels (HIGH/MEDIUM/LOW). A few HIGH-confidence findings are more valuable than many LOW-confidence ones.
 
 Continue to record_decisions.
 </step>
@@ -174,11 +156,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- Three research agents spawned and completed
-- RESEARCH.md synthesized from agent findings
-- Confidence levels assigned
-- Research-driven decisions recorded in DECISIONS.md
-- STATE.md updated
-- Changes committed
-</success_criteria>

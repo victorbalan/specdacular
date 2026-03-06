@@ -4,14 +4,6 @@
 
 Spawn three parallel research agents. Use `run_in_background: true` for all.
 
-**Before using this reference, you must have ready:**
-- `$TASK_NAME` — the task name
-- `$TASK_CONTEXT` — summary of what's being built (from FEATURE.md)
-- `$CONSTRAINTS` — active decisions and constraints (from DECISIONS.md)
-- `$TECH_STACK` — technology stack (from codebase docs if available)
-- `$FILES_TO_CREATE` — list of files to create (from FEATURE.md or PLAN.md)
-- `$FILES_TO_MODIFY` — list of files to modify (from FEATURE.md or PLAN.md)
-
 ### Agent 1: Codebase Integration
 
 Uses the Explore agent to analyze how the task integrates with existing code.

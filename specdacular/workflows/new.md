@@ -11,33 +11,6 @@ The user controls the rhythm after initialization. This command is just the entr
 **Output:** `.specd/tasks/{task-name}/` folder with FEATURE.md, CONTEXT.md, DECISIONS.md, CHANGELOG.md, STATE.md, config.json
 </purpose>
 
-<philosophy>
-
-## Collaborative, Not Interrogative
-
-Follow the thread. Build understanding through natural dialogue. When the user says something interesting, explore it. Don't march through a checklist.
-
-## Technical Focus
-
-This is about technical requirements, not product specs. Focus on:
-- What code needs to exist
-- What existing code it integrates with
-- Technical constraints
-
-## Probe Until Initial Understanding
-
-Keep asking until you understand:
-1. What this creates (files, components, APIs)
-2. What it integrates with (existing code)
-3. Key constraints (technical, timeline, scope)
-
-You don't need to resolve everything — that's what `/specd.discuss` is for.
-
-## Decisions Get Recorded
-
-Any decision made during this initial discussion goes into DECISIONS.md with date and rationale.
-
-</philosophy>
 
 <process>
 
@@ -112,7 +85,7 @@ Continue to first_discussion.
 </step>
 
 <step name="first_discussion">
-Start the conversation.
+Start the conversation. Follow the thread — build understanding through natural dialogue. When the user says something interesting, explore it. Don't march through a checklist. This is about technical requirements (what code needs to exist, what it integrates with, technical constraints) — not product specs. Keep asking until you understand what this creates, what it integrates with, and the key constraints. You don't need to resolve everything — that's what `/specd.discuss` is for.
 
 **Opening:**
 ```
@@ -173,7 +146,7 @@ Fill in discussion summary, resolved questions, deferred questions, gray areas.
 
 **Write DECISIONS.md:**
 Use template at `~/.claude/specdacular/templates/tasks/DECISIONS.md`
-Record any decisions made during discussion using the format from:
+Record any decisions made during this initial discussion (with date and rationale) using the format from:
 @~/.claude/specdacular/references/record-decision.md
 
 **Write CHANGELOG.md:**
@@ -285,15 +258,3 @@ End workflow.
 </step>
 
 </process>
-
-<success_criteria>
-- Task folder created at `.specd/tasks/{name}/`
-- FEATURE.md has specific technical requirements
-- CONTEXT.md captures the discussion state
-- DECISIONS.md initialized (with any decisions made)
-- CHANGELOG.md initialized (empty)
-- STATE.md tracks current stage
-- config.json created
-- Committed to git
-- User presented with clear next options
-</success_criteria>

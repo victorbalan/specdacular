@@ -9,25 +9,6 @@ The brain is the single source of truth for workflow orchestration. Step workflo
 - **Auto (`--auto`):** Runs everything, only stops on errors or task completion
 </purpose>
 
-<philosophy>
-
-## One Orchestrator
-
-All flow control lives here. Step workflows are pure execution — they do their work and return. They never dispatch the next step.
-
-## Config-Driven
-
-The pipeline comes from pipeline.json, not hardcoded logic. Users can swap steps, add hooks, or replace the entire pipeline.
-
-## State Machine
-
-The brain reads state → determines position → dispatches → updates state → loops. Every state transition is explicit and persisted before dispatch.
-
-## Hooks Are Workflow Steps
-
-Hooks are markdown files executed like any other workflow step. They can read and modify task files. No special output contract.
-
-</philosophy>
 
 <process>
 
@@ -368,15 +349,3 @@ End workflow.
 
 </process>
 
-<success_criteria>
-- Pipeline loaded from .specd/pipeline.json or installed default
-- Pipeline validated (schema version, references, workflow paths)
-- State-based routing matches all 8 state combinations
-- Default mode auto-runs, pauses at `pause: true` steps, smart-skips unnecessary steps
-- Interactive mode prompts at each transition with skip/jump options
-- Auto mode proceeds without prompting, smart-skips, stops on errors
-- Phase-execution sub-pipeline loops correctly per phase
-- Decimal fix phases handled
-- State saved before dispatch for reliable resume
-- Stop/resume works at any point via /specd.continue
-</success_criteria>

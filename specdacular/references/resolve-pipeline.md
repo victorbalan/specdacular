@@ -4,9 +4,6 @@
 
 Load and validate the pipeline configuration.
 
-**Before using this reference, you must have ready:**
-- Working directory is the project root
-
 ### Load Pipeline
 
 **Resolution order:**

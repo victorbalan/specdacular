@@ -4,12 +4,6 @@
 
 Combine findings from three research agents into a single RESEARCH.md.
 
-**Before using this reference, you must have ready:**
-- `$TASK_NAME` — the task name
-- Agent 1 output (Codebase Integration findings)
-- Agent 2 output (Implementation Patterns findings)
-- Agent 3 output (Pitfalls findings)
-
 ### Collect Agent Outputs
 
 Read the output from each background agent. If an agent failed or returned empty results, note it in the confidence assessment but continue with available data.

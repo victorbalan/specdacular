@@ -6,21 +6,6 @@ Edits are tagged with `<!-- USER_MODIFIED: YYYY-MM-DD -->`. Re-mapping spawns a 
 Output: Updated context file with reviewed/edited sections and updated timestamps.
 </purpose>
 
-<philosophy>
-
-## User Picks What To Review
-
-Don't walk through every section automatically. Show a list of sections and let the user choose which one to look at. The user knows what needs attention.
-
-## User Controls Everything
-
-Every change requires explicit user approval. Never auto-edit, auto-remove, or auto-accept re-mapped content.
-
-## Minimal Touch
-
-Edit only what the user asks. Don't reorganize surrounding sections or rewrite adjacent content.
-
-</philosophy>
 
 <critical_rules>
 
@@ -203,6 +188,8 @@ Display the selected section and let the user act on it.
 
 Follow the Section Display format from the template above exactly. Do not improvise a different format.
 
+Every change requires explicit user approval. Never auto-edit, auto-remove, or auto-accept re-mapped content.
+
 **After displaying, use AskUserQuestion:**
 - header: "Section {N}"
 - question: "What would you like to do with this section?"
@@ -218,7 +205,7 @@ Update the existing tag's date to today (keep the same tag type). If the section
 **If Edit:**
 Ask: "What should I change in this section?"
 
-Wait for user response. Apply the edit using the Edit tool.
+Wait for user response. Apply the edit using the Edit tool. Edit only what the user asks — do not reorganize surrounding sections or rewrite adjacent content.
 
 Add or update `<!-- USER_MODIFIED: {today} -->` on the line immediately after the section heading.
 
@@ -391,20 +378,3 @@ End workflow.
 </step>
 
 </process>
-
-<success_criteria>
-- User selects a context file to review
-- Section list shown with tag status
-- User picks which section to review (not auto-walked)
-- Section display follows `specdacular/templates/context/section-display.md`
-- Re-map diff display follows `specdacular/templates/context/review-diff.md`
-- User can confirm, edit, remove, or re-map each section
-- Edits add USER_MODIFIED tag with date
-- Re-map accepts add AUTO_GENERATED tag with date
-- Confirms update the tag date to today (or add AUTO_GENERATED if untagged)
-- Removes warn about child sections
-- Re-map spawns `specd-codebase-mapper` agent with file-type-specific focus
-- Timestamps updated after review
-- Changes committed
-- Summary shown
-</success_criteria>

@@ -4,21 +4,6 @@ Create a high-level execution roadmap from task context. Derives phases based on
 **Output:** ROADMAP.md, updated STATE.md, config.json
 </purpose>
 
-<philosophy>
-
-## Small Phases
-
-Each phase should be small and focused. One PLAN.md per phase. If a phase feels too big, split it into two phases.
-
-## Dependencies Drive Order
-
-Phase order follows code dependencies: types before implementations, APIs before consumers, foundations before features.
-
-## Plans Are Self-Contained
-
-Each PLAN.md should have enough context that the executing agent doesn't need to ask questions. Reference decisions, research, and codebase patterns.
-
-</philosophy>
 
 <process>
 
@@ -164,11 +149,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- Phases derived from task requirements and dependencies
-- ROADMAP.md created with phase goals and scope (no PLAN.md files)
-- No phase directories created (just-in-time by phase-plan.md)
-- STATE.md updated
-- config.json set to execution stage with phases info
-- Changes committed
-</success_criteria>

@@ -4,10 +4,6 @@
 
 Add a new decision to DECISIONS.md with proper numbering and format.
 
-**Before using this reference, you must have ready:**
-- `$TASK_NAME` — the task name
-- The decision details (from discussion, research, or review)
-
 ### When to Record
 
 Record a decision when:

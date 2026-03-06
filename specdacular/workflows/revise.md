@@ -4,17 +4,6 @@ Collect user feedback on review findings and create fix plans in decimal phases.
 **Output:** Fix plan in decimal phase directory (e.g., phase-01.1/PLAN.md), updated ROADMAP.md, config.json signaling for brain routing.
 </purpose>
 
-<philosophy>
-
-## Fix Plans, Not Inline Fixes
-
-When the user reports issues, create proper PLAN.md files in decimal phases. These get executed through the same execute workflow.
-
-## Clear Signal to Brain
-
-After creating a fix plan, signal the brain by setting `phases.current_status: "pending"` so the brain routes back to execute for the current phase.
-
-</philosophy>
 
 <process>
 
@@ -112,10 +101,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- User feedback collected with clear understanding of issues
-- Fix plan created in decimal phase directory
-- ROADMAP.md updated with fix phase
-- config.json signals brain to route back to execute
-- Changes committed
-</success_criteria>

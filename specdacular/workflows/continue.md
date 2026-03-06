@@ -26,8 +26,3 @@ End workflow.
 </step>
 
 </process>
-
-<success_criteria>
-- All arguments forwarded to brain.md
-- Brain handles all orchestration
-</success_criteria>

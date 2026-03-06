@@ -4,21 +4,6 @@ Continue/deepen task discussion. Targets gray areas, records decisions, and buil
 **Output:** Updated CONTEXT.md, DECISIONS.md, STATE.md
 </purpose>
 
-<philosophy>
-
-## Follow the Thread
-
-Don't march through gray areas like a checklist. Pick the most important one, explore it, and let the conversation branch naturally.
-
-## Four Questions Then Check
-
-For each gray area: ask 4 focused questions, then summarize what was resolved. If clear, mark resolved. If not, continue probing.
-
-## Decisions Get Recorded
-
-Any decision made gets a DEC-{NNN} entry immediately — not at the end.
-
-</philosophy>
 
 <process>
 
@@ -175,10 +160,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- Gray areas explored through conversation
-- New decisions recorded in DECISIONS.md
-- CONTEXT.md updated with resolutions
-- STATE.md reflects updated progress
-- Changes committed
-</success_criteria>

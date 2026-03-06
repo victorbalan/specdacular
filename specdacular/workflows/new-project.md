@@ -6,25 +6,6 @@ After scaffolding, sub-projects use `/specd.new` and `/specd.continue` for their
 **Output:** `.specd/tasks/project/PROJECT.md` (Phase 1), research files (Phase 2), REQUIREMENTS.md + ROADMAP.md (Phase 3), scaffolded sub-projects (Phase 4)
 </purpose>
 
-<philosophy>
-
-## Collaborative, Not Interrogative
-
-Follow the thread. When the user mentions something interesting, explore it. Don't march through a checklist of questions. Build understanding through natural dialogue.
-
-## Vision First, Details Later
-
-The questioning stage captures the big picture — what, why, who, constraints. Technical details (stack, libraries, architecture) come from research agents later.
-
-## Opinionated Research
-
-Research agents don't list options — they recommend. "Use X because Y" is more useful than "you could use X, Y, or Z."
-
-## Greenfield Assumptions
-
-There's no codebase to learn from. All context comes from the user's vision and domain research. This is fundamentally different from `/specd.new`.
-
-</philosophy>
 
 <process>
 
@@ -63,7 +44,7 @@ Continue to questioning.
 </step>
 
 <step name="questioning">
-Collaborative conversation to understand the project vision.
+Collaborative conversation to understand the project vision. Follow the thread — when the user mentions something interesting, explore it. Don't march through a checklist of questions. The questioning stage captures the big picture (what, why, who, constraints); technical details come from research agents later.
 
 **Opening:**
 ```
@@ -165,7 +146,7 @@ Continue to research.
 </step>
 
 <step name="research">
-Spawn 4 parallel research agents to investigate the project domain.
+Spawn 4 parallel research agents to investigate the project domain. Research agents don't list options — they recommend. "Use X because Y" is more useful than "you could use X, Y, or Z."
 
 **Show banner:**
 ```
@@ -781,19 +762,3 @@ End workflow.
 </step>
 
 </process>
-
-<success_criteria>
-- Questioning produces PROJECT.md with clear vision, goals, users, constraints
-- Project directory created at `.specd/tasks/project/`
-- CONTEXT.md and DECISIONS.md initialized from discussion
-- 4 research agents spawn in parallel after PROJECT.md is written
-- Each agent writes its findings (STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md)
-- SUMMARY.md synthesized from all 4 outputs
-- Requirements scoped via multi-select from research FEATURES.md
-- REQUIREMENTS.md written with REQ-IDs, v1/v2/out-of-scope sections
-- Roadmap generated with phases mapped to REQ-IDs and sub-projects
-- Orchestrator config created at root with projects array
-- Sub-project directories created with config and seeded setup FEATURE.md
-- All files committed to git
-- Completion banner shows all artifacts and next steps per sub-project
-</success_criteria>
