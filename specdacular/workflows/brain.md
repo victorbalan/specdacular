@@ -78,19 +78,19 @@ The core orchestration loop. Repeats until task is complete or user stops.
 1. **Determine next step:**
    @~/.claude/specdacular/references/brain-routing.md
 
-   This returns JSON with `next_step`, `pipeline`, `resume`, optionally `task_complete` or `advance_phase`.
+   Read task state and walk the pipeline to find the next step.
 
-2. **If `advance_phase` is true:**
+2. **If all phases complete:**
+   Continue to complete.
+
+3. **If phase completed and more remain:**
    ```bash
    node ~/.claude/hooks/specd-utils.js advance-phase --task-dir $TASK_DIR
    ```
-   Then re-route (run routing again).
-
-3. **If `task_complete` is true:**
-   Continue to complete.
+   Then re-route.
 
 4. **Find step config in pipeline:**
-   Look up `$NEXT_STEP` in `$PIPELINE.pipelines.$NEXT_PIPELINE`.
+   Look up `$NEXT_STEP` in the appropriate pipeline from `$PIPELINE`.
 
 5. **Prompt or proceed:**
    Continue to prompt_or_proceed.

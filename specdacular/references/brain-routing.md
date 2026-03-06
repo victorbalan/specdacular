@@ -2,18 +2,22 @@
 
 ## Brain Routing
 
-Determine the next pipeline step based on current state.
+Determine the next step by reading task state and walking the pipeline.
 
-**Run:**
+**Read state:**
 ```bash
-node ~/.claude/hooks/specd-utils.js route --task-dir $TASK_DIR
+node ~/.claude/hooks/specd-utils.js config-get --task-dir $TASK_DIR --key "stage"
+node ~/.claude/hooks/specd-utils.js config-get --task-dir $TASK_DIR --key "phases"
 ```
 
-**Output:** `{"next_step": "...", "pipeline": "...", "resume": bool}`
+**Determine position in pipeline:** Walk `$PIPELINE.pipelines.main` steps in order. The task's `stage` tells you which step was last completed. The next uncompleted step is your target. If the current step is `phase-execution` (a sub-pipeline reference), walk `$PIPELINE.pipelines["phase-execution"]` using `phases.current_status` to find position within it.
 
-- If `task_complete: true` → continue to complete step
-- If `advance_phase: true` → run `node ~/.claude/hooks/specd-utils.js advance-phase --task-dir $TASK_DIR` first, then re-route
-- Otherwise → use `next_step` and `pipeline` to find and dispatch the step
+**For phase-execution sub-pipeline:** Check `phases.current_status`:
+- `pending` + no PLAN.md → next step is `plan`
+- `pending` + PLAN.md exists → next step is `execute`
+- `executing` → resume `execute`
+- `executed` → next step is `review`
+- `completed` → advance to next phase (or task complete if last phase)
 
 ### Find Step in Pipeline
 
