@@ -2,60 +2,26 @@
 
 ## Load Task Context
 
-Load all context files for a task. Use after validation.
+**Required:** `$TASK_NAME`, `$TASK_DIR` (from validate-task)
+**Optional:** `$PHASE` (phase number), `$CONTEXT_MODE` ("full" or "execution")
 
-**Before using this reference, you must have ready:**
-- `$TASK_NAME` — the task name
-- `$TASK_DIR` — resolved task directory (from validate-task, either `.specd/tasks/$TASK_NAME` or `.specd/features/$TASK_NAME`)
-- `$PHASE` (optional) — phase number, if loading phase-specific context
+### Full Mode (default)
 
-### Always Load
-
-| File | Provides |
-|------|----------|
-| `FEATURE.md` | Technical requirements, files to create, integration points, constraints |
-| `CONTEXT.md` | Discussion history, resolved questions, gray areas remaining |
-| `DECISIONS.md` | Active decisions that constrain implementation |
-| `STATE.md` | Current stage, progress, completed phases |
-| `config.json` | Task settings, stage, decision count |
+Load all task files:
 
 ```bash
-# Read all required files
 cat $TASK_DIR/FEATURE.md
 cat $TASK_DIR/CONTEXT.md
 cat $TASK_DIR/DECISIONS.md
 cat $TASK_DIR/STATE.md
 cat $TASK_DIR/config.json
-```
-
-### Load If Exists
-
-| File | Provides | When Useful |
-|------|----------|-------------|
-| `RESEARCH.md` | Implementation patterns, library decisions, pitfalls | Planning, execution |
-| `ROADMAP.md` | Phase overview, success criteria, dependencies | Planning, execution, review |
-| `CHANGELOG.md` | Implementation deviations, execution-time decisions | Review, continued execution |
-
-```bash
-# Check and read optional files
 [ -f "$TASK_DIR/RESEARCH.md" ] && cat $TASK_DIR/RESEARCH.md
 [ -f "$TASK_DIR/ROADMAP.md" ] && cat $TASK_DIR/ROADMAP.md
 [ -f "$TASK_DIR/CHANGELOG.md" ] && cat $TASK_DIR/CHANGELOG.md
 ```
 
-### Phase-Specific Context (when $PHASE is set)
-
+Load codebase docs if available:
 ```bash
-PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $PHASE)"
-
-# Read phase plan
-[ -f "$PHASE_DIR/PLAN.md" ] && cat "$PHASE_DIR/PLAN.md"
-```
-
-### Codebase Context (if available)
-
-```bash
-# Check for codebase docs
 [ -d ".specd/codebase" ] && {
   [ -f ".specd/codebase/MAP.md" ] && cat .specd/codebase/MAP.md
   [ -f ".specd/codebase/PATTERNS.md" ] && cat .specd/codebase/PATTERNS.md
@@ -64,21 +30,23 @@ PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $PHASE)"
 }
 ```
 
-### Global Config
+### Execution Mode (`$CONTEXT_MODE = execution`)
+
+Load only what's needed for coding — skip discussion history, state, and codebase structure docs:
 
 ```bash
-# Check for global specd config (auto-commit settings)
-cat .specd/config.json 2>/dev/null || echo '{}'
+cat $TASK_DIR/FEATURE.md
+cat $TASK_DIR/DECISIONS.md
+[ -f ".specd/codebase/PATTERNS.md" ] && cat .specd/codebase/PATTERNS.md
+[ -f "$TASK_DIR/RESEARCH.md" ] && cat $TASK_DIR/RESEARCH.md
+[ -f "$TASK_DIR/CHANGELOG.md" ] && cat $TASK_DIR/CHANGELOG.md
 ```
 
-### What to Extract After Loading
+### Phase-Specific Context (when $PHASE is set)
 
-- **From FEATURE.md:** Files to create, integration points, constraints, success criteria
-- **From CONTEXT.md:** Resolved questions, gray areas, discussion history
-- **From DECISIONS.md:** Active decisions (filter out superseded/revoked)
-- **From RESEARCH.md:** Patterns to follow, libraries to use, pitfalls to avoid
-- **From ROADMAP.md:** Phase order, current phase, success criteria per phase
-- **From STATE.md:** Current stage, completed phases, discussion session count
-- **From codebase docs:** Code patterns, file locations, system architecture
+```bash
+PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $PHASE)"
+[ -f "$PHASE_DIR/PLAN.md" ] && cat "$PHASE_DIR/PLAN.md"
+```
 
 </shared>

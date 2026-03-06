@@ -37,7 +37,7 @@ Continue to load_context.
 <step name="load_context">
 @~/.claude/specdacular/references/load-context.md
 
-Load all task context including phase-specific context.
+Set `$CONTEXT_MODE = execution`. Load task context in execution mode (skips discussion history and codebase structure docs).
 
 Continue to find_phase.
 </step>
