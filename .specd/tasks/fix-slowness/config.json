@@ -7,7 +7,8 @@
   "phases": {
     "total": 3,
     "current": 2,
-    "current_status": "pending",
-    "completed": 0
+    "current_status": "executed",
+    "completed": 0,
+    "phase_start_commit": "1f5b2b44656b5e64df31e9ce727153a5b1d2a572"
   }
 }
