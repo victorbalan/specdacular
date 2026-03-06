@@ -61,8 +61,8 @@ User wants two parts: (1) integrate the utility script into workflows, (2) resea
 
 ## Gray Areas Remaining
 
-- [ ] Additional slowness sources — Need to audit all workflows for patterns that cause Claude to over-think (verbose instructions, redundant validations, unnecessary re-reads)
-- [ ] Workflow instruction optimization — Some workflow .md files may have overly detailed instructions that inflate the prompt, causing longer thinking times
+- [x] Additional slowness sources — Deferred to research phase
+- [x] Workflow instruction optimization — Deferred to research phase
 
 ---
 
