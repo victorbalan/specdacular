@@ -2,142 +2,20 @@
 
 ## Brain Routing
 
-Determine the next pipeline step based on current state. The brain calls this after loading state to figure out where to dispatch.
+Determine the next pipeline step based on current state.
 
-**Before using this reference, you must have ready:**
-- `$PIPELINE` — loaded pipeline config
-- `$CONFIG` — task config.json contents
-- `$STATE` — task STATE.md contents
-- `$CONTEXT` — task CONTEXT.md contents
-- `$TASK_DIR` — path to task directory
-
-### Read Current State
-
-Extract from config.json:
-- `stage` — discussion, research, planning, execution
-- `phases.current` — current phase number (if in execution)
-- `phases.current_status` — pending, executing, executed, completed (if in execution)
-- `phases.total` — total phases (if planned)
-
-Extract from CONTEXT.md:
-- Count unchecked items in "Gray Areas Remaining" section → `$GRAY_AREAS_COUNT`
-
-### Route to Next Step
-
-**State-to-step mapping:**
-
-| State | Next Step | Pipeline |
-|-------|-----------|----------|
-| stage=discussion, gray areas > 0 | `discuss` | main |
-| stage=discussion, gray areas = 0 | `research` (or `plan` if user skips) | main |
-| stage=research, no RESEARCH.md | `research` | main |
-| stage=planning, no phases dir | `plan` | main |
-| stage=planning or execution, phases.current_status=pending, no PLAN.md | `plan` | phase-execution |
-| stage=planning or execution, phases.current_status=pending, PLAN.md exists | `execute` | phase-execution |
-| stage=execution, phases.current_status=executing | `execute` (resume) | phase-execution |
-| stage=execution, phases.current_status=executed | `review` | phase-execution |
-| stage=execution, phases.current_status=completed | check more phases | phase-execution |
-
-### Routing Logic
-
-**1. Discussion stage with gray areas:**
-```
-$NEXT_STEP = "discuss"
-$NEXT_PIPELINE = "main"
-```
-**2. Discussion stage, no gray areas:**
-```
-$NEXT_STEP = "research"
-$NEXT_PIPELINE = "main"
-```
-Auto-proceed to research.
-
-**3. Research stage:**
+**Run:**
 ```bash
-[ -f "$TASK_DIR/RESEARCH.md" ] && echo "has_research"
-```
-If no RESEARCH.md:
-```
-$NEXT_STEP = "research"
-$NEXT_PIPELINE = "main"
-```
-If RESEARCH.md exists, advance to plan.
-
-**4. Planning stage, no phases:**
-```bash
-[ -d "$TASK_DIR/phases" ] && echo "has_phases"
-```
-If no phases:
-```
-$NEXT_STEP = "plan"
-$NEXT_PIPELINE = "main"
-```
-If phases exist, advance to execution.
-
-**5. Execution — phases.current_status = "pending":**
-
-Check if the current phase already has a PLAN.md (just-in-time planning):
-```bash
-PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $CURRENT)"
-[ -f "$PHASE_DIR/PLAN.md" ] && echo "has_plan"
+node ~/.claude/hooks/specd-utils.js route --task-dir $TASK_DIR
 ```
 
-If no PLAN.md — phase needs planning first:
-```
-$NEXT_STEP = "plan"
-$NEXT_PIPELINE = "phase-execution"
-```
-plan.md detects stage=execution and creates a detailed PLAN.md for this phase only, reading the goal from ROADMAP.md.
+**Output:** `{"next_step": "...", "pipeline": "...", "resume": bool}`
 
-If PLAN.md exists — phase is planned, ready to execute:
-```
-$NEXT_STEP = "execute"
-$NEXT_PIPELINE = "phase-execution"
-```
-
-**6. Execution — phases.current_status = "executing":**
-```
-$NEXT_STEP = "execute"
-$NEXT_PIPELINE = "phase-execution"
-$RESUME = true
-```
-Interrupted execution — resume.
-
-**7. Execution — phases.current_status = "executed":**
-```
-$NEXT_STEP = "review"
-$NEXT_PIPELINE = "phase-execution"
-```
-Phase done, needs review.
-
-**8. Execution — phases.current_status = "completed":**
-Check for more phases:
-```bash
-# Check if current phase < total phases
-CURRENT=$(read phases.current from config.json)
-TOTAL=$(read phases.total from config.json)
-```
-
-Also check for decimal fix phases:
-```bash
-ls -d $TASK_DIR/phases/phase-$(printf '%02d' $CURRENT).* 2>/dev/null
-```
-
-If decimal fix phases exist and are incomplete → route to execute for fix phase.
-If current < total → advance `phases.current`, set status to "pending", route to execute.
-If current >= total → task complete.
-
-### Task Complete
-
-When all phases are done:
-```
-$NEXT_STEP = "complete"
-$TASK_COMPLETE = true
-```
+- If `task_complete: true` → continue to complete step
+- If `advance_phase: true` → run `node ~/.claude/hooks/specd-utils.js advance-phase --task-dir $TASK_DIR` first, then re-route
+- Otherwise → use `next_step` and `pipeline` to find and dispatch the step
 
 ### Find Step in Pipeline
-
-To find a step by name in a pipeline array:
 
 ```
 For each step in $PIPELINE.pipelines.{pipeline_name}:
@@ -145,24 +23,13 @@ For each step in $PIPELINE.pipelines.{pipeline_name}:
     Return step (workflow path, hooks config)
 ```
 
-If step not found in pipeline → error:
-```
-Step '{name}' not found in pipeline '{pipeline_name}'. Check your pipeline.json.
-```
+If step not found → error: `Step '{name}' not found in pipeline '{pipeline_name}'.`
 
 ### Resolve Workflow Path
 
 Step workflow values are filenames (e.g., `"discuss.md"`). Resolve to full path:
-
-```
-~/.claude/specdacular/workflows/{workflow}
-```
-
-Or for local install:
-```
-.claude/specdacular/workflows/{workflow}
-```
-
-For user-overridden workflows (path contains `/`), use as-is (relative to project root).
+- Installed: `~/.claude/specdacular/workflows/{workflow}`
+- Local: `.claude/specdacular/workflows/{workflow}`
+- User-overridden (path contains `/`): use as-is relative to project root.
 
 </shared>
