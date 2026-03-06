@@ -1,0 +1,14 @@
+{
+  "task_name": "fix-slowness",
+  "created": "2026-03-06",
+  "stage": "complete",
+  "discussion_sessions": 1,
+  "decisions_count": 4,
+  "phases": {
+    "total": 3,
+    "current": 3,
+    "current_status": "completed",
+    "completed": 2,
+    "phase_start_commit": "98b43feb9a38b52be15d06b05a3bc6bfa02078e8"
+  }
+}

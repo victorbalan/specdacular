@@ -103,10 +103,3 @@ End workflow.
 </step>
 
 </process>
-
-<success_criteria>
-- [ ] `.specd/config.json` exists with `auto_commit_docs` and `auto_commit_code` fields
-- [ ] Existing config fields preserved (not overwritten)
-- [ ] User confirmed settings via AskUserQuestion
-- [ ] Final config displayed to user
-</success_criteria>

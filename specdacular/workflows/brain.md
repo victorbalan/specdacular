@@ -9,25 +9,6 @@ The brain is the single source of truth for workflow orchestration. Step workflo
 - **Auto (`--auto`):** Runs everything, only stops on errors or task completion
 </purpose>
 
-<philosophy>
-
-## One Orchestrator
-
-All flow control lives here. Step workflows are pure execution — they do their work and return. They never dispatch the next step.
-
-## Config-Driven
-
-The pipeline comes from pipeline.json, not hardcoded logic. Users can swap steps, add hooks, or replace the entire pipeline.
-
-## State Machine
-
-The brain reads state → determines position → dispatches → updates state → loops. Every state transition is explicit and persisted before dispatch.
-
-## Hooks Are Workflow Steps
-
-Hooks are markdown files executed like any other workflow step. They can read and modify task files. No special output contract.
-
-</philosophy>
 
 <process>
 
@@ -94,19 +75,22 @@ The core orchestration loop. Repeats until task is complete or user stops.
 
 **On each iteration:**
 
-1. **Load current state:**
-   Read config.json, STATE.md, CONTEXT.md from task directory.
-
-2. **Determine next step:**
+1. **Determine next step:**
    @~/.claude/specdacular/references/brain-routing.md
 
-   This sets: `$NEXT_STEP`, `$NEXT_PIPELINE`, and optionally `$TASK_COMPLETE` or `$RESUME`.
+   Read task state and walk the pipeline to find the next step.
 
-3. **If task complete:**
+2. **If all phases complete:**
    Continue to complete.
 
+3. **If phase completed and more remain:**
+   ```bash
+   node ~/.claude/hooks/specd-utils.js advance-phase --task-dir $TASK_DIR
+   ```
+   Then re-route.
+
 4. **Find step config in pipeline:**
-   Look up `$NEXT_STEP` in `$PIPELINE.pipelines.$NEXT_PIPELINE`.
+   Look up `$NEXT_STEP` in the appropriate pipeline from `$PIPELINE`.
 
 5. **Prompt or proceed:**
    Continue to prompt_or_proceed.
@@ -115,7 +99,7 @@ The core orchestration loop. Repeats until task is complete or user stops.
    Continue to update_state.
 
 7. **After state update:**
-   Loop back to step 1 (re-read state, determine next step).
+   Loop back to step 1.
 
 Continue to prompt_or_proceed.
 </step>
@@ -223,7 +207,11 @@ Continue to execute_hooks_and_step.
 Execute pre-hooks, the step workflow, and post-hooks.
 
 **Save state before dispatch:**
-Update config.json to reflect the step is starting. For execute step, set `phases.current_status: "executing"` and record `phase_start_commit`.
+For execute step:
+```bash
+node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "phases.current_status=executing"
+node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "phases.phase_start_commit=$(git rev-parse HEAD)"
+```
 
 Commit state:
 @~/.claude/specdacular/references/commit-docs.md
@@ -271,12 +259,16 @@ Continue to update_state.
 Update state based on which step just completed.
 
 **After discuss completes:**
-- Stage stays at "discussion"
 - Re-read CONTEXT.md to check if gray areas are resolved
-- If all resolved, advance stage to "research"
+- If all resolved:
+  ```bash
+  node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "stage=research"
+  ```
 
 **After research completes:**
-- Set stage to "planning" in config.json
+```bash
+node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "stage=planning"
+```
 
 **After plan completes (task-level — main pipeline):**
 - plan.md sets stage to "execution" and phases info in config.json
@@ -288,16 +280,22 @@ Update state based on which step just completed.
 - Brain loops back, routing sees pending + PLAN.md exists → routes to execute
 
 **After execute completes:**
-- Set `phases.current_status: "executed"` in config.json
+```bash
+node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "phases.current_status=executed"
+```
 
 **After review completes:**
-- Read review outcome from config.json or STATE.md
-- If user approved ("Looks good"): set `phases.current_status: "completed"`, increment `phases.completed`, advance to next phase or mark task complete
+- If user approved ("Looks good"):
+  ```bash
+  node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "phases.current_status=completed"
+  node ~/.claude/hooks/specd-utils.js increment --task-dir $TASK_DIR --key "phases.completed"
+  ```
+  Routing will handle phase advancement on next loop.
 - If user wants revisions: set up for revise step
 - If user stopped: save state, exit
 
 **After revise completes:**
-- Read config.json — revise should have set `phases.current_status: "pending"` (fix plan created, needs execution)
+- Revise sets `phases.current_status: "pending"` via script
 - Brain loops back to execute for the current phase (including decimal fix phases)
 
 **Commit state updates:**
@@ -314,27 +312,13 @@ Handle the phase-execution sub-pipeline loop.
 
 When the brain reaches the `phase-execution` pipeline reference in the main pipeline:
 
-1. Read ROADMAP.md and config.json to determine current phase
+1. Route using specd-utils to determine current phase
 2. Enter the phase-execution sub-pipeline (plan → execute → review → revise)
 3. After each iteration through the sub-pipeline:
-   - If review approved and more phases remain: advance `phases.current`, set status "pending", loop
+   - If review approved and more phases remain: routing handles advance-phase, loop
    - If review approved and no more phases: exit sub-pipeline, task complete
    - If revise created fix plans: stay on current phase, loop back to execute
    - If user stopped: save state, exit
-
-**Decimal phase handling:**
-After revise creates a fix plan (e.g., phase-01.1/):
-```bash
-ls -d $TASK_DIR/phases/phase-$(printf '%02d' $CURRENT).* 2>/dev/null | sort -V
-```
-If decimal phases exist and are incomplete, execute them before advancing to next integer phase.
-
-**Phase advancement:**
-```
-phases.current += 1
-phases.current_status = "pending"
-phases.phase_start_commit = null
-```
 
 Continue to main_loop (which will route to the next phase's execute step).
 </step>
@@ -343,7 +327,9 @@ Continue to main_loop (which will route to the next phase's execute step).
 All phases complete. Task is done.
 
 **Update state:**
-- Set stage to "complete" in config.json
+```bash
+node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "stage=complete"
+```
 
 **Present:**
 ```
@@ -363,16 +349,3 @@ End workflow.
 
 </process>
 
-<success_criteria>
-- Pipeline loaded from .specd/pipeline.json or installed default
-- Pipeline validated (schema version, references, workflow paths)
-- State-based routing matches all 8 state combinations
-- Default mode auto-runs, pauses at `pause: true` steps, smart-skips unnecessary steps
-- Interactive mode prompts at each transition with skip/jump options
-- Auto mode proceeds without prompting, smart-skips, stops on errors
-- Phase-execution sub-pipeline loops correctly per phase
-- Decimal fix phases handled
-- State saved before dispatch for reliable resume
-- Stop/resume works at any point via /specd.continue
-- Hook execution points marked for Phase 2
-</success_criteria>

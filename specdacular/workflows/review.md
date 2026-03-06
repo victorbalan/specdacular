@@ -6,21 +6,6 @@ Review executed phase by comparing plan intent against actual code. Combines sem
 **Output:** Review findings presented, user choice recorded for brain routing (approve, revise, or stop).
 </purpose>
 
-<philosophy>
-
-## Semantic Review, Not Literal Diff
-
-Plans describe intent. Code implements intent. Check whether intent was fulfilled, not whether every word matches.
-
-## Inspect, Then Show
-
-Claude reads the code and compares against the plan first. Then presents findings with the git diff. The user gets a curated view, not a raw dump.
-
-## Deviations Are Neutral
-
-A deviation means code differs from plan. It might be an improvement. The review surfaces it; the user decides.
-
-</philosophy>
 
 <process>
 
@@ -154,11 +139,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- Plan intent compared against actual code (semantic review)
-- Git diff presented to user
-- Per-task status with icons (✅ ⚠️ ❌)
-- User can approve, revise, or stop
-- User's choice recorded for brain routing
-- Phase advances only through brain (not in this workflow)
-</success_criteria>

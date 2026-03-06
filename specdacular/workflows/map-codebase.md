@@ -6,21 +6,6 @@ Each agent has fresh context, explores a specific focus area, and **writes docum
 Output: .specd/codebase/ folder with 4 documents optimized for Claude consumption.
 </purpose>
 
-<philosophy>
-**These documents are FOR CLAUDE, not humans.**
-
-The 4 documents answer questions Claude can't get from reading code:
-- **MAP.md** — "Where is X? What functions exist?"
-- **PATTERNS.md** — "How do I write code that fits?"
-- **STRUCTURE.md** — "Where do I put new code?"
-- **CONCERNS.md** — "What will bite me?"
-
-**Why dedicated mapper agents:**
-- Fresh context per domain (no token contamination)
-- Agents write documents directly (no context transfer back to orchestrator)
-- Orchestrator only summarizes what was created (minimal context usage)
-- Parallel execution (faster)
-</philosophy>
 
 <process>
 
@@ -687,29 +672,3 @@ End workflow.
 </step>
 
 </process>
-
-<success_criteria>
-**Single-project mode:**
-- .specd/codebase/ directory created
-- .specd/config.json created with type and specd_version (DEC-012)
-- 4 parallel specd-codebase-mapper agents spawned with run_in_background=true
-- Agents write documents directly (orchestrator doesn't receive document contents)
-- All 4 documents exist: MAP.md, PATTERNS.md, STRUCTURE.md, CONCERNS.md
-- Documents contain real code examples (not placeholders)
-- Clear completion summary with line counts
-
-**Multi-project mode (additional):**
-- detect_mode correctly identifies multi-project setup
-- Projects registered with name, path, description
-- .specd/config.json created with type=orchestrator and projects array (DEC-006)
-- Per-project .specd/config.json created with type=project (DEC-012)
-- 4 agents spawned per project, all in parallel
-- Orchestrator agent runs after per-project agents complete (DEC-007)
-- Orchestrator docs: PROJECTS.md, TOPOLOGY.md, CONTRACTS.md, CONCERNS.md
-- Per-project docs: MAP.md, PATTERNS.md, STRUCTURE.md, CONCERNS.md per project
-- Multi-project completion summary with per-project line counts
-
-**Legacy detection:**
-- .specd/ without config.json detected as legacy
-- User prompted to re-map
-</success_criteria>

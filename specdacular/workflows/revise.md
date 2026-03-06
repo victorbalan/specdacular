@@ -4,17 +4,6 @@ Collect user feedback on review findings and create fix plans in decimal phases.
 **Output:** Fix plan in decimal phase directory (e.g., phase-01.1/PLAN.md), updated ROADMAP.md, config.json signaling for brain routing.
 </purpose>
 
-<philosophy>
-
-## Fix Plans, Not Inline Fixes
-
-When the user reports issues, create proper PLAN.md files in decimal phases. These get executed through the same execute workflow.
-
-## Clear Signal to Brain
-
-After creating a fix plan, signal the brain by setting `phases.current_status: "pending"` so the brain routes back to execute for the current phase.
-
-</philosophy>
 
 <process>
 
@@ -33,10 +22,10 @@ Load all context including the current phase's PLAN.md and review findings.
 
 **Read phase info:**
 ```bash
-PHASE_NUM=$(cat $TASK_DIR/config.json | grep -o '"current": [0-9]*' | grep -o '[0-9]*')
-PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $PHASE_NUM)"
-cat "$PHASE_DIR/PLAN.md"
+node ~/.claude/hooks/specd-utils.js phase-info --task-dir $TASK_DIR
 ```
+
+Parse JSON output for `phase`, `title`, `status`.
 
 Continue to collect_feedback.
 </step>
@@ -62,20 +51,14 @@ Continue to create_fix_plan.
 <step name="create_fix_plan">
 Create a fix plan in a decimal phase.
 
-**Determine fix phase number:**
+**Create next decimal phase directory:**
 ```bash
-CURRENT=$(printf '%02d' $PHASE_NUM)
-ls -d $TASK_DIR/phases/phase-$CURRENT.* 2>/dev/null | sort -V | tail -1
-```
-- If no decimal phases → create `phase-{N}.1/`
-- If `phase-{N}.1/` exists → create `phase-{N}.2/`, etc.
-
-**Create fix phase directory and PLAN.md:**
-```bash
-mkdir -p $TASK_DIR/phases/phase-{N.M}/
+node ~/.claude/hooks/specd-utils.js next-decimal-phase --task-dir $TASK_DIR
 ```
 
-Write `PLAN.md` using standard plan format:
+Parse JSON output for `phase` (e.g., "1.1") and `dir` (e.g., "phases/phase-01.1").
+
+**Write PLAN.md** in the created directory using standard plan format:
 - Objective: Address review feedback for Phase {N}
 - Tasks: One per issue reported, with clear fix description and verification
 
@@ -88,8 +71,9 @@ Continue to signal_outcome.
 <step name="signal_outcome">
 Signal the brain that a fix plan was created and needs execution.
 
-**Update config.json:**
-- Set `phases.current_status` to `"pending"` — this tells the brain to route back to execute for the current phase (which will pick up the decimal fix phase)
+```bash
+node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "phases.current_status=pending"
+```
 
 Continue to commit.
 </step>
@@ -117,10 +101,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- User feedback collected with clear understanding of issues
-- Fix plan created in decimal phase directory
-- ROADMAP.md updated with fix phase
-- config.json signals brain to route back to execute
-- Changes committed
-</success_criteria>

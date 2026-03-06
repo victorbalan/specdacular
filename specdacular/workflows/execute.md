@@ -4,25 +4,6 @@ Execute the current phase's PLAN.md. Runs tasks with verification, handles devia
 **Output:** Implemented code, CHANGELOG.md entries
 </purpose>
 
-<philosophy>
-
-## One Phase at a Time
-
-Execute one phase's PLAN.md. The brain decides what happens after.
-
-## Verify Each Task
-
-After each task, run the verification command. If it fails, attempt to fix. If fix fails, stop and ask the user.
-
-## Log Deviations
-
-If implementation differs from plan, log it in CHANGELOG.md. Deviations are neutral — they might be improvements.
-
-## Commit Granularly
-
-Commit after each task (or logical group of closely related tasks). Small commits make review easier.
-
-</philosophy>
 
 <process>
 
@@ -37,13 +18,7 @@ Continue to load_context.
 <step name="load_context">
 @~/.claude/specdacular/references/load-context.md
 
-Load all task context including phase-specific context.
-
-**Read global config:**
-```bash
-cat .specd/config.json 2>/dev/null || echo '{}'
-```
-Check `auto_commit_code` and `auto_commit_docs` settings.
+Set `$CONTEXT_MODE = execution`. Load task context in execution mode (skips discussion history and codebase structure docs).
 
 Continue to find_phase.
 </step>
@@ -51,23 +26,15 @@ Continue to find_phase.
 <step name="find_phase">
 Find the phase to execute.
 
-**Read config.json:**
-- `phases.current` — current phase number
-- `phases.current_status` — should be "pending" or "executing"
-
-**Find PLAN.md:**
 ```bash
-PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $CURRENT_PHASE)"
-[ -f "$PHASE_DIR/PLAN.md" ] || { echo "no plan"; exit 1; }
+node ~/.claude/hooks/specd-utils.js phase-info --task-dir $TASK_DIR
 ```
 
-**Also check for fix plans (decimal phases):**
-```bash
-ls -d $TASK_DIR/phases/phase-$(printf '%02d' $CURRENT_PHASE).* 2>/dev/null
-```
-If fix plans exist and are incomplete, execute those first.
+Parse JSON output: `phase`, `status`, `plan_exists`, `tasks_count`, `title`.
 
-Read the PLAN.md. Parse tasks.
+If `plan_exists` is false → error, no plan for this phase.
+
+Read the PLAN.md at `$TASK_DIR/phases/phase-{NN}/PLAN.md`. Parse tasks.
 
 Continue to record_start.
 </step>
@@ -77,9 +44,9 @@ Record phase execution start.
 
 **If this is a fresh start (not resuming):**
 ```bash
-git rev-parse HEAD
+node ~/.claude/hooks/specd-utils.js config-update --task-dir $TASK_DIR --set "phases.phase_start_commit=$(git rev-parse HEAD)"
+node ~/.claude/hooks/specd-utils.js record-phase-start --task-dir $TASK_DIR --phase $PHASE_NUM
 ```
-Store as `phases.phase_start_commit` in config.json if not already set.
 
 Continue to execute_tasks.
 </step>
@@ -98,14 +65,9 @@ Execute each task from the PLAN.md.
    - If fails: attempt to fix (max 2 attempts)
    - If still fails: stop and ask user (retry/skip/stop)
 
-4. **Log deviations:** If implementation differs from plan, add to CHANGELOG.md:
-   ```markdown
-   ### {date} - Phase {N} PLAN.md
-
-   **{Brief title}**
-   - **What:** {What was changed/decided}
-   - **Why:** {Reason for deviation}
-   - **Files:** `{affected files}`
+4. **Log deviations:** If implementation differs from plan:
+   ```bash
+   node ~/.claude/hooks/specd-utils.js log-changelog --task-dir $TASK_DIR --phase $N --title "Brief title" --what "What changed" --why "Reason" --files "affected files"
    ```
 
 5. **Commit:**
@@ -120,8 +82,9 @@ Continue to phase_complete.
 Mark phase execution as done.
 
 **Update STATE.md:**
-- Add phase to Completed Phases table (or update if fix phase)
-- Update current phase info
+```bash
+node ~/.claude/hooks/specd-utils.js state-add-phase --task-dir $TASK_DIR --phase $N --tasks $TASK_COUNT --deviations $DEV_COUNT
+```
 
 **Commit state:**
 @~/.claude/specdacular/references/commit-docs.md
@@ -138,10 +101,3 @@ End workflow (caller handles continuation).
 
 </process>
 
-<success_criteria>
-- Phase PLAN.md tasks executed in order
-- Each task verified after implementation
-- Deviations logged in CHANGELOG.md
-- Code committed after each task
-- Ends cleanly without dispatching review
-</success_criteria>

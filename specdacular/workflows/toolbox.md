@@ -11,17 +11,6 @@ Menu of advanced feature operations. Presents a picker and dispatches to the app
 For discuss, research, and plan: asks scope (whole feature or specific phase) before dispatching.
 </purpose>
 
-<philosophy>
-
-## Thin Dispatcher
-
-This workflow is a menu + dispatcher. It selects a feature, presents operations, asks scope when needed, then hands off to the real workflow. No logic duplication.
-
-## Scope Selection (DEC-007)
-
-Discuss, research, and plan can operate at feature level OR phase level. The toolbox asks which, then routes accordingly.
-
-</philosophy>
 
 <process>
 
@@ -105,11 +94,3 @@ Pass feature name as argument.
 </step>
 
 </process>
-
-<success_criteria>
-- [ ] Feature selected (from argument or picker)
-- [ ] Menu presented with all 5 operations
-- [ ] Scope selection works for discuss/research/plan (DEC-007)
-- [ ] Routes to correct workflow for each operation
-- [ ] Uses shared references for feature and phase selection (DEC-010)
-</success_criteria>

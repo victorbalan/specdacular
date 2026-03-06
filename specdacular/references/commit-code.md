@@ -2,36 +2,12 @@
 
 ## Auto-Commit Code
 
-Commit implementation code changes, respecting the user's auto-commit setting.
-
-**Before using this reference, you must have ready:**
-- `$FILES` — the files to `git add` (space-separated paths)
-- `$MESSAGE` — the commit message
-
-**IMPORTANT — You MUST check the auto-commit setting BEFORE running any git commands. Do NOT skip this check.**
-
-**Step 1: Read the setting (MANDATORY):**
+**Required:** `$FILES` (space-separated paths), `$MESSAGE` (commit message)
 
 ```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_code": true}'
+node ~/.claude/hooks/specd-utils.js commit --task-dir .specd/tasks/$TASK_NAME --type code --files "$FILES" --message "$MESSAGE"
 ```
 
-Read the value of `auto_commit_code` from the output.
-
-**Step 2: If `auto_commit_code` is `false` → STOP. Do NOT commit.**
-
-Print this message and move on to the next workflow step:
-
-```
-Auto-commit disabled for code — changes not committed.
-Modified files: $FILES
-```
-
-**Step 3: If `auto_commit_code` is `true` or not set (default true) → commit:**
-
-```bash
-git add $FILES
-git commit -m "$MESSAGE"
-```
+If `"committed": false`, auto-commit is disabled — mention uncommitted files and continue.
 
 </shared>
