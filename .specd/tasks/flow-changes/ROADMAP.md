@@ -12,7 +12,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: State File & Task Resolution** — Add `.specd/state.json` and fallback task resolution to existing commands
+- [x] **Phase 1: State File & Task Resolution** — Add `.specd/state.json` and fallback task resolution to existing commands
 - [ ] **Phase 2: Guardrails Template & Context Command** — Create behavioral guardrails file and `/specd.context` command
 - [ ] **Phase 3: Standalone Commands** — Extract toolbox operations into `/specd.research`, `/specd.plan`, `/specd.execute`, expand `/specd.new`
 - [ ] **Phase 4: RALPH Loop** — Build `bin/ralph.js` state-machine loop spawning Claude CLI per step
