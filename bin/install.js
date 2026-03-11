@@ -2,6 +2,7 @@
 
 // Dispatch subcommands before install logic
 if (process.argv[2] === 'ralph') {
+  process.argv.splice(2, 1); // Remove 'ralph' so ralph.js sees clean args
   require('./ralph.js');
   return;
 }

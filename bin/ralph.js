@@ -53,19 +53,30 @@ const taskNameArg = args.find(a => !a.startsWith('--'));
 
 // Track current child for cleanup
 let currentChild = null;
+let shuttingDown = false;
 
 // Graceful shutdown
-process.on('SIGINT', () => {
+function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
   console.log(`\n${yellow}Shutting down gracefully...${reset}`);
   if (currentChild) {
     try {
+      // Kill the process group (detached child + its children)
       process.kill(-currentChild.pid, 'SIGTERM');
     } catch (e) {
-      // Process may have already exited
+      try {
+        // Fallback: kill just the child
+        currentChild.kill('SIGTERM');
+      } catch {}
     }
   }
-  process.exit(0);
-});
+  // Give child a moment to clean up, then exit
+  setTimeout(() => process.exit(0), 500);
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 // --- Utility functions ---
 
@@ -286,11 +297,29 @@ Proceed autonomously — do not ask the user questions. Make reasonable decision
 When a workflow step says to use AskUserQuestion, instead make the most reasonable default choice and proceed.`;
 }
 
+function formatToolLog(toolName, toolInput) {
+  const short = {
+    Read: () => toolInput.file_path ? path.basename(toolInput.file_path) : '',
+    Write: () => toolInput.file_path ? path.basename(toolInput.file_path) : '',
+    Edit: () => toolInput.file_path ? path.basename(toolInput.file_path) : '',
+    Glob: () => toolInput.pattern || '',
+    Grep: () => toolInput.pattern ? `/${toolInput.pattern}/` : '',
+    Bash: () => {
+      const cmd = toolInput.command || '';
+      return cmd.length > 60 ? cmd.substring(0, 57) + '...' : cmd;
+    },
+    Agent: () => toolInput.description || '',
+  };
+  const fmt = short[toolName];
+  const detail = fmt ? fmt() : '';
+  return detail ? `${toolName} ${dim}${detail}${reset}` : toolName;
+}
+
 function runClaudeStep(prompt, guardrailsFile) {
   return new Promise((resolve, reject) => {
     const cliArgs = [
       '-p', prompt,
-      '--output-format', 'json',
+      '--output-format', 'stream-json',
       '--dangerously-skip-permissions',
       '--no-session-persistence',
     ];
@@ -306,9 +335,39 @@ function runClaudeStep(prompt, guardrailsFile) {
 
     currentChild = child;
 
-    let stdout = '';
+    let lastResult = null;
     let stderr = '';
-    child.stdout.on('data', (d) => { stdout += d; });
+    let buffer = '';
+
+    child.stdout.on('data', (d) => {
+      buffer += d;
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const event = JSON.parse(line);
+
+          // Track final result message for cost info
+          if (event.type === 'result') {
+            lastResult = event;
+          }
+
+          // Log tool use
+          if (event.type === 'assistant' && event.message && event.message.content) {
+            for (const block of event.message.content) {
+              if (block.type === 'tool_use') {
+                const log = formatToolLog(block.name, block.input || {});
+                console.log(`  ${dim}▸${reset} ${log}`);
+              }
+            }
+          }
+        } catch {
+          // Skip malformed lines
+        }
+      }
+    });
     child.stderr.on('data', (d) => { stderr += d; });
 
     child.on('error', (err) => {
@@ -318,13 +377,7 @@ function runClaudeStep(prompt, guardrailsFile) {
 
     child.on('close', (code) => {
       currentChild = null;
-      let result;
-      try {
-        result = JSON.parse(stdout.trim());
-      } catch {
-        result = { result: stdout.trim() };
-      }
-      resolve({ exitCode: code, result, stderr: stderr.trim() });
+      resolve({ exitCode: code, result: lastResult || {}, stderr: stderr.trim() });
     });
   });
 }
@@ -429,8 +482,9 @@ ${green}━━━━━━━━━━━━━━━━━━━━━━━━
         // Skip — continue loop, state should be updated by the step
       } else {
         console.log(`${green}✓${reset} Step ${route.step} complete`);
-        if (result.result && result.result.total_cost_usd) {
-          console.log(`  ${dim}Cost: $${result.result.total_cost_usd.toFixed(4)}${reset}`);
+        const cost = result.result && (result.result.total_cost_usd ?? result.result.costUsd);
+        if (cost) {
+          console.log(`  ${dim}Cost: $${Number(cost).toFixed(4)}${reset}`);
         }
       }
     } catch (err) {
