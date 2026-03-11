@@ -241,10 +241,17 @@ function determineNextStep(taskName, config) {
   }
 
   // Execution stage (or planning with phases)
-  if (stage === 'execution' || stage === 'planning') {
+  // Normalize stage — treat 'complete' with incomplete phases as 'execution'
+  const hasIncompletePhases = phases.total && (phases.completed || 0) < phases.total;
+  const effectiveStage = (stage === 'complete' && hasIncompletePhases) ? 'execution' : stage;
+
+  if (effectiveStage === 'execution' || effectiveStage === 'planning') {
     const current = phases.current || 1;
     const total = phases.total || 1;
-    const status = phases.current_status || 'pending';
+    // Normalize status — treat unknown values as 'pending'
+    const knownStatuses = ['pending', 'executing', 'executed', 'completed'];
+    const rawStatus = phases.current_status || 'pending';
+    const status = knownStatuses.includes(rawStatus) ? rawStatus : 'pending';
     const phaseNum = String(current).padStart(2, '0');
     const phaseDir = path.join(taskDir, 'phases', `phase-${phaseNum}`);
 
@@ -290,55 +297,40 @@ function determineNextStep(taskName, config) {
 
 function advanceState(config, route, taskDir) {
   const step = route.step;
-  let changed = false;
 
-  // Main pipeline transitions
+  // Forcefully set the correct state — don't trust subprocess config edits.
+  // The orchestrator is the single source of truth for state transitions.
+
   if (step === 'discuss') {
-    // discuss → research: only if workflow resolved gray areas
-    // Let determineNextStep re-check CONTEXT.md on next iteration
+    // Leave as-is — router re-checks CONTEXT.md gray areas
   } else if (step === 'research') {
-    if (config.stage === 'discussion' || config.stage === 'research') {
-      config.stage = 'research';
-      // Router will check for RESEARCH.md existence next iteration
-      changed = true;
-    }
+    config.stage = 'research';
   } else if (step === 'plan') {
-    if (config.stage !== 'execution') {
-      config.stage = 'planning';
-      // Router will check for phases/ dir next iteration
-      changed = true;
-    }
-  }
+    config.stage = 'planning';
+  } else if (step === 'phase-plan') {
+    // Ensure stage is correct
+    config.stage = 'execution';
+    config.phases = config.phases || {};
+    config.phases.current_status = 'pending'; // router checks PLAN.md existence
 
-  // Phase pipeline transitions
-  if (step === 'phase-plan') {
-    // phase-plan creates PLAN.md — status stays 'pending', router detects PLAN.md
-    // Nothing to change — but verify PLAN.md was created
-    const phases = config.phases || {};
-    const phaseNum = String(phases.current || 1).padStart(2, '0');
+    const phaseNum = String(config.phases.current || 1).padStart(2, '0');
     const planPath = path.join(taskDir, 'phases', `phase-${phaseNum}`, 'PLAN.md');
     if (!fs.existsSync(planPath)) {
       console.log(`  ${yellow}⚠ PLAN.md not created — step will retry${reset}`);
     }
   } else if (step === 'execute') {
-    // After successful execution, advance to 'executed' for review
-    if (config.phases && config.phases.current_status !== 'executed' && config.phases.current_status !== 'completed') {
-      config.phases.current_status = 'executed';
-      if (config.stage !== 'execution') config.stage = 'execution';
-      changed = true;
-    }
+    config.stage = 'execution';
+    config.phases = config.phases || {};
+    config.phases.current_status = 'executed';
   } else if (step === 'review') {
-    // After successful review, mark phase completed
-    if (config.phases && config.phases.current_status !== 'completed') {
-      config.phases.current_status = 'completed';
-      config.phases.completed = (config.phases.completed || 0) + 1;
-      changed = true;
-    }
+    config.stage = 'execution';
+    config.phases = config.phases || {};
+    config.phases.current_status = 'completed';
+    config.phases.completed = (config.phases.completed || 0) + 1;
   }
 
-  if (changed) {
-    writeAtomic(path.join(taskDir, 'config.json'), config);
-  }
+  // Always write — correct any damage the subprocess may have done
+  writeAtomic(path.join(taskDir, 'config.json'), config);
 }
 
 // --- Claude spawning ---
