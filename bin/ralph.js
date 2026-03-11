@@ -274,6 +274,61 @@ function determineNextStep(taskName, config) {
   return { step: 'complete' };
 }
 
+// --- State advancement ---
+
+function advanceState(config, route, taskDir) {
+  const step = route.step;
+  let changed = false;
+
+  // Main pipeline transitions
+  if (step === 'discuss') {
+    // discuss → research: only if workflow resolved gray areas
+    // Let determineNextStep re-check CONTEXT.md on next iteration
+  } else if (step === 'research') {
+    if (config.stage === 'discussion' || config.stage === 'research') {
+      config.stage = 'research';
+      // Router will check for RESEARCH.md existence next iteration
+      changed = true;
+    }
+  } else if (step === 'plan') {
+    if (config.stage !== 'execution') {
+      config.stage = 'planning';
+      // Router will check for phases/ dir next iteration
+      changed = true;
+    }
+  }
+
+  // Phase pipeline transitions
+  if (step === 'phase-plan') {
+    // phase-plan creates PLAN.md — status stays 'pending', router detects PLAN.md
+    // Nothing to change — but verify PLAN.md was created
+    const phases = config.phases || {};
+    const phaseNum = String(phases.current || 1).padStart(2, '0');
+    const planPath = path.join(taskDir, 'phases', `phase-${phaseNum}`, 'PLAN.md');
+    if (!fs.existsSync(planPath)) {
+      console.log(`  ${yellow}⚠ PLAN.md not created — step will retry${reset}`);
+    }
+  } else if (step === 'execute') {
+    // After successful execution, advance to 'executed' for review
+    if (config.phases && config.phases.current_status !== 'executed' && config.phases.current_status !== 'completed') {
+      config.phases.current_status = 'executed';
+      if (config.stage !== 'execution') config.stage = 'execution';
+      changed = true;
+    }
+  } else if (step === 'review') {
+    // After successful review, mark phase completed
+    if (config.phases && config.phases.current_status !== 'completed') {
+      config.phases.current_status = 'completed';
+      config.phases.completed = (config.phases.completed || 0) + 1;
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    writeAtomic(path.join(taskDir, 'config.json'), config);
+  }
+}
+
 // --- Claude spawning ---
 
 function buildPrompt(taskName, stepName, workflowFile) {
@@ -529,6 +584,13 @@ ${green}━━━━━━━━━━━━━━━━━━━━━━━━
         if (input || output) stats.push(`${(input / 1000).toFixed(1)}k in / ${(output / 1000).toFixed(1)}k out`);
         if (stats.length) {
           console.log(`  ${dim}${stats.join(' · ')}${reset}`);
+        }
+
+        // Orchestrator-owned state transitions
+        // Re-read config in case the step modified it
+        const updatedConfig = readJson(path.join(taskDir, 'config.json'));
+        if (updatedConfig) {
+          advanceState(updatedConfig, route, taskDir);
         }
       }
     } catch (err) {
