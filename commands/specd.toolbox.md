@@ -20,12 +20,12 @@ Task lifecycle operations: discuss, research, plan, execute, review.
 </objective>
 
 <execution_context>
-**Parse $ARGUMENTS as task name.**
+**Resolve task name:**
+@~/.claude/specdacular/references/resolve-task.md
 
-- If a bare word that matches a directory in `.specd/tasks/` or `.specd/features/` → use as task name
-- If empty → check `.specd/tasks/` for available tasks. If only one task exists, use it automatically. If multiple, ask.
+Resolve task name from $ARGUMENTS (falls back to `.specd/state.json`, then single-task auto-pick, then asks user).
 
-Validate using:
+**Validate task:**
 @~/.claude/specdacular/references/validate-task.md
 
 Then present the menu using AskUserQuestion:
