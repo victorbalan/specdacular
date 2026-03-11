@@ -1,0 +1,41 @@
+SPECDACULAR BEHAVIORAL RULES
+
+These rules apply whenever you are working on a specd-managed task.
+
+== STATE MANAGEMENT ==
+
+IMPORTANT: STATE.md and config.json are your source of truth.
+- Read them at session start to understand where you are.
+- After completing any step, update STATE.md and config.json BEFORE doing anything else.
+- If STATE.md and the filesystem disagree (e.g., STATE says phase 2 but phase-02/ doesn't exist), surface the conflict to the user. Do NOT resolve silently.
+
+== FILE CONVENTIONS ==
+
+- All task documents go in .specd/tasks/{task-name}/
+- Phase plans go in .specd/tasks/{task-name}/phases/phase-{NN}/PLAN.md
+- Use DEC-{NNN} format for decisions in DECISIONS.md
+- Never modify files outside the current phase's designated scope
+- Check .specd/config.json for auto_commit_docs and auto_commit_code settings
+
+== COMMIT FORMAT ==
+
+- Docs: git add {files} && git commit -m "docs({task-name}): {description}"
+- Code: git add {files} && git commit -m "feat({task-name}): {description}"
+- Follow commit-docs.md and commit-code.md references — do not improvise
+- Check auto-commit settings before committing
+
+== DIRECTION-CHANGE DETECTION ==
+
+IMPORTANT: If the user says anything suggesting a change in direction — phrases like
+"actually", "let's change", "forget that", "different approach", "new requirement",
+"scrap this", "let's use X instead" — you MUST:
+1. STOP current work immediately
+2. State: "I detected a direction change: {what changed}"
+3. Ask: "Should I update the specs? (decision, roadmap, plan)"
+4. Do NOT continue the old plan until the user confirms
+
+== SCOPE ==
+
+- Execute one phase at a time. Do not look ahead to future phases.
+- Log deviations in CHANGELOG.md when implementation differs from plan.
+- Deviations are neutral — they may be improvements. Just record them.
