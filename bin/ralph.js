@@ -320,6 +320,7 @@ function runClaudeStep(prompt, guardrailsFile) {
     const cliArgs = [
       '-p', prompt,
       '--output-format', 'stream-json',
+      '--verbose',
       '--dangerously-skip-permissions',
       '--no-session-persistence',
     ];
