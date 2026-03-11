@@ -1,29 +1,29 @@
 # Context: flow-changes
 
 **Last Updated:** 2026-03-11
-**Sessions:** 1
+**Sessions:** 2
 
 ## Discussion Summary
 
-Initial discussion covered three interconnected changes to specdacular's developer flow:
+Reworking specdacular's developer flow across four areas:
 
-1. **Local state tracking** — A `.specd/state.local.json` file (gitignored) that stores the current working task so commands don't need explicit task name arguments. Minimal format: just `current_task`.
+1. **Active task tracking** — `.specd/state.json` (committed) stores `{"current_task": "task-name"}`. Committed so it travels with branches. Merge conflicts accepted as temporary tradeoff.
 
-2. **Command extraction + RALPH loop** — Extract granular commands from the toolbox into standalone slash commands. Build a RALPH (Read-Act-Log-Pause-Handoff) loop as `npx specdacular ralph` that spawns fresh Claude instances per step, avoiding context bloat. The existing pipeline survives as `/specd.auto` or `/specd.brain`.
+2. **Command vocabulary** — Consolidated to: `/specd.new` (inception: discuss + research + phases), `/specd.research` (ad-hoc), `/specd.plan` (phase planning), `/specd.execute` (phase implementation). Plus `/specd.context` as read-only loader.
 
-3. **Context + guardrails injection** — A `/specd.context` command that loads task context AND injects behavioral rules so Claude stays on-rails (writes to correct specd files, auto-commits, follows conventions). Re-injectable mid-conversation when Claude drifts.
+3. **Context + guardrails** — `/specd.context` is read-only: loads task state and injects behavioral rules. Steering (direction changes) is handled as a guardrail behavior — Claude detects intent and prompts to update specs/decisions/roadmap.
 
-The command vocabulary is the main open research question — needs to be "developer-natural" rather than a 1:1 mirror of workflow stages.
+4. **RALPH loop** — `npx specdacular ralph` spawns fresh Claude instances per step. Injects `/specd.context` at each step start. Details TBD (research needed).
 
 ---
 
 ## Resolved Questions
 
-### What goes in state.local.json?
+### What goes in state file and how is it tracked?
 
-**Question:** Should it track just task name or richer state (phase, last command, etc.)?
+**Question:** Should it be gitignored or committed? What content?
 
-**Resolution:** Minimal — just `{"current_task": "flow-changes"}`. Task-level state lives in the task's own config.json and STATE.md.
+**Resolution:** Committed as `.specd/state.json` with `{"current_task": "task-name"}`. Gitignored breaks across branches. Branch-name inference too rigid. Committed means it travels with the branch. Merge conflicts accepted as temporary tradeoff.
 
 **Related Decisions:** DEC-001
 
@@ -35,15 +35,25 @@ The command vocabulary is the main open research question — needs to be "devel
 
 **Related Decisions:** DEC-002
 
+### What's the command vocabulary?
+
+**Question:** How many commands, and what do they do?
+
+**Resolution:** `/specd.new` (discuss + research + phases in one inception flow), `/specd.research` (ad-hoc research), `/specd.plan` (phase plan), `/specd.execute` (implement phase). Plus `/specd.context` (read-only loader + guardrails).
+
+**Related Decisions:** DEC-005
+
+### Is /specd.context read-only or does it allow steering?
+
+**Question:** Should the context command let users change direction?
+
+**Resolution:** Read-only. Steering is a behavioral guardrail: when Claude detects a direction change, it prompts to update specs/decisions/roadmap. This works in any context where guardrails are loaded, not just via a specific command.
+
+**Related Decisions:** DEC-003, DEC-004
+
 ---
 
 ## Deferred Questions
-
-### Exact command vocabulary
-
-**Reason:** Needs research — current workflow stages (discuss, research, plan, execute, review) are too mechanical. Need to find developer-natural actions.
-**Default for now:** Use current stages as starting point for research
-**Revisit when:** Research phase
 
 ### RALPH loop protocol details
 
@@ -58,15 +68,16 @@ The command vocabulary is the main open research question — needs to be "devel
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
 | 2026-03-11 | Local state, command extraction, RALPH loop, context guardrails | FEATURE.md created, 3 decisions recorded |
+| 2026-03-11 | Command vocabulary, state file tracking, context read-only vs steering | Resolved: committed state, 4-command set, steering as guardrail. 5 decisions total |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] Command vocabulary — What's the right set of granular commands? Not 1:1 with workflow stages
 - [ ] RALPH loop implementation — How exactly does it spawn Claude, pass context, track progress?
 - [ ] Context guardrails content — What specific rules keep Claude compliant? How to make them re-injectable?
 - [ ] Naming for the legacy pipeline command — `/specd.auto` vs `/specd.brain` vs something else
+- [ ] Where does review fit? — Part of execute? Separate step in RALPH loop? Between-phase logic?
 
 ---
 

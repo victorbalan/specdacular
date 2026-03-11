@@ -8,12 +8,15 @@ Rework the specdacular developer flow: add local task state tracking, extract to
 
 ### Must Create
 
-- [ ] `.specd/state.local.json` — Local state file tracking current task (`{"current_task": "task-name"}`), gitignored
-- [ ] `commands/specd.context.md` — Slash command that loads task context + injects behavioral guardrails
+- [ ] `.specd/state.json` — Committed state file tracking current task (`{"current_task": "task-name"}`)
+- [ ] `commands/specd.context.md` — Read-only slash command that loads task context + injects behavioral guardrails
 - [ ] `specdacular/workflows/context.md` — Implementation for `/specd.context`
-- [ ] Standalone slash commands extracted from toolbox (set TBD after research)
+- [ ] `commands/specd.research.md` — Ad-hoc research command in current task context
+- [ ] `commands/specd.plan.md` — Phase planning command
+- [ ] `commands/specd.execute.md` — Phase execution command
 - [ ] `bin/ralph.js` or equivalent — RALPH loop script, invokable via `npx specdacular ralph`
-- [ ] Behavioral guardrails template — Rules injected by `/specd.context` to keep Claude on-rails
+- [ ] Behavioral guardrails template — Rules including: file conventions, auto-commit, state management, direction-change detection
+- [ ] Updated `/specd.new` — Expanded to handle full inception (discuss + research + phases)
 
 ### Must Integrate With
 
@@ -27,9 +30,10 @@ Rework the specdacular developer flow: add local task state tracking, extract to
 
 - Zero dependencies — RALPH loop must use Node.js stdlib only (consistent with project convention)
 - Backward compatible — Existing `/specd.continue` pipeline must survive as `/specd.auto` or similar
-- `.specd/state.local.json` must be gitignored — Per-developer, not shared
+- `.specd/state.json` is committed — Travels with branches, merge conflicts accepted for now
 - Commands must be self-contained — Each does one step, writes state, exits cleanly for RALPH loop compatibility
 - Context guardrails must be re-injectable — User can run `/specd.context` mid-conversation to reset Claude's behavior
+- Guardrails must detect direction changes — Prompt user to update specs/decisions/roadmap when steering
 
 ---
 
