@@ -1,14 +1,14 @@
 {
   "task_name": "flow-changes",
   "created": "2026-03-11",
-  "stage": "execution",
+  "stage": "complete",
   "discussion_sessions": 3,
   "decisions_count": 6,
   "phases": {
     "total": 5,
-    "completed": 4,
+    "completed": 5,
     "current": 5,
-    "current_status": "executing",
+    "current_status": "completed",
     "phase_start_commit": "29d32e950a2e473e2f2a0d21d161c7ccb806294d"
   }
 }

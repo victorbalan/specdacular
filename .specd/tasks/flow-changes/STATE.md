@@ -27,7 +27,7 @@
 - [x] Phase 2 complete
 - [x] Phase 3 complete
 - [x] Phase 4 complete
-- [ ] Phase 5 complete
+- [x] Phase 5 complete
 
 ---
 
@@ -35,7 +35,7 @@
 
 ### Current Phase
 - Phase: 5 — Install & Help Updates
-- Status: Executed
+- Status: Completed
 - Started: 2026-03-11
 
 ### Completed Phases
@@ -45,6 +45,7 @@
 | 2 — Guardrails Template & Context Command | 2026-03-11 | 3 | 0 |
 | 3 — Standalone Commands | 2026-03-11 | 5 | 0 |
 | 4 — RALPH Loop | 2026-03-11 | 2 | 0 |
+| 5 — Install & Help Updates | 2026-03-11 | 3 | 0 |
 
 ---
 
@@ -90,9 +91,7 @@
 
 ## Next Steps
 
-Phase 5 executed. Awaiting review.
-
-**Resume:** `/specd.continue flow-changes` — Picks up where you left off.
+All 5 phases complete. Task done.
 
 ---
 
