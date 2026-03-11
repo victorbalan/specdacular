@@ -69,15 +69,14 @@ Reworking specdacular's developer flow across four areas:
 |------|----------------|--------------|
 | 2026-03-11 | Local state, command extraction, RALPH loop, context guardrails | FEATURE.md created, 3 decisions recorded |
 | 2026-03-11 | Command vocabulary, state file tracking, context read-only vs steering | Resolved: committed state, 4-command set, steering as guardrail. 5 decisions total |
+| 2026-03-11 | Legacy naming, review placement, research scope | Keep /specd.continue, review folds into execute. 2 gray areas remain for research. |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] RALPH loop implementation — How exactly does it spawn Claude, pass context, track progress?
-- [ ] Context guardrails content — What specific rules keep Claude compliant? How to make them re-injectable?
-- [ ] Naming for the legacy pipeline command — `/specd.auto` vs `/specd.brain` vs something else
-- [ ] Where does review fit? — Part of execute? Separate step in RALPH loop? Between-phase logic?
+- [ ] RALPH loop implementation — How to spawn Claude, pass context, use `--system-prompt`, track progress. Needs research.
+- [ ] Context guardrails content — What specific rules keep Claude compliant? Needs research.
 
 ---
 

@@ -27,20 +27,19 @@
 **References:**
 - `@commands/specd.continue.md` — Primary consumer
 
-### DEC-002: Keep pipeline as renamed command
+### DEC-002: Keep /specd.continue as the pipeline command
 
 **Date:** 2026-03-11
 **Status:** Active
 **Context:** The existing `/specd.continue` pipeline drives the whole lifecycle in one context window. RALPH loop replaces this as primary flow.
-**Decision:** Rename the pipeline to `/specd.auto` or `/specd.brain` (name TBD). Keep it functional for users who prefer all-in-one execution.
+**Decision:** Keep `/specd.continue` as-is for the all-in-one pipeline. No rename needed.
 **Rationale:**
-- Backward compatibility for existing users
-- Some tasks may benefit from single-context execution
-- Low maintenance cost to keep it alongside new commands
+- No need to rename — `continue` is already understood by existing users
+- RALPH loop is a separate entry point (`npx specdacular ralph`), not a command rename
+- Simpler than introducing a new name
 **Implications:**
-- `/specd.continue` name freed up for potential reuse or becomes alias
-- Need to update help docs and command list
-- RALPH loop becomes the recommended primary flow
+- `/specd.continue` stays as the single-context pipeline
+- RALPH loop is the new recommended flow but doesn't replace the command
 
 ### DEC-003: Context command as read-only loader with behavioral guardrails
 
@@ -86,8 +85,22 @@
 - Fewer commands = easier mental model for developers
 **Implications:**
 - `/specd.new` becomes a bigger, more capable command
-- Review may fold into execute or become part of the RALPH loop's between-step logic
+- Review is part of execute (confirmed)
 - Toolbox keeps advanced/rare operations only
+
+### DEC-006: Review is part of execute
+
+**Date:** 2026-03-11
+**Status:** Active
+**Context:** Review was a separate workflow stage. Question was whether it stays separate or folds into execute.
+**Decision:** Review is part of the execute flow. After implementing a phase, execute reviews the work before moving to the next phase.
+**Rationale:**
+- Execute and review are one mental unit: "do the work and check it"
+- Reduces command count
+- RALPH loop handles the between-phase boundary naturally
+**Implications:**
+- `/specd.execute` workflow must include review logic after implementation
+- No separate `/specd.review` command needed
 
 ---
 
@@ -108,3 +121,4 @@
 | DEC-003 | 2026-03-11 | Context command as read-only loader with guardrails | Active |
 | DEC-004 | 2026-03-11 | Steering as guardrail behavior, not a command | Active |
 | DEC-005 | 2026-03-11 | Command vocabulary — new/research/plan/execute | Active |
+| DEC-006 | 2026-03-11 | Review is part of execute | Active |
