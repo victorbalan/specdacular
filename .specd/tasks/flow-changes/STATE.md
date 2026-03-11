@@ -35,8 +35,8 @@
 
 ### Current Phase
 - Phase: 5 — Install & Help Updates
-- Status: Pending
-- Started: —
+- Status: Executed
+- Started: 2026-03-11
 
 ### Completed Phases
 | Phase | Completed | Tasks | Deviations |
@@ -90,7 +90,7 @@
 
 ## Next Steps
 
-Phase 4 approved. Phase 5 (final) ready for planning/execution.
+Phase 5 executed. Awaiting review.
 
 **Resume:** `/specd.continue flow-changes` — Picks up where you left off.
 
