@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+// Dispatch subcommands before install logic
+if (process.argv[2] === 'ralph') {
+  require('./ralph.js');
+  return;
+}
+
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
