@@ -499,10 +499,13 @@ async function main() {
 
   let iteration = 0;
   const maxIterations = 50; // Safety limit
+  const maxStepRetries = 2; // Max retries for same step
   const sessionStart = Date.now();
   let totalCost = 0;
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
+  let lastStepKey = null;
+  let stepRetryCount = 0;
 
   while (iteration < maxIterations) {
     iteration++;
@@ -516,6 +519,21 @@ async function main() {
 
     // Determine next step
     const route = determineNextStep(taskName, config);
+
+    // Detect repeated steps — stop if same step keeps failing
+    const stepKey = `${route.step}:${route.phase || 0}`;
+    if (stepKey === lastStepKey) {
+      stepRetryCount++;
+      if (stepRetryCount >= maxStepRetries) {
+        console.log(`\n${red}Step "${route.step}" failed ${maxStepRetries} times in a row. Stopping.${reset}`);
+        console.log(`${yellow}Progress saved. Resume with:${reset} npx specdacular ralph ${taskName}`);
+        break;
+      }
+      console.log(`  ${yellow}Retry ${stepRetryCount}/${maxStepRetries} for step "${route.step}"${reset}`);
+    } else {
+      lastStepKey = stepKey;
+      stepRetryCount = 0;
+    }
 
     // Handle completion
     if (route.step === 'complete') {
