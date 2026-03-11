@@ -6,9 +6,15 @@
 
 ## Steps
 
-### 1. Parse arguments
+### 1. Parse arguments and read current task
 
 Check if `$ARGUMENTS` contains `--all`. If so, completed tasks will be shown in a separate section.
+
+**Read current task from state.json:**
+```bash
+cat .specd/state.json 2>/dev/null
+```
+If file exists and has `current_task`, store as `$CURRENT_TASK` for use in step 6 (visual indicator).
 
 ### 2. Detect orchestrator mode
 
@@ -113,6 +119,7 @@ _{total} features, {in_progress} in progress_
 | {name} | {stage} | {plans} | {created} | {next_action} |
 ```
 
+- If `$CURRENT_TASK` is set and matches this feature's name, prefix the feature name with `→ ` (e.g., `→ my-task`) to indicate the active task from state.json
 - `Plans` shows the completed/total count from Plan Status table, or `—` if pre-planning
 - `Next Action` is the extracted recommendation from STATE.md Next Steps
 
