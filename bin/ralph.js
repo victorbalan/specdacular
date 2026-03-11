@@ -53,26 +53,38 @@ const taskNameArg = args.find(a => !a.startsWith('--'));
 
 // Track current child for cleanup
 let currentChild = null;
-let shuttingDown = false;
+let sigintCount = 0;
 
-// Graceful shutdown
+// Graceful shutdown — escalates on repeated Ctrl+C
 function shutdown() {
-  if (shuttingDown) return;
-  shuttingDown = true;
-  console.log(`\n${yellow}Shutting down gracefully...${reset}`);
-  if (currentChild) {
-    try {
-      // Kill the process group (detached child + its children)
-      process.kill(-currentChild.pid, 'SIGTERM');
-    } catch (e) {
+  sigintCount++;
+
+  if (sigintCount === 1) {
+    console.log(`\n${yellow}Stopping... (press Ctrl+C again to force)${reset}`);
+    if (currentChild) {
       try {
-        // Fallback: kill just the child
-        currentChild.kill('SIGTERM');
-      } catch {}
+        process.kill(-currentChild.pid, 'SIGTERM');
+      } catch {
+        try { currentChild.kill('SIGTERM'); } catch {}
+      }
     }
+    // Give child 2s to clean up, then exit
+    setTimeout(() => {
+      console.log(`${yellow}Force exit (timeout)${reset}`);
+      process.exit(1);
+    }, 2000);
+  } else {
+    // Second Ctrl+C — force kill immediately
+    console.log(`\n${red}Force killing...${reset}`);
+    if (currentChild) {
+      try {
+        process.kill(-currentChild.pid, 'SIGKILL');
+      } catch {
+        try { currentChild.kill('SIGKILL'); } catch {}
+      }
+    }
+    process.exit(1);
   }
-  // Give child a moment to clean up, then exit
-  setTimeout(() => process.exit(0), 500);
 }
 
 process.on('SIGINT', shutdown);
@@ -384,7 +396,7 @@ function runClaudeStep(prompt, guardrailsFile) {
     }
 
     const child = spawn('claude', cliArgs, {
-      stdio: ['inherit', 'pipe', 'pipe'],
+      stdio: ['ignore', 'pipe', 'pipe'],
       detached: true,
       cwd: process.cwd(),
     });
