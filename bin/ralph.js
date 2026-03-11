@@ -339,6 +339,21 @@ function runClaudeStep(prompt, guardrailsFile) {
     let lastResult = null;
     let stderr = '';
     let buffer = '';
+    let lastActivity = Date.now();
+    let toolCount = 0;
+
+    // Heartbeat: show elapsed time when no tool calls for a while
+    const heartbeat = setInterval(() => {
+      const silenceSec = Math.round((Date.now() - lastActivity) / 1000);
+      if (silenceSec >= 15) {
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        const min = Math.floor(elapsed / 60);
+        const sec = elapsed % 60;
+        const ts = min > 0 ? `${min}m${sec}s` : `${sec}s`;
+        console.log(`  ${dim}⋯ still working (${ts} elapsed, ${toolCount} tool calls)${reset}`);
+      }
+    }, 15000);
+    const startTime = Date.now();
 
     child.stdout.on('data', (d) => {
       buffer += d;
@@ -359,6 +374,8 @@ function runClaudeStep(prompt, guardrailsFile) {
           if (event.type === 'assistant' && event.message && event.message.content) {
             for (const block of event.message.content) {
               if (block.type === 'tool_use') {
+                toolCount++;
+                lastActivity = Date.now();
                 const log = formatToolLog(block.name, block.input || {});
                 console.log(`  ${dim}▸${reset} ${log}`);
               }
@@ -372,12 +389,19 @@ function runClaudeStep(prompt, guardrailsFile) {
     child.stderr.on('data', (d) => { stderr += d; });
 
     child.on('error', (err) => {
+      clearInterval(heartbeat);
       currentChild = null;
       reject(err);
     });
 
     child.on('close', (code) => {
+      clearInterval(heartbeat);
       currentChild = null;
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      const min = Math.floor(elapsed / 60);
+      const sec = elapsed % 60;
+      const ts = min > 0 ? `${min}m${sec}s` : `${sec}s`;
+      console.log(`  ${dim}Step duration: ${ts}, ${toolCount} tool calls${reset}`);
       resolve({ exitCode: code, result: lastResult || {}, stderr: stderr.trim() });
     });
   });
@@ -404,6 +428,10 @@ async function main() {
 
   let iteration = 0;
   const maxIterations = 50; // Safety limit
+  const sessionStart = Date.now();
+  let totalCost = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
 
   while (iteration < maxIterations) {
     iteration++;
@@ -422,6 +450,9 @@ async function main() {
     if (route.step === 'complete') {
       config.stage = 'complete';
       writeAtomic(path.join(taskDir, 'config.json'), config);
+      const sessionElapsed = Math.round((Date.now() - sessionStart) / 1000);
+      const sm = Math.floor(sessionElapsed / 60);
+      const ss = sessionElapsed % 60;
       console.log(`
 ${green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}
  ${bold}TASK COMPLETE${reset}
@@ -429,6 +460,9 @@ ${green}━━━━━━━━━━━━━━━━━━━━━━━━
 
  Task: ${taskName}
  Phases completed: ${config.phases ? config.phases.completed : '?'}
+ Session: ${sm}m${ss}s
+ Total cost: $${totalCost.toFixed(4)}
+ Tokens: ${(totalInputTokens / 1000).toFixed(1)}k in / ${(totalOutputTokens / 1000).toFixed(1)}k out
 `);
       break;
     }
@@ -483,9 +517,18 @@ ${green}━━━━━━━━━━━━━━━━━━━━━━━━
         // Skip — continue loop, state should be updated by the step
       } else {
         console.log(`${green}✓${reset} Step ${route.step} complete`);
-        const cost = result.result && (result.result.total_cost_usd ?? result.result.costUsd);
-        if (cost) {
-          console.log(`  ${dim}Cost: $${Number(cost).toFixed(4)}${reset}`);
+        const r = result.result || {};
+        const cost = r.total_cost_usd ?? r.costUsd ?? 0;
+        const input = r.input_tokens ?? r.usage?.input_tokens ?? 0;
+        const output = r.output_tokens ?? r.usage?.output_tokens ?? 0;
+        if (cost) totalCost += Number(cost);
+        if (input) totalInputTokens += Number(input);
+        if (output) totalOutputTokens += Number(output);
+        const stats = [];
+        if (cost) stats.push(`$${Number(cost).toFixed(4)}`);
+        if (input || output) stats.push(`${(input / 1000).toFixed(1)}k in / ${(output / 1000).toFixed(1)}k out`);
+        if (stats.length) {
+          console.log(`  ${dim}${stats.join(' · ')}${reset}`);
         }
       }
     } catch (err) {
