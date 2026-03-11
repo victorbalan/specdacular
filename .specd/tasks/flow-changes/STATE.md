@@ -80,7 +80,7 @@
 
 ## Next Steps
 
-Phase 1 approved. Phase 2: Guardrails Template & Context Command.
+Phase 2 planned. Ready for execution.
 
 **Resume:** `/specd.continue flow-changes` — Picks up where you left off.
 
