@@ -97,6 +97,37 @@ The `continue` command is powered by the **brain** — a config-driven orchestra
 
 ---
 
+## RALPH — Autonomous Loop
+
+RALPH is a Node.js script that drives the full task lifecycle by spawning fresh Claude CLI instances per step. Each step gets a clean context with guardrails injected automatically.
+
+```bash
+npx specdacular ralph
+```
+
+**How it works:**
+1. Reads task state (`config.json`, `STATE.md`)
+2. Determines the next step from the pipeline
+3. Spawns `claude -p` with the step's prompt + guardrails
+4. Checks results, updates state
+5. Loops until complete or stopped
+
+**Key features:**
+- Fresh context per step — no context window buildup
+- Guardrails injected automatically via `--append-system-prompt-file`
+- Graceful Ctrl+C with state saved
+- Process group cleanup (no orphaned Claude processes)
+
+**RALPH vs `/specd.continue`:**
+
+| | RALPH | `/specd.continue` |
+|---|---|---|
+| Context | Fresh per step | Single window |
+| Best for | Long tasks, autonomous runs | Short tasks, interactive work |
+| Runs via | Terminal (`npx`) | Claude Code (slash command) |
+
+---
+
 ## Pipeline Configuration
 
 The pipeline is defined in `pipeline.json` — nothing is hardcoded. The default pipeline ships with Specdacular and can be fully replaced by placing a `.specd/pipeline.json` in your project.
