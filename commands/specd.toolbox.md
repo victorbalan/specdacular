@@ -9,14 +9,11 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-  - Task
   - AskUserQuestion
-  - WebSearch
-  - WebFetch
 ---
 
 <objective>
-Task lifecycle operations: discuss, research, plan, execute, review.
+Advanced task operations that aren't part of the regular workflow. For standard operations, use the standalone commands: `/specd.new`, `/specd.research`, `/specd.plan`, `/specd.execute`, `/specd.context`.
 </objective>
 
 <execution_context>
@@ -29,21 +26,40 @@ Resolve task name from $ARGUMENTS (falls back to `.specd/state.json`, then singl
 @~/.claude/specdacular/references/validate-task.md
 
 Then present the menu using AskUserQuestion:
-- header: "Operation"
+- header: "Advanced Operations"
 - question: "What would you like to do with {task-name}?"
 - options:
+  - "Insert phase" — Add a new phase to the roadmap at a specific position
+  - "Skip phase" — Mark the current or specified phase as skipped
+  - "Reset phase" — Re-run a completed phase from scratch
+  - "View docs" — Browse task documentation (FEATURE, CONTEXT, DECISIONS, ROADMAP)
   - "Discuss" — Explore gray areas and record decisions
-  - "Research" — Spawn parallel agents for patterns/pitfalls
-  - "Plan" — Create execution phases
-  - "Execute" — Execute the next phase
-  - "Review" — Review executed phase
 
-Based on selection, delegate to the appropriate workflow:
-- Discuss → @~/.claude/specdacular/workflows/discuss.md
-- Research → @~/.claude/specdacular/workflows/research.md
-- Plan → @~/.claude/specdacular/workflows/plan.md
-- Execute → @~/.claude/specdacular/workflows/execute.md
-- Review → @~/.claude/specdacular/workflows/review.md
+Based on selection:
+
+**Insert phase:**
+- Ask what the phase should accomplish
+- Ask where to insert (after which phase)
+- Create the phase directory and update ROADMAP.md
+- Renumber subsequent phases if needed
+
+**Skip phase:**
+- Confirm which phase to skip
+- Mark as skipped in config.json and STATE.md
+- Advance to next phase
+
+**Reset phase:**
+- Confirm which phase to reset
+- Remove phase execution artifacts (keep PLAN.md)
+- Set phase status back to "pending"
+- Reset phase_start_commit
+
+**View docs:**
+- Show a file picker for task documents
+- Display the selected file
+
+**Discuss:**
+- Delegate to @~/.claude/specdacular/workflows/discuss.md
 
 </execution_context>
 
@@ -51,13 +67,9 @@ Based on selection, delegate to the appropriate workflow:
 Arguments: $ARGUMENTS
 
 @~/.claude/specdacular/workflows/discuss.md
-@~/.claude/specdacular/workflows/research.md
-@~/.claude/specdacular/workflows/plan.md
-@~/.claude/specdacular/workflows/execute.md
-@~/.claude/specdacular/workflows/review.md
 </context>
 
 <success_criteria>
 - [ ] Task validated and operation menu shown
-- [ ] Selected operation executed via correct workflow
+- [ ] Selected operation executed
 </success_criteria>
