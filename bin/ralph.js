@@ -350,6 +350,8 @@ function buildPrompt(taskName, stepName, workflowFile) {
 
   const workflowPath = path.join(specdPath, 'workflows', workflowFile);
 
+  const configPath = `.specd/tasks/${taskName}/config.json`;
+
   return `You are executing a specd workflow step autonomously.
 
 Task: ${taskName}
@@ -361,7 +363,17 @@ The task argument is: ${taskName}
 Read the task state from .specd/tasks/${taskName}/ to understand context.
 Execute all workflow steps. Update state files when done.
 Proceed autonomously — do not ask the user questions. Make reasonable decisions.
-When a workflow step says to use AskUserQuestion, instead make the most reasonable default choice and proceed.`;
+When a workflow step says to use AskUserQuestion, instead make the most reasonable default choice and proceed.
+
+IMPORTANT — State updates:
+After completing this step, you MUST update ${configPath} to reflect progress:
+- After "discuss": if all gray areas resolved, set stage to "research"
+- After "research": set stage to "planning" (if RESEARCH.md was created)
+- After "plan": set stage to "execution", set phases.total/current/current_status/completed
+- After "phase-plan": do NOT modify config.json (orchestrator handles this)
+- After "execute": set phases.current_status to "executed"
+- After "review": set phases.current_status to "completed", increment phases.completed
+If the workflow says not to modify config.json, you should STILL update it as described above — the orchestrator depends on it.`;
 }
 
 function formatToolLog(toolName, toolInput) {
@@ -560,6 +572,19 @@ ${green}━━━━━━━━━━━━━━━━━━━━━━━━
       else if (route.step === 'plan') { config.stage = 'execution'; config.phases = { total: 1, current: 1, current_status: 'pending', completed: 0 }; }
       writeAtomic(path.join(taskDir, 'config.json'), config);
       continue;
+    }
+
+    // Set in-progress state BEFORE spawning, so crashes can resume
+    if (route.step === 'execute' && config.phases) {
+      config.phases.current_status = 'executing';
+      if (config.stage !== 'execution') config.stage = 'execution';
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+    } else if (route.step === 'research' && (config.stage === 'discussion' || config.stage === 'research')) {
+      config.stage = 'research';
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+    } else if (route.step === 'plan' && config.stage !== 'execution') {
+      config.stage = 'planning';
+      writeAtomic(path.join(taskDir, 'config.json'), config);
     }
 
     // Build prompt and execute
