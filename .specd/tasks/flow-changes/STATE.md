@@ -34,9 +34,9 @@
 ## Execution Progress
 
 ### Current Phase
-- Phase: 4 — RALPH Loop
-- Status: Executed
-- Started: 2026-03-11
+- Phase: 5 — Install & Help Updates
+- Status: Pending
+- Started: —
 
 ### Completed Phases
 | Phase | Completed | Tasks | Deviations |
@@ -89,7 +89,7 @@
 
 ## Next Steps
 
-Phase 4 executed. Pending review.
+Phase 4 approved. Phase 5 (final) ready for planning/execution.
 
 **Resume:** `/specd.continue flow-changes` — Picks up where you left off.
 
