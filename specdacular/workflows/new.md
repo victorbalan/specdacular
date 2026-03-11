@@ -195,6 +195,13 @@ Initialize with stage: discussion, initial discussion complete: yes.
 }
 ```
 
+**Write .specd/state.json** (set new task as current):
+```json
+{"current_task": "{task-name}"}
+```
+
+This ensures `/specd.continue` works without arguments immediately after task creation (DEC-001).
+
 Continue to commit.
 </step>
 
@@ -203,7 +210,7 @@ Commit the task initialization.
 
 @~/.claude/specdacular/references/commit-docs.md
 
-- **$FILES:** `.specd/tasks/{task-name}/`
+- **$FILES:** `.specd/tasks/{task-name}/ .specd/state.json`
 - **$MESSAGE:** `docs({task-name}): initialize task` with list of created files
 - **$LABEL:** `task initialization`
 
