@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** research
+**Stage:** execution
 **Last Updated:** 2026-03-11
 
 ---
@@ -19,8 +19,8 @@
 - [x] Findings documented in RESEARCH.md
 
 ### Planning
-- [ ] Phases derived
-- [ ] Plans created
+- [x] Phases derived
+- [x] Plans created
 
 ### Execution
 - [ ] Phase 1 complete
@@ -62,8 +62,8 @@
 | CONTEXT.md | Created | 2026-03-11 |
 | DECISIONS.md | 3 decisions | 2026-03-11 |
 | RESEARCH.md | Created | 2026-03-11 |
-| ROADMAP.md | Not started | — |
-| phases/ | Not started | — |
+| ROADMAP.md | Created | 2026-03-11 |
+| phases/ | Not started (just-in-time) | — |
 
 ---
 
@@ -77,7 +77,7 @@
 
 ## Next Steps
 
-Gray areas remain around command vocabulary, RALPH loop implementation details, and context guardrails content. Research is needed.
+5 phases planned. Ready for execution. Phase 1: State File & Task Resolution.
 
 **Resume:** `/specd.continue flow-changes` — Picks up where you left off.
 
