@@ -2,7 +2,7 @@
 
 ## Current Position
 
-**Stage:** discussion
+**Stage:** research
 **Last Updated:** 2026-03-11
 
 ---
@@ -12,11 +12,11 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved (2 deferred to research)
 
 ### Research
-- [ ] Research conducted
-- [ ] Findings documented in RESEARCH.md
+- [x] Research conducted
+- [x] Findings documented in RESEARCH.md
 
 ### Planning
 - [ ] Phases derived
@@ -61,7 +61,7 @@
 | FEATURE.md | Created | 2026-03-11 |
 | CONTEXT.md | Created | 2026-03-11 |
 | DECISIONS.md | 3 decisions | 2026-03-11 |
-| RESEARCH.md | Not started | — |
+| RESEARCH.md | Created | 2026-03-11 |
 | ROADMAP.md | Not started | — |
 | phases/ | Not started | — |
 
