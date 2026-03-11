@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+// Dispatch subcommands before install logic
+if (process.argv[2] === 'ralph') {
+  process.argv.splice(2, 1); // Remove 'ralph' so ralph.js sees clean args
+  require('./ralph.js');
+  return;
+}
+
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -466,10 +473,12 @@ function install(isGlobal) {
   console.log(`
   ${green}Done!${reset} Launch Claude Code and run ${cyan}/specd.help${reset}.
 
-  ${yellow}Commands:${reset}
-    /specd.codebase.map  - Analyze and document your codebase
-    /specd.update        - Update to latest version
-    /specd.help          - Show all commands
+  ${yellow}Quick start:${reset}
+    ${cyan}/specd.new my-feature${reset}    Start a new task
+    ${cyan}/specd.execute${reset}           Execute next phase
+    ${cyan}/specd.continue${reset}          Full pipeline (one context)
+    ${cyan}npx specdacular ralph${reset}    Autonomous loop ${dim}(recommended)${reset}
+    ${cyan}/specd.help${reset}              Show all commands
 `);
 }
 

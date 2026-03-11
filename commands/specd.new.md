@@ -12,7 +12,7 @@ allowed-tools:
 ---
 
 <objective>
-Initialize a task folder and start the first discussion. Creates structure, asks initial questions about what's being built, and writes technical requirements. After initialization, offers to continue discussing or stop.
+Initialize a task and drive the full inception flow: discuss → research → plan. Creates task structure, asks initial questions, and iterates through discussion/research until ready to produce phases.
 
 **Creates:**
 - `.specd/tasks/{name}/FEATURE.md` — Technical requirements from discussion
@@ -22,7 +22,7 @@ Initialize a task folder and start the first discussion. Creates structure, asks
 - `.specd/tasks/{name}/STATE.md` — Progress tracking
 - `.specd/tasks/{name}/config.json` — Task configuration
 
-**This is the entry point.** After this, continue with `/specd.continue` to drive the entire lifecycle.
+**Full inception:** After initial discussion, offers to research, plan, discuss more, or stop. Iterates until phases are ready or user stops.
 </objective>
 
 <execution_context>
@@ -41,6 +41,9 @@ Task name: $ARGUMENTS
 - `MAP.md` — System structure
 - `PATTERNS.md` — Code patterns
 - `STRUCTURE.md` — Directory layout
+
+**Behavioral guardrails:**
+@~/.claude/specdacular/guardrails/specd-rules.txt
 </context>
 
 <process>

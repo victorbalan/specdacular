@@ -39,7 +39,10 @@ Config-driven orchestrator that reads pipeline.json and drives the entire task l
 </execution_context>
 
 <context>
-Task name and flags: $ARGUMENTS
+**Task resolution:**
+@~/.claude/specdacular/references/resolve-task.md
+
+Resolve task name from $ARGUMENTS (falls back to `.specd/state.json`, then single-task auto-pick, then asks user). Pass resolved $TASK_NAME and $FLAGS through to the brain.
 
 **Pipeline config:**
 @.specd/pipeline.json (user override, if exists)

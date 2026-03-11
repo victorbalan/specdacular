@@ -1,0 +1,658 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { spawn, execSync } = require('child_process');
+const readline = require('readline');
+
+// Colors
+const cyan = '\x1b[36m';
+const green = '\x1b[32m';
+const yellow = '\x1b[33m';
+const red = '\x1b[31m';
+const dim = '\x1b[2m';
+const bold = '\x1b[1m';
+const reset = '\x1b[0m';
+
+// Parse args
+const args = process.argv.slice(2);
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(`
+  ${bold}RALPH${reset} — Run All Loops Per Handoff
+
+  State-machine loop that drives specd task lifecycle by spawning
+  fresh Claude CLI instances per step.
+
+  ${yellow}Usage:${reset}
+    npx specdacular ralph [task-name]
+
+  ${yellow}Options:${reset}
+    ${cyan}--help, -h${reset}     Show this help
+    ${cyan}--dry-run${reset}      Show what would be executed without running
+
+  ${yellow}Prerequisites:${reset}
+    1. Claude CLI installed and in PATH
+    2. Run ${cyan}claude${reset} once to accept permissions
+    3. A specd task exists (${cyan}/specd.new${reset})
+
+  ${yellow}How it works:${reset}
+    1. Reads task state from .specd/tasks/{name}/config.json
+    2. Determines next step (discuss → research → plan → execute → review)
+    3. Spawns ${cyan}claude -p${reset} with guardrails injected
+    4. Waits for completion, re-reads state, loops
+
+  ${yellow}Example:${reset}
+    npx specdacular ralph my-feature
+`);
+  process.exit(0);
+}
+
+const dryRun = args.includes('--dry-run');
+const taskNameArg = args.find(a => !a.startsWith('--'));
+
+// Track current child for cleanup
+let currentChild = null;
+let sigintCount = 0;
+
+// Graceful shutdown — escalates on repeated Ctrl+C
+function shutdown() {
+  sigintCount++;
+
+  if (sigintCount === 1) {
+    console.log(`\n${yellow}Stopping... (press Ctrl+C again to force)${reset}`);
+    if (currentChild) {
+      try {
+        process.kill(-currentChild.pid, 'SIGTERM');
+      } catch {
+        try { currentChild.kill('SIGTERM'); } catch {}
+      }
+    }
+    // Give child 2s to clean up, then exit
+    setTimeout(() => {
+      console.log(`${yellow}Force exit (timeout)${reset}`);
+      process.exit(1);
+    }, 2000);
+  } else {
+    // Second Ctrl+C — force kill immediately
+    console.log(`\n${red}Force killing...${reset}`);
+    if (currentChild) {
+      try {
+        process.kill(-currentChild.pid, 'SIGKILL');
+      } catch {
+        try { currentChild.kill('SIGKILL'); } catch {}
+      }
+    }
+    process.exit(1);
+  }
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
+// --- Utility functions ---
+
+function writeAtomic(filePath, data) {
+  const content = typeof data === 'string' ? data : JSON.stringify(data, null, 2) + '\n';
+  const tmp = filePath + '.tmp';
+  fs.writeFileSync(tmp, content);
+  fs.renameSync(tmp, filePath);
+}
+
+function readJson(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function banner(title, subtitle) {
+  console.log(`
+${cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}
+ ${bold}RALPH: ${title}${reset}
+${cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}
+${subtitle ? '\n ' + subtitle + '\n' : ''}`);
+}
+
+function stepBanner(stepName, phase, total) {
+  const phaseInfo = phase && total ? `  Phase: ${phase}/${total}` : '';
+  console.log(`
+${dim}───────────────────────────────────────────────────────${reset}
+ Step: ${cyan}${stepName}${reset}${phaseInfo}
+${dim}───────────────────────────────────────────────────────${reset}
+`);
+}
+
+function ask(question, options) {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    console.log(`\n${yellow}${question}${reset}`);
+    options.forEach((opt, i) => {
+      console.log(`  ${cyan}${i + 1}${reset}) ${opt}`);
+    });
+
+    rl.question(`\n  Choice [1]: `, (answer) => {
+      rl.close();
+      const idx = parseInt(answer || '1', 10) - 1;
+      resolve(options[Math.max(0, Math.min(idx, options.length - 1))]);
+    });
+  });
+}
+
+// --- Task resolution ---
+
+function resolveTask() {
+  // 1. From argument
+  if (taskNameArg) return taskNameArg;
+
+  // 2. From state.json
+  const stateJson = readJson('.specd/state.json');
+  if (stateJson && stateJson.current_task) return stateJson.current_task;
+
+  // 3. From task directory scan
+  try {
+    const tasks = fs.readdirSync('.specd/tasks').filter(d =>
+      fs.statSync(path.join('.specd/tasks', d)).isDirectory()
+    );
+    if (tasks.length === 1) return tasks[0];
+    if (tasks.length > 1) {
+      console.log(`${yellow}Multiple tasks found:${reset}`);
+      tasks.forEach((t, i) => console.log(`  ${i + 1}) ${t}`));
+      console.error(`${red}Specify task name: npx specdacular ralph <task-name>${reset}`);
+      process.exit(1);
+    }
+  } catch {
+    // No tasks dir
+  }
+
+  console.error(`${red}No tasks found. Create one with /specd.new${reset}`);
+  process.exit(1);
+}
+
+// --- Pre-flight checks ---
+
+function checkClaude() {
+  try {
+    execSync('which claude', { stdio: 'pipe' });
+    return true;
+  } catch {
+    console.error(`${red}Claude CLI not found in PATH.${reset}`);
+    console.error(`Install: ${cyan}npm install -g @anthropic-ai/claude-code${reset}`);
+    return false;
+  }
+}
+
+// --- Guardrails resolution ---
+
+function findGuardrails() {
+  const locations = [
+    path.join(os.homedir(), '.claude', 'specdacular', 'guardrails', 'specd-rules.txt'),
+    path.join(process.cwd(), 'specdacular', 'guardrails', 'specd-rules.txt'),
+    path.join(process.cwd(), '.claude', 'specdacular', 'guardrails', 'specd-rules.txt'),
+  ];
+  for (const loc of locations) {
+    if (fs.existsSync(loc)) return loc;
+  }
+  console.log(`${yellow}Warning: guardrails file not found. Continuing without.${reset}`);
+  return null;
+}
+
+// --- Routing ---
+
+function determineNextStep(taskName, config) {
+  const taskDir = `.specd/tasks/${taskName}`;
+  const stage = config.stage || 'discussion';
+  const phases = config.phases || {};
+
+  // Discussion stage
+  if (stage === 'discussion') {
+    // Check gray areas in CONTEXT.md
+    try {
+      const context = fs.readFileSync(path.join(taskDir, 'CONTEXT.md'), 'utf8');
+      const grayAreas = (context.match(/- \[ \]/g) || []).length;
+      if (grayAreas > 0) {
+        return { step: 'discuss', workflow: 'discuss.md', pipeline: 'main' };
+      }
+    } catch {}
+    return { step: 'research', workflow: 'research.md', pipeline: 'main' };
+  }
+
+  // Research stage
+  if (stage === 'research') {
+    const hasResearch = fs.existsSync(path.join(taskDir, 'RESEARCH.md'));
+    if (!hasResearch) {
+      return { step: 'research', workflow: 'research.md', pipeline: 'main' };
+    }
+    return { step: 'plan', workflow: 'plan.md', pipeline: 'main' };
+  }
+
+  // Planning stage
+  if (stage === 'planning') {
+    const hasPhases = fs.existsSync(path.join(taskDir, 'phases'));
+    if (!hasPhases) {
+      return { step: 'plan', workflow: 'plan.md', pipeline: 'main' };
+    }
+    // Fall through to execution logic
+  }
+
+  // Execution stage (or planning with phases)
+  // Normalize stage — treat 'complete' with incomplete phases as 'execution'
+  const hasIncompletePhases = phases.total && (phases.completed || 0) < phases.total;
+  const effectiveStage = (stage === 'complete' && hasIncompletePhases) ? 'execution' : stage;
+
+  if (effectiveStage === 'execution' || effectiveStage === 'planning') {
+    const current = phases.current || 1;
+    const total = phases.total || 1;
+    // Normalize status — treat unknown values as 'pending'
+    const knownStatuses = ['pending', 'executing', 'executed', 'completed'];
+    const rawStatus = phases.current_status || 'pending';
+    const status = knownStatuses.includes(rawStatus) ? rawStatus : 'pending';
+    const phaseNum = String(current).padStart(2, '0');
+    const phaseDir = path.join(taskDir, 'phases', `phase-${phaseNum}`);
+
+    if (status === 'pending') {
+      const hasPlan = fs.existsSync(path.join(phaseDir, 'PLAN.md'));
+      if (!hasPlan) {
+        return { step: 'phase-plan', workflow: 'phase-plan.md', pipeline: 'phase-execution', phase: current, total };
+      }
+      return { step: 'execute', workflow: 'execute.md', pipeline: 'phase-execution', phase: current, total };
+    }
+
+    if (status === 'executing') {
+      return { step: 'execute', workflow: 'execute.md', pipeline: 'phase-execution', phase: current, total, resume: true };
+    }
+
+    if (status === 'executed') {
+      return { step: 'review', workflow: 'review.md', pipeline: 'phase-execution', phase: current, total };
+    }
+
+    if (status === 'completed') {
+      // Check for decimal fix phases
+      try {
+        const entries = fs.readdirSync(path.join(taskDir, 'phases'));
+        const fixPhases = entries.filter(e => e.startsWith(`phase-${phaseNum}.`)).sort();
+        if (fixPhases.length > 0) {
+          // Check if any fix phase needs execution
+          return { step: 'execute', workflow: 'execute.md', pipeline: 'phase-execution', phase: current, total };
+        }
+      } catch {}
+
+      if (current < total) {
+        // Advance to next phase
+        return { step: 'advance', phase: current + 1, total };
+      }
+      return { step: 'complete' };
+    }
+  }
+
+  return { step: 'complete' };
+}
+
+// --- State advancement ---
+
+function advanceState(config, route, taskDir) {
+  const step = route.step;
+
+  // Forcefully set the correct state — don't trust subprocess config edits.
+  // The orchestrator is the single source of truth for state transitions.
+
+  if (step === 'discuss') {
+    // Leave as-is — router re-checks CONTEXT.md gray areas
+  } else if (step === 'research') {
+    config.stage = 'research';
+  } else if (step === 'plan') {
+    config.stage = 'planning';
+  } else if (step === 'phase-plan') {
+    // Ensure stage is correct
+    config.stage = 'execution';
+    config.phases = config.phases || {};
+    config.phases.current_status = 'pending'; // router checks PLAN.md existence
+
+    const phaseNum = String(config.phases.current || 1).padStart(2, '0');
+    const planPath = path.join(taskDir, 'phases', `phase-${phaseNum}`, 'PLAN.md');
+    if (!fs.existsSync(planPath)) {
+      console.log(`  ${yellow}⚠ PLAN.md not created — step will retry${reset}`);
+    }
+  } else if (step === 'execute') {
+    config.stage = 'execution';
+    config.phases = config.phases || {};
+    config.phases.current_status = 'executed';
+  } else if (step === 'review') {
+    config.stage = 'execution';
+    config.phases = config.phases || {};
+    config.phases.current_status = 'completed';
+    config.phases.completed = (config.phases.completed || 0) + 1;
+  }
+
+  // Always write — correct any damage the subprocess may have done
+  writeAtomic(path.join(taskDir, 'config.json'), config);
+}
+
+// --- Claude spawning ---
+
+function buildPrompt(taskName, stepName, workflowFile) {
+  const specdPath = fs.existsSync(path.join(os.homedir(), '.claude', 'specdacular'))
+    ? path.join(os.homedir(), '.claude', 'specdacular')
+    : path.join(process.cwd(), 'specdacular');
+
+  const workflowPath = path.join(specdPath, 'workflows', workflowFile);
+
+  const configPath = `.specd/tasks/${taskName}/config.json`;
+
+  return `You are executing a specd workflow step autonomously.
+
+Task: ${taskName}
+Step: ${stepName}
+
+Read and execute the workflow at: ${workflowPath}
+The task argument is: ${taskName}
+
+Read the task state from .specd/tasks/${taskName}/ to understand context.
+Execute all workflow steps. Update state files when done.
+Proceed autonomously — do not ask the user questions. Make reasonable decisions.
+When a workflow step says to use AskUserQuestion, instead make the most reasonable default choice and proceed.
+
+IMPORTANT — State updates:
+After completing this step, you MUST update ${configPath} to reflect progress:
+- After "discuss": if all gray areas resolved, set stage to "research"
+- After "research": set stage to "planning" (if RESEARCH.md was created)
+- After "plan": set stage to "execution", set phases.total/current/current_status/completed
+- After "phase-plan": do NOT modify config.json (orchestrator handles this)
+- After "execute": set phases.current_status to "executed"
+- After "review": set phases.current_status to "completed", increment phases.completed
+If the workflow says not to modify config.json, you should STILL update it as described above — the orchestrator depends on it.`;
+}
+
+function formatToolLog(toolName, toolInput) {
+  const short = {
+    Read: () => toolInput.file_path ? path.basename(toolInput.file_path) : '',
+    Write: () => toolInput.file_path ? path.basename(toolInput.file_path) : '',
+    Edit: () => toolInput.file_path ? path.basename(toolInput.file_path) : '',
+    Glob: () => toolInput.pattern || '',
+    Grep: () => toolInput.pattern ? `/${toolInput.pattern}/` : '',
+    Bash: () => {
+      const cmd = toolInput.command || '';
+      return cmd.length > 60 ? cmd.substring(0, 57) + '...' : cmd;
+    },
+    Agent: () => toolInput.description || '',
+  };
+  const fmt = short[toolName];
+  const detail = fmt ? fmt() : '';
+  return detail ? `${toolName} ${dim}${detail}${reset}` : toolName;
+}
+
+function runClaudeStep(prompt, guardrailsFile) {
+  return new Promise((resolve, reject) => {
+    const cliArgs = [
+      '-p', prompt,
+      '--output-format', 'stream-json',
+      '--verbose',
+      '--dangerously-skip-permissions',
+      '--no-session-persistence',
+    ];
+    if (guardrailsFile) {
+      cliArgs.push('--append-system-prompt-file', guardrailsFile);
+    }
+
+    const child = spawn('claude', cliArgs, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      detached: true,
+      cwd: process.cwd(),
+    });
+
+    currentChild = child;
+
+    let lastResult = null;
+    let stderr = '';
+    let buffer = '';
+    let lastActivity = Date.now();
+    let toolCount = 0;
+
+    // Heartbeat: show elapsed time when no tool calls for a while
+    const heartbeat = setInterval(() => {
+      const silenceSec = Math.round((Date.now() - lastActivity) / 1000);
+      if (silenceSec >= 15) {
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        const min = Math.floor(elapsed / 60);
+        const sec = elapsed % 60;
+        const ts = min > 0 ? `${min}m${sec}s` : `${sec}s`;
+        console.log(`  ${dim}⋯ still working (${ts} elapsed, ${toolCount} tool calls)${reset}`);
+      }
+    }, 15000);
+    const startTime = Date.now();
+
+    child.stdout.on('data', (d) => {
+      buffer += d;
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const event = JSON.parse(line);
+
+          // Track final result message for cost info
+          if (event.type === 'result') {
+            lastResult = event;
+          }
+
+          // Log tool use
+          if (event.type === 'assistant' && event.message && event.message.content) {
+            for (const block of event.message.content) {
+              if (block.type === 'tool_use') {
+                toolCount++;
+                lastActivity = Date.now();
+                const log = formatToolLog(block.name, block.input || {});
+                console.log(`  ${dim}▸${reset} ${log}`);
+              }
+            }
+          }
+        } catch {
+          // Skip malformed lines
+        }
+      }
+    });
+    child.stderr.on('data', (d) => { stderr += d; });
+
+    child.on('error', (err) => {
+      clearInterval(heartbeat);
+      currentChild = null;
+      reject(err);
+    });
+
+    child.on('close', (code) => {
+      clearInterval(heartbeat);
+      currentChild = null;
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      const min = Math.floor(elapsed / 60);
+      const sec = elapsed % 60;
+      const ts = min > 0 ? `${min}m${sec}s` : `${sec}s`;
+      console.log(`  ${dim}Step duration: ${ts}, ${toolCount} tool calls${reset}`);
+      resolve({ exitCode: code, result: lastResult || {}, stderr: stderr.trim() });
+    });
+  });
+}
+
+// --- Main loop ---
+
+async function main() {
+  const taskName = resolveTask();
+  const taskDir = `.specd/tasks/${taskName}`;
+
+  // Validate task exists
+  if (!fs.existsSync(taskDir)) {
+    console.error(`${red}Task directory not found: ${taskDir}${reset}`);
+    process.exit(1);
+  }
+
+  // Pre-flight
+  if (!checkClaude()) process.exit(1);
+
+  const guardrails = findGuardrails();
+
+  banner(taskName, `Mode: ${dryRun ? 'dry-run' : 'auto'}`);
+
+  let iteration = 0;
+  const maxIterations = 50; // Safety limit
+  const maxStepRetries = 2; // Max retries for same step
+  const sessionStart = Date.now();
+  let totalCost = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  let lastStepKey = null;
+  let stepRetryCount = 0;
+
+  while (iteration < maxIterations) {
+    iteration++;
+
+    // Read current state
+    const config = readJson(path.join(taskDir, 'config.json'));
+    if (!config) {
+      console.error(`${red}Cannot read config.json for ${taskName}${reset}`);
+      process.exit(1);
+    }
+
+    // Determine next step
+    const route = determineNextStep(taskName, config);
+
+    // Detect repeated steps — stop if same step keeps failing
+    const stepKey = `${route.step}:${route.phase || 0}`;
+    if (stepKey === lastStepKey) {
+      stepRetryCount++;
+      if (stepRetryCount >= maxStepRetries) {
+        console.log(`\n${red}Step "${route.step}" failed ${maxStepRetries} times in a row. Stopping.${reset}`);
+        console.log(`${yellow}Progress saved. Resume with:${reset} npx specdacular ralph ${taskName}`);
+        break;
+      }
+      console.log(`  ${yellow}Retry ${stepRetryCount}/${maxStepRetries} for step "${route.step}"${reset}`);
+    } else {
+      lastStepKey = stepKey;
+      stepRetryCount = 0;
+    }
+
+    // Handle completion
+    if (route.step === 'complete') {
+      config.stage = 'complete';
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+      const sessionElapsed = Math.round((Date.now() - sessionStart) / 1000);
+      const sm = Math.floor(sessionElapsed / 60);
+      const ss = sessionElapsed % 60;
+      console.log(`
+${green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}
+ ${bold}TASK COMPLETE${reset}
+${green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}
+
+ Task: ${taskName}
+ Phases completed: ${config.phases ? config.phases.completed : '?'}
+ Session: ${sm}m${ss}s
+ Total cost: $${totalCost.toFixed(4)}
+ Tokens: ${(totalInputTokens / 1000).toFixed(1)}k in / ${(totalOutputTokens / 1000).toFixed(1)}k out
+`);
+      break;
+    }
+
+    // Handle phase advancement
+    if (route.step === 'advance') {
+      config.phases.current = route.phase;
+      config.phases.current_status = 'pending';
+      delete config.phases.phase_start_commit;
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+      console.log(`${green}✓${reset} Advanced to phase ${route.phase}/${route.total}`);
+      continue;
+    }
+
+    // Show step info
+    stepBanner(route.step, route.phase, route.total);
+
+    if (dryRun) {
+      console.log(`  ${dim}Would execute: ${route.workflow}${reset}`);
+      console.log(`  ${dim}Prompt: ${buildPrompt(taskName, route.step, route.workflow).substring(0, 100)}...${reset}`);
+
+      const choice = await ask('Continue dry-run?', ['Next step', 'Stop']);
+      if (choice === 'Stop') break;
+
+      // Simulate state advancement for dry-run
+      if (route.step === 'discuss') config.stage = 'research';
+      else if (route.step === 'research') config.stage = 'planning';
+      else if (route.step === 'plan') { config.stage = 'execution'; config.phases = { total: 1, current: 1, current_status: 'pending', completed: 0 }; }
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+      continue;
+    }
+
+    // Set in-progress state BEFORE spawning, so crashes can resume
+    if (route.step === 'execute' && config.phases) {
+      config.phases.current_status = 'executing';
+      if (config.stage !== 'execution') config.stage = 'execution';
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+    } else if (route.step === 'research' && (config.stage === 'discussion' || config.stage === 'research')) {
+      config.stage = 'research';
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+    } else if (route.step === 'plan' && config.stage !== 'execution') {
+      config.stage = 'planning';
+      writeAtomic(path.join(taskDir, 'config.json'), config);
+    }
+
+    // Build prompt and execute
+    const prompt = buildPrompt(taskName, route.step, route.workflow);
+
+    console.log(`  ${dim}Spawning claude -p ...${reset}`);
+    try {
+      const result = await runClaudeStep(prompt, guardrails);
+
+      if (result.exitCode !== 0) {
+        console.log(`\n${red}Step failed (exit code ${result.exitCode})${reset}`);
+        if (result.stderr) {
+          console.log(`${dim}${result.stderr}${reset}`);
+        }
+
+        const choice = await ask('What would you like to do?', ['Retry', 'Skip', 'Stop']);
+        if (choice === 'Retry') continue;
+        if (choice === 'Stop') {
+          console.log(`\n${yellow}Progress saved. Resume with:${reset} npx specdacular ralph ${taskName}`);
+          break;
+        }
+        // Skip — continue loop, state should be updated by the step
+      } else {
+        console.log(`${green}✓${reset} Step ${route.step} complete`);
+        const r = result.result || {};
+        const cost = r.total_cost_usd ?? r.costUsd ?? 0;
+        const input = r.input_tokens ?? r.usage?.input_tokens ?? 0;
+        const output = r.output_tokens ?? r.usage?.output_tokens ?? 0;
+        if (cost) totalCost += Number(cost);
+        if (input) totalInputTokens += Number(input);
+        if (output) totalOutputTokens += Number(output);
+        const stats = [];
+        if (cost) stats.push(`$${Number(cost).toFixed(4)}`);
+        if (input || output) stats.push(`${(input / 1000).toFixed(1)}k in / ${(output / 1000).toFixed(1)}k out`);
+        if (stats.length) {
+          console.log(`  ${dim}${stats.join(' · ')}${reset}`);
+        }
+
+        // Orchestrator-owned state transitions
+        // Re-read config in case the step modified it
+        const updatedConfig = readJson(path.join(taskDir, 'config.json'));
+        if (updatedConfig) {
+          advanceState(updatedConfig, route, taskDir);
+        }
+      }
+    } catch (err) {
+      console.error(`${red}Error spawning claude: ${err.message}${reset}`);
+      const choice = await ask('What would you like to do?', ['Retry', 'Stop']);
+      if (choice === 'Stop') break;
+    }
+  }
+
+  if (iteration >= maxIterations) {
+    console.error(`${yellow}Safety limit reached (${maxIterations} iterations). Stopping.${reset}`);
+  }
+}
+
+main().catch((err) => {
+  console.error(`${red}Fatal error: ${err.message}${reset}`);
+  process.exit(1);
+});
