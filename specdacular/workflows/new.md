@@ -251,33 +251,56 @@ Continue to continuation_offer.
 </step>
 
 <step name="continuation_offer">
-Offer to continue discussing or stop.
+Offer next inception steps or stop.
 
 **If gray areas remain:**
 Use AskUserQuestion:
 - header: "Continue?"
-- question: "Want to keep discussing the open areas, or come back later?"
+- question: "What's next?"
 - options:
   - "Keep discussing" — Dive into the gray areas now
+  - "Research" — Spawn research agents to investigate patterns and pitfalls
   - "Stop for now" — Come back with /specd.continue {task-name}
 
 **If Keep discussing:**
-Execute the discuss workflow logic:
+Execute the discuss workflow:
 @~/.claude/specdacular/workflows/discuss.md
 
 After discussion completes, return to this step.
 
-**If no gray areas remain:**
+**If Research:**
+Execute the research workflow:
+@~/.claude/specdacular/workflows/research.md
+
+After research completes, return to this step with planning option available.
+
+**If no gray areas remain (or after research):**
 Use AskUserQuestion:
 - header: "Continue?"
-- question: "Discussion looks solid. Want to keep going or come back later?"
+- question: "Ready to plan, or want to dig deeper?"
 - options:
-  - "Continue" — Move to the next step (research or planning)
+  - "Plan" — Create roadmap with phase goals
+  - "Research" — Investigate implementation patterns first
+  - "Keep discussing" — More discussion
   - "Stop for now" — Come back with /specd.continue {task-name}
 
-**If Continue:**
-Hand off to continue workflow:
-@~/.claude/specdacular/workflows/continue.md
+**If Plan:**
+Execute the plan workflow:
+@~/.claude/specdacular/workflows/plan.md
+
+After planning completes:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ INCEPTION COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Task {task-name} is ready for execution.
+
+Run /specd.execute to start the first phase.
+Or /specd.continue {task-name} for the full pipeline.
+```
+
+End workflow.
 
 **If Stop for now:**
 ```
