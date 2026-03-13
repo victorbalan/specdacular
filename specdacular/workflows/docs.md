@@ -360,10 +360,10 @@ Use AskUserQuestion:
 
 Only propose if there's significant bloat (>20 lines of rules/patterns). Skip this for small CLAUDE.md files.
 
-Continue to cleanup_and_commit.
+Continue to cleanup.
 </step>
 
-<step name="cleanup_and_commit">
+<step name="cleanup">
 Clean up temp files and commit results.
 
 **Delete temp directory:**
@@ -372,30 +372,7 @@ rm -rf .specd/tmp/docs-raw
 rmdir .specd/tmp 2>/dev/null  # Remove tmp dir if empty
 ```
 
-**Commit:**
-
-Check auto-commit setting:
-```bash
-cat .specd/config.json 2>/dev/null || echo '{"auto_commit_docs": true}'
-```
-
-If `auto_commit_docs` is false: skip commit, notify user.
-
-If true (default):
-```bash
-git add $DOCS_DIR/*.md CLAUDE.md
-git commit -m "$(cat <<'EOF'
-docs: generate topic docs and CLAUDE.md routing table
-
-Created:
-{list each doc file with line count}
-
-CLAUDE.md routing table {created | updated}.
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-```
+**Do not commit.** The user manages commits with their own workflow.
 
 Continue to completion.
 </step>
@@ -439,5 +416,5 @@ End workflow.
 - CLAUDE.md is purely a routing table — zero inline rules
 - Existing CLAUDE.md content preserved during merge (section markers)
 - Temp files cleaned up
-- Results committed (if auto_commit_docs enabled)
+- No auto-commit — user manages commits
 </success_criteria>

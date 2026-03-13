@@ -19,8 +19,6 @@ Generate AI-optimized documentation using a context-engineering approach.
 
 Spawns 4 parallel mapper agents for raw codebase analysis, then merges their outputs into topic-specific docs in `docs/`. Writes CLAUDE.md as a pure routing table — no inline rules.
 
-**Replaces:** `/specd.codebase.map` (old `.specd/codebase/` system)
-
 Output: `docs/` folder with topic-specific docs + `CLAUDE.md` routing table.
 </objective>
 
@@ -68,7 +66,7 @@ CLAUDE.md is a thin routing table — "Working on X? Read docs/Y.md". All knowle
 6. Propose doc list to user for approval
 7. Generate topic docs + `rules.md` with YAML frontmatter
 8. Write/update CLAUDE.md routing table (non-destructive merge)
-9. Clean up temp files and commit
+9. Clean up temp files
 </process>
 
 <success_criteria>
