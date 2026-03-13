@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -51,6 +51,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-03-13 | Full scope definition | FEATURE.md created, 5 decisions recorded |
+| 2026-03-13 | Gray area resolution | All gray areas resolved, 3 new decisions |
 
 ---
 
@@ -69,15 +70,15 @@
 
 ## Decision Count
 
-- **Active:** 5
+- **Active:** 8
 - **Superseded:** 0
-- **Total:** 5
+- **Total:** 8
 
 ---
 
 ## Next Steps
 
-Gray areas remain around doc merging heuristics, always-true rules extraction, review date storage, and research agent usage. Consider running `/specd.research` to investigate these before planning.
+All gray areas resolved. Ready for research or planning.
 
 **Resume:** `/specd.continue 180-turn` — Picks up where you left off.
 

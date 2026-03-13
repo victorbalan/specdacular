@@ -3,6 +3,7 @@
 **Task:** 180-turn
 **Created:** 2026-03-13
 **Last Updated:** 2026-03-13
+**Decisions Count:** 8
 
 ---
 
@@ -69,15 +70,58 @@
 **Date:** 2026-03-13
 **Status:** Active
 **Context:** Needed to decide whether doc topics are fixed or dynamic.
-**Decision:** Topics are dynamically determined by analyzing what the codebase actually uses. Research agents investigate best practices for the detected stack. No fixed list of topics.
+**Decision:** Topics are dynamically determined by analyzing what the codebase actually uses. No fixed list of topics.
 **Rationale:**
 - A CSS doc for a project with no CSS is wasted context
 - Different stacks need different guidance (React project vs. Go API vs. CLI tool)
-- Research agents can find current best practices for detected technologies
 **Implications:**
 - Topic detection logic needed in the merge step
-- Research agents called during doc generation
 - Proposed topic list shown to user for approval before generation
+
+### DEC-006: CLAUDE.md is purely a router — no rules inline
+
+**Date:** 2026-03-13
+**Status:** Active
+**Context:** Needed to decide what lives in CLAUDE.md vs. doc files.
+**Decision:** CLAUDE.md contains only the routing table ("Working on X? Read docs/Y.md"). All rules, even one-liners, go in `docs/rules.md`. CLAUDE.md has zero inline rules.
+**Rationale:**
+- Keeps CLAUDE.md thin and stable
+- All knowledge is in one place (docs/) not split across CLAUDE.md + docs/
+- Easier to review and maintain rules in a dedicated file
+**Implications:**
+- `docs/rules.md` is always generated (contains always-true project rules)
+- CLAUDE.md routing table points to rules.md for the "always read" rules
+- Existing CLAUDE.md rules can be proposed for migration to docs/rules.md
+
+### DEC-007: Frontmatter for review date tracking
+
+**Date:** 2026-03-13
+**Status:** Active
+**Context:** Need to track when each doc was last reviewed for staleness detection.
+**Decision:** Use YAML frontmatter in each doc file with `last_reviewed` and `generated_by` fields.
+**Rationale:**
+- Self-contained per doc — no separate manifest file to maintain
+- Easy to grep for stale docs
+- Standard markdown convention
+**Implications:**
+- All generated docs include frontmatter block
+- Review command reads frontmatter to detect staleness
+- Format: `---\nlast_reviewed: YYYY-MM-DD\ngenerated_by: specd\n---`
+
+### DEC-008: No external research during generation — research during review only
+
+**Date:** 2026-03-13
+**Status:** Active
+**Context:** Should research agents look up best practices during doc generation?
+**Decision:** Initial doc generation uses only what the mapper agents find in the actual codebase. No external research. The review command (`/specd.docs.review`) can optionally suggest best-practice improvements using research agents.
+**Rationale:**
+- Docs should reflect the project's actual patterns, not generic internet advice
+- Research during review is additive — suggests improvements rather than overriding reality
+- Keeps generation fast and grounded
+**Implications:**
+- Generation workflow: 4 mapper agents → merge → topic docs (no research step)
+- Review workflow: can optionally spawn research agents to compare against best practices
+- Clear separation: "what the code does" (generation) vs. "what it could do better" (review)
 
 ---
 
@@ -98,3 +142,6 @@
 | DEC-003 | 2026-03-13 | Separate review command with date tracking | Active |
 | DEC-004 | 2026-03-13 | Non-destructive CLAUDE.md merging | Active |
 | DEC-005 | 2026-03-13 | Dynamic doc topics based on codebase content | Active |
+| DEC-006 | 2026-03-13 | CLAUDE.md is purely a router — no rules inline | Active |
+| DEC-007 | 2026-03-13 | Frontmatter for review date tracking | Active |
+| DEC-008 | 2026-03-13 | No external research during generation — research during review only | Active |

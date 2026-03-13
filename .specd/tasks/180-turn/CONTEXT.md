@@ -1,7 +1,7 @@
 # Context: 180-turn
 
 **Last Updated:** 2026-03-13
-**Sessions:** 1
+**Sessions:** 2
 
 ## Discussion Summary
 
@@ -49,6 +49,30 @@ The user's SND webclient CLAUDE.md serves as the target pattern: a routing table
 
 **Related Decisions:** DEC-004
 
+### CLAUDE.md is purely a router
+
+**Question:** Should always-true rules go directly in CLAUDE.md or in a doc file?
+
+**Resolution:** CLAUDE.md is purely a routing table. All rules go in `docs/rules.md`, even one-liners. No inline rules in CLAUDE.md at all.
+
+**Related Decisions:** DEC-006
+
+### Review date tracking
+
+**Question:** Where to store review dates — frontmatter or manifest?
+
+**Resolution:** YAML frontmatter in each doc (`last_reviewed`, `generated_by` fields). Self-contained, easy to grep.
+
+**Related Decisions:** DEC-007
+
+### Research agents during generation vs. review
+
+**Question:** Should we research best practices during doc generation?
+
+**Resolution:** No. Generation uses only what mapper agents find in the actual codebase. Research agents are used during review only (`/specd.docs.review`) to suggest improvements.
+
+**Related Decisions:** DEC-008
+
 ---
 
 ## Deferred Questions
@@ -72,15 +96,13 @@ The user's SND webclient CLAUDE.md serves as the target pattern: a routing table
 | Date | Topics Covered | Key Outcomes |
 |------|----------------|--------------|
 | 2026-03-13 | Full scope: replace codebase system, new commands, CLAUDE.md routing, dynamic topics, review tracking | FEATURE.md defined, 5 decisions recorded |
+| 2026-03-13 | Gray areas: merging heuristics, rules location, review storage, research timing | All 4 gray areas resolved, 3 new decisions (DEC-006/007/008) |
 
 ---
 
 ## Gray Areas Remaining
 
-- [ ] **Doc topic merging heuristics** — How exactly to merge 4 agent outputs into topic-based docs. What triggers a merge (e.g., when patterns + map both mention react-query, create one doc)? Needs research into the user's SND experience.
-- [ ] **Always-true rules extraction** — How to identify which patterns should go in CLAUDE.md directly vs. in a doc file. What's the threshold?
-- [ ] **Review date storage format** — Where to track review dates per doc (frontmatter in each doc? Separate manifest file?)
-- [ ] **Research agent usage for best practices** — How to use Claude's research tools to investigate best practices for the detected stack during doc generation.
+All initial gray areas resolved in session 2. See DEC-006, DEC-007, DEC-008.
 
 ---
 
