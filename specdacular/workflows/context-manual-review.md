@@ -1,5 +1,5 @@
 <purpose>
-Manual review of a codebase context file (.specd/codebase/*.md). Shows a section list and lets the user pick which section to review, edit, remove, re-map, or add new content.
+Manual review of a codebase doc file (docs/*.md). Shows a section list and lets the user pick which section to review, edit, remove, re-map, or add new content.
 
 Edits are tagged with `<!-- USER_MODIFIED: YYYY-MM-DD -->`. Re-mapping spawns a targeted agent for just that section and shows a semantic diff.
 
@@ -88,17 +88,17 @@ Never skip tagging. Never defer to a later step.
 <process>
 
 <step name="validate">
-Check that codebase context files exist.
+Check that codebase doc files exist.
 
 ```bash
-ls .specd/codebase/*.md 2>/dev/null
+grep -rl "generated_by: specd" docs/ 2>/dev/null || ls docs/*.md 2>/dev/null
 ```
 
 **If no files found:**
 ```
-No codebase context files found.
+No codebase doc files found.
 
-Run /specd.codebase.map to generate codebase documentation.
+Run /specd.docs to generate topic-based documentation.
 ```
 End workflow.
 
@@ -262,7 +262,7 @@ description: "Re-map section: {section title}"
 ```
 Focus: {MAPPER_FOCUS}
 
-You are re-mapping a SINGLE SECTION of .specd/codebase/{file}.
+You are re-mapping a SINGLE SECTION of docs/{file}.
 
 Section heading: {exact heading text}
 Heading level: {## or ###}
@@ -360,7 +360,7 @@ Still commit the timestamp update (Last Reviewed changed).
 
 @~/.claude/specdacular/references/commit-docs.md
 
-- **$FILES:** `.specd/codebase/{file}`
+- **$FILES:** `docs/{file}`
 - **$MESSAGE:** `docs: review {file}` with brief summary of changes
 - **$LABEL:** `context review`
 

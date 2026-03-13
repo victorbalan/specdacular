@@ -33,14 +33,14 @@ Initialize a task folder and start the first discussion. Creates structure, asks
 Task name: $ARGUMENTS
 
 **Codebase context discovery:**
-1. Check for `.specd/config.json` — if exists, read `codebase_docs` path
-2. If no config, check for `.specd/codebase/` (default location)
-3. If neither found, offer `/specd.codebase.map`
+1. Check for `CLAUDE.md` routing table — if exists, read referenced docs
+2. If no CLAUDE.md, check for `docs/` directory with specd-generated docs
+3. If neither found, offer `/specd.docs`
 
 **Referenced docs (when available):**
-- `MAP.md` — System structure
-- `PATTERNS.md` — Code patterns
-- `STRUCTURE.md` — Directory layout
+- `CLAUDE.md` — Routing table pointing to topic docs
+- `docs/rules.md` — Project-wide rules
+- `docs/*.md` — Topic-specific patterns and guidance
 </context>
 
 <process>
