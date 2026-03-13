@@ -30,7 +30,8 @@
 ## Execution Progress
 
 ### Current Phase
-- Phase: none
+- Phase: 1 — Docs Generation Command
+- Plan created: 2026-03-13
 - Started: —
 
 ### Completed Phases
@@ -64,7 +65,7 @@
 | DECISIONS.md | 5 decisions | 2026-03-13 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Created | 2026-03-13 |
-| phases/ | Not started | — |
+| phases/phase-01/PLAN.md | Created | 2026-03-13 |
 
 ---
 
