@@ -18,8 +18,8 @@
 
 | Command | Description |
 |---------|-------------|
-| `/specd.codebase.map` | Analyze codebase with parallel agents → AI-optimized docs |
-| `/specd.codebase.review` | Review and edit codebase context files section by section |
+| `/specd.docs` | Generate topic-based docs and CLAUDE.md routing table |
+| `/specd.docs.review` | Review and audit docs for accuracy, staleness, and coverage gaps |
 | `/specd.config` | Configure auto-commit settings for docs and code |
 | `/specd.status [--all]` | Show task status dashboard |
 | `/specd.help` | Show this help |
@@ -47,7 +47,7 @@
    - Works across context windows — reads state fresh each time
    - Modes: default (auto-runs, pauses at phase steps), `--interactive` (prompt at each step), `--auto` (run everything)
 3. **`/specd.toolbox [name]`** — Direct access to task operations: Discuss, Research, Plan, Execute, Review
-4. **`/specd.codebase.review`** — Review and edit codebase context files section by section
+4. **`/specd.docs.review`** — Review and audit docs for accuracy, staleness, and coverage gaps
 
 ### Quick Start
 
@@ -125,17 +125,18 @@ Hooks are markdown workflow files that run before and after pipeline steps. They
 ## Codebase Documentation
 
 ```
-/specd.codebase.map
+/specd.docs
 ```
 
-Spawns 4 parallel agents to analyze your codebase and creates `.specd/codebase/`:
+Spawns 4 parallel agents to analyze your codebase, then merges their outputs into topic-specific docs in `docs/` and writes a `CLAUDE.md` routing table:
 
-| Document | What it contains |
-|----------|------------------|
-| **MAP.md** | Navigation: modules, functions, entry points |
-| **PATTERNS.md** | Code examples: services, errors, testing |
-| **STRUCTURE.md** | Organization: where to put new code |
-| **CONCERNS.md** | Warnings: gotchas, anti-patterns, debt |
+| File | What it contains |
+|------|------------------|
+| **CLAUDE.md** | Routing table — "Working on X? Read docs/Y.md" |
+| **docs/rules.md** | Always-true project rules (imports, naming, conventions) |
+| **docs/{topic}.md** | Topic-specific patterns and guidance (dynamic) |
+
+Review existing docs with `/specd.docs.review` — checks accuracy, staleness, and coverage gaps.
 
 ---
 

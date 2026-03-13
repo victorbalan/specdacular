@@ -467,7 +467,8 @@ function install(isGlobal) {
   ${green}Done!${reset} Launch Claude Code and run ${cyan}/specd.help${reset}.
 
   ${yellow}Commands:${reset}
-    /specd.codebase.map  - Analyze and document your codebase
+    /specd.docs          - Generate topic docs and CLAUDE.md routing table
+    /specd.docs.review   - Review docs for accuracy and staleness
     /specd.update        - Update to latest version
     /specd.help          - Show all commands
 `);

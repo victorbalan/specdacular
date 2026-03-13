@@ -4,10 +4,10 @@ This project uses [Specdacular](https://github.com/victorbalan/specdacular) for 
 
 ## Codebase Context
 
-If `.specd/codebase/` exists, read these files for project understanding:
-- `.specd/codebase/MAP.md` — System overview
-- `.specd/codebase/PATTERNS.md` — Code patterns and conventions
-- `.specd/codebase/STRUCTURE.md` — Directory layout
+If `CLAUDE.md` exists, read it for the routing table that points to topic docs in `docs/`:
+- `CLAUDE.md` — Routing table: "Working on X? Read docs/Y.md"
+- `docs/rules.md` — Project-wide rules (always read first)
+- `docs/*.md` — Topic-specific patterns and guidance
 
 ## Available Skills
 

@@ -101,13 +101,13 @@ In Claude Code:
 
 ## Quick Start
 
-### Map a Codebase
+### Generate Codebase Docs
 
 ```
-/specd.codebase.map
+/specd.docs
 ```
 
-Creates `.specd/codebase/` with 4 AI-optimized documents. This gives Claude context about your codebase's architecture, patterns, structure, and gotchas. For multi-project setups, it detects sub-projects automatically and maps each one in parallel before producing system-level documentation.
+Spawns 4 parallel agents to analyze your codebase, then merges their outputs into topic-specific docs in `docs/` and writes a `CLAUDE.md` routing table. Topics are dynamically determined from what your codebase actually uses. Review docs with `/specd.docs.review`.
 
 ### Plan a Feature
 
