@@ -469,6 +469,7 @@ function install(isGlobal) {
   ${yellow}Commands:${reset}
     /specd.docs          - Generate topic docs and CLAUDE.md routing table
     /specd.docs.review   - Review docs for accuracy and staleness
+    /specd.generate-skills.learn - Generate a /learn skill for your project
     /specd.update        - Update to latest version
     /specd.help          - Show all commands
 `);
