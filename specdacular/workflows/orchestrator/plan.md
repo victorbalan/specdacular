@@ -13,16 +13,16 @@ Called from the main `plan.md` workflow after orchestrator mode detection.
 <step name="load_cross_project_context">
 Load system-level and sub-project context.
 
-**System-level codebase docs:**
-- `.specd/codebase/PROJECTS.md` — Project registry
-- `.specd/codebase/TOPOLOGY.md` — Communication patterns
-- `.specd/codebase/CONTRACTS.md` — Shared interfaces
+**System-level docs:**
+- `docs/PROJECTS.md` — Project registry
+- `docs/TOPOLOGY.md` — Communication patterns
+- `docs/CONTRACTS.md` — Shared interfaces
 
 **Sub-project context:**
 From task config.json `"projects"` array, for each project:
 - Read `{project-path}/.specd/tasks/{task-name}/FEATURE.md` — Project-specific requirements
-- Read `{project-path}/.specd/codebase/MAP.md` — Project code overview (if exists)
-- Read `{project-path}/.specd/codebase/PATTERNS.md` — Project patterns (if exists)
+- Read `{project-path}/CLAUDE.md` — Project routing table and docs (if exists)
+- Read `{project-path}/docs/*.md` — Project topic docs (if exists)
 
 ```
 Orchestrator mode: {N} projects involved in this task.

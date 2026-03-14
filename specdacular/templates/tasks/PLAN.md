@@ -17,8 +17,8 @@ modifies:
 ## Context
 
 **Reference these files:**
-- `@.specd/codebase/PATTERNS.md` — Code patterns to follow
-- `@.specd/codebase/STRUCTURE.md` — Where files go
+- `@CLAUDE.md` — Routing table for project docs
+- `@docs/rules.md` — Project-wide rules and conventions
 - `@{path/to/pattern/file}` — Pattern to follow for this task
 
 **Relevant Decisions:**

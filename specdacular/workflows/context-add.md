@@ -1,7 +1,7 @@
 <purpose>
-Guide the user to add new content to a codebase context file (.specd/codebase/*.md). Identifies the correct file and section, checks for duplicates, confirms placement, and writes the content with a USER_MODIFIED tag.
+Guide the user to add new content to a codebase doc file (docs/*.md). Identifies the correct file and section, checks for duplicates, confirms placement, and writes the content with a USER_MODIFIED tag.
 
-Output: Updated context file with new content added to the correct section.
+Output: Updated doc file with new content added to the correct section.
 </purpose>
 
 <philosophy>
@@ -43,17 +43,17 @@ After writing content, update the document-level `Last Modified:` timestamp. If 
 <process>
 
 <step name="validate">
-Check that codebase context files exist.
+Check that codebase doc files exist.
 
 ```bash
-ls .specd/codebase/*.md 2>/dev/null
+grep -rl "generated_by: specd" docs/ 2>/dev/null || ls docs/*.md 2>/dev/null
 ```
 
 **If no files found:**
 ```
-No codebase context files found.
+No codebase doc files found.
 
-Run /specd.codebase.map to generate codebase documentation.
+Run /specd.docs to generate topic-based documentation.
 ```
 End workflow.
 
@@ -81,7 +81,7 @@ Determine where the content belongs.
 
 Search all context files for key terms from the user's description:
 
-Use Grep to search `.specd/codebase/*.md` for the main keywords/concepts from the user's input.
+Use Grep to search `docs/*.md` for the main keywords/concepts from the user's input.
 
 **If similar content found:**
 ```
@@ -105,11 +105,10 @@ If "Cancel": End workflow.
 
 **Step 2: Identify best file**
 
-Based on the content type, determine the target file:
-- **MAP.md** — Entry points, modules, functions, integrations, data flow
-- **PATTERNS.md** — Code patterns, conventions, examples to follow
-- **STRUCTURE.md** — Directory layout, where to put new files, naming conventions
-- **CONCERNS.md** — Gotchas, anti-patterns, tech debt, fragile areas, warnings
+Based on the content type, determine the target file from docs/:
+- **rules.md** — Always-true project rules, conventions, import patterns
+- **{topic}.md** — Topic-specific docs (e.g., react-query.md, testing-patterns.md, project-structure.md)
+- Read the CLAUDE.md routing table to see which docs exist and what they cover
 
 **Step 3: Identify best section**
 
@@ -142,27 +141,14 @@ Use AskUserQuestion:
   - "Cancel" — Don't add
 
 **If "Different section":**
-Show all sections across all 4 files as options:
+Show all sections across all doc files as options:
 
 ```
 Available sections:
 
-MAP.md:
-  ## Entry Points
-  ## Core Modules
-  ...
-
-PATTERNS.md:
-  ## Workflow/Command Pattern
-  ...
-
-STRUCTURE.md:
-  ## Directory Layout
-  ...
-
-CONCERNS.md:
-  ## Gotchas
-  ## Anti-patterns
+{For each docs/*.md file:}
+{filename}:
+  {list of ## headings}
   ...
 ```
 
@@ -203,7 +189,7 @@ Continue to commit.
 <step name="commit">
 @~/.claude/specdacular/references/commit-docs.md
 
-- **$FILES:** `.specd/codebase/{file}`
+- **$FILES:** `docs/{file}`
 - **$MESSAGE:** `docs: add to {file} — {brief description of what was added}`
 - **$LABEL:** `context addition`
 

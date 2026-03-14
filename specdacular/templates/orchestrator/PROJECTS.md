@@ -29,10 +29,9 @@
 
 ### Codebase Docs
 
-- `{project-path}/.specd/codebase/MAP.md` — System overview
-- `{project-path}/.specd/codebase/PATTERNS.md` — Code patterns
-- `{project-path}/.specd/codebase/STRUCTURE.md` — File structure
-- `{project-path}/.specd/codebase/CONCERNS.md` — Project-level concerns
+- `{project-path}/CLAUDE.md` — Routing table for project docs
+- `{project-path}/docs/rules.md` — Project-wide rules
+- `{project-path}/docs/*.md` — Topic-specific patterns and guidance
 
 ---
 

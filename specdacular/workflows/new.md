@@ -90,21 +90,22 @@ End main workflow.
 
 **Check for codebase docs:**
 ```bash
-ls .specd/codebase/*.md 2>/dev/null
+[ -f "CLAUDE.md" ] && cat CLAUDE.md || echo "no_claude_md"
+ls docs/*.md 2>/dev/null
 ```
 
-**If codebase docs found:**
+**If CLAUDE.md or docs/ found:**
 ```
 Found codebase documentation. I'll reference these when defining requirements.
 ```
-Read the available docs to understand project structure, code patterns, and architecture.
+Read the CLAUDE.md routing table and referenced docs to understand project structure, code patterns, and architecture.
 
 **If no codebase docs found:**
 Use AskUserQuestion:
 - header: "No Codebase Docs"
 - question: "I didn't find codebase documentation. How should we proceed?"
 - options:
-  - "Run map-codebase first" — Creates AI-optimized docs
+  - "Run /specd.docs first" — Generates topic docs and CLAUDE.md routing table
   - "Continue without" — Proceed without codebase context
   - "Custom location" — Docs are elsewhere
 

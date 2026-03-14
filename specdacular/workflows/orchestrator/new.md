@@ -13,10 +13,10 @@ Called from the main `new.md` workflow after orchestrator mode detection.
 <step name="load_system_docs">
 Read system-level codebase docs:
 
-- `.specd/codebase/PROJECTS.md` — Project registry
-- `.specd/codebase/TOPOLOGY.md` — Communication patterns
-- `.specd/codebase/CONTRACTS.md` — Shared interfaces
-- `.specd/codebase/CONCERNS.md` — System-level concerns
+- `docs/PROJECTS.md` — Project registry
+- `docs/TOPOLOGY.md` — Communication patterns
+- `docs/CONTRACTS.md` — Shared interfaces
+- `docs/CONCERNS.md` — System-level concerns
 
 Read project list from `.specd/config.json` `"projects"` array.
 

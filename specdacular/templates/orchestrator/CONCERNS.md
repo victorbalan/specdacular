@@ -4,7 +4,7 @@
 
 ## Overview
 
-{Brief description of cross-cutting system-level concerns that affect multiple projects. These are distinct from per-project concerns in each project's `.specd/codebase/CONCERNS.md`.}
+{Brief description of cross-cutting system-level concerns that affect multiple projects. These are distinct from per-project concerns in each project's topic docs.}
 
 ---
 

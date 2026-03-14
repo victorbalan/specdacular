@@ -55,13 +55,10 @@ PHASE_DIR="$TASK_DIR/phases/phase-$(printf '%02d' $PHASE)"
 ### Codebase Context (if available)
 
 ```bash
-# Check for codebase docs
-[ -d ".specd/codebase" ] && {
-  [ -f ".specd/codebase/MAP.md" ] && cat .specd/codebase/MAP.md
-  [ -f ".specd/codebase/PATTERNS.md" ] && cat .specd/codebase/PATTERNS.md
-  [ -f ".specd/codebase/STRUCTURE.md" ] && cat .specd/codebase/STRUCTURE.md
-  [ -f ".specd/codebase/CONCERNS.md" ] && cat .specd/codebase/CONCERNS.md
-}
+# Check for CLAUDE.md routing table and docs/
+[ -f "CLAUDE.md" ] && cat CLAUDE.md
+# Read all topic docs if they exist
+ls docs/*.md 2>/dev/null && for f in docs/*.md; do cat "$f"; done
 ```
 
 ### Global Config

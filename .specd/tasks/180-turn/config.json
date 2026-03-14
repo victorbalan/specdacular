@@ -1,0 +1,14 @@
+{
+  "task_name": "180-turn",
+  "created": "2026-03-13",
+  "stage": "execution",
+  "discussion_sessions": 2,
+  "decisions_count": 8,
+  "phases": {
+    "total": 3,
+    "current": 3,
+    "current_status": "executing",
+    "phase_start_commit": "508ee676f7686560dc5df1ddd26c70f347000972",
+    "phase_start_commit": "c56fdd1520c099f6a72e52c852e45406408c3382"
+  }
+}
