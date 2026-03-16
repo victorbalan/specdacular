@@ -1,7 +1,14 @@
 {
   "task_name": "best-practices-docs",
   "created": "2026-03-16",
-  "stage": "planning",
+  "stage": "execution",
   "discussion_sessions": 2,
-  "decisions_count": 7
+  "decisions_count": 7,
+  "phases": {
+    "current": 1,
+    "current_status": "pending",
+    "total": 3,
+    "completed": 0,
+    "phase_start_commit": null
+  }
 }
