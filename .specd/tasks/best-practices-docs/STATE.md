@@ -12,7 +12,7 @@
 ### Discussion
 - [x] Initial discussion complete
 - [x] Gray areas identified
-- [ ] All gray areas resolved
+- [x] All gray areas resolved
 
 ### Research
 - [ ] Research conducted
@@ -51,6 +51,7 @@
 | Date | Focus | Outcome |
 |------|-------|---------|
 | 2026-03-16 | Initial discussion | FEATURE.md created, 3 decisions |
+| 2026-03-16 | Gray areas | All resolved, 4 new decisions (7 total) |
 
 ---
 
@@ -60,7 +61,7 @@
 |----------|--------|--------------|
 | FEATURE.md | Created | 2026-03-16 |
 | CONTEXT.md | Created | 2026-03-16 |
-| DECISIONS.md | 3 decisions | 2026-03-16 |
+| DECISIONS.md | 7 decisions | 2026-03-16 |
 | RESEARCH.md | Not started | — |
 | ROADMAP.md | Not started | — |
 | phases/ | Not started | — |
@@ -69,15 +70,15 @@
 
 ## Decision Count
 
-- **Active:** 3
+- **Active:** 7
 - **Superseded:** 0
-- **Total:** 3
+- **Total:** 7
 
 ---
 
 ## Next Steps
 
-Continue discussing gray areas (agent research strategy, doc structure, multi-stack repos) or move to research.
+All gray areas resolved. Ready for research or planning.
 
 **Resume:** `/specd.continue best-practices-docs` — Picks up where you left off.
 

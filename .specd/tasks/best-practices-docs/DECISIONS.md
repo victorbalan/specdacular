@@ -53,6 +53,65 @@
 - Agent prompts must incorporate user's focus areas
 - "Research everything" must still produce useful breadth
 
+### DEC-004: Four Research Source Types
+
+**Date:** 2026-03-16
+**Status:** Active
+**Context:** What sources should research agents use to find best practices?
+**Decision:** Four source types: (1) official docs and getting-started guides, (2) awesome-{stack} lists and production-ready GitHub templates, (3) Claude Code MCP server registries and community skill lists, (4) tooling comparison resources (synthesized, not link-dumped).
+**Rationale:**
+- Official docs are authoritative but often miss community patterns
+- Awesome-lists and templates show what the community actually uses
+- MCP registries are the primary source for Claude Code ecosystem
+- Synthesis over link-dumping keeps the doc actionable
+**Implications:**
+- Agents need web search and web fetch tools
+- Agent prompts should specify source priority (official first, community second)
+
+### DEC-005: Organize Output by Category
+
+**Date:** 2026-03-16
+**Status:** Active
+**Context:** How should the output `docs/best-practices.md` be structured?
+**Decision:** Organize by category — stack patterns, Claude Code ecosystem, tooling/DX — with each section presenting options at actionable depth.
+**Rationale:**
+- Category-based structure maps naturally to the 3-agent split
+- Actionable depth means enough context to decide without leaving the doc
+- Not just names — include what it does, tradeoffs, when to use it
+**Implications:**
+- Merge step organizes agent outputs into category sections
+- Each option needs: name, what it does, tradeoffs, when to use it
+
+### DEC-006: Detect and Research All Stacks
+
+**Date:** 2026-03-16
+**Status:** Active
+**Context:** How to handle repos with multiple tech stacks (e.g., Python + TypeScript)?
+**Decision:** Detect all stacks and research all of them with clearly labeled sections. If too many stacks detected, ask the user which to focus on.
+**Rationale:**
+- Multi-stack repos are common (API + frontend)
+- Researching all gives complete picture
+- User override prevents wasted research on irrelevant stacks
+**Implications:**
+- Tech detection must enumerate all detected stacks
+- Agent prompts include all stacks (or user-selected subset)
+- Output doc has per-stack sections where relevant
+
+### DEC-007: Three Research Agents
+
+**Date:** 2026-03-16
+**Status:** Active
+**Context:** How to split research work across parallel agents
+**Decision:** 3 agents: (1) Stack patterns — project structure, architectural patterns, common libraries, (2) Claude Code ecosystem — MCP servers, skills, hooks, CLAUDE.md rules, (3) Tooling & DX — linters, formatters, testing frameworks, CI, pre-commit hooks.
+**Rationale:**
+- Matches the 3 categories in the output doc (DEC-005)
+- Similar to existing research.md 3-agent pattern
+- Each agent has a focused search domain
+**Implications:**
+- Each agent writes to a temp file, merge step combines them
+- Agent prompts are stack-aware (receive detected tech info)
+- User focus areas (DEC-003) steer all 3 agents
+
 ---
 
 ## Superseded Decisions
@@ -70,3 +129,7 @@
 | DEC-001 | 2026-03-16 | Present Options, Don't Prescribe | Active |
 | DEC-002 | 2026-03-16 | Output Stays Separate From CLAUDE.md | Active |
 | DEC-003 | 2026-03-16 | Ask User for Focus Areas Before Research | Active |
+| DEC-004 | 2026-03-16 | Four Research Source Types | Active |
+| DEC-005 | 2026-03-16 | Organize Output by Category | Active |
+| DEC-006 | 2026-03-16 | Detect and Research All Stacks | Active |
+| DEC-007 | 2026-03-16 | Three Research Agents | Active |
