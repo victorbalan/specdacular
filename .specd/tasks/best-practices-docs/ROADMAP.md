@@ -12,9 +12,9 @@
 
 ## Phases
 
-- [ ] **Phase 1: Command & Tech Detection** — Create command stub, workflow skeleton, and tech stack detection logic
-- [ ] **Phase 2: Research Agents** — Implement 3 parallel research agents with stack-aware prompts
-- [ ] **Phase 3: Merge & Output** — Merge agent outputs into docs/best-practices.md, add help entry
+- [x] **Phase 1: Command & Tech Detection** — Create command stub, workflow skeleton, and tech stack detection logic
+- [x] **Phase 2: Research Agents** — Implement 3 parallel research agents with stack-aware prompts
+- [x] **Phase 3: Merge & Output** — Merge agent outputs into docs/best-practices.md, add help entry
 
 ---
 
