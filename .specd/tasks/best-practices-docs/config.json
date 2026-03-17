@@ -5,10 +5,10 @@
   "discussion_sessions": 2,
   "decisions_count": 7,
   "phases": {
-    "current": 2,
+    "current": 3,
     "current_status": "pending",
     "total": 3,
-    "completed": 1,
-    "phase_start_commit": "8d76f51d88856c58bed41ac23d3aaba840ad584c"
+    "completed": 2,
+    "phase_start_commit": "5717f2f729145037aa1789a334e63f1fec7be57b"
   }
 }
