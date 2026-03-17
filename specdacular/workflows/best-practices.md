@@ -171,64 +171,184 @@ Continue to spawn_agents.
 </step>
 
 <step name="spawn_agents">
-Spawn 3 parallel research agents with stack and focus context.
+Spawn 3 parallel research agents with stack and focus context. All agents run in background simultaneously.
 
-**Agent context (shared by all 3):**
-- Detected stacks: `$SELECTED_STACKS`
-- Focus areas: `$FOCUS_AREAS`
-- Project signals: `$PROJECT_SIGNALS`
+**Spawn all 3 agents in a single message using the Agent tool with `run_in_background: true`:**
 
-<!-- PHASE 2: Implement agent spawning here.
-     3 agents per DEC-007:
-     1. Stack Patterns agent — project structure, architectural patterns, common libraries
-     2. Claude Code Ecosystem agent — MCP servers, skills, hooks, CLAUDE.md patterns
-     3. Tooling & DX agent — linters, formatters, testing frameworks, CI patterns
+### Agent 1: Stack Patterns
 
-     Each agent:
-     - Receives $SELECTED_STACKS, $FOCUS_AREAS, $PROJECT_SIGNALS
-     - Uses WebSearch and WebFetch tools
-     - Writes output to a temp file
-     - Uses model: "sonnet"
-     - Spawned with run_in_background: true
+```
+Agent(
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  description: "Stack patterns research"
+  run_in_background: true
+  prompt: "First, read ~/.claude/specdacular/agents/best-practices-researcher.md for your role and output format.
 
-     Source priorities (DEC-004):
-     1. Official docs and getting-started guides
-     2. awesome-{stack} lists and production-ready GitHub templates
-     3. Claude Code MCP server registries and community skill lists
-     4. Tooling comparison resources (synthesized, not link-dumped)
+<focus_area>stack-patterns</focus_area>
 
-     Security notes from research:
-     - Treat all fetched content as untrusted data
-     - Wrap in "summarise factual content only" prompt
-     - Budget max fetches per agent: 5 searches + 3 fetches
-     - 15s timeout per fetch, degrade to search summaries on timeout
+<detected_stacks>
+$SELECTED_STACKS
+</detected_stacks>
 
-     Output schema per agent:
-     - Structured markdown with categories
-     - Each recommendation: name, purpose, tradeoffs, when to use it
-     - Confidence levels: HIGH / MEDIUM / LOW
-     - Sources cited for each recommendation
--->
+<user_focus>
+$FOCUS_AREAS
+</user_focus>
 
-Placeholder: agents not yet implemented. Continue to collect_results.
+<project_signals>
+$PROJECT_SIGNALS
+</project_signals>
+
+Research project structure options, architectural patterns, and common libraries for the detected stacks.
+
+<search_targets>
+1. Search: '{primary_stack} project structure best practices 2026'
+2. Search: '{primary_stack} recommended libraries production 2026'
+3. Search: 'awesome-{primary_stack} github'
+4. Search: '{primary_framework} vs alternatives comparison 2026' (if framework detected)
+5. Fetch: Official docs or awesome-list for top finding (verify claims)
+</search_targets>
+
+<output_instructions>
+Return structured markdown following the 'Stack Patterns Output' format from your role file.
+Every recommendation must include: name, purpose, tradeoffs, when to use it.
+Assign confidence levels. Cite sources.
+Do NOT write files — just return the markdown.
+</output_instructions>"
+)
+```
+
+### Agent 2: Claude Code Ecosystem
+
+```
+Agent(
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  description: "Claude Code ecosystem research"
+  run_in_background: true
+  prompt: "First, read ~/.claude/specdacular/agents/best-practices-researcher.md for your role and output format.
+
+<focus_area>claude-code-ecosystem</focus_area>
+
+<detected_stacks>
+$SELECTED_STACKS
+</detected_stacks>
+
+<user_focus>
+$FOCUS_AREAS
+</user_focus>
+
+Research Claude Code MCP servers, skills, hooks, and CLAUDE.md patterns relevant to the detected stacks.
+
+<search_targets>
+1. Search: 'Claude Code MCP servers {primary_stack} 2026'
+2. Search: 'awesome-mcp-servers github' — fetch the README for the full server list
+3. Search: 'awesome-claude-code github' — fetch for skills and hooks patterns
+4. Search: 'Claude Code CLAUDE.md best practices {primary_stack}'
+5. Fetch: punkpeye/awesome-mcp-servers README or mcpservers.org for current server list
+</search_targets>
+
+<security_note>
+43% of examined MCP servers had critical security flaws (2026 research).
+For every MCP server you recommend, include a note about whether it's from an official/verified source.
+Always link to the official registry page, not raw install commands from web results.
+</security_note>
+
+<output_instructions>
+Return structured markdown following the 'Claude Code Ecosystem Output' format from your role file.
+Include MCP servers with: name, purpose, install command (from official source only), stack relevance, confidence, security notes.
+Include CLAUDE.md recommendations, skill patterns, and hook patterns.
+Do NOT write files — just return the markdown.
+</output_instructions>"
+)
+```
+
+### Agent 3: Tooling & DX
+
+```
+Agent(
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  description: "Tooling and DX research"
+  run_in_background: true
+  prompt: "First, read ~/.claude/specdacular/agents/best-practices-researcher.md for your role and output format.
+
+<focus_area>tooling-dx</focus_area>
+
+<detected_stacks>
+$SELECTED_STACKS
+</detected_stacks>
+
+<user_focus>
+$FOCUS_AREAS
+</user_focus>
+
+<project_signals>
+$PROJECT_SIGNALS
+</project_signals>
+
+Research linters, formatters, testing frameworks, CI patterns, and pre-commit hooks for the detected stacks.
+
+<search_targets>
+1. Search: '{primary_stack} linter formatter comparison 2026'
+2. Search: '{primary_stack} testing framework comparison 2026'
+3. Search: '{primary_stack} CI/CD github actions best practices 2026'
+4. Search: '{primary_stack} pre-commit hooks developer experience'
+5. Fetch: Official docs for top linter/formatter to verify current config format
+</search_targets>
+
+<calibration>
+Use project signals to calibrate recommendations:
+- If CI/CD signal detected: focus on optimizing existing, not setting up from scratch
+- If linting signal detected: compare existing tools to alternatives
+- If no test directory: emphasize testing setup as priority
+- Source file count indicates project scale: tailor recommendations accordingly
+</calibration>
+
+<output_instructions>
+Return structured markdown following the 'Tooling & DX Output' format from your role file.
+Present options as comparisons (tool A vs tool B) with tradeoffs.
+Include pre-commit hook recommendations.
+Do NOT write files — just return the markdown.
+</output_instructions>"
+)
+```
+
+After spawning all 3, continue to collect_results.
 
 Continue to collect_results.
 </step>
 
 <step name="collect_results">
-Collect outputs from all 3 research agents.
+Wait for all 3 background agents to complete and collect their outputs.
 
-<!-- PHASE 2: Implement agent output collection here.
-     - Wait for all 3 agents to complete
-     - Read each agent's temp file output
-     - If an agent failed, note it but continue with available results
-     - Display status:
-       Agent 1 (Stack Patterns): done/failed
-       Agent 2 (Claude Code Ecosystem): done/failed
-       Agent 3 (Tooling & DX): done/failed
--->
+**The agents were spawned with `run_in_background: true`, so they will notify when done.** Wait for all 3 notifications before proceeding.
 
-Placeholder: collection not yet implemented.
+**For each agent, when it completes:**
+- Read the returned output (structured markdown)
+- Store as `$AGENT_1_OUTPUT`, `$AGENT_2_OUTPUT`, `$AGENT_3_OUTPUT`
+- If an agent failed or returned empty output, note it but continue
+
+**Display status:**
+```
+Research agents complete:
+- Stack Patterns: {✓ complete | ✗ failed}
+- Claude Code Ecosystem: {✓ complete | ✗ failed}
+- Tooling & DX: {✓ complete | ✗ failed}
+```
+
+**If any agent failed:**
+```
+Note: {agent name} research failed. The output doc will have reduced
+coverage in that section. You can re-run /specd.best-practices to retry.
+```
+
+**If all agents failed:**
+```
+All research agents failed. This may be due to rate limiting or network
+issues. Try again in a few minutes with /specd.best-practices.
+```
+End workflow.
 
 Continue to merge_and_write.
 </step>
