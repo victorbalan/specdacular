@@ -18,6 +18,7 @@
 
 | Command | Description |
 |---------|-------------|
+| `/specd.best-practices` | Detect tech stack and generate best practices reference doc |
 | `/specd.docs` | Generate topic-based docs and CLAUDE.md routing table |
 | `/specd.docs.review` | Review and audit docs for accuracy, staleness, and coverage gaps |
 | `/specd.generate-skills.learn` | Generate a /learn skill that captures lessons into project docs |

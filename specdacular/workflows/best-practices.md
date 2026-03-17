@@ -356,48 +356,83 @@ Continue to merge_and_write.
 <step name="merge_and_write">
 Merge agent outputs into `docs/best-practices.md`.
 
-<!-- PHASE 3: Implement merge logic here.
-     Output doc structure (DEC-005):
-
-     # Best Practices: {Stack} ({Project Name})
-     Generated: {date} — Re-run `/specd.best-practices` to refresh
-
-     ## Detected Stack
-     {summary of detected stacks and frameworks}
-
-     ## Project Structure & Patterns
-     {from Agent 1: architectural patterns, file layout options, common libraries}
-     {each option: name, purpose, tradeoffs, when to use it}
-
-     ## Claude Code Configuration
-     ### CLAUDE.md Recommendations
-     ### Recommended MCP Servers
-     ### Skills & Hooks
-     {from Agent 2: MCP servers, skills, hooks, CLAUDE.md patterns}
-     {security caveats for MCP servers}
-
-     ## Tooling & DX
-     ### Linting & Formatting
-     ### Testing
-     ### CI/CD
-     {from Agent 3: linters, formatters, test frameworks, CI patterns}
-
-     ## Sources
-     {aggregated from all agents, verified URLs only}
-
-     Merge rules:
-     - Organize by category, not by agent
-     - Run contradiction detection: same tech recommended differently by 2 agents
-     - Drop or flag unverified URL claims
-     - Present options with tradeoffs (DEC-001), not single prescriptions
-     - Stamp generation date with "re-run to refresh" note
--->
-
 ```bash
 mkdir -p docs
 ```
 
-Placeholder: merge not yet implemented.
+**Get project name from current directory:**
+```bash
+basename $(pwd)
+```
+Store as `$PROJECT_NAME`.
+
+**Build the output document** by assembling agent outputs into the category structure. Write using the Write tool to `docs/best-practices.md`:
+
+```markdown
+# Best Practices: {$SELECTED_STACKS} ({$PROJECT_NAME})
+
+> Generated: {today's date} by `/specd.best-practices`
+> Re-run to refresh with latest recommendations.
+
+---
+
+## Detected Stack
+
+{$SELECTED_STACKS with framework details from detect_stack step}
+
+**Project signals:** {$PROJECT_SIGNALS summary — Docker, CI/CD, tests, linting, file count}
+
+---
+
+## Project Structure & Patterns
+
+{Insert $AGENT_1_OUTPUT here — Stack Patterns agent findings}
+
+{If agent 1 failed: "⚠️ Stack patterns research was unavailable. Re-run `/specd.best-practices` to retry."}
+
+---
+
+## Claude Code Configuration
+
+{Insert $AGENT_2_OUTPUT here — Claude Code Ecosystem agent findings}
+
+{If agent 2 failed: "⚠️ Claude Code ecosystem research was unavailable. Re-run `/specd.best-practices` to retry."}
+
+---
+
+## Tooling & DX
+
+{Insert $AGENT_3_OUTPUT here — Tooling & DX agent findings}
+
+{If agent 3 failed: "⚠️ Tooling & DX research was unavailable. Re-run `/specd.best-practices` to retry."}
+
+---
+
+## Sources
+
+{Aggregate all source URLs from agent outputs into a single list.
+Only include URLs that agents marked as verified.
+Group by: Official Docs, Community Resources, Registries.}
+```
+
+**Merge rules to follow:**
+
+1. **Organize by category, not by agent.** Each agent's output maps to one section, but if an agent's findings touch another section's topic, move that content to the appropriate section.
+
+2. **Contradiction detection:** Before writing, scan all 3 agent outputs for cases where the same technology or tool is mentioned with conflicting recommendations. If found, add a note:
+   ```
+   > **Note:** Different research sources have varying perspectives on {tool}.
+   > {Perspective 1} vs {Perspective 2}. Consider your specific needs.
+   ```
+
+3. **Confidence filtering:**
+   - HIGH confidence findings: include directly as recommendations
+   - MEDIUM confidence findings: include with source attribution
+   - LOW confidence findings: move to a "For Awareness (Unverified)" subsection at the bottom of each major section, or omit if section is already comprehensive
+
+4. **URL verification:** Only include URLs that agents reported as verified (fetched successfully). Drop broken or unverified URLs.
+
+5. **Do NOT modify CLAUDE.md** (DEC-002). The output file is `docs/best-practices.md` only.
 
 Continue to completion.
 </step>
