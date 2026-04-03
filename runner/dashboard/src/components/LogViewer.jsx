@@ -1,9 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export function LogViewer({ taskId }) {
   const [lines, setLines] = useState([]);
   const [loading, setLoading] = useState(true);
-  const bottomRef = useRef(null);
+  const containerRef = useRef(null);
+  const isNearBottomRef = useRef(true);
+  const prevLineCountRef = useRef(0);
+
+  // Track if user is scrolled near the bottom
+  const handleScroll = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const threshold = 50;
+    isNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+  }, []);
 
   useEffect(() => {
     let interval;
@@ -11,7 +21,12 @@ export function LogViewer({ taskId }) {
       try {
         const res = await fetch(`/api/tasks/${taskId}/logs?tail=500`);
         const data = await res.json();
-        setLines(data.lines || []);
+        const newLines = data.lines || [];
+        // Only update state if lines actually changed
+        if (newLines.length !== prevLineCountRef.current) {
+          prevLineCountRef.current = newLines.length;
+          setLines(newLines);
+        }
         setLoading(false);
       } catch (e) {
         setLoading(false);
@@ -19,19 +34,26 @@ export function LogViewer({ taskId }) {
     };
 
     fetchLogs();
-    interval = setInterval(fetchLogs, 1000); // poll every 1s for live feel
+    interval = setInterval(fetchLogs, 1500);
     return () => clearInterval(interval);
   }, [taskId]);
 
+  // Only auto-scroll if user was already at the bottom
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isNearBottomRef.current && containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
   }, [lines]);
 
   if (loading) return <p className="text-gray-500 text-sm">Loading logs...</p>;
   if (lines.length === 0) return <p className="text-gray-500 text-sm">No logs yet. Waiting for agent output...</p>;
 
   return (
-    <div className="bg-gray-900 rounded p-3 mt-3 max-h-96 overflow-y-auto font-mono text-xs leading-relaxed">
+    <div
+      ref={containerRef}
+      onScroll={handleScroll}
+      className="bg-gray-900 rounded p-3 mt-3 max-h-96 overflow-y-auto font-mono text-xs leading-relaxed"
+    >
       {lines.map((line, i) => (
         <div
           key={i}
@@ -44,7 +66,6 @@ export function LogViewer({ taskId }) {
           {line}
         </div>
       ))}
-      <div ref={bottomRef} />
     </div>
   );
 }

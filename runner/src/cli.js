@@ -14,27 +14,51 @@ program
   .description('Config-driven autonomous agent orchestrator')
   .version('0.1.0');
 
-program
-  .command('start')
-  .description('Start the orchestrator daemon')
-  .option('-p, --port <port>', 'Dashboard port', '3700')
-  .option('-d, --dir <dir>', 'Project directory', process.cwd())
-  .action(async (opts) => {
-    const projectDir = path.resolve(opts.dir);
-    const configDir = path.join(projectDir, '.specd', 'runner');
+function resolveConfigDir(dir) {
+  const projectDir = path.resolve(dir);
+  const configDir = path.join(projectDir, '.specd', 'runner');
+  if (!fs.existsSync(configDir)) {
+    console.error(`Config directory not found: ${configDir}`);
+    console.error('Ensure .specd/runner/ exists with config.yaml, agents.yaml, pipelines.yaml');
+    process.exit(1);
+  }
+  return { projectDir, configDir };
+}
 
-    if (!fs.existsSync(configDir)) {
-      console.error(`Config directory not found: ${configDir}`);
-      console.error('Run "specd-runner init" to create one, or ensure .specd/runner/ exists.');
+function setupShutdown(orchestrator, server) {
+  let shuttingDown = false;
+  const shutdown = async () => {
+    if (shuttingDown) {
+      console.log('Force exiting...');
       process.exit(1);
     }
+    shuttingDown = true;
+    console.log('\nShutting down...');
+    orchestrator.stop();
+    try { await server.stop(); } catch (e) { /* ignore */ }
+    process.exit(0);
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+}
 
+// ─── specd-runner start ───────────────────────────────────────────
+// Runs the orchestrator + API. No static dashboard served.
+// The dashboard is started separately with `specd-runner ui`.
+program
+  .command('start')
+  .description('Start the orchestrator daemon + API server')
+  .option('-p, --port <port>', 'API port', '3700')
+  .option('-d, --dir <dir>', 'Project directory', process.cwd())
+  .action(async (opts) => {
+    const { configDir } = resolveConfigDir(opts.dir);
     const port = parseInt(opts.port);
 
     try {
       const orchestrator = new Orchestrator(configDir);
       await orchestrator.init();
 
+      // Telegram notifications
       const telegram = new TelegramNotifier(orchestrator.config.notifications?.telegram);
       orchestrator.stateManager.on('change', (event) => {
         if (event.type === 'task_status_changed') {
@@ -51,27 +75,12 @@ program
       const server = createServer(orchestrator, port);
       await server.start();
 
-      console.log(`Orchestrator running. Watching ${configDir}/tasks/ for work.`);
+      console.log(`API server:    http://localhost:${port}`);
+      console.log(`Watching:      ${configDir}/tasks/`);
+      console.log(`Dashboard:     run "specd-runner ui" in another terminal\n`);
       console.log('Press Ctrl+C to stop.\n');
 
-      let shuttingDown = false;
-      const shutdown = async () => {
-        if (shuttingDown) {
-          console.log('Force exiting...');
-          process.exit(1);
-        }
-        shuttingDown = true;
-        console.log('\nShutting down...');
-        orchestrator.stop();
-        try {
-          await server.stop();
-        } catch (e) { /* ignore */ }
-        process.exit(0);
-      };
-
-      process.on('SIGINT', shutdown);
-      process.on('SIGTERM', shutdown);
-
+      setupShutdown(orchestrator, server);
       await orchestrator.startLoop();
     } catch (err) {
       console.error(`Failed to start: ${err.message}`);
@@ -79,13 +88,51 @@ program
     }
   });
 
+// ─── specd-runner ui ──────────────────────────────────────────────
+// Runs the Vite dev server for the dashboard, proxying API to the runner.
+program
+  .command('ui')
+  .description('Start the dashboard UI (dev server)')
+  .option('--ui-port <port>', 'Dashboard UI port', '3710')
+  .option('--api-port <port>', 'API port to proxy to', '3700')
+  .action(async (opts) => {
+    const { spawn } = require('child_process');
+    const uiPort = parseInt(opts.uiPort);
+    const apiPort = parseInt(opts.apiPort);
+    const dashboardDir = path.join(__dirname, '..', 'dashboard');
+
+    if (!fs.existsSync(path.join(dashboardDir, 'package.json'))) {
+      console.error(`Dashboard not found at ${dashboardDir}`);
+      process.exit(1);
+    }
+
+    // Update vite proxy target dynamically
+    console.log(`Dashboard:  http://localhost:${uiPort}`);
+    console.log(`Proxying:   API -> http://localhost:${apiPort}\n`);
+
+    const vite = spawn('npx', ['vite', '--port', String(uiPort)], {
+      cwd: dashboardDir,
+      stdio: 'inherit',
+      shell: true,
+      env: {
+        ...process.env,
+        VITE_API_PORT: String(apiPort),
+      },
+    });
+
+    vite.on('close', (code) => process.exit(code || 0));
+    process.on('SIGINT', () => { vite.kill(); process.exit(0); });
+    process.on('SIGTERM', () => { vite.kill(); process.exit(0); });
+  });
+
+// ─── specd-runner status ──────────────────────────────────────────
 program
   .command('status')
   .description('Show current run status')
   .option('-d, --dir <dir>', 'Project directory', process.cwd())
   .action(async (opts) => {
-    const projectDir = path.resolve(opts.dir);
-    const statusPath = path.join(projectDir, '.specd', 'runner', 'status.json');
+    const { configDir } = resolveConfigDir(opts.dir);
+    const statusPath = path.join(configDir, 'status.json');
 
     if (!fs.existsSync(statusPath)) {
       console.log('No active run found.');

@@ -1,43 +1,32 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export function useWebSocket() {
   const [status, setStatus] = useState(null);
   const [connected, setConnected] = useState(false);
-  const wsRef = useRef(null);
+  const prevJsonRef = useRef('');
 
-  const fetchInitialStatus = useCallback(async () => {
+  const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/status');
       const data = await res.json();
-      setStatus(data);
+      // Only update state if data actually changed (prevents unnecessary re-renders)
+      const json = JSON.stringify(data);
+      if (json !== prevJsonRef.current) {
+        prevJsonRef.current = json;
+        setStatus(data);
+      }
+      setConnected(true);
     } catch (e) {
-      console.error('Failed to fetch status:', e);
+      setConnected(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchInitialStatus();
-
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}`);
-    wsRef.current = ws;
-
-    ws.onopen = () => setConnected(true);
-    ws.onclose = () => {
-      setConnected(false);
-      setTimeout(() => fetchInitialStatus(), 3000);
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (['task_registered', 'task_status_changed', 'stage_started',
-           'stage_completed', 'live_progress'].includes(data.type)) {
-        fetchInitialStatus();
-      }
-    };
-
-    return () => ws.close();
-  }, [fetchInitialStatus]);
+    fetchStatus();
+    // Poll every 2s — simple, reliable, works across ports
+    const interval = setInterval(fetchStatus, 2000);
+    return () => clearInterval(interval);
+  }, [fetchStatus]);
 
   return { status, connected };
 }
