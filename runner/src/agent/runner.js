@@ -15,21 +15,31 @@ class AgentRunner extends EventEmitter {
 
   run(prompt) {
     return new Promise((resolve) => {
-      const { cmd, prompt_flag } = this.agentConfig;
+      const { cmd, prompt_flag, input_mode } = this.agentConfig;
       const parts = cmd.split(/\s+/);
       const command = parts[0];
       const args = [...parts.slice(1)];
 
-      if (prompt_flag) {
-        args.push(prompt_flag, prompt);
-      } else {
-        args.push(prompt);
+      const useStdin = input_mode === 'stdin';
+
+      if (!useStdin) {
+        if (prompt_flag) {
+          args.push(prompt_flag, prompt);
+        } else {
+          args.push(prompt);
+        }
       }
 
       this.process = spawn(command, args, {
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: [useStdin ? 'pipe' : 'ignore', 'pipe', 'pipe'],
         shell: true,
       });
+
+      // Pipe prompt via stdin if configured
+      if (useStdin && this.process.stdin) {
+        this.process.stdin.write(prompt);
+        this.process.stdin.end();
+      }
 
       this.lastOutputTime = Date.now();
       let result = null;
