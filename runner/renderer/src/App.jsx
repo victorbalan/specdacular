@@ -25,7 +25,7 @@ export default function App() {
         {selectedId === null && <Dashboard projects={projects} />}
         {selectedId === 'settings' && <div style={{ padding: 24 }}><h1>Settings</h1><p>Coming soon</p></div>}
         {selectedId && selectedId !== 'settings' && (
-          <ProjectView projectId={selectedId} />
+          <ProjectView projectId={selectedId} projectName={projects.find(p => p.id === selectedId)?.name || 'Project'} />
         )}
       </main>
     </div>
