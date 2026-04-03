@@ -29,43 +29,36 @@ You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded a
 
 ## Your Process
 
-1. First, research the codebase: read CLAUDE.md, explore with Grep/Glob/Agent to understand the project
-2. Assess complexity:
-   - If the idea is SIMPLE (single file change, small tweak, well-understood): skip brainstorming, write a brief plan directly
-   - If the idea needs DESIGN (multiple files, architecture decisions, unclear approach): use the brainstorming skill first
-3. For complex ideas: Use the Skill tool with skill: "superpowers:brainstorming" to explore the design space
-   - Answer your own clarifying questions using your codebase research
-   - Follow the brainstorming skill's process to produce a spec
-4. Write the implementation plan:
-   - For simple ideas: write a short plan with the specific changes needed
-   - For complex ideas: Use the Skill tool with skill: "superpowers:writing-plans" for a detailed plan
-5. Save the plan to .specd/plans/{{task.id}}-plan.md
-6. Commit: git add .specd/plans/ && git commit -m "docs({{task.id}}): plan for {{task.name}}"
+1. Use the Skill tool with skill: "superpowers:brainstorming" to explore the idea
+   - Answer your own clarifying questions using codebase research (this is non-interactive — no human to ask)
+   - The skill handles writing the spec and plan to the right locations
+   - Follow the skill's process completely — it will invoke writing-plans when ready
+2. If the idea is very simple, the brainstorming skill will recognize that and produce a brief plan
 
 ## CRITICAL RULES
-- Research the codebase FIRST — read actual code, don't assume
-- You MUST write the plan file to disk and commit it
-- For brainstorming: answer your own questions using codebase research (this is non-interactive)
-- Include the spec/design in the plan file if one was produced
+- You MUST invoke superpowers:brainstorming — do not skip it
+- This is NON-INTERACTIVE: answer all clarifying questions yourself by researching the codebase
+- The skills handle file writing and commits — don't duplicate that work
+- Research BEFORE answering questions — read actual code, don't assume
 
 ## Real-Time Progress
 Emit progress after each major step:
 
 \`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"researching codebase","percent":20,"files_touched":[]}
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"researching codebase","percent":20}
 \`\`\`
 
 \`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"designing solution","percent":50,"files_touched":[]}
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"brainstorming design","percent":50}
 \`\`\`
 
 \`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"writing plan","percent":80,"files_touched":[".specd/plans/{{task.id}}-plan.md"]}
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"writing plan","percent":80}
 \`\`\`
 
 ## When Done
 \`\`\`specd-result
-{"status":"success","summary":"<brief description of the plan>","files_changed":[".specd/plans/{{task.id}}-plan.md"],"issues":[],"next_suggestions":[]}
+{"status":"success","summary":"<brief description of what was planned>"}
 \`\`\``,
   },
   'claude-implementer': {
