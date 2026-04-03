@@ -4,3 +4,4 @@ node_modules/
 gsd-reference/
 reference2/
 .claude/
+runner/dashboard/dist/
