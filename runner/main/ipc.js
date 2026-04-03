@@ -1,6 +1,6 @@
 // runner/main/ipc.js
 import { ipcMain, dialog, shell } from 'electron';
-import { readFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, unlinkSync } from 'fs';
 import { join, basename } from 'path';
 
 export function setupIpc(getContext) {
@@ -116,6 +116,18 @@ export function setupIpc(getContext) {
   ipcMain.handle('get-agent-files', () => {
     const { paths } = getContext();
     return readTemplateDir(paths.agentTemplatesDir);
+  });
+
+  ipcMain.handle('delete-task', (event, projectId, taskId) => {
+    const { orchestrators } = getContext();
+    const orch = orchestrators.get(projectId);
+    if (!orch) return false;
+    const taskPath = join(orch.projectPaths.tasksDir, `${taskId}.json`);
+    if (existsSync(taskPath)) {
+      unlinkSync(taskPath);
+      return true;
+    }
+    return false;
   });
 
   ipcMain.handle('open-external', (event, url) => {

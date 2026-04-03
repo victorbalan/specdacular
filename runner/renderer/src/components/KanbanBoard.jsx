@@ -282,20 +282,39 @@ function TaskCard({ task, action, onClick, onAction, onRefresh }) {
       onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadows.sm; }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <div style={{ fontWeight: 500, fontSize: 12, color: colors.text }}>{task.name}</div>
-        {(task.status === 'idea' || task.status === 'planning' || task.status === 'review') && (
-          <span
-            onClick={handleToggleAuto}
-            title={task.auto_execute ? 'Auto-execute ON' : 'Auto-execute OFF'}
-            style={{
-              fontSize: 10, cursor: 'pointer', padding: '1px 4px', borderRadius: 3,
-              backgroundColor: task.auto_execute ? colors.accentLight : 'transparent',
-              color: task.auto_execute ? colors.accent : colors.textMuted,
-            }}
-          >
-            {task.auto_execute ? 'AUTO' : ''}
-          </span>
-        )}
+        <div style={{ fontWeight: 500, fontSize: 12, color: colors.text, flex: 1 }}>{task.name}</div>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {(task.status === 'idea' || task.status === 'planning' || task.status === 'review') && task.auto_execute && (
+            <span
+              onClick={handleToggleAuto}
+              title="Auto-execute ON"
+              style={{
+                fontSize: 10, cursor: 'pointer', padding: '1px 4px', borderRadius: 3,
+                backgroundColor: colors.accentLight, color: colors.accent,
+              }}
+            >
+              AUTO
+            </span>
+          )}
+          {task.status === 'idea' && (
+            <span
+              onClick={async (e) => {
+                e.stopPropagation();
+                await window.specd.invoke('delete-task', task.projectId, task.id);
+                if (onRefresh) onRefresh();
+              }}
+              title="Remove idea"
+              style={{
+                fontSize: 12, cursor: 'pointer', color: colors.textMuted, padding: '0 2px',
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = colors.danger}
+              onMouseLeave={(e) => e.currentTarget.style.color = colors.textMuted}
+            >
+              ×
+            </span>
+          )}
+        </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{
