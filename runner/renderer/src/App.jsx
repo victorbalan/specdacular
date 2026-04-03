@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
+import ProjectView from './pages/ProjectView';
 
 export default function App() {
   const [projects, setProjects] = useState([]);
@@ -24,10 +25,7 @@ export default function App() {
         {selectedId === null && <Dashboard projects={projects} />}
         {selectedId === 'settings' && <div style={{ padding: 24 }}><h1>Settings</h1><p>Coming soon</p></div>}
         {selectedId && selectedId !== 'settings' && (
-          <div style={{ padding: 24 }}>
-            <h1>{projects.find(p => p.id === selectedId)?.name || 'Project'}</h1>
-            <p>Project view coming in next task</p>
-          </div>
+          <ProjectView projectId={selectedId} />
         )}
       </main>
     </div>
