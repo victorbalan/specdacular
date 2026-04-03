@@ -161,7 +161,8 @@ class Orchestrator {
       }
     }
 
-    console.log(`[${task.id}] Starting in ${workDir ? 'worktree: ' + workDir : 'project dir: ' + projectDir}`);
+    console.log(`[${task.id}] Starting "${task.name}" in ${workDir ? 'worktree: ' + workDir : 'project dir: ' + projectDir}`);
+    console.log(`[${task.id}] Pipeline: ${pipelineName} (${pipeline.stages.length} stages: ${pipeline.stages.map(s => s.stage).join(' → ')})`);
 
     const sequencer = new StageSequencer({
       stages: pipeline.stages,
@@ -204,12 +205,16 @@ class Orchestrator {
 
         return runner;
       },
-      onStageStart: (stage) => {
-        this._appendLog(task.id, `\n--- Stage: ${stage.stage} (${stage.agent || stage.cmd}) ---\n`);
+      onStageStart: (stage, attempt) => {
+        const retryStr = attempt > 0 ? ` (retry ${attempt})` : '';
+        console.log(`[${task.id}] Stage: ${stage.stage}${retryStr} → ${stage.agent || stage.cmd}`);
+        this._appendLog(task.id, `\n--- Stage: ${stage.stage} (${stage.agent || stage.cmd})${retryStr} ---\n`);
         this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
         this.stateManager.persist();
       },
       onStageComplete: (stage, result) => {
+        const icon = result.status === 'success' ? '✓' : '✗';
+        console.log(`[${task.id}] ${icon} ${stage.stage}: ${result.summary || result.status}`);
         this.stateManager.completeStage(task.id, result.status, result.summary);
         this.stateManager.persist();
       },
@@ -222,6 +227,7 @@ class Orchestrator {
     const result = await sequencer.run();
 
     const finalStatus = result.status === 'success' ? 'done' : 'failed';
+    console.log(`[${task.id}] ${finalStatus === 'done' ? '✓ Completed' : '✗ Failed'}${result.failedStage ? ' at stage: ' + result.failedStage : ''}`);
     this.stateManager.updateTaskStatus(task.id, finalStatus);
     this.stateManager.persist();
 
@@ -280,49 +286,65 @@ class Orchestrator {
    * Called after task success, and also by the periodic sweep.
    */
   async _createPRForTask(taskId, taskName, summary, cwd) {
-    // Skip if PR already exists for this task
+    // Skip if PR already exists or was already attempted
     const taskState = this.stateManager.getState().tasks[taskId];
     if (taskState?.pr_url) return taskState.pr_url;
 
-    // Check if the task YAML already has a pr_url
+    // Check if the task YAML already has a pr_url (including 'none')
     const taskFile = path.join(this.tasksDir, `${taskId}.yaml`);
     if (fs.existsSync(taskFile)) {
       const yaml = require('js-yaml');
       const data = yaml.load(fs.readFileSync(taskFile, 'utf8'));
       if (data.pr_url) {
-        // Already has a PR — record it in state
         this.stateManager.setPrUrl(taskId, data.pr_url);
         this.stateManager.persist();
         return data.pr_url;
       }
     }
 
-    if (!this.worktreeManager) return null;
+    if (!this.worktreeManager) {
+      // No worktree manager — mark as no PR needed
+      this._markNoPR(taskId, 'no worktree manager');
+      return null;
+    }
 
-    // The worktree might already be cleaned up. Check if the branch exists.
+    // Check if the branch exists
     const branchName = `specd/${taskId}`;
     try {
       const { execSync } = require('child_process');
       const repoRoot = this._findGitRoot();
       execSync(`git rev-parse --verify "${branchName}"`, { cwd: repoRoot, stdio: 'pipe' });
     } catch (e) {
-      // Branch doesn't exist — nothing to PR
+      // Branch doesn't exist — mark so we don't retry
+      this._markNoPR(taskId, 'no branch found');
+      return null;
+    }
+
+    // Check if branch actually has changes
+    if (!this.worktreeManager.hasChanges(taskId)) {
+      this._markNoPR(taskId, 'no changes on branch');
       return null;
     }
 
     const prUrl = await this.worktreeManager.createPR(taskId, taskName, summary);
     if (prUrl) {
-      // Save to state
       this.stateManager.setPrUrl(taskId, prUrl);
       this.stateManager.persist();
-
-      // Save to task YAML
       this._writePrUrlToYaml(taskId, prUrl);
-
       this._appendLog(taskId, `\n--- PR Created: ${prUrl} ---\n`);
       console.log(`[${taskId}] PR: ${prUrl}`);
+    } else {
+      // createPR failed — mark so we don't infinite loop
+      this._markNoPR(taskId, 'gh pr create failed');
     }
     return prUrl;
+  }
+
+  _markNoPR(taskId, reason) {
+    console.log(`[${taskId}] No PR: ${reason}`);
+    // Use 'none' as a sentinel so the sweep stops retrying
+    this.stateManager.setPrUrl(taskId, 'none');
+    this.stateManager.persist();
   }
 
   /**
@@ -347,13 +369,16 @@ class Orchestrator {
    */
   async sweepPRs() {
     const state = this.stateManager.getState();
-    for (const [taskId, task] of Object.entries(state.tasks)) {
-      if (task.status === 'done' && !task.pr_url) {
-        console.log(`[${taskId}] Sweep: creating missing PR...`);
-        const summary = task.stages
-          ?.map(s => s.summary).filter(Boolean).join('\n- ') || '';
-        await this._createPRForTask(taskId, task.name, summary, null);
-      }
+    const needsPR = Object.entries(state.tasks)
+      .filter(([_, t]) => t.status === 'done' && !t.pr_url);
+
+    if (needsPR.length === 0) return;
+
+    console.log(`[sweep] ${needsPR.length} done task(s) without PR`);
+    for (const [taskId, task] of needsPR) {
+      const summary = task.stages
+        ?.map(s => s.summary).filter(Boolean).join('\n- ') || '';
+      await this._createPRForTask(taskId, task.name, summary, null);
     }
   }
 
@@ -381,11 +406,14 @@ class Orchestrator {
 
     await this.taskWatcher.watch();
 
-    // Run PR sweep on startup to catch any done tasks missing PRs
+    // Run PR sweep on startup
     await this.sweepPRs();
 
+    const readyCount = this.tasks.filter(t => t.status === 'ready').length;
+    console.log(`\n${readyCount} task(s) ready, ${this.completedTasks.size} completed, max_parallel: ${maxParallel}\n`);
+
     let lastSweep = Date.now();
-    const sweepInterval = 60000; // sweep every 60s
+    const sweepInterval = 60000;
 
     while (this.running) {
       // Periodic PR sweep
