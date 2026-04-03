@@ -14,7 +14,7 @@ describe('AgentRunner', () => {
   it('runs a CLI agent and collects result', async () => {
     const agent = {
       cmd: `node ${mockAgentPath}`,
-      prompt_flag: '',
+      input_mode: 'stdin',
       output_format: 'json_block',
     };
 

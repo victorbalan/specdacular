@@ -25,7 +25,6 @@ class AgentRunner extends EventEmitter {
       const useStdin = input_mode === 'stdin';
       const useStreamJson = output_format === 'stream_json' || cmd.includes('claude');
 
-      // For Claude CLI agents, use stream-json for structured output
       if (useStreamJson && !args.includes('--output-format')) {
         args.push('--output-format', 'stream-json', '--verbose');
       }
@@ -61,11 +60,14 @@ class AgentRunner extends EventEmitter {
         resolve(r);
       };
 
+      // Capture result from either parser
+      this.on('result', (r) => {
+        result = r;
+      });
+
       if (useStreamJson) {
-        // Parse structured JSON events from Claude CLI
-        this._parseStreamJson(result, doResolve);
+        this._parseStreamJson();
       } else {
-        // Legacy: parse specd-status/specd-result blocks from text output
         this._parseTextOutput();
       }
 
@@ -123,7 +125,7 @@ class AgentRunner extends EventEmitter {
     });
   }
 
-  _parseStreamJson(result, doResolve) {
+  _parseStreamJson() {
     const rl = readline.createInterface({ input: this.process.stdout });
 
     rl.on('line', (line) => {
@@ -133,34 +135,28 @@ class AgentRunner extends EventEmitter {
       try {
         event = JSON.parse(line);
       } catch (e) {
-        // Not JSON — emit as raw output
         this.emit('output', line);
         return;
       }
 
-      // Route events by type
       switch (event.type) {
         case 'assistant':
-          // Assistant text message
           if (event.message?.content) {
             const text = typeof event.message.content === 'string'
               ? event.message.content
               : event.message.content.map(b => b.text || '').join('');
             if (text) {
               this.emit('output', text);
-              // Check for specd-status/specd-result in the text
               this._checkForSpecdBlocks(text);
             }
           }
           break;
 
         case 'result':
-          // Final result from Claude CLI
           if (event.result) {
             this.emit('output', `\n[result] ${event.result.substring(0, 200)}`);
           }
-          // Build our result from the Claude result
-          result = {
+          this.emit('result', {
             status: event.subtype === 'success' ? 'success' : 'failure',
             summary: event.result ? event.result.substring(0, 500) : 'Completed',
             files_changed: [],
@@ -168,11 +164,10 @@ class AgentRunner extends EventEmitter {
             next_suggestions: [],
             cost_usd: event.total_cost_usd,
             num_turns: event.num_turns,
-          };
+          });
           break;
 
         case 'system':
-          // System events (hooks, tool usage, etc.)
           if (event.subtype === 'tool_use') {
             this.emit('output', `[tool] ${event.tool_name || 'unknown'}`);
             this.emit('status', {
@@ -182,13 +177,6 @@ class AgentRunner extends EventEmitter {
               percent: -1,
               files_touched: [],
             });
-          }
-          break;
-
-        default:
-          // Emit other events as output for logging
-          if (event.type !== 'system' || event.subtype === 'tool_use') {
-            // Skip noisy system events
           }
           break;
       }
@@ -221,21 +209,14 @@ class AgentRunner extends EventEmitter {
   }
 
   _checkForSpecdBlocks(text) {
-    // Check if text contains specd-status or specd-result blocks
     const statusMatch = text.match(/```specd-status\n([\s\S]*?)```/);
     if (statusMatch) {
-      try {
-        const status = JSON.parse(statusMatch[1]);
-        this.emit('status', status);
-      } catch (e) { /* ignore */ }
+      try { this.emit('status', JSON.parse(statusMatch[1])); } catch (e) { /* ignore */ }
     }
 
     const resultMatch = text.match(/```specd-result\n([\s\S]*?)```/);
     if (resultMatch) {
-      try {
-        const result = JSON.parse(resultMatch[1]);
-        this.emit('result', result);
-      } catch (e) { /* ignore */ }
+      try { this.emit('result', JSON.parse(resultMatch[1])); } catch (e) { /* ignore */ }
     }
   }
 

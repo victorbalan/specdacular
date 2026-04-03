@@ -19,7 +19,7 @@ class StageSequencer {
         this.onStageStart(stage, attempt);
         const runner = this.createRunner(stage);
         stageResult = await runner.run('');
-        this.onStageComplete(stage, stageResult, attempt);
+        await this.onStageComplete(stage, stageResult, attempt);
 
         if (stageResult.status === 'success') break;
         if (stage.on_fail !== 'retry') break;

@@ -213,11 +213,20 @@ class Orchestrator {
         this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
         this.stateManager.persist();
       },
-      onStageComplete: (stage, result) => {
+      onStageComplete: async (stage, result) => {
         const icon = result.status === 'success' ? '✓' : '✗';
         console.log(`[${task.id}] ${icon} ${stage.stage}: ${result.summary || result.status}`);
         this.stateManager.completeStage(task.id, result.status, result.summary);
         this.stateManager.persist();
+
+        // Push and create/update PR after every stage
+        if (result.status === 'success') {
+          try {
+            await this._pushAndPR(task, projectDir, pipeline);
+          } catch (e) {
+            console.error(`[${task.id}] Push/PR failed: ${e.message}`);
+          }
+        }
       },
       onProgress: (stage, progress) => {
         this.stateManager.updateLiveProgress(task.id, progress);
@@ -262,6 +271,100 @@ class Orchestrator {
       on: () => {},
       kill: () => {},
     };
+  }
+
+  async _pushAndPR(task, projectDir, pipeline) {
+    const { execSync } = require('child_process');
+    const branchName = `specd/${task.id}`;
+
+    try {
+      const repoRoot = this._findGitRoot();
+      if (!repoRoot) return; // not a git repo
+      execSync(`git rev-parse --verify "${branchName}"`, { cwd: repoRoot, stdio: 'pipe' });
+
+      const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+      const mergeBase = execSync(`git merge-base "${currentBranch}" "${branchName}"`, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+      const count = parseInt(execSync(`git rev-list --count ${mergeBase}..${branchName}`, { cwd: repoRoot, stdio: 'pipe' }).toString().trim());
+
+      if (count === 0) return; // nothing to push
+
+      // Push
+      console.log(`[${task.id}] Pushing ${count} commit(s)...`);
+      execSync(`git push -u origin "${branchName}"`, { cwd: projectDir, stdio: 'pipe' });
+
+      // Check if PR already exists
+      let prUrl = this.stateManager.getState().tasks[task.id]?.pr_url;
+      if (prUrl && prUrl !== 'none') {
+        // PR exists — update the body with latest stage info
+        console.log(`[${task.id}] PR exists, updating...`);
+        const body = this._buildPRBody(task);
+        try {
+          execSync(`gh pr edit "${branchName}" --body-file -`, {
+            cwd: repoRoot, stdio: ['pipe', 'pipe', 'pipe'], input: body
+          });
+        } catch (e) { /* ignore update failures */ }
+        return;
+      }
+
+      // Create PR
+      console.log(`[${task.id}] Creating PR...`);
+      const baseBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+      const title = task.name.length > 70 ? task.name.substring(0, 67) + '...' : task.name;
+      const body = this._buildPRBody(task);
+
+      try {
+        prUrl = execSync(
+          `gh pr create --base "${baseBranch}" --head "${branchName}" --title "${title.replace(/"/g, '\\"')}" --body-file -`,
+          { cwd: repoRoot, stdio: ['pipe', 'pipe', 'pipe'], input: body }
+        ).toString().trim();
+
+        console.log(`[${task.id}] PR: ${prUrl}`);
+        this.stateManager.setPrUrl(task.id, prUrl);
+        this.stateManager.persist();
+        this._writePrUrlToYaml(task.id, prUrl);
+        this._appendLog(task.id, `\n--- PR Created: ${prUrl} ---\n`);
+      } catch (e) {
+        // PR might already exist
+        const stderr = e.stderr?.toString() || '';
+        if (stderr.includes('already exists')) {
+          try {
+            prUrl = execSync(`gh pr view "${branchName}" --json url --jq .url`, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+            if (prUrl) {
+              this.stateManager.setPrUrl(task.id, prUrl);
+              this.stateManager.persist();
+              console.log(`[${task.id}] PR already exists: ${prUrl}`);
+            }
+          } catch (e2) { /* give up */ }
+        } else {
+          console.error(`[${task.id}] PR creation failed: ${stderr}`);
+        }
+      }
+    } catch (e) {
+      // Branch doesn't exist or other git error — skip
+    }
+  }
+
+  _buildPRBody(task) {
+    const state = this.stateManager.getState().tasks[task.id];
+    const stages = state?.stages || [];
+
+    let body = `## ${task.name}\n\n`;
+
+    // Stage summary table
+    body += '| Stage | Status | Summary |\n|-------|--------|--------|\n';
+    for (const s of stages) {
+      const icon = s.status === 'success' ? 'done' : s.status === 'running' ? 'running' : s.status;
+      body += `| ${s.stage} | ${icon} | ${(s.summary || '').substring(0, 80)} |\n`;
+    }
+
+    body += `\n## Task\n\n\`${task.id}\`\n`;
+
+    if (task.description) {
+      body += `\n## Description\n\n${typeof task.description === 'string' ? task.description.substring(0, 500) : ''}\n`;
+    }
+
+    body += '\n---\n_Updated by specd-runner_\n';
+    return body;
   }
 
   _updateTaskYamlStatus(taskId, status) {
@@ -407,21 +510,10 @@ class Orchestrator {
 
     await this.taskWatcher.watch();
 
-    // Run PR sweep on startup
-    await this.sweepPRs();
-
     const readyCount = this.tasks.filter(t => t.status === 'ready').length;
     console.log(`\n${readyCount} task(s) ready, ${this.completedTasks.size} completed, max_parallel: ${maxParallel}\n`);
 
-    let lastSweep = Date.now();
-    const sweepInterval = 60000;
-
     while (this.running) {
-      // Periodic PR sweep
-      if (Date.now() - lastSweep > sweepInterval) {
-        await this.sweepPRs();
-        lastSweep = Date.now();
-      }
       const loader = new ConfigLoader(this.configDir);
       this.tasks = await loader.loadTasks();
 
@@ -452,14 +544,7 @@ class Orchestrator {
             }
           }
           try {
-            const result = await this.runTask(task, cwd);
-
-            // Create PR if task succeeded
-            if (result.status === 'success') {
-              const summary = result.results
-                ?.map(r => r.result?.summary).filter(Boolean).join('\n- ') || '';
-              await this._createPRForTask(task.id, task.name, summary, cwd);
-            }
+            await this.runTask(task, cwd);
           } finally {
             this.runningTasks.delete(task.id);
             console.log(`[${task.id}] Finished (${this.runningTasks.size}/${maxParallel} slots used)`);

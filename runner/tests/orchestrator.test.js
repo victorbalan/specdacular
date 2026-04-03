@@ -24,7 +24,7 @@ describe('Orchestrator', () => {
       agents: {
         'test-agent': {
           cmd: `node ${mockAgent}`,
-          prompt_flag: '',
+          input_mode: 'stdin',
           output_format: 'json_block',
           system_prompt: 'You are testing {{task.name}}',
         },
