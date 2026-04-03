@@ -1,13 +1,34 @@
+import { useState, useEffect, useCallback } from 'react';
+import Sidebar from './components/Sidebar';
+import Dashboard from './pages/Dashboard';
+
 export default function App() {
+  const [projects, setProjects] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+
+  const loadProjects = useCallback(async () => {
+    const result = await window.specd.invoke('get-projects');
+    setProjects(result || []);
+  }, []);
+
+  useEffect(() => {
+    loadProjects();
+    const interval = setInterval(loadProjects, 5000);
+    return () => clearInterval(interval);
+  }, [loadProjects]);
+
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'system-ui' }}>
-      <aside style={{ width: 240, borderRight: '1px solid #e0e0e0', padding: 16 }}>
-        <h2>Specd Runner</h2>
-        <p>Projects will appear here</p>
-      </aside>
-      <main style={{ flex: 1, padding: 24 }}>
-        <h1>Dashboard</h1>
-        <p>No projects registered yet.</p>
+      <Sidebar projects={projects} selectedId={selectedId} onSelect={setSelectedId} />
+      <main style={{ flex: 1, overflow: 'auto' }}>
+        {selectedId === null && <Dashboard projects={projects} />}
+        {selectedId === 'settings' && <div style={{ padding: 24 }}><h1>Settings</h1><p>Coming soon</p></div>}
+        {selectedId && selectedId !== 'settings' && (
+          <div style={{ padding: 24 }}>
+            <h1>{projects.find(p => p.id === selectedId)?.name || 'Project'}</h1>
+            <p>Project view coming in next task</p>
+          </div>
+        )}
       </main>
     </div>
   );
