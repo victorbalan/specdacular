@@ -1,6 +1,9 @@
 // runner/main/index.js
 import { app, BrowserWindow } from 'electron';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { Paths } from './paths.js';
 import { bootstrap } from './bootstrap.js';
