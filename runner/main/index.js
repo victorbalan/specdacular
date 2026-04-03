@@ -1,7 +1,53 @@
+// runner/main/index.js
 import { app, BrowserWindow } from 'electron';
 import { join } from 'path';
+import { readFileSync } from 'fs';
+import { Paths } from './paths.js';
+import { bootstrap } from './bootstrap.js';
+import { ProjectDB } from './db.js';
+import { Orchestrator } from './orchestrator.js';
+import { createServer } from './server/index.js';
+import { setupIpc } from './ipc.js';
 
 let mainWindow;
+const paths = new Paths();
+const orchestrators = new Map();
+let db;
+let config;
+let server;
+
+function getContext() {
+  return { db, config, paths, orchestrators };
+}
+
+async function initBackend() {
+  await bootstrap(paths);
+
+  db = new ProjectDB(paths.db);
+  config = JSON.parse(readFileSync(paths.config, 'utf-8'));
+
+  // Initialize orchestrators for active projects
+  for (const project of db.list().filter(p => p.active)) {
+    const orch = new Orchestrator({ projectId: project.id, paths, config });
+    orch.init();
+    orchestrators.set(project.id, orch);
+  }
+
+  // Start API server
+  server = createServer(getContext);
+  const port = config.server?.port || 3700;
+  await server.start(port);
+
+  // Wire orchestrators to WebSocket
+  for (const orch of orchestrators.values()) {
+    server.wireOrchestrator(orch);
+  }
+
+  // Start orchestrator loops
+  for (const orch of orchestrators.values()) {
+    orch.startLoop().catch(err => console.error('Loop error:', err));
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -21,7 +67,11 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+  setupIpc(getContext);
+  await initBackend();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
@@ -29,4 +79,11 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
+});
+
+app.on('before-quit', () => {
+  for (const orch of orchestrators.values()) {
+    orch.stop();
+  }
+  if (server) server.stop();
 });
