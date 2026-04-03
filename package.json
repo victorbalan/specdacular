@@ -1,6 +1,6 @@
 {
   "name": "specdacular",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Feature planning system for existing codebases. Map, understand, and plan features in large projects.",
   "bin": {
     "specd": "bin/specd.js"
@@ -36,7 +36,11 @@
   "bugs": {
     "url": "https://github.com/victorbalan/specdacular/issues"
   },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0"
+  },
   "engines": {
-    "node": ">=16.7.0"
+    "node": ">=18"
   }
 }
