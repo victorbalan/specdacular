@@ -53,21 +53,14 @@ function createApiRouter(orchestrator) {
 
   router.get('/tasks/:id/logs', (req, res) => {
     const taskId = req.params.id;
-    const state = orchestrator.stateManager.getState();
-    const task = state.tasks[taskId];
 
-    if (!task) return res.status(404).json({ error: 'Task not found' });
-
-    const currentStage = task.current_stage;
-    if (!currentStage) return res.json({ lines: [] });
-
-    const logFile = path.join(orchestrator.logsDir, `${taskId}-${currentStage}.log`);
+    const logFile = path.join(orchestrator.logsDir, `${taskId}.log`);
     if (!fs.existsSync(logFile)) return res.json({ lines: [] });
 
     const content = fs.readFileSync(logFile, 'utf8');
-    const lines = content.split('\n').filter(Boolean);
+    const lines = content.split('\n');
 
-    const tail = parseInt(req.query.tail) || 100;
+    const tail = parseInt(req.query.tail) || 200;
     res.json({ lines: lines.slice(-tail) });
   });
 

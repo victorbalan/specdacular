@@ -153,7 +153,7 @@ class Orchestrator {
         });
 
         runner.on('output', (line) => {
-          this._appendLog(task.id, stage.stage, line);
+          this._appendLog(task.id, line);
         });
 
         const origRun = runner.run.bind(runner);
@@ -162,6 +162,7 @@ class Orchestrator {
         return runner;
       },
       onStageStart: (stage) => {
+        this._appendLog(task.id, `\n--- Stage: ${stage.stage} (${stage.agent || stage.cmd}) ---\n`);
         this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
         this.stateManager.persist();
       },
@@ -210,8 +211,8 @@ class Orchestrator {
     };
   }
 
-  _appendLog(taskId, stage, line) {
-    const logFile = path.join(this.logsDir, `${taskId}-${stage}.log`);
+  _appendLog(taskId, line) {
+    const logFile = path.join(this.logsDir, `${taskId}.log`);
     fs.appendFileSync(logFile, line + '\n');
   }
 

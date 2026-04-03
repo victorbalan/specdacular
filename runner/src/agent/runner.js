@@ -77,6 +77,16 @@ class AgentRunner extends EventEmitter {
         this.emit('error', err);
       });
 
+      // Capture stderr too
+      if (this.process.stderr) {
+        const readline = require('readline');
+        const rl = readline.createInterface({ input: this.process.stderr });
+        rl.on('line', (line) => {
+          this.lastOutputTime = Date.now();
+          this.emit('output', `[stderr] ${line}`);
+        });
+      }
+
       // Timeout timer
       const timeoutTimer = setTimeout(() => {
         this.kill();
