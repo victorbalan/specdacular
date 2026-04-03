@@ -2,6 +2,9 @@ import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import { createWriteStream } from 'fs';
 import { StreamParser } from './parser.js';
+import { createLogger } from '../logger.js';
+
+const log = createLogger('agent', '\x1b[36m');
 
 export class AgentRunner extends EventEmitter {
   constructor({ cmd, input_mode, output_format, system_prompt, timeout, stuck_timeout }) {
@@ -20,6 +23,10 @@ export class AgentRunner extends EventEmitter {
       const args = this.cmd.split(' ').slice(1);
       const bin = this.cmd.split(' ')[0];
 
+      log.info(`spawning: ${this.cmd}`);
+      log.info(`  cwd: ${cwd || '(none)'}`);
+      log.info(`  log: ${logPath || '(none)'}`);
+
       const proc = spawn(bin, args, {
         cwd,
         shell: true,
@@ -27,6 +34,7 @@ export class AgentRunner extends EventEmitter {
         env: { ...process.env },
       });
 
+      log.info(`  pid: ${proc.pid}`);
       const logStream = logPath ? createWriteStream(logPath, { flags: 'a' }) : null;
       let lastOutputAt = Date.now();
       let result = null;
@@ -34,14 +42,18 @@ export class AgentRunner extends EventEmitter {
       const parser = new StreamParser();
       parser.on('status', (s) => {
         lastOutputAt = Date.now();
+        log.info(`  status: ${s.progress || ''} ${s.percent != null ? s.percent + '%' : ''}`);
         this.emit('status', s);
       });
       parser.on('result', (r) => {
         lastOutputAt = Date.now();
+        log.info(`  result: ${r.status} — ${(r.summary || '').slice(0, 100)}`);
         result = r;
         this.emit('result', r);
       });
       parser.on('output', (line) => {
+        log.debug(`  > ${line.slice(0, 120)}`);
+
         lastOutputAt = Date.now();
         this.emit('output', line);
       });
@@ -88,6 +100,8 @@ export class AgentRunner extends EventEmitter {
       });
 
       proc.stderr.on('data', (chunk) => {
+        const text = chunk.toString().trim();
+        if (text) log.warn(`  stderr: ${text.slice(0, 200)}`);
         if (logStream) logStream.write(`[stderr] ${chunk}`);
       });
 
@@ -112,6 +126,7 @@ export class AgentRunner extends EventEmitter {
       }, 30000);
 
       proc.on('close', (code) => {
+        log.info(`  process exited: code=${code} pid=${proc.pid}`);
         clearTimeout(globalTimer);
         clearInterval(stuckCheck);
         if (logStream) logStream.end();
@@ -127,6 +142,7 @@ export class AgentRunner extends EventEmitter {
       });
 
       proc.on('error', (err) => {
+        log.error(`  process error: ${err.message}`);
         clearTimeout(globalTimer);
         clearInterval(stuckCheck);
         if (logStream) logStream.end();

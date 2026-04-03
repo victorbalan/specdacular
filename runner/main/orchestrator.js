@@ -9,6 +9,9 @@ import { StageSequencer } from './pipeline/sequencer.js';
 import { resolvePipeline } from './pipeline/resolver.js';
 import { resolveTemplate, buildTemplateContext } from './agent/template.js';
 import { WorktreeManager } from './worktree/manager.js';
+import { createLogger } from './logger.js';
+
+const log = createLogger('orchestrator', '\x1b[35m');
 
 export class Orchestrator extends EventEmitter {
   constructor({ projectId, paths, config }) {
@@ -25,7 +28,7 @@ export class Orchestrator extends EventEmitter {
   }
 
   init() {
-    // Ensure project dirs exist
+    log.info(`initializing project ${this.projectId}`);
     mkdirSync(this.projectPaths.tasksDir, { recursive: true });
     mkdirSync(this.projectPaths.logsDir, { recursive: true });
 
@@ -76,6 +79,7 @@ export class Orchestrator extends EventEmitter {
   }
 
   createIdea(name, description) {
+    log.info(`creating idea: "${name}"`);
     const id = `idea-${Date.now().toString(36)}`;
     const task = {
       id,
@@ -95,6 +99,7 @@ export class Orchestrator extends EventEmitter {
   }
 
   async advanceTask(taskId, action, feedback) {
+    log.info(`advance ${taskId} → ${action}${feedback ? ' (with feedback)' : ''}`);
     const task = this.getTask(taskId);
     if (!task) return null;
 
@@ -144,6 +149,7 @@ export class Orchestrator extends EventEmitter {
   }
 
   async _runBrainstormPipeline(task) {
+    log.info(`starting brainstorm pipeline for ${task.id}: "${task.name}"`);
     const agents = this.templateManager.getAgents(this.projectId);
     const pipelines = this.templateManager.getPipelines(this.projectId);
     const pipeline = resolvePipeline('brainstorm', pipelines, null, this.config.defaults);
@@ -213,9 +219,11 @@ export class Orchestrator extends EventEmitter {
   }
 
   async runTask(task) {
+    log.info(`running task ${task.id}: "${task.name}"`);
     const agents = this.templateManager.getAgents(this.projectId);
     const pipelines = this.templateManager.getPipelines(this.projectId);
     const pipelineName = task.pipeline || this.config.defaults?.pipeline || 'default';
+    log.info(`  pipeline: ${pipelineName}`);
     const pipeline = resolvePipeline(pipelineName, pipelines, task.stage_overrides, this.config.defaults);
 
     this.runningTasks.add(task.id);
