@@ -26,9 +26,8 @@ If the runner is not running or no project matches, tell the user:
 Ask the user for:
 1. **Task name** — short description (e.g., "Add dark mode support")
 2. **Description/spec** — what should be built (can be multi-line)
-3. **Working directory** — which subdirectory to work in (default: ".")
-4. **Pipeline** — which pipeline to use (default: "default")
-5. **Priority** — 1 (highest) to 99 (lowest), default 10
+
+That's it. Don't ask for working directory, pipeline, or priority — use defaults.
 
 ## Step 3: Create the task
 
@@ -38,9 +37,6 @@ curl -s -X POST "http://localhost:3700/api/projects/{PROJECT_ID}/tasks" \
   -d '{
     "name": "TASK_NAME",
     "description": "DESCRIPTION",
-    "working_dir": "WORKING_DIR",
-    "pipeline": "PIPELINE",
-    "priority": PRIORITY,
     "spec": "SPEC_CONTENT"
   }'
 ```
