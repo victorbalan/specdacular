@@ -9,19 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            arch: universal
-          - os: ubuntu-latest
-            arch: x64
-          - os: windows-latest
-            arch: x64
-
-    runs-on: ${{ matrix.os }}
-
+  build-mac:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -42,17 +31,12 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: runner-${{ matrix.os }}
+          name: runner-mac
           path: |
             runner/release/*.dmg
-            runner/release/*.zip
-            runner/release/*.AppImage
-            runner/release/*.deb
-            runner/release/*.exe
-          if-no-files-found: ignore
 
   release:
-    needs: build
+    needs: build-mac
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

@@ -2,16 +2,16 @@
   "name": "specd-runner",
   "version": "0.2.1",
   "description": "Specd Runner — Electron desktop app for autonomous agent orchestration",
+  "author": "Victor Balan <victor@specd.dev>",
+  "homepage": "https://github.com/victorbalan/specdacular",
   "type": "module",
   "main": "main/index.js",
   "scripts": {
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
     "build:renderer": "cd renderer && npm install && npm run build",
-    "dist": "npm run build:renderer && electron-builder",
-    "dist:mac": "npm run build:renderer && electron-builder --mac",
-    "dist:linux": "npm run build:renderer && electron-builder --linux",
-    "dist:win": "npm run build:renderer && electron-builder --win"
+    "dist": "npm run build:renderer && electron-builder --mac",
+    "dist:mac": "npm run build:renderer && electron-builder --mac"
   },
   "dependencies": {
     "express": "^4.21.0",
@@ -41,20 +41,8 @@
         {
           "target": "dmg",
           "arch": ["x64", "arm64"]
-        },
-        {
-          "target": "zip",
-          "arch": ["x64", "arm64"]
         }
-      ],
-      "icon": null
-    },
-    "linux": {
-      "target": ["AppImage", "deb"],
-      "category": "Development"
-    },
-    "win": {
-      "target": ["nsis", "portable"]
+      ]
     },
     "publish": {
       "provider": "github",
