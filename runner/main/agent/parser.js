@@ -23,8 +23,8 @@ export class StreamParser extends EventEmitter {
       try {
         const parsed = JSON.parse(content);
         this.emit(this.inBlock, parsed);
-      } catch (err) {
-        this.emit('error', err);
+      } catch {
+        // Incomplete or malformed JSON in block — ignore
       }
       this.inBlock = null;
       this.blockLines = [];
