@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { colors, radius, shadows } from '../theme';
 import TaskDetailOverlay from './TaskDetailOverlay';
 
 const COLUMNS = [
-  { key: 'ready', label: 'Queued', color: '#ff9800', statuses: ['ready', 'queued'] },
-  { key: 'in_progress', label: 'Running', color: '#2196f3', statuses: ['in_progress'] },
-  { key: 'done', label: 'Done', color: '#4caf50', statuses: ['done'] },
-  { key: 'failed', label: 'Failed', color: '#f44336', statuses: ['failed'] },
+  { key: 'ready', label: 'Queued', color: colors.warning, statuses: ['ready', 'queued'] },
+  { key: 'in_progress', label: 'Running', color: colors.accent, statuses: ['in_progress'] },
+  { key: 'done', label: 'Done', color: colors.success, statuses: ['done'] },
+  { key: 'failed', label: 'Failed', color: colors.danger, statuses: ['failed'] },
 ];
 
 export default function KanbanBoard({ tasks }) {
@@ -24,8 +25,8 @@ export default function KanbanBoard({ tasks }) {
           const colTasks = tasks.filter(t => col.statuses.includes(t.status));
           return (
             <div key={col.key} style={{
-              backgroundColor: '#f5f5f5',
-              borderRadius: 8,
+              backgroundColor: colors.bg,
+              borderRadius: radius.md,
               padding: 12,
               display: 'flex',
               flexDirection: 'column',
@@ -36,20 +37,20 @@ export default function KanbanBoard({ tasks }) {
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 marginBottom: 12, paddingBottom: 8, borderBottom: `2px solid ${col.color}`,
               }}>
-                <span style={{ fontWeight: 600, fontSize: 14 }}>{col.label}</span>
+                <span style={{ fontWeight: 600, fontSize: 13, color: colors.text }}>{col.label}</span>
                 <span style={{
-                  backgroundColor: col.color, color: '#fff', borderRadius: 12,
-                  padding: '2px 8px', fontSize: 12, fontWeight: 600,
+                  backgroundColor: col.color, color: '#fff', borderRadius: 10,
+                  padding: '1px 8px', fontSize: 11, fontWeight: 600, minWidth: 20, textAlign: 'center',
                 }}>
                   {colTasks.length}
                 </span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {colTasks.map(t => (
                   <TaskCard key={t.id} task={t} onClick={() => setSelectedTask(t)} />
                 ))}
                 {colTasks.length === 0 && (
-                  <div style={{ color: '#aaa', fontSize: 13, textAlign: 'center', padding: 16 }}>
+                  <div style={{ color: colors.textMuted, fontSize: 12, textAlign: 'center', padding: 24 }}>
                     No tasks
                   </div>
                 )}
@@ -71,27 +72,31 @@ function TaskCard({ task, onClick }) {
     <div
       onClick={onClick}
       style={{
-        backgroundColor: '#fff',
-        borderRadius: 6,
-        padding: 10,
-        border: '1px solid #e0e0e0',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+        backgroundColor: colors.surface,
+        borderRadius: radius.sm,
+        padding: '10px 12px',
+        border: `1px solid ${colors.border}`,
+        boxShadow: shadows.sm,
         cursor: 'pointer',
+        transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
       }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadows.md; e.currentTarget.style.borderColor = colors.accent; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadows.sm; e.currentTarget.style.borderColor = colors.border; }}
     >
-      <div style={{ fontWeight: 500, fontSize: 13, marginBottom: 4 }}>{task.name}</div>
+      <div style={{ fontWeight: 500, fontSize: 13, color: colors.text, marginBottom: 6 }}>{task.name}</div>
       <span style={{
         display: 'inline-block',
-        backgroundColor: '#e8e8e8',
-        borderRadius: 4,
+        backgroundColor: colors.bg,
+        borderRadius: radius.sm,
         padding: '1px 6px',
-        fontSize: 11,
-        color: '#666',
+        fontSize: 10,
+        fontWeight: 500,
+        color: colors.textSecondary,
       }}>
         {task.projectName}
       </span>
       {task.description && (
-        <div style={{ fontSize: 12, color: '#888', marginTop: 4, lineHeight: 1.3 }}>
+        <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 6, lineHeight: 1.4 }}>
           {task.description.length > 80 ? task.description.slice(0, 80) + '...' : task.description}
         </div>
       )}
