@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-export function LogViewer({ taskId }) {
+export function LogViewer({ taskId, project }) {
   const [lines, setLines] = useState([]);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
@@ -19,7 +19,7 @@ export function LogViewer({ taskId }) {
     let interval;
     const fetchLogs = async () => {
       try {
-        const res = await fetch(`/api/tasks/${taskId}/logs?tail=500`);
+        const res = await fetch(`/api/projects/${project}/tasks/${taskId}/logs?tail=500`);
         const data = await res.json();
         const newLines = data.lines || [];
         // Only update state if lines actually changed

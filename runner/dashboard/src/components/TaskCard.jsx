@@ -18,7 +18,7 @@ const STATUS_BADGES = {
   draft: { text: 'Draft', class: 'bg-gray-700/20 text-gray-500' },
 };
 
-export function TaskCard({ id, task }) {
+export function TaskCard({ id, task, project }) {
   const isActive = task.status === 'in_progress' || task.status === 'failed';
   const [expanded, setExpanded] = useState(isActive);
   const [showLogs, setShowLogs] = useState(isActive);
@@ -27,7 +27,7 @@ export function TaskCard({ id, task }) {
   const badge = STATUS_BADGES[task.status] || STATUS_BADGES.queued;
 
   const handleAction = async (action) => {
-    await fetch(`/api/tasks/${id}/${action}`, { method: 'POST' });
+    await fetch(`/api/projects/${project}/tasks/${id}/${action}`, { method: 'POST' });
   };
 
   return (
@@ -90,7 +90,7 @@ export function TaskCard({ id, task }) {
             </button>
           </div>
 
-          {showLogs && <LogViewer taskId={id} />}
+          {showLogs && <LogViewer taskId={id} project={project} />}
         </div>
       )}
     </div>
