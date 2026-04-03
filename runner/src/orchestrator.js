@@ -276,46 +276,72 @@ class Orchestrator {
   async _pushAndPR(task, projectDir, pipeline) {
     const { execSync } = require('child_process');
     const branchName = `specd/${task.id}`;
+    // Use projectDir for all git ops — this is the worktree when parallel
+    const gitDir = projectDir;
 
     try {
+      // Check what branch we're on in this directory
+      const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: gitDir, stdio: 'pipe' }).toString().trim();
+      console.log(`[${task.id}] Current branch in workdir: ${currentBranch}`);
+
+      // Check if there are unpushed commits
+      let hasUnpushed = false;
+      try {
+        execSync(`git fetch origin "${currentBranch}" 2>/dev/null`, { cwd: gitDir, stdio: 'pipe' });
+        const unpushed = execSync(`git rev-list --count origin/${currentBranch}..${currentBranch}`, { cwd: gitDir, stdio: 'pipe' }).toString().trim();
+        hasUnpushed = parseInt(unpushed) > 0;
+      } catch (e) {
+        // Remote branch doesn't exist yet — everything is unpushed
+        hasUnpushed = true;
+      }
+
+      if (!hasUnpushed) {
+        // Also check if there are uncommitted changes to commit
+        const status = execSync('git status --porcelain', { cwd: gitDir, stdio: 'pipe' }).toString().trim();
+        if (!status) return; // nothing to push or commit
+      }
+
+      // Push current branch
+      console.log(`[${task.id}] Pushing branch ${currentBranch}...`);
+      execSync(`git push -u origin "${currentBranch}"`, { cwd: gitDir, stdio: 'pipe' });
+
+      // Determine base branch for PR (the main repo's current branch)
       const repoRoot = this._findGitRoot();
-      if (!repoRoot) return; // not a git repo
-      execSync(`git rev-parse --verify "${branchName}"`, { cwd: repoRoot, stdio: 'pipe' });
+      let baseBranch = 'main';
+      if (repoRoot) {
+        try {
+          baseBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+        } catch (e) { /* default to main */ }
+      }
 
-      const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
-      const mergeBase = execSync(`git merge-base "${currentBranch}" "${branchName}"`, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
-      const count = parseInt(execSync(`git rev-list --count ${mergeBase}..${branchName}`, { cwd: repoRoot, stdio: 'pipe' }).toString().trim());
-
-      if (count === 0) return; // nothing to push
-
-      // Push
-      console.log(`[${task.id}] Pushing ${count} commit(s)...`);
-      execSync(`git push -u origin "${branchName}"`, { cwd: projectDir, stdio: 'pipe' });
+      // Skip PR if we're on the base branch (no worktree)
+      if (currentBranch === baseBranch) {
+        console.log(`[${task.id}] On base branch, skipping PR`);
+        return;
+      }
 
       // Check if PR already exists
       let prUrl = this.stateManager.getState().tasks[task.id]?.pr_url;
       if (prUrl && prUrl !== 'none') {
-        // PR exists — update the body with latest stage info
-        console.log(`[${task.id}] PR exists, updating...`);
+        console.log(`[${task.id}] Updating PR body...`);
         const body = this._buildPRBody(task);
         try {
-          execSync(`gh pr edit "${branchName}" --body-file -`, {
-            cwd: repoRoot, stdio: ['pipe', 'pipe', 'pipe'], input: body
+          execSync(`gh pr edit "${currentBranch}" --body-file -`, {
+            cwd: gitDir, stdio: ['pipe', 'pipe', 'pipe'], input: body
           });
-        } catch (e) { /* ignore update failures */ }
+        } catch (e) { /* ignore */ }
         return;
       }
 
       // Create PR
-      console.log(`[${task.id}] Creating PR...`);
-      const baseBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+      console.log(`[${task.id}] Creating PR (${currentBranch} → ${baseBranch})...`);
       const title = task.name.length > 70 ? task.name.substring(0, 67) + '...' : task.name;
       const body = this._buildPRBody(task);
 
       try {
         prUrl = execSync(
-          `gh pr create --base "${baseBranch}" --head "${branchName}" --title "${title.replace(/"/g, '\\"')}" --body-file -`,
-          { cwd: repoRoot, stdio: ['pipe', 'pipe', 'pipe'], input: body }
+          `gh pr create --base "${baseBranch}" --head "${currentBranch}" --title "${title.replace(/"/g, '\\"')}" --body-file -`,
+          { cwd: gitDir, stdio: ['pipe', 'pipe', 'pipe'], input: body }
         ).toString().trim();
 
         console.log(`[${task.id}] PR: ${prUrl}`);
@@ -324,23 +350,22 @@ class Orchestrator {
         this._writePrUrlToYaml(task.id, prUrl);
         this._appendLog(task.id, `\n--- PR Created: ${prUrl} ---\n`);
       } catch (e) {
-        // PR might already exist
         const stderr = e.stderr?.toString() || '';
         if (stderr.includes('already exists')) {
           try {
-            prUrl = execSync(`gh pr view "${branchName}" --json url --jq .url`, { cwd: repoRoot, stdio: 'pipe' }).toString().trim();
+            prUrl = execSync(`gh pr view "${currentBranch}" --json url --jq .url`, { cwd: gitDir, stdio: 'pipe' }).toString().trim();
             if (prUrl) {
               this.stateManager.setPrUrl(task.id, prUrl);
               this.stateManager.persist();
-              console.log(`[${task.id}] PR already exists: ${prUrl}`);
+              console.log(`[${task.id}] PR exists: ${prUrl}`);
             }
           } catch (e2) { /* give up */ }
         } else {
-          console.error(`[${task.id}] PR creation failed: ${stderr}`);
+          console.error(`[${task.id}] PR failed: ${stderr}`);
         }
       }
     } catch (e) {
-      // Branch doesn't exist or other git error — skip
+      console.error(`[${task.id}] Push/PR error: ${e.message}`);
     }
   }
 
