@@ -1,10 +1,21 @@
 // runner/main/server/api.js
 import { Router } from 'express';
 import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 import { randomUUID } from 'crypto';
 
 export function createApiRouter(getContext) {
   const router = Router();
+
+  // Find project by path (for skill auto-detection) — must be before :id routes
+  router.get('/projects/by-path', (req, res) => {
+    const { db } = getContext();
+    const folderPath = req.query.path;
+    if (!folderPath) return res.status(400).json({ error: 'path query param required' });
+    const project = db.findByPath(folderPath);
+    if (!project) return res.status(404).json({ error: 'No project matches this path' });
+    res.json(project);
+  });
 
   // List projects
   router.get('/projects', (req, res) => {
@@ -67,6 +78,7 @@ export function createApiRouter(getContext) {
     const { orchestrators } = getContext();
     const orch = orchestrators.get(req.params.id);
     if (!orch) return res.status(404).json({ error: 'Project not found' });
+    if (!req.body.name) return res.status(400).json({ error: 'name is required' });
 
     const task = {
       id: req.body.id || `task-${randomUUID().slice(0, 6)}`,
@@ -100,23 +112,13 @@ export function createApiRouter(getContext) {
   // Task logs
   router.get('/projects/:id/tasks/:taskId/logs', (req, res) => {
     const { paths } = getContext();
-    const logPath = `${paths.forProject(req.params.id).logsDir}/${req.params.taskId}.log`;
+    const logPath = join(paths.forProject(req.params.id).logsDir, `${req.params.taskId}.log`);
     if (!existsSync(logPath)) return res.status(404).json({ error: 'Log not found' });
 
     const content = readFileSync(logPath, 'utf-8');
     const lines = content.split('\n');
     const tail = parseInt(req.query.tail) || 200;
     res.json({ lines: lines.slice(-tail) });
-  });
-
-  // Find project by path (for skill auto-detection)
-  router.get('/projects/by-path', (req, res) => {
-    const { db } = getContext();
-    const folderPath = req.query.path;
-    if (!folderPath) return res.status(400).json({ error: 'path query param required' });
-    const project = db.findByPath(folderPath);
-    if (!project) return res.status(404).json({ error: 'No project matches this path' });
-    res.json(project);
   });
 
   return router;

@@ -15,8 +15,8 @@ export function createServer(getContext) {
   return {
     start(port) {
       return new Promise((resolve) => {
-        httpServer.listen(port, () => {
-          console.log(`Specd API server on http://localhost:${port}`);
+        httpServer.listen(port, '127.0.0.1', () => {
+          console.log(`Specd API server on http://127.0.0.1:${port}`);
           resolve();
         });
       });

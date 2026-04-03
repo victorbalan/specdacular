@@ -1,6 +1,7 @@
 // runner/main/ipc.js
 import { ipcMain } from 'electron';
 import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 export function setupIpc(getContext) {
   ipcMain.handle('get-projects', () => {
@@ -58,7 +59,7 @@ export function setupIpc(getContext) {
 
   ipcMain.handle('get-task-logs', (event, projectId, taskId) => {
     const { paths } = getContext();
-    const logPath = `${paths.forProject(projectId).logsDir}/${taskId}.log`;
+    const logPath = join(paths.forProject(projectId).logsDir, `${taskId}.log`);
     if (!existsSync(logPath)) return { lines: [] };
     const content = readFileSync(logPath, 'utf-8');
     return { lines: content.split('\n').slice(-200) };

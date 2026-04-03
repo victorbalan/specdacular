@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 const DEFAULT_CONFIG = {
   server: { port: 3700 },
@@ -60,9 +61,9 @@ export async function bootstrap(paths) {
 
   // Write default agent templates
   for (const [name, agent] of Object.entries(DEFAULT_AGENTS)) {
-    writeIfMissing(`${paths.agentTemplatesDir}/${name}.json`, agent);
+    writeIfMissing(join(paths.agentTemplatesDir, `${name}.json`), agent);
   }
 
   // Write default pipeline template
-  writeIfMissing(`${paths.pipelineTemplatesDir}/default.json`, DEFAULT_PIPELINE);
+  writeIfMissing(join(paths.pipelineTemplatesDir, 'default.json'), DEFAULT_PIPELINE);
 }

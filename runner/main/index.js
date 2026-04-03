@@ -1,7 +1,7 @@
 // runner/main/index.js
 import { app, BrowserWindow } from 'electron';
 import { join } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { Paths } from './paths.js';
 import { bootstrap } from './bootstrap.js';
 import { ProjectDB } from './db.js';
@@ -28,6 +28,17 @@ async function initBackend() {
 
   // Initialize orchestrators for active projects
   for (const project of db.list().filter(p => p.active)) {
+    // Ensure project.json exists (may not if registered via CLI only)
+    const projectPaths = paths.forProject(project.id);
+    mkdirSync(projectPaths.dir, { recursive: true });
+    if (!existsSync(projectPaths.projectJson)) {
+      writeFileSync(projectPaths.projectJson, JSON.stringify({
+        name: project.name,
+        path: project.path,
+        registeredAt: project.registeredAt,
+      }, null, 2));
+    }
+
     const orch = new Orchestrator({ projectId: project.id, paths, config });
     orch.init();
     orchestrators.set(project.id, orch);

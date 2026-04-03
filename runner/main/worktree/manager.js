@@ -1,5 +1,5 @@
 // runner/main/worktree/manager.js
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import { existsSync, mkdirSync, rmSync } from 'fs';
 import { join, basename } from 'path';
 import { tmpdir } from 'os';
@@ -73,9 +73,9 @@ export class WorktreeManager {
     const branch = `specd/${taskId}`;
 
     try {
-      execSync(`git push -u origin ${branch}`, { cwd: worktreePath, stdio: 'pipe' });
-      const prUrl = execSync(
-        `gh pr create --title "${taskName}" --body "${summary}" --head ${branch}`,
+      execFileSync('git', ['push', '-u', 'origin', branch], { cwd: worktreePath, stdio: 'pipe' });
+      const prUrl = execFileSync(
+        'gh', ['pr', 'create', '--title', taskName, '--body', summary, '--head', branch],
         { cwd: worktreePath, encoding: 'utf-8' }
       ).trim();
       return prUrl;
