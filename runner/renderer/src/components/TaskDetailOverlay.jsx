@@ -229,19 +229,112 @@ export default function TaskDetailOverlay({ task, onClose, onAdvance }) {
           )}
 
           {/* Logs */}
-          <h4 style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: colors.text }}>Logs</h4>
-          <div
-            ref={logRef}
-            style={{
-              backgroundColor: '#111213', color: '#ced4da', padding: 14, borderRadius: radius.md,
-              fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
-              fontSize: 11, maxHeight: 300, overflow: 'auto',
-              whiteSpace: 'pre-wrap', lineHeight: 1.6,
-            }}
-          >
-            {logs.length > 0 ? logs.join('\n') : 'No logs yet.'}
-          </div>
+          <LogSection logs={logs} logRef={logRef} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function parseLogs(lines) {
+  const entries = [];
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    try {
+      const event = JSON.parse(line);
+      if (event.type === 'assistant' && event.message?.content) {
+        for (const block of event.message.content) {
+          if (block.type === 'text' && block.text?.trim()) {
+            entries.push({ type: 'text', content: block.text });
+          } else if (block.type === 'tool_use') {
+            entries.push({ type: 'tool', name: block.name, input: block.input });
+          }
+        }
+      } else if (event.type === 'result' && event.result) {
+        for (const block of event.result) {
+          if (block.type === 'text' && block.text?.trim()) {
+            entries.push({ type: 'result', content: block.text });
+          }
+        }
+      } else if (event.type === 'tool_result') {
+        // skip tool results — they're verbose
+      } else if (event.type === 'system') {
+        if (event.subtype === 'init') {
+          entries.push({ type: 'system', content: `Session started (${event.model || 'claude'})` });
+        }
+      }
+    } catch {
+      if (line.startsWith('[stderr]')) {
+        entries.push({ type: 'stderr', content: line.slice(8).trim() });
+      }
+    }
+  }
+  return entries;
+}
+
+function LogSection({ logs, logRef }) {
+  const [showRaw, setShowRaw] = useState(false);
+  const parsed = parseLogs(logs);
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: colors.text }}>Logs</h4>
+        <button
+          onClick={() => setShowRaw(!showRaw)}
+          style={{
+            padding: '2px 8px', fontSize: 10, fontWeight: 500, border: `1px solid ${colors.border}`,
+            borderRadius: radius.sm, backgroundColor: showRaw ? colors.surfaceActive : 'transparent',
+            color: colors.textSecondary, cursor: 'pointer',
+          }}
+        >
+          {showRaw ? 'Parsed' : 'Raw'}
+        </button>
+      </div>
+      <div
+        ref={logRef}
+        style={{
+          backgroundColor: '#111213', padding: 14, borderRadius: radius.md,
+          fontSize: 12, maxHeight: 400, overflow: 'auto',
+          lineHeight: 1.6,
+        }}
+      >
+        {showRaw ? (
+          <pre style={{
+            margin: 0, color: '#ced4da', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+            fontFamily: "'SF Mono', 'Fira Code', monospace", fontSize: 11,
+          }}>
+            {logs.length > 0 ? logs.join('\n') : 'No logs yet.'}
+          </pre>
+        ) : (
+          parsed.length > 0 ? parsed.map((entry, i) => (
+            <div key={i} style={{ marginBottom: 8 }}>
+              {entry.type === 'text' && (
+                <div style={{ color: '#e9ecef', whiteSpace: 'pre-wrap' }}>{entry.content}</div>
+              )}
+              {entry.type === 'tool' && (
+                <div style={{ color: '#868e96', fontSize: 11 }}>
+                  <span style={{ color: '#339af0' }}>{entry.name}</span>
+                  {entry.input?.command && <span style={{ color: '#5c5f66' }}> {entry.input.command}</span>}
+                  {entry.input?.pattern && <span style={{ color: '#5c5f66' }}> {entry.input.pattern}</span>}
+                  {entry.input?.file_path && <span style={{ color: '#5c5f66' }}> {entry.input.file_path}</span>}
+                  {entry.input?.skill && <span style={{ color: '#51cf66' }}> {entry.input.skill}</span>}
+                </div>
+              )}
+              {entry.type === 'result' && (
+                <div style={{ color: '#51cf66', whiteSpace: 'pre-wrap' }}>{entry.content}</div>
+              )}
+              {entry.type === 'system' && (
+                <div style={{ color: '#5c5f66', fontStyle: 'italic', fontSize: 11 }}>{entry.content}</div>
+              )}
+              {entry.type === 'stderr' && (
+                <div style={{ color: '#ff6b6b', fontSize: 11 }}>{entry.content}</div>
+              )}
+            </div>
+          )) : (
+            <div style={{ color: '#5c5f66' }}>No logs yet.</div>
+          )
+        )}
       </div>
     </div>
   );
