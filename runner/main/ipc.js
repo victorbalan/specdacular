@@ -1,6 +1,6 @@
 // runner/main/ipc.js
 import { ipcMain, dialog } from 'electron';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
 
 export function setupIpc(getContext) {
@@ -85,8 +85,43 @@ export function setupIpc(getContext) {
     return true;
   });
 
+  ipcMain.handle('create-idea', (event, projectId, name) => {
+    const { orchestrators } = getContext();
+    const orch = orchestrators.get(projectId);
+    if (!orch) return null;
+    return orch.createIdea(name);
+  });
+
+  ipcMain.handle('advance-task', (event, projectId, taskId, action, feedback) => {
+    const { orchestrators } = getContext();
+    const orch = orchestrators.get(projectId);
+    if (!orch) return null;
+    return orch.advanceTask(taskId, action, feedback);
+  });
+
+  ipcMain.handle('get-pipeline-files', () => {
+    const { paths } = getContext();
+    return readTemplateDir(paths.pipelineTemplatesDir);
+  });
+
+  ipcMain.handle('get-agent-files', () => {
+    const { paths } = getContext();
+    return readTemplateDir(paths.agentTemplatesDir);
+  });
+
   ipcMain.handle('get-config', () => {
     const { config } = getContext();
     return config;
   });
+
+  function readTemplateDir(dir) {
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => ({
+        name: f.replace('.json', ''),
+        filename: f,
+        content: JSON.parse(readFileSync(join(dir, f), 'utf-8')),
+      }));
+  }
 }
