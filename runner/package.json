@@ -1,24 +1,21 @@
 {
-  "name": "@specdacular/runner",
-  "version": "0.1.0",
-  "description": "Config-driven autonomous agent orchestrator",
-  "main": "src/cli.js",
-  "bin": {
-    "specd-runner": "src/cli.js"
-  },
+  "name": "@specd/runner",
+  "version": "0.2.0",
+  "description": "Specd Runner — Electron desktop app for autonomous agent orchestration",
+  "type": "module",
+  "main": "main/index.js",
   "scripts": {
-    "start": "node src/cli.js start",
-    "test": "node --test tests/**/*.test.js",
-    "build:dashboard": "cd dashboard && npm run build"
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build:renderer": "cd renderer && npm run build"
   },
   "dependencies": {
-    "chokidar": "^4.0.0",
-    "commander": "^12.0.0",
     "express": "^4.21.0",
-    "js-yaml": "^4.1.0",
     "ws": "^8.18.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "electron": "^34.0.0"
+  },
   "engines": {
     "node": ">=18"
   }

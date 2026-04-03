@@ -5,3 +5,4 @@ gsd-reference/
 reference2/
 .claude/
 runner/dashboard/dist/
+.worktrees/

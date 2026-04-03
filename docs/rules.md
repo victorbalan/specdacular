@@ -75,6 +75,6 @@ generated_by: specd
 
 ## JavaScript
 
-- CommonJS `require()` only — no ES6 imports
+- ES6 modules (`import`/`export`) — no CommonJS `require()`
 - Read settings with try-catch, return empty object on failure
 - Write JSON with 2-space indent and trailing newline
