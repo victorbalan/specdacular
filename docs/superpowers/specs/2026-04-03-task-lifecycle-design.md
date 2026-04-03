@@ -32,6 +32,8 @@ Text input field at the top of the Ideas column. User types an idea and hits Ent
 - `status`: `idea`
 - `pipeline`: none (manual advancement)
 
+On Dashboard (cross-project view), the input includes a project dropdown to select which project the idea belongs to. On ProjectView, the project is implicit.
+
 ## Pipelines
 
 ### `brainstorm` pipeline
@@ -62,6 +64,10 @@ Runs when a user clicks "Plan" on an idea card. Two-stage process:
 
 After completion, the task moves to `review` status (human gate — does NOT auto-advance).
 
+**Stage output passing:** Each stage's result summary is prepended as context to the next stage's prompt. The research agent's output becomes part of the brainstorm agent's input so it has codebase context without re-exploring.
+
+**If the brainstorm pipeline fails:** The task moves to `failed` status. The "Retry" action on a failed task that was in the brainstorm pipeline moves it back to `idea` (not `ready`), so the user can re-trigger planning.
+
 ### `default` pipeline
 
 Runs when a task reaches `ready` status (after human approval in review).
@@ -91,11 +97,11 @@ Runs when a task reaches `ready` status (after human approval in review).
 |--------|-------------|
 | Ideas | **Plan** — triggers brainstorm pipeline, moves to `planning` |
 | Planning | Shows live progress from brainstorm pipeline |
-| Review | **Approve** — moves to `ready`. **Re-plan** — moves back to `planning` with feedback |
+| Review | **Approve** — moves to `ready`. **Re-plan** — opens a text input for feedback, then moves back to `planning` with that feedback appended to the original idea |
 | Queued | Auto-picked up by orchestrator |
 | Running | Shows stage progress + logs |
 | Done | None |
-| Failed | **Retry** — moves back to `ready` |
+| Failed | **Retry** — moves back to `idea` if failed during brainstorm, or `ready` if failed during execution |
 
 ## Pipeline Viewer
 
@@ -119,7 +125,7 @@ New preload channels: `create-idea`, `advance-task`, `get-pipeline-files`, `get-
 ## UI Changes
 
 ### KanbanBoard
-- 6 columns instead of 4: Ideas, Planning, Review, Queued, Running, Done/Failed
+- 7 columns: Ideas, Planning, Review, Queued, Running, Done, Failed
 - Quick-add text input in Ideas column header
 - Action buttons on cards based on column
 
