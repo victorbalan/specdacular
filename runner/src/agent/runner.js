@@ -8,6 +8,7 @@ class AgentRunner extends EventEmitter {
     this.agentConfig = agentConfig;
     this.timeout = options.timeout || 3600000; // 1h default
     this.stuckTimeout = options.stuckTimeout || 1800000; // 30min default
+    this.cwd = options.cwd || undefined;
     this.process = null;
     this.lastOutputTime = null;
     this.stuckTimer = null;
@@ -33,6 +34,7 @@ class AgentRunner extends EventEmitter {
       this.process = spawn(command, args, {
         stdio: [useStdin ? 'pipe' : 'ignore', 'pipe', 'pipe'],
         shell: true,
+        cwd: this.cwd,
       });
 
       // Pipe prompt via stdin if configured

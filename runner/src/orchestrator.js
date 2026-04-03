@@ -93,7 +93,11 @@ class Orchestrator {
     return tasks;
   }
 
-  async runTask(task) {
+  async runTask(task, workDir) {
+    // workDir = worktree path for parallel execution, or null for sequential
+    // If null, use the project root (parent of .specd)
+    const projectDir = workDir || this._findGitRoot() || path.dirname(this.configDir);
+
     const pipelineName = task.pipeline || this.config.defaults.pipeline;
     const pipeline = resolvePipeline(
       pipelineName,
@@ -114,12 +118,14 @@ class Orchestrator {
       }
     }
 
+    console.log(`[${task.id}] Starting in ${workDir ? 'worktree: ' + workDir : 'project dir: ' + projectDir}`);
+
     const sequencer = new StageSequencer({
       stages: pipeline.stages,
       createRunner: (stage) => {
         const agentConfig = this.agents[stage.agent];
         if (!agentConfig && stage.cmd) {
-          return this._createCmdRunner(stage);
+          return this._createCmdRunner(stage, projectDir);
         }
         if (!agentConfig) {
           throw new Error(`Agent "${stage.agent}" not found in agents.yaml`);
@@ -139,7 +145,7 @@ class Orchestrator {
         const timeout = (stage.timeout || this.config.defaults.timeout) * 1000;
         const stuckTimeout = (stage.stuck_timeout || this.config.defaults.stuck_timeout) * 1000;
 
-        const runner = new AgentRunner(agentConfig, { timeout, stuckTimeout });
+        const runner = new AgentRunner(agentConfig, { timeout, stuckTimeout, cwd: projectDir });
 
         runner.on('status', (status) => {
           this.stateManager.updateLiveProgress(task.id, status);
@@ -182,11 +188,11 @@ class Orchestrator {
     return result;
   }
 
-  _createCmdRunner(stage) {
+  _createCmdRunner(stage, cwd) {
     const { spawn } = require('child_process');
     return {
       run: () => new Promise((resolve) => {
-        const proc = spawn(stage.cmd, [], { shell: true, stdio: ['ignore', 'pipe', 'pipe'] });
+        const proc = spawn(stage.cmd, [], { shell: true, stdio: ['ignore', 'pipe', 'pipe'], cwd });
         let stdout = '';
         proc.stdout.on('data', (d) => { stdout += d.toString(); });
         proc.on('close', (code) => {

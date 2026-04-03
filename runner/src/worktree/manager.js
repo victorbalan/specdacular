@@ -1,11 +1,15 @@
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 class WorktreeManager {
   constructor(repoDir, worktreesDir) {
     this.repoDir = repoDir;
-    this.worktreesDir = worktreesDir || path.join(repoDir, '.specd', 'runner', 'worktrees');
+    // Store worktrees OUTSIDE the repo to avoid conflicts
+    // Default: /tmp/specd-worktrees/<repo-name>/
+    const repoName = path.basename(repoDir);
+    this.worktreesDir = worktreesDir || path.join(os.tmpdir(), 'specd-worktrees', repoName);
     this.active = new Map();
   }
 
