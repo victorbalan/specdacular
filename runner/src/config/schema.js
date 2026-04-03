@@ -1,6 +1,6 @@
 const REQUIRED_AGENT_FIELDS = ['cmd', 'output_format'];
 const VALID_OUTPUT_FORMATS = ['json_block', 'exit_code'];
-const VALID_TASK_STATUSES = ['draft', 'ready', 'in_progress', 'done', 'failed'];
+const VALID_TASK_STATUSES = ['draft', 'ready', 'planning', 'in_progress', 'done', 'failed', 'paused', 'blocked'];
 const VALID_FAILURE_POLICIES = ['skip', 'retry', 'block'];
 
 function validateConfig(config) {
