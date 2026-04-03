@@ -35,19 +35,15 @@ describe('bootstrap', () => {
     const config = JSON.parse(readFileSync(paths.config, 'utf-8'));
     a.equal(config.server.port, 3700);
 
-    // Default agent templates exist
-    a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-planner.json')));
+    // Agent templates
+    a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-superpower-planner.json')));
     a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-implementer.json')));
     a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-reviewer.json')));
-
-    // Default pipeline template exists
-    a.ok(existsSync(join(paths.pipelineTemplatesDir, 'default.json')));
-
-    // Brainstorm agents
+    a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-tester.json')));
     a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-researcher.json')));
-    a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-brainstormer.json')));
 
-    // Brainstorm pipeline
+    // Pipeline templates
+    a.ok(existsSync(join(paths.pipelineTemplatesDir, 'default.json')));
     a.ok(existsSync(join(paths.pipelineTemplatesDir, 'brainstorm.json')));
   });
 
