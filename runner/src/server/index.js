@@ -10,14 +10,6 @@ function createServer(daemon, port) {
 
   app.use('/api', createApiRouter(daemon));
 
-  const dashboardPath = path.join(__dirname, '..', '..', 'dashboard', 'dist');
-  app.use(express.static(dashboardPath));
-
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
-    res.sendFile(path.join(dashboardPath, 'index.html'));
-  });
-
   const server = http.createServer(app);
   const broadcaster = new WsBroadcaster(server);
 
