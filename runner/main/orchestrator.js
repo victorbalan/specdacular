@@ -75,6 +75,129 @@ export class Orchestrator extends EventEmitter {
     return updated;
   }
 
+  createIdea(name) {
+    const id = `idea-${Date.now().toString(36)}`;
+    const task = {
+      id,
+      name,
+      description: '',
+      project_id: this.projectId,
+      working_dir: '.',
+      pipeline: null,
+      status: 'idea',
+      priority: 10,
+      depends_on: [],
+      spec: '',
+      feedback: '',
+      created_at: new Date().toISOString(),
+    };
+    return this.createTask(task);
+  }
+
+  async advanceTask(taskId, action, feedback) {
+    const task = this.getTask(taskId);
+    if (!task) return null;
+
+    if (action === 'plan') {
+      if (feedback) {
+        this.updateTask(taskId, { status: 'planning', feedback });
+      } else {
+        this.updateTask(taskId, { status: 'planning' });
+      }
+
+      this._runBrainstormPipeline(task).catch(err => {
+        console.error(`Brainstorm failed for ${taskId}:`, err);
+        this.updateTask(taskId, { status: 'failed', failed_pipeline: 'brainstorm' });
+        this.stateManager.updateTaskStatus(taskId, 'failed');
+        this.stateManager.persist();
+      });
+
+      return this.getTask(taskId);
+    }
+
+    if (action === 'approve') {
+      this.updateTask(taskId, { status: 'ready' });
+      return this.getTask(taskId);
+    }
+
+    if (action === 're-plan') {
+      const updatedFeedback = [task.feedback, feedback].filter(Boolean).join('\n\n---\n\n');
+      this.updateTask(taskId, { status: 'planning', feedback: updatedFeedback });
+
+      this._runBrainstormPipeline({ ...task, feedback: updatedFeedback }).catch(err => {
+        console.error(`Re-plan failed for ${taskId}:`, err);
+        this.updateTask(taskId, { status: 'failed', failed_pipeline: 'brainstorm' });
+        this.stateManager.updateTaskStatus(taskId, 'failed');
+        this.stateManager.persist();
+      });
+
+      return this.getTask(taskId);
+    }
+
+    if (action === 'retry') {
+      const newStatus = task.failed_pipeline === 'brainstorm' ? 'idea' : 'ready';
+      this.updateTask(taskId, { status: newStatus, failed_pipeline: null });
+      return this.getTask(taskId);
+    }
+
+    return null;
+  }
+
+  async _runBrainstormPipeline(task) {
+    const agents = this.templateManager.getAgents(this.projectId);
+    const pipelines = this.templateManager.getPipelines(this.projectId);
+    const pipeline = resolvePipeline('brainstorm', pipelines, null, this.config.defaults);
+
+    this.stateManager.registerTask(task.id, { name: task.name, pipeline: 'brainstorm' });
+    this.stateManager.updateTaskStatus(task.id, 'planning');
+
+    const prompt = [task.name, task.description, task.feedback].filter(Boolean).join('\n\n');
+    const logPath = join(this.projectPaths.logsDir, `${task.id}.log`);
+
+    const sequencer = new StageSequencer({
+      stages: pipeline.stages,
+      createRunner: (stage, previousOutput) => {
+        const agentDef = agents[stage.agent];
+        if (!agentDef) throw new Error(`Agent not found: ${stage.agent}`);
+
+        const context = buildTemplateContext(task, stage, pipeline, this.projectPaths, previousOutput);
+        const resolvedPrompt = resolveTemplate(agentDef.system_prompt || '', context);
+
+        const runner = new AgentRunner({
+          ...agentDef,
+          system_prompt: resolvedPrompt,
+          timeout: stage.timeout,
+          stuck_timeout: this.config.defaults?.stuck_timeout,
+        });
+
+        runner.on('status', (s) => this.stateManager.updateLiveProgress(task.id, s));
+        runner.on('output', () => this.stateManager.persist());
+
+        return { run: () => runner.run(prompt, { cwd: this.projectPath, logPath }) };
+      },
+      onStageStart: async (stage, attempt) => {
+        this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
+        this.stateManager.persist();
+      },
+      onStageComplete: async (stage, result, attempt) => {
+        this.stateManager.completeStage(task.id, result.status, result.summary);
+        this.stateManager.persist();
+      },
+    });
+
+    const result = await sequencer.run();
+
+    if (result.status === 'success') {
+      const lastStage = result.results[result.results.length - 1];
+      this.updateTask(task.id, { status: 'review', spec: lastStage.summary || '' });
+      this.stateManager.updateTaskStatus(task.id, 'review');
+    } else {
+      this.updateTask(task.id, { status: 'failed', failed_pipeline: 'brainstorm' });
+      this.stateManager.updateTaskStatus(task.id, 'failed');
+    }
+    this.stateManager.persist();
+  }
+
   pickNextTask() {
     const tasks = this.getTasks();
     const completedIds = new Set(
