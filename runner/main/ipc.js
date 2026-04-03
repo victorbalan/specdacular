@@ -85,11 +85,20 @@ export function setupIpc(getContext) {
     return true;
   });
 
-  ipcMain.handle('create-idea', (event, projectId, name, description) => {
+  ipcMain.handle('create-idea', (event, projectId, name, description, autoExecute) => {
     const { orchestrators } = getContext();
     const orch = orchestrators.get(projectId);
     if (!orch) return null;
-    return orch.createIdea(name, description);
+    return orch.createIdea(name, description, autoExecute);
+  });
+
+  ipcMain.handle('toggle-auto-execute', (event, projectId, taskId) => {
+    const { orchestrators } = getContext();
+    const orch = orchestrators.get(projectId);
+    if (!orch) return null;
+    const task = orch.getTask(taskId);
+    if (!task) return null;
+    return orch.updateTask(taskId, { auto_execute: !task.auto_execute });
   });
 
   ipcMain.handle('advance-task', (event, projectId, taskId, action, feedback) => {

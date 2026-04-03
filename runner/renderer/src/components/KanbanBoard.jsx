@@ -90,6 +90,7 @@ export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
                     action={ACTION_MAP[t.status]}
                     onClick={() => setSelectedTask(t)}
                     onAction={(action) => handleAction(t, action)}
+                    onRefresh={onRefresh}
                   />
                 ))}
                 {colTasks.length === 0 && (
@@ -128,6 +129,7 @@ export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
 function AddIdeaModal({ projectId, projects, onClose, onCreated }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [autoExecute, setAutoExecute] = useState(false);
   const [selectedProject, setSelectedProject] = useState(projectId || projects?.[0]?.id || '');
 
   const handleSubmit = async () => {
@@ -135,7 +137,7 @@ function AddIdeaModal({ projectId, projects, onClose, onCreated }) {
     if (!name) return;
     const pid = projectId || selectedProject;
     if (!pid) return;
-    await window.specd.invoke('create-idea', pid, name, description.trim());
+    await window.specd.invoke('create-idea', pid, name, description.trim(), autoExecute);
     onCreated();
   };
 
@@ -219,6 +221,19 @@ function AddIdeaModal({ projectId, projects, onClose, onCreated }) {
           />
         </div>
 
+        <label style={{
+          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20,
+          fontSize: 13, color: colors.textSecondary, cursor: 'pointer',
+        }}>
+          <input
+            type="checkbox"
+            checked={autoExecute}
+            onChange={(e) => setAutoExecute(e.target.checked)}
+            style={{ accentColor: colors.accent }}
+          />
+          Auto-execute (plan → review → queue → run automatically)
+        </label>
+
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button
             onClick={onClose}
@@ -244,7 +259,13 @@ function AddIdeaModal({ projectId, projects, onClose, onCreated }) {
   );
 }
 
-function TaskCard({ task, action, onClick, onAction }) {
+function TaskCard({ task, action, onClick, onAction, onRefresh }) {
+  const handleToggleAuto = async (e) => {
+    e.stopPropagation();
+    await window.specd.invoke('toggle-auto-execute', task.projectId, task.id);
+    if (onRefresh) onRefresh();
+  };
+
   return (
     <div
       onClick={onClick}
@@ -252,15 +273,30 @@ function TaskCard({ task, action, onClick, onAction }) {
         backgroundColor: colors.surface,
         borderRadius: radius.sm,
         padding: '8px 10px',
-        border: `1px solid ${colors.border}`,
+        border: `1px solid ${task.auto_execute ? colors.accent : colors.border}`,
         boxShadow: shadows.sm,
         cursor: 'pointer',
         transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadows.md; e.currentTarget.style.borderColor = colors.accent; }}
-      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadows.sm; e.currentTarget.style.borderColor = colors.border; }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = shadows.md; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = shadows.sm; }}
     >
-      <div style={{ fontWeight: 500, fontSize: 12, color: colors.text, marginBottom: 4 }}>{task.name}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <div style={{ fontWeight: 500, fontSize: 12, color: colors.text }}>{task.name}</div>
+        {(task.status === 'idea' || task.status === 'planning' || task.status === 'review') && (
+          <span
+            onClick={handleToggleAuto}
+            title={task.auto_execute ? 'Auto-execute ON' : 'Auto-execute OFF'}
+            style={{
+              fontSize: 10, cursor: 'pointer', padding: '1px 4px', borderRadius: 3,
+              backgroundColor: task.auto_execute ? colors.accentLight : 'transparent',
+              color: task.auto_execute ? colors.accent : colors.textMuted,
+            }}
+          >
+            {task.auto_execute ? 'AUTO' : ''}
+          </span>
+        )}
+      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{
           backgroundColor: colors.bg, borderRadius: radius.sm,
@@ -284,6 +320,18 @@ function TaskCard({ task, action, onClick, onAction }) {
           </button>
         )}
       </div>
+      {task.pr_url && (
+        <a
+          href={task.pr_url}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            display: 'block', marginTop: 4, fontSize: 10, color: colors.accent,
+            textDecoration: 'none',
+          }}
+        >
+          PR →
+        </a>
+      )}
     </div>
   );
 }

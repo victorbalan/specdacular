@@ -78,8 +78,8 @@ export class Orchestrator extends EventEmitter {
     return updated;
   }
 
-  createIdea(name, description) {
-    log.info(`creating idea: "${name}"`);
+  createIdea(name, description, autoExecute) {
+    log.info(`creating idea: "${name}" (auto_execute: ${!!autoExecute})`);
     const id = `idea-${Date.now().toString(36)}`;
     const task = {
       id,
@@ -93,6 +93,8 @@ export class Orchestrator extends EventEmitter {
       depends_on: [],
       spec: '',
       feedback: '',
+      auto_execute: !!autoExecute,
+      pr_url: null,
       created_at: new Date().toISOString(),
     };
     return this.createTask(task);
@@ -195,8 +197,15 @@ export class Orchestrator extends EventEmitter {
 
     if (result.status === 'success') {
       const lastStage = result.results[result.results.length - 1];
-      this.updateTask(task.id, { status: 'review', spec: lastStage.summary || '' });
-      this.stateManager.updateTaskStatus(task.id, 'review');
+      const currentTask = this.getTask(task.id);
+      if (currentTask?.auto_execute) {
+        log.info(`auto-execute: advancing ${task.id} directly to ready (skipping review)`);
+        this.updateTask(task.id, { status: 'ready', spec: lastStage.summary || '' });
+        this.stateManager.updateTaskStatus(task.id, 'ready');
+      } else {
+        this.updateTask(task.id, { status: 'review', spec: lastStage.summary || '' });
+        this.stateManager.updateTaskStatus(task.id, 'review');
+      }
     } else {
       this.updateTask(task.id, { status: 'failed', failed_pipeline: 'brainstorm' });
       this.stateManager.updateTaskStatus(task.id, 'failed');
