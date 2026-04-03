@@ -3,7 +3,8 @@
   "version": "0.10.1",
   "description": "Feature planning system for existing codebases. Map, understand, and plan features in large projects.",
   "bin": {
-    "specdacular": "bin/install.js"
+    "specdacular": "bin/install.js",
+    "specd-runner": "runner/src/cli.js"
   },
   "files": [
     "bin",
@@ -11,6 +12,10 @@
     "agents",
     "specdacular",
     "hooks",
+    "runner/src",
+    "runner/package.json",
+    "runner/dashboard/dist",
+    "runner/dashboard/package.json",
     "README.md"
   ],
   "keywords": [

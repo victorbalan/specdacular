@@ -1,0 +1,21 @@
+pipelines:
+  default:
+    stages:
+      - stage: plan
+        agent: test-agent
+        critical: true
+      - stage: implement
+        agent: test-agent
+        critical: true
+      - stage: test
+        cmd: "npm test"
+        on_fail: retry
+        max_retries: 3
+  bug-fix:
+    stages:
+      - stage: investigate
+        agent: test-agent
+        critical: true
+      - stage: fix
+        agent: test-agent
+        critical: true
