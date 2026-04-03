@@ -210,6 +210,20 @@ class Orchestrator {
         const retryStr = attempt > 0 ? ` (retry ${attempt})` : '';
         console.log(`[${task.id}] Stage: ${stage.stage}${retryStr} → ${stage.agent || stage.cmd}`);
         this._appendLog(task.id, `\n--- Stage: ${stage.stage} (${stage.agent || stage.cmd})${retryStr} ---\n`);
+
+        // Log the full prompt being sent
+        const agentConfig = this.agents[stage.agent];
+        if (agentConfig) {
+          const stageIndex = pipeline.stages.indexOf(stage) + 1;
+          const templateContext = buildTemplateContext(
+            { id: task.id, name: task.name, spec: specContent },
+            { name: stage.stage, index: stageIndex, total: pipeline.stages.length },
+            { name: pipelineName },
+            { statusFile: this.statusPath, logDir: this.logsDir }
+          );
+          const resolvedPrompt = resolveTemplate(agentConfig.system_prompt || '', templateContext);
+          this._appendLog(task.id, `\n--- PROMPT START ---\n${resolvedPrompt}\n--- PROMPT END ---\n`);
+        }
         this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
         this.stateManager.persist();
       },

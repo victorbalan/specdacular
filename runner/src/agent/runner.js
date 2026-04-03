@@ -139,22 +139,33 @@ class AgentRunner extends EventEmitter {
         return;
       }
 
+      // Log ALL events for full visibility
       switch (event.type) {
         case 'assistant':
           if (event.message?.content) {
-            const text = typeof event.message.content === 'string'
-              ? event.message.content
-              : event.message.content.map(b => b.text || '').join('');
-            if (text) {
-              this.emit('output', text);
-              this._checkForSpecdBlocks(text);
+            const blocks = Array.isArray(event.message.content) ? event.message.content : [{ text: event.message.content }];
+            for (const block of blocks) {
+              if (block.type === 'tool_use') {
+                this.emit('output', `[tool_call] ${block.name}(${JSON.stringify(block.input || {}).substring(0, 200)})`);
+                this.emit('status', {
+                  task_id: '', stage: '',
+                  progress: `Calling: ${block.name}`,
+                  percent: -1, files_touched: [],
+                });
+              } else if (block.type === 'text' && block.text) {
+                this.emit('output', block.text);
+                this._checkForSpecdBlocks(block.text);
+              } else if (typeof block === 'string') {
+                this.emit('output', block);
+              }
             }
           }
           break;
 
         case 'result':
+          this.emit('output', `\n[completed] turns=${event.num_turns || '?'} cost=$${event.total_cost_usd?.toFixed(4) || '?'}`);
           if (event.result) {
-            this.emit('output', `\n[result] ${event.result.substring(0, 200)}`);
+            this.emit('output', event.result);
           }
           this.emit('result', {
             status: event.subtype === 'success' ? 'success' : 'failure',
@@ -168,15 +179,25 @@ class AgentRunner extends EventEmitter {
           break;
 
         case 'system':
-          if (event.subtype === 'tool_use') {
-            this.emit('output', `[tool] ${event.tool_name || 'unknown'}`);
-            this.emit('status', {
-              task_id: '',
-              stage: '',
-              progress: `Using tool: ${event.tool_name || 'unknown'}`,
-              percent: -1,
-              files_touched: [],
-            });
+          if (event.subtype === 'tool_use' || event.subtype === 'tool_result') {
+            const name = event.tool_name || event.name || '';
+            if (event.subtype === 'tool_use') {
+              this.emit('output', `[tool] ${name}`);
+              this.emit('status', {
+                task_id: '', stage: '',
+                progress: `Using: ${name}`,
+                percent: -1, files_touched: [],
+              });
+            }
+          } else if (event.subtype === 'hook_response' && event.hook_event === 'SessionStart') {
+            this.emit('output', `[hook] SessionStart loaded`);
+          }
+          break;
+
+        default:
+          // Log unknown event types
+          if (event.type) {
+            this.emit('output', `[${event.type}:${event.subtype || ''}] ${JSON.stringify(event).substring(0, 150)}`);
           }
           break;
       }
