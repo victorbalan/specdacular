@@ -75,12 +75,12 @@ export class Orchestrator extends EventEmitter {
     return updated;
   }
 
-  createIdea(name) {
+  createIdea(name, description) {
     const id = `idea-${Date.now().toString(36)}`;
     const task = {
       id,
       name,
-      description: '',
+      description: description || '',
       project_id: this.projectId,
       working_dir: '.',
       pipeline: null,

@@ -20,18 +20,7 @@ const ACTION_MAP = {
 
 export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
   const [selectedTask, setSelectedTask] = useState(null);
-  const [ideaText, setIdeaText] = useState('');
-  const [ideaProject, setIdeaProject] = useState(projectId || projects?.[0]?.id || '');
-
-  const handleAddIdea = async () => {
-    const text = ideaText.trim();
-    if (!text) return;
-    const pid = projectId || ideaProject;
-    if (!pid) return;
-    await window.specd.invoke('create-idea', pid, text);
-    setIdeaText('');
-    if (onRefresh) onRefresh();
-  };
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const handleAction = async (task, action, feedback) => {
     await window.specd.invoke('advance-task', task.projectId, task.id, action, feedback || '');
@@ -67,46 +56,31 @@ export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
                 marginBottom: 10, paddingBottom: 8, borderBottom: `2px solid ${col.color}`,
               }}>
                 <span style={{ fontWeight: 600, fontSize: 12, color: colors.text }}>{col.label}</span>
-                <span style={{
-                  backgroundColor: col.color, color: '#fff', borderRadius: 10,
-                  padding: '1px 7px', fontSize: 10, fontWeight: 600, minWidth: 18, textAlign: 'center',
-                }}>
-                  {colTasks.length}
-                </span>
-              </div>
-
-              {isIdeasCol && (
-                <div style={{ marginBottom: 8 }}>
-                  {!projectId && projects?.length > 1 && (
-                    <select
-                      value={ideaProject}
-                      onChange={(e) => setIdeaProject(e.target.value)}
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                  {isIdeasCol && (
+                    <button
+                      onClick={() => setShowAddModal(true)}
                       style={{
-                        width: '100%', padding: '5px 8px', marginBottom: 4,
-                        backgroundColor: colors.surface, color: colors.text,
-                        border: `1px solid ${colors.border}`, borderRadius: radius.sm,
-                        fontSize: 11, outline: 'none',
+                        width: 20, height: 20, border: 'none', borderRadius: radius.sm,
+                        cursor: 'pointer', backgroundColor: colors.surface,
+                        color: colors.textSecondary, display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', fontSize: 14, lineHeight: '18px',
+                        transition: 'all 0.15s ease',
                       }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.accent; e.currentTarget.style.color = '#fff'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = colors.surface; e.currentTarget.style.color = colors.textSecondary; }}
                     >
-                      {projects.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
+                      +
+                    </button>
                   )}
-                  <input
-                    value={ideaText}
-                    onChange={(e) => setIdeaText(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddIdea(); }}
-                    placeholder="Add an idea..."
-                    style={{
-                      width: '100%', padding: '6px 8px',
-                      backgroundColor: colors.surface, color: colors.text,
-                      border: `1px solid ${colors.border}`, borderRadius: radius.sm,
-                      fontSize: 12, outline: 'none',
-                    }}
-                  />
+                  <span style={{
+                    backgroundColor: col.color, color: '#fff', borderRadius: 10,
+                    padding: '1px 7px', fontSize: 10, fontWeight: 600, minWidth: 18, textAlign: 'center',
+                  }}>
+                    {colTasks.length}
+                  </span>
                 </div>
-              )}
+              </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {colTasks.map(t => (
@@ -129,6 +103,15 @@ export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
         })}
       </div>
 
+      {showAddModal && (
+        <AddIdeaModal
+          projectId={projectId}
+          projects={projects}
+          onClose={() => setShowAddModal(false)}
+          onCreated={() => { setShowAddModal(false); if (onRefresh) onRefresh(); }}
+        />
+      )}
+
       {selectedTask && (
         <TaskDetailOverlay
           task={selectedTask}
@@ -139,6 +122,125 @@ export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
         />
       )}
     </>
+  );
+}
+
+function AddIdeaModal({ projectId, projects, onClose, onCreated }) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedProject, setSelectedProject] = useState(projectId || projects?.[0]?.id || '');
+
+  const handleSubmit = async () => {
+    const name = title.trim();
+    if (!name) return;
+    const pid = projectId || selectedProject;
+    if (!pid) return;
+    await window.specd.invoke('create-idea', pid, name, description.trim());
+    onCreated();
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+        backdropFilter: 'blur(2px)',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundColor: colors.surface, borderRadius: radius.lg, padding: 24,
+          width: 440, boxShadow: shadows.overlay,
+        }}
+      >
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: colors.text }}>
+          New Idea
+        </h3>
+
+        {!projectId && projects?.length > 1 && (
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, marginBottom: 4, display: 'block' }}>
+              Project
+            </label>
+            <select
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              style={{
+                width: '100%', padding: '8px 10px',
+                backgroundColor: colors.bg, color: colors.text,
+                border: `1px solid ${colors.border}`, borderRadius: radius.sm,
+                fontSize: 13, outline: 'none',
+              }}
+            >
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, marginBottom: 4, display: 'block' }}>
+            Title
+          </label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) handleSubmit(); }}
+            placeholder="What's the idea?"
+            autoFocus
+            style={{
+              width: '100%', padding: '8px 10px',
+              backgroundColor: colors.bg, color: colors.text,
+              border: `1px solid ${colors.border}`, borderRadius: radius.sm,
+              fontSize: 13, outline: 'none',
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, marginBottom: 4, display: 'block' }}>
+            Description (optional)
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="More detail about what you want to build..."
+            rows={4}
+            style={{
+              width: '100%', padding: '8px 10px',
+              backgroundColor: colors.bg, color: colors.text,
+              border: `1px solid ${colors.border}`, borderRadius: radius.sm,
+              fontSize: 13, outline: 'none', resize: 'vertical',
+              fontFamily: 'inherit',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '7px 16px', border: `1px solid ${colors.border}`, borderRadius: radius.md,
+              cursor: 'pointer', backgroundColor: 'transparent', color: colors.textSecondary, fontSize: 13,
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            style={{
+              padding: '7px 16px', border: 'none', borderRadius: radius.md,
+              cursor: 'pointer', backgroundColor: colors.accent, color: '#fff', fontSize: 13,
+            }}
+          >
+            Add Idea
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

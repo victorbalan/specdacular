@@ -85,11 +85,11 @@ export function setupIpc(getContext) {
     return true;
   });
 
-  ipcMain.handle('create-idea', (event, projectId, name) => {
+  ipcMain.handle('create-idea', (event, projectId, name, description) => {
     const { orchestrators } = getContext();
     const orch = orchestrators.get(projectId);
     if (!orch) return null;
-    return orch.createIdea(name);
+    return orch.createIdea(name, description);
   });
 
   ipcMain.handle('advance-task', (event, projectId, taskId, action, feedback) => {
