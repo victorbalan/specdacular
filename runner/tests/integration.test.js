@@ -62,7 +62,7 @@ describe('Integration: full orchestrator run', () => {
   });
 
   it('runs a task through the full pipeline and updates status.json', async () => {
-    const orch = new Orchestrator(tmpDir);
+    const orch = new Orchestrator({ configDir: tmpDir });
     await orch.init();
     await orch.runOnce();
 
@@ -82,7 +82,7 @@ describe('Integration: full orchestrator run', () => {
   });
 
   it('serves status via the REST API', async () => {
-    const orch = new Orchestrator(tmpDir);
+    const orch = new Orchestrator({ configDir: tmpDir });
     await orch.init();
     await orch.runOnce();
 
@@ -100,7 +100,7 @@ describe('Integration: full orchestrator run', () => {
   });
 
   it('logs are written to disk', async () => {
-    const orch = new Orchestrator(tmpDir);
+    const orch = new Orchestrator({ configDir: tmpDir });
     await orch.init();
     await orch.runOnce();
 

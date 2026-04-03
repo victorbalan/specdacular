@@ -10,11 +10,12 @@ const { StageSequencer } = require('./pipeline/sequencer');
 const { WorktreeManager } = require('./worktree/manager');
 
 class Orchestrator {
-  constructor(configDir) {
+  constructor({ configDir, tasksDir, statusPath, logsDir, projectName }) {
     this.configDir = configDir;
-    this.statusPath = path.join(configDir, 'status.json');
-    this.tasksDir = path.join(configDir, 'tasks');
-    this.logsDir = path.join(configDir, 'logs');
+    this.tasksDir = tasksDir || path.join(configDir, 'tasks');
+    this.statusPath = statusPath || path.join(configDir, 'status.json');
+    this.logsDir = logsDir || path.join(configDir, 'logs');
+    this.projectName = projectName || 'default';
 
     this.config = null;
     this.agents = null;

@@ -55,7 +55,7 @@ program
     const port = parseInt(opts.port);
 
     try {
-      const orchestrator = new Orchestrator(configDir);
+      const orchestrator = new Orchestrator({ configDir });
       await orchestrator.init();
 
       // Telegram notifications

@@ -58,7 +58,7 @@ describe('Orchestrator', () => {
   });
 
   it('picks up a ready task and runs it', async () => {
-    const orch = new Orchestrator(tmpDir);
+    const orch = new Orchestrator({ configDir: tmpDir });
     await orch.init();
     await orch.runOnce();
 
@@ -80,7 +80,7 @@ describe('Orchestrator', () => {
       pipeline: 'default',
     }));
 
-    const orch = new Orchestrator(tmpDir);
+    const orch = new Orchestrator({ configDir: tmpDir });
     await orch.init();
     const picked = orch.pickNextTask();
     assert.strictEqual(picked.id, '001-test');
@@ -96,7 +96,7 @@ describe('Orchestrator', () => {
       pipeline: 'default',
     }));
 
-    const orch = new Orchestrator(tmpDir);
+    const orch = new Orchestrator({ configDir: tmpDir });
     await orch.init();
     const picked = orch.pickNextTask();
     assert.strictEqual(picked, null);
