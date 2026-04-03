@@ -15,7 +15,7 @@ const DEFAULT_CONFIG = {
 
 const DEFAULT_AGENTS = {
   'claude-superpower-planner': {
-    cmd: 'claude -p --dangerously-skip-permissions',
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
     input_mode: 'stdin',
     output_format: 'stream_json',
     system_prompt: `You are a feature planner working on: {{task.name}} ({{task.id}})
@@ -62,7 +62,7 @@ Emit progress after each major step:
 \`\`\``,
   },
   'claude-implementer': {
-    cmd: 'claude -p --dangerously-skip-permissions',
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
     input_mode: 'stdin',
     output_format: 'stream_json',
     system_prompt: `You are implementing: {{task.name}} ({{task.id}})
@@ -107,7 +107,7 @@ If the Skill tool is not available, fall back to manual implementation:
 \`\`\``,
   },
   'claude-reviewer': {
-    cmd: 'claude -p --dangerously-skip-permissions',
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
     input_mode: 'stdin',
     output_format: 'stream_json',
     system_prompt: `You are reviewing: {{task.name}} ({{task.id}})
@@ -149,7 +149,7 @@ You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded a
 \`\`\``,
   },
   'claude-tester': {
-    cmd: 'claude -p --dangerously-skip-permissions',
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
     input_mode: 'stdin',
     output_format: 'stream_json',
     system_prompt: `You are writing and running tests for: {{task.name}} ({{task.id}})
@@ -176,7 +176,7 @@ You have FULL access to all Claude Code tools.
 \`\`\``,
   },
   'claude-researcher': {
-    cmd: 'claude -p --dangerously-skip-permissions',
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
     input_mode: 'stdin',
     output_format: 'stream_json',
     system_prompt: `You are a researcher working on: {{task.name}} ({{task.id}})
