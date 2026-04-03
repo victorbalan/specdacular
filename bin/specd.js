@@ -2,12 +2,13 @@
 
 // bin/specd.js — unified CLI entry point
 // Usage:
-//   specd llm-init [--local]     — install commands/agents/workflows
-//   specd runner                  — launch Electron app
-//   specd runner register <path>  — register a folder
-//   specd runner unregister <id>  — remove a project
-//   specd runner projects         — list projects
-//   specd runner status           — show task status
+//   specd llm-init [--local]        — install commands/agents/workflows
+//   specd install-runner             — install runner dependencies (express, ws, electron)
+//   specd runner                     — launch Electron app
+//   specd runner register <path>     — register a folder
+//   specd runner unregister <id>     — remove a project
+//   specd runner projects            — list projects
+//   specd runner status              — show task status
 
 import { resolve, join } from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
@@ -16,6 +17,8 @@ import { execSync, spawn } from 'child_process';
 
 const args = process.argv.slice(2);
 const command = args[0];
+
+const runnerDir = join(import.meta.dirname, '..', 'runner');
 
 function getAppDataDir() {
   if (platform() === 'darwin') {
@@ -40,12 +43,38 @@ function saveDb(data) {
   writeFileSync(dbPath, JSON.stringify(data, null, 2));
 }
 
+function isRunnerInstalled() {
+  return existsSync(join(runnerDir, 'node_modules', 'express'));
+}
+
+function requireRunner() {
+  if (!isRunnerInstalled()) {
+    console.error('Runner dependencies not installed. Run: specd install-runner');
+    process.exit(1);
+  }
+}
+
 if (command === 'llm-init') {
-  // Delegate to existing install.js
   const installScript = join(import.meta.dirname, 'install.js');
   const isLocal = args.includes('--local');
   process.argv = ['node', installScript, isLocal ? '--local' : '--global'];
   await import(installScript);
+
+} else if (command === 'install-runner') {
+  console.log('Installing runner dependencies...');
+  execSync('npm install --omit=dev', { cwd: runnerDir, stdio: 'inherit' });
+
+  // Also install renderer deps and build
+  const rendererDir = join(runnerDir, 'renderer');
+  if (existsSync(join(rendererDir, 'package.json'))) {
+    console.log('Installing renderer dependencies...');
+    execSync('npm install', { cwd: rendererDir, stdio: 'inherit' });
+    console.log('Building renderer...');
+    execSync('npm run build', { cwd: rendererDir, stdio: 'inherit' });
+  }
+
+  console.log('Runner installed. Run: specd runner');
+
 } else if (command === 'runner') {
   const subcommand = args[1];
 
@@ -105,16 +134,12 @@ if (command === 'llm-init') {
     }
   } else {
     // No subcommand — launch Electron app
-    const runnerDir = join(import.meta.dirname, '..', 'runner');
-    const electronPath = join(getAppDataDir(), 'electron', 'node_modules', '.bin', 'electron');
+    requireRunner();
 
+    const electronPath = join(runnerDir, 'node_modules', '.bin', 'electron');
     if (!existsSync(electronPath)) {
-      console.log('First run — installing Electron runtime...');
-      const electronDir = join(getAppDataDir(), 'electron');
-      mkdirSync(electronDir, { recursive: true });
-      writeFileSync(join(electronDir, 'package.json'), JSON.stringify({ name: 'specd-electron', private: true }));
-      execSync('npm install electron@latest', { cwd: electronDir, stdio: 'inherit' });
-      console.log('Electron installed.');
+      console.error('Electron not installed. Run: specd install-runner');
+      process.exit(1);
     }
 
     const child = spawn(electronPath, [runnerDir], {
@@ -126,10 +151,11 @@ if (command === 'llm-init') {
   }
 } else {
   console.log('Usage:');
-  console.log('  specd llm-init [--local]     Install Claude Code commands/agents');
-  console.log('  specd runner                  Launch the Specd Runner app');
-  console.log('  specd runner register <path>  Register a project folder');
-  console.log('  specd runner unregister <id>  Remove a project');
-  console.log('  specd runner projects         List registered projects');
-  console.log('  specd runner status           Show task status');
+  console.log('  specd llm-init [--local]      Install Claude Code commands/agents');
+  console.log('  specd install-runner           Install runner dependencies');
+  console.log('  specd runner                   Launch the Specd Runner app');
+  console.log('  specd runner register <path>   Register a project folder');
+  console.log('  specd runner unregister <id>   Remove a project');
+  console.log('  specd runner projects          List registered projects');
+  console.log('  specd runner status            Show task status');
 }
