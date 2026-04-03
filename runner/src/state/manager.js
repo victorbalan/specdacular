@@ -5,6 +5,7 @@ const path = require('path');
 class StateManager extends EventEmitter {
   constructor(statusPath) {
     super();
+    this.setMaxListeners(50);
     this.statusPath = statusPath;
     this.state = {
       started_at: new Date().toISOString(),

@@ -54,18 +54,23 @@ program
       console.log(`Orchestrator running. Watching ${configDir}/tasks/ for work.`);
       console.log('Press Ctrl+C to stop.\n');
 
-      process.on('SIGINT', async () => {
+      let shuttingDown = false;
+      const shutdown = async () => {
+        if (shuttingDown) {
+          console.log('Force exiting...');
+          process.exit(1);
+        }
+        shuttingDown = true;
         console.log('\nShutting down...');
         orchestrator.stop();
-        await server.stop();
+        try {
+          await server.stop();
+        } catch (e) { /* ignore */ }
         process.exit(0);
-      });
+      };
 
-      process.on('SIGTERM', async () => {
-        orchestrator.stop();
-        await server.stop();
-        process.exit(0);
-      });
+      process.on('SIGINT', shutdown);
+      process.on('SIGTERM', shutdown);
 
       await orchestrator.startLoop();
     } catch (err) {
