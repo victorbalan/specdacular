@@ -256,37 +256,45 @@ class Orchestrator {
         continue;
       }
 
-      const promises = tasks.map(async (task) => {
+      for (const task of tasks) {
         this.runningTasks.add(task.id);
-        let cwd = null;
-        if (this.worktreeManager && maxParallel > 1) {
-          try {
-            cwd = await this.worktreeManager.create(task.id);
-          } catch (e) {
-            console.error(`Failed to create worktree for ${task.id}: ${e.message}`);
-          }
-        }
-        try {
-          const result = await this.runTask(task, cwd);
+        console.log(`[${task.id}] Launching (${this.runningTasks.size}/${maxParallel} slots used)`);
 
-          // Create PR if task succeeded and we used a worktree
-          if (result.status === 'success' && this.worktreeManager && cwd) {
-            const summary = result.results
-              ?.map(r => r.result?.summary).filter(Boolean).join('\n- ') || '';
-            const prUrl = await this.worktreeManager.createPR(task.id, task.name, summary);
-            if (prUrl) {
-              this._appendLog(task.id, `\n--- PR Created: ${prUrl} ---\n`);
+        // Fire and don't await — let tasks run concurrently
+        const taskPromise = (async () => {
+          let cwd = null;
+          if (this.worktreeManager && maxParallel > 1) {
+            try {
+              cwd = await this.worktreeManager.create(task.id);
+            } catch (e) {
+              console.error(`[${task.id}] Failed to create worktree: ${e.message}`);
             }
           }
-        } finally {
-          this.runningTasks.delete(task.id);
-          if (this.worktreeManager && maxParallel > 1) {
-            try { await this.worktreeManager.remove(task.id); } catch (e) { /* ignore */ }
-          }
-        }
-      });
+          try {
+            const result = await this.runTask(task, cwd);
 
-      Promise.allSettled(promises);
+            // Create PR if task succeeded and we used a worktree
+            if (result.status === 'success' && this.worktreeManager && cwd) {
+              const summary = result.results
+                ?.map(r => r.result?.summary).filter(Boolean).join('\n- ') || '';
+              const prUrl = await this.worktreeManager.createPR(task.id, task.name, summary);
+              if (prUrl) {
+                this._appendLog(task.id, `\n--- PR Created: ${prUrl} ---\n`);
+              }
+            }
+          } finally {
+            this.runningTasks.delete(task.id);
+            console.log(`[${task.id}] Finished (${this.runningTasks.size}/${maxParallel} slots used)`);
+            if (this.worktreeManager && maxParallel > 1) {
+              try { await this.worktreeManager.remove(task.id); } catch (e) { /* ignore */ }
+            }
+          }
+        })();
+
+        // Don't await — let it run in background
+        taskPromise.catch(e => console.error(`[${task.id}] Unhandled error: ${e.message}`));
+      }
+
       await new Promise(r => setTimeout(r, interval));
     }
   }
