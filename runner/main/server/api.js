@@ -27,6 +27,9 @@ export function createApiRouter(getContext) {
         ...p,
         taskCounts: {
           total: tasks.length,
+          idea: tasks.filter(t => t.status === 'idea').length,
+          planning: tasks.filter(t => t.status === 'planning').length,
+          review: tasks.filter(t => t.status === 'review').length,
           ready: tasks.filter(t => t.status === 'ready').length,
           running: tasks.filter(t => t.status === 'in_progress').length,
           done: tasks.filter(t => t.status === 'done').length,
@@ -107,6 +110,20 @@ export function createApiRouter(getContext) {
     const task = orch.updateTask(req.params.taskId, { status: 'ready' });
     if (!task) return res.status(404).json({ error: 'Task not found' });
     res.json(task);
+  });
+
+  // Advance task (plan, approve, re-plan, retry)
+  router.post('/projects/:id/tasks/:taskId/advance', (req, res) => {
+    const { orchestrators } = getContext();
+    const orch = orchestrators.get(req.params.id);
+    if (!orch) return res.status(404).json({ error: 'Project not found' });
+
+    const { action, feedback } = req.body;
+    if (!action) return res.status(400).json({ error: 'action is required' });
+
+    const result = orch.advanceTask(req.params.taskId, action, feedback);
+    if (!result) return res.status(404).json({ error: 'Task not found' });
+    res.json(result);
   });
 
   // Task logs
