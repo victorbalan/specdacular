@@ -267,7 +267,17 @@ class Orchestrator {
           }
         }
         try {
-          await this.runTask(task, cwd);
+          const result = await this.runTask(task, cwd);
+
+          // Create PR if task succeeded and we used a worktree
+          if (result.status === 'success' && this.worktreeManager && cwd) {
+            const summary = result.results
+              ?.map(r => r.result?.summary).filter(Boolean).join('\n- ') || '';
+            const prUrl = await this.worktreeManager.createPR(task.id, task.name, summary);
+            if (prUrl) {
+              this._appendLog(task.id, `\n--- PR Created: ${prUrl} ---\n`);
+            }
+          }
         } finally {
           this.runningTasks.delete(task.id);
           if (this.worktreeManager && maxParallel > 1) {
