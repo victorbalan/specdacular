@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 const ALLOWED_CHANNELS = new Set([
   'get-projects', 'get-project-status', 'get-tasks',
   'get-task', 'create-task', 'retry-task', 'get-task-logs', 'get-config',
+  'register-project', 'unregister-project',
 ]);
 
 contextBridge.exposeInMainWorld('specd', {

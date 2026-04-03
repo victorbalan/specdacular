@@ -1,7 +1,7 @@
 // runner/main/ipc.js
-import { ipcMain } from 'electron';
+import { ipcMain, dialog } from 'electron';
 import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { join, basename } from 'path';
 
 export function setupIpc(getContext) {
   ipcMain.handle('get-projects', () => {
@@ -63,6 +63,26 @@ export function setupIpc(getContext) {
     if (!existsSync(logPath)) return { lines: [] };
     const content = readFileSync(logPath, 'utf-8');
     return { lines: content.split('\n').slice(-200) };
+  });
+
+  ipcMain.handle('register-project', async () => {
+    const { db } = getContext();
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory'],
+      title: 'Select project folder',
+    });
+    if (result.canceled || !result.filePaths.length) return null;
+    const folderPath = result.filePaths[0];
+    const existing = db.findByPath(folderPath);
+    if (existing) return existing;
+    const name = basename(folderPath);
+    return db.register(name, folderPath);
+  });
+
+  ipcMain.handle('unregister-project', (event, projectId) => {
+    const { db } = getContext();
+    db.unregister(projectId);
+    return true;
   });
 
   ipcMain.handle('get-config', () => {

@@ -20,7 +20,7 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'system-ui' }}>
-      <Sidebar projects={projects} selectedId={selectedId} onSelect={setSelectedId} />
+      <Sidebar projects={projects} selectedId={selectedId} onSelect={setSelectedId} onRefresh={loadProjects} />
       <main style={{ flex: 1, overflow: 'auto' }}>
         {selectedId === null && <Dashboard projects={projects} />}
         {selectedId === 'settings' && <div style={{ padding: 24 }}><h1>Settings</h1><p>Coming soon</p></div>}
