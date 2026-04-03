@@ -36,10 +36,10 @@ export class Orchestrator extends EventEmitter {
     const projectJson = JSON.parse(readFileSync(this.projectPaths.projectJson, 'utf-8'));
     this.projectPath = projectJson.path;
 
-    // Init worktree manager if parallel
-    const maxParallel = this.config.defaults?.max_parallel || 1;
-    if (maxParallel > 1 && existsSync(join(this.projectPath, '.git'))) {
+    // Always init worktree manager — every task gets its own branch + worktree
+    if (existsSync(join(this.projectPath, '.git'))) {
       this.worktreeManager = new WorktreeManager(this.projectPath);
+      log.info(`worktree manager initialized for ${this.projectPath}`);
     }
 
     // Forward state events
@@ -162,6 +162,17 @@ export class Orchestrator extends EventEmitter {
     const prompt = [task.name, task.description, task.feedback].filter(Boolean).join('\n\n');
     const logPath = join(this.projectPaths.logsDir, `${task.id}.log`);
 
+    // Create worktree for this task
+    let cwd = this.projectPath;
+    if (this.worktreeManager) {
+      try {
+        cwd = this.worktreeManager.create(task.id);
+        log.info(`created worktree for ${task.id} at ${cwd}`);
+      } catch (err) {
+        log.warn(`worktree creation failed for ${task.id}: ${err.message}, using project dir`);
+      }
+    }
+
     const sequencer = new StageSequencer({
       stages: pipeline.stages,
       createRunner: (stage, previousOutput) => {
@@ -181,7 +192,7 @@ export class Orchestrator extends EventEmitter {
         runner.on('status', (s) => this.stateManager.updateLiveProgress(task.id, s));
         runner.on('output', () => this.stateManager.persist());
 
-        return { run: () => runner.run(prompt, { cwd: this.projectPath, logPath }) };
+        return { run: () => runner.run(prompt, { cwd, logPath }) };
       },
       onStageStart: async (stage, attempt) => {
         this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
@@ -190,6 +201,8 @@ export class Orchestrator extends EventEmitter {
       onStageComplete: async (stage, result, attempt) => {
         this.stateManager.completeStage(task.id, result.status, result.summary);
         this.stateManager.persist();
+        // Create/update draft PR after each stage
+        this._createOrUpdatePR(task.id, task.name, stage.stage, result);
       },
     });
 
@@ -240,14 +253,21 @@ export class Orchestrator extends EventEmitter {
     this.stateManager.updateTaskStatus(task.id, 'in_progress');
     this.updateTask(task.id, { status: 'in_progress' });
 
-    // Determine working directory
-    const workingDir = task.working_dir || '.';
-    let cwd = join(this.projectPath, workingDir);
-    let worktreePath = null;
-
-    if (this.worktreeManager && existsSync(join(cwd, '.git'))) {
-      worktreePath = this.worktreeManager.create(task.id);
-      cwd = worktreePath;
+    // Create worktree — reuse existing one if brainstorm already created it
+    let cwd = this.projectPath;
+    if (this.worktreeManager) {
+      const existing = this.worktreeManager.getPath(task.id);
+      if (existing) {
+        cwd = existing;
+        log.info(`reusing existing worktree for ${task.id} at ${cwd}`);
+      } else {
+        try {
+          cwd = this.worktreeManager.create(task.id);
+          log.info(`created worktree for ${task.id} at ${cwd}`);
+        } catch (err) {
+          log.warn(`worktree creation failed for ${task.id}: ${err.message}, using project dir`);
+        }
+      }
     }
 
     const logPath = join(this.projectPaths.logsDir, `${task.id}.log`);
@@ -280,6 +300,8 @@ export class Orchestrator extends EventEmitter {
       onStageComplete: async (stage, result, attempt) => {
         this.stateManager.completeStage(task.id, result.status, result.summary);
         this.stateManager.persist();
+        // Create/update draft PR after each stage
+        this._createOrUpdatePR(task.id, task.name, stage.stage, result);
       },
     });
 
@@ -290,21 +312,45 @@ export class Orchestrator extends EventEmitter {
     this.stateManager.persist();
     this.updateTask(task.id, { status: finalStatus });
 
-    // Create PR if worktree has changes
-    if (worktreePath && this.worktreeManager.hasChanges(task.id)) {
-      const summary = result.results.map(r => `- ${r.stage}: ${r.summary}`).join('\n');
-      const prUrl = this.worktreeManager.createPR(task.id, task.name, summary);
-      if (prUrl) this.stateManager.setPrUrl(task.id, prUrl);
-      this.stateManager.persist();
-    }
-
-    // Cleanup worktree
-    if (worktreePath) {
-      this.worktreeManager.remove(task.id);
+    // Final PR update — mark as ready for review if done
+    if (finalStatus === 'done') {
+      this._createOrUpdatePR(task.id, task.name, 'complete', { status: 'success', summary: 'All stages passed' });
     }
 
     this.runningTasks.delete(task.id);
     return result;
+  }
+
+  _createOrUpdatePR(taskId, taskName, stageName, result) {
+    if (!this.worktreeManager) return;
+    if (!this.worktreeManager.hasChanges(taskId)) {
+      log.info(`no changes to push for ${taskId} after stage "${stageName}"`);
+      return;
+    }
+
+    try {
+      const task = this.getTask(taskId);
+      const existingPr = task?.pr_url;
+
+      if (existingPr) {
+        // PR already exists — just push new commits
+        log.info(`pushing new commits for ${taskId} (PR exists: ${existingPr})`);
+        this.worktreeManager.push(taskId);
+      } else {
+        // Create draft PR
+        log.info(`creating draft PR for ${taskId} after stage "${stageName}"`);
+        const summary = `Stage: ${stageName}\n\n${result?.summary || ''}`;
+        const prUrl = this.worktreeManager.createDraftPR(taskId, taskName, summary);
+        if (prUrl) {
+          this.updateTask(taskId, { pr_url: prUrl });
+          this.stateManager.setPrUrl(taskId, prUrl);
+          this.stateManager.persist();
+          log.info(`draft PR created: ${prUrl}`);
+        }
+      }
+    } catch (err) {
+      log.error(`PR creation/update failed for ${taskId}: ${err.message}`);
+    }
   }
 
   async startLoop(interval = 5000) {

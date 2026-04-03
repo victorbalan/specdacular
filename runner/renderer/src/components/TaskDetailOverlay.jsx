@@ -113,13 +113,17 @@ export default function TaskDetailOverlay({ task, onClose, onAdvance }) {
             </p>
           )}
 
-          {status?.pr_url && (
-            <a href={status.pr_url} style={{
-              display: 'inline-block', color: colors.accent, fontSize: 13,
-              marginBottom: 16, textDecoration: 'none',
-            }}>
+          {(status?.pr_url || task.pr_url) && (
+            <button
+              onClick={() => window.specd.invoke('open-external', status?.pr_url || task.pr_url)}
+              style={{
+                display: 'inline-block', color: colors.accent, fontSize: 13,
+                marginBottom: 16, background: 'none', border: 'none', cursor: 'pointer',
+                padding: 0, textDecoration: 'underline',
+              }}
+            >
               View Pull Request →
-            </a>
+            </button>
           )}
 
           {currentStatus === 'failed' && (

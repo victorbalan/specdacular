@@ -321,16 +321,16 @@ function TaskCard({ task, action, onClick, onAction, onRefresh }) {
         )}
       </div>
       {task.pr_url && (
-        <a
-          href={task.pr_url}
-          onClick={(e) => e.stopPropagation()}
+        <button
+          onClick={(e) => { e.stopPropagation(); window.specd.invoke('open-external', task.pr_url); }}
           style={{
             display: 'block', marginTop: 4, fontSize: 10, color: colors.accent,
-            textDecoration: 'none',
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            textDecoration: 'underline', textAlign: 'left',
           }}
         >
           PR →
-        </a>
+        </button>
       )}
     </div>
   );

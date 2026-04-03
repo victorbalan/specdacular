@@ -5,6 +5,7 @@ const ALLOWED_CHANNELS = new Set([
   'get-task', 'create-task', 'retry-task', 'get-task-logs', 'get-config',
   'register-project', 'unregister-project',
   'create-idea', 'advance-task', 'toggle-auto-execute', 'get-pipeline-files', 'get-agent-files',
+  'open-external',
 ]);
 
 contextBridge.exposeInMainWorld('specd', {

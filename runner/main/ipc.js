@@ -1,5 +1,5 @@
 // runner/main/ipc.js
-import { ipcMain, dialog } from 'electron';
+import { ipcMain, dialog, shell } from 'electron';
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, basename } from 'path';
 
@@ -116,6 +116,10 @@ export function setupIpc(getContext) {
   ipcMain.handle('get-agent-files', () => {
     const { paths } = getContext();
     return readTemplateDir(paths.agentTemplatesDir);
+  });
+
+  ipcMain.handle('open-external', (event, url) => {
+    shell.openExternal(url);
   });
 
   ipcMain.handle('get-config', () => {

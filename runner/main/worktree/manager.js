@@ -66,6 +66,13 @@ export class WorktreeManager {
     }
   }
 
+  push(taskId) {
+    const worktreePath = this.active.get(taskId);
+    if (!worktreePath) return;
+    const branch = `specd/${taskId}`;
+    execFileSync('git', ['push', '-u', 'origin', branch], { cwd: worktreePath, stdio: 'pipe' });
+  }
+
   createPR(taskId, taskName, summary) {
     const worktreePath = this.active.get(taskId);
     if (!worktreePath) return null;
@@ -81,6 +88,25 @@ export class WorktreeManager {
       return prUrl;
     } catch (err) {
       console.error(`PR creation failed for ${taskId}:`, err.message);
+      return null;
+    }
+  }
+
+  createDraftPR(taskId, taskName, summary) {
+    const worktreePath = this.active.get(taskId);
+    if (!worktreePath) return null;
+
+    const branch = `specd/${taskId}`;
+
+    try {
+      execFileSync('git', ['push', '-u', 'origin', branch], { cwd: worktreePath, stdio: 'pipe' });
+      const prUrl = execFileSync(
+        'gh', ['pr', 'create', '--draft', '--title', taskName, '--body', summary, '--head', branch],
+        { cwd: worktreePath, encoding: 'utf-8' }
+      ).trim();
+      return prUrl;
+    } catch (err) {
+      console.error(`Draft PR creation failed for ${taskId}:`, err.message);
       return null;
     }
   }
