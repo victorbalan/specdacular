@@ -27,46 +27,45 @@ You have FULL access to all Claude Code tools: Read, Write, Edit, Bash, Grep, Gl
 
 You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded automatically.
 
-Your process:
-1. Use the Skill tool with skill: "superpowers:brainstorming" to explore the design space
-   - This will guide you through understanding the problem, proposing approaches, and validating the design
-   - Follow the brainstorming skill's process completely
-2. Use the Skill tool with skill: "superpowers:writing-plans" to write a detailed implementation plan
-   - This will guide you through creating bite-sized, actionable tasks
-   - Follow the writing-plans skill's process completely
-3. The plan MUST be saved to .specd/plans/{{task.id}}-plan.md
-4. Commit: git add .specd/plans/ && git commit -m "docs({{task.id}}): implementation plan for {{task.name}}"
+## Your Process
 
-If the Skill tool is not available, fall back to manual planning:
-- Research the codebase thoroughly (read CLAUDE.md, explore with Grep/Glob/Agent)
-- Propose 2-3 approaches with tradeoffs
-- Write a detailed plan with exact file paths, tasks, and test strategy
-- Save to .specd/plans/{{task.id}}-plan.md and commit
+1. First, research the codebase: read CLAUDE.md, explore with Grep/Glob/Agent to understand the project
+2. Assess complexity:
+   - If the idea is SIMPLE (single file change, small tweak, well-understood): skip brainstorming, write a brief plan directly
+   - If the idea needs DESIGN (multiple files, architecture decisions, unclear approach): use the brainstorming skill first
+3. For complex ideas: Use the Skill tool with skill: "superpowers:brainstorming" to explore the design space
+   - Answer your own clarifying questions using your codebase research
+   - Follow the brainstorming skill's process to produce a spec
+4. Write the implementation plan:
+   - For simple ideas: write a short plan with the specific changes needed
+   - For complex ideas: Use the Skill tool with skill: "superpowers:writing-plans" for a detailed plan
+5. Save the plan to .specd/plans/{{task.id}}-plan.md
+6. Commit: git add .specd/plans/ && git commit -m "docs({{task.id}}): plan for {{task.name}}"
 
 ## CRITICAL RULES
-- You MUST invoke the Skill tool for brainstorming and planning — do not skip this
-- You MUST write the plan file to disk using the Write tool
-- You MUST commit the file with git
-- Research BEFORE planning — read actual code, don't assume
+- Research the codebase FIRST — read actual code, don't assume
+- You MUST write the plan file to disk and commit it
+- For brainstorming: answer your own questions using codebase research (this is non-interactive)
+- Include the spec/design in the plan file if one was produced
 
 ## Real-Time Progress
-Emit progress after each step:
+Emit progress after each major step:
 
 \`\`\`specd-status
 {"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"researching codebase","percent":20,"files_touched":[]}
 \`\`\`
 
 \`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"designing approaches","percent":50,"files_touched":[]}
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"designing solution","percent":50,"files_touched":[]}
 \`\`\`
 
 \`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"writing plan document","percent":80,"files_touched":[".specd/plans/{{task.id}}-plan.md"]}
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"writing plan","percent":80,"files_touched":[".specd/plans/{{task.id}}-plan.md"]}
 \`\`\`
 
 ## When Done
 \`\`\`specd-result
-{"status":"success","summary":"Created implementation plan with N tasks","files_changed":[".specd/plans/{{task.id}}-plan.md"],"issues":[],"next_suggestions":[]}
+{"status":"success","summary":"<brief description of the plan>","files_changed":[".specd/plans/{{task.id}}-plan.md"],"issues":[],"next_suggestions":[]}
 \`\`\``,
   },
   'claude-implementer': {
@@ -230,7 +229,6 @@ const DEFAULT_PIPELINE = {
 const BRAINSTORM_PIPELINE = {
   name: 'brainstorm',
   stages: [
-    { stage: 'research', agent: 'claude-researcher', critical: true },
     { stage: 'brainstorm', agent: 'claude-superpower-planner', critical: true },
   ],
 };
