@@ -1,0 +1,8 @@
+agents:
+  test-agent:
+    cmd: "echo"
+    prompt_flag: ""
+    output_format: json_block
+    system_prompt: |
+      You are working on: {{task.name}} ({{task.id}})
+      Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})

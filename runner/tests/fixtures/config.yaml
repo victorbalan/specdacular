@@ -1,0 +1,12 @@
+server:
+  port: 3700
+
+notifications:
+  telegram:
+    enabled: false
+
+defaults:
+  pipeline: default
+  failure_policy: skip
+  timeout: 3600
+  stuck_timeout: 1800

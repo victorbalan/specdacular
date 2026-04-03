@@ -1,0 +1,6 @@
+name: "Test task"
+status: ready
+priority: 1
+description: "A test task for unit tests"
+depends_on: []
+pipeline: default
