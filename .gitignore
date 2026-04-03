@@ -5,4 +5,6 @@ gsd-reference/
 reference2/
 .claude/
 runner/dashboard/dist/
+runner/renderer/dist/
+runner/release/
 .worktrees/

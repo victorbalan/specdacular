@@ -11,10 +11,6 @@
     "agents",
     "specdacular",
     "hooks",
-    "runner/main",
-    "runner/renderer/dist",
-    "runner/preload.js",
-    "runner/package.json",
     "README.md"
   ],
   "keywords": [
