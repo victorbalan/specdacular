@@ -18,7 +18,7 @@ export default function ProjectView({ projectId, projectName }) {
   return (
     <div style={{ padding: 24, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <h1 style={{ margin: '0 0 16px' }}>{projectName}</h1>
-      <KanbanBoard tasks={tasks} />
+      <KanbanBoard tasks={tasks} projectId={projectId} onRefresh={loadTasks} />
     </div>
   );
 }

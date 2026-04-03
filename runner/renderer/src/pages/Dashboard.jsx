@@ -33,7 +33,7 @@ export default function Dashboard({ projects }) {
   return (
     <div style={{ padding: 24, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <h1 style={{ margin: '0 0 16px' }}>Dashboard</h1>
-      <KanbanBoard tasks={allTasks} />
+      <KanbanBoard tasks={allTasks} projects={projects} onRefresh={loadAllTasks} />
     </div>
   );
 }
