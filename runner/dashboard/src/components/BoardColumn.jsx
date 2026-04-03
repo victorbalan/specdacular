@@ -2,7 +2,7 @@ import { TaskCard } from './TaskCard';
 
 export function BoardColumn({ column, tasks, count }) {
   return (
-    <div className="flex-shrink-0 w-72 flex flex-col h-full">
+    <div className="flex-shrink-0 w-80 min-w-[280px] flex flex-col h-full">
       {/* Column header */}
       <div className="flex items-center justify-between px-3 py-2.5 mb-2">
         <div className="flex items-center gap-2">
