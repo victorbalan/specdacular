@@ -5,12 +5,13 @@ export function resolveTemplate(template, variables) {
   });
 }
 
-export function buildTemplateContext(task, stage, pipeline, paths) {
+export function buildTemplateContext(task, stage, pipeline, paths, previousOutput) {
   return {
     task: { id: task.id, name: task.name, spec: task.spec || '' },
     stage: { name: stage.stage, index: stage.index, total: stage.total },
     pipeline: { name: pipeline.name },
     status_file: paths?.statusJson || '',
     log_dir: paths?.logsDir || '',
+    previous_stage_output: previousOutput || '',
   };
 }

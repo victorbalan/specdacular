@@ -114,11 +114,11 @@ export class Orchestrator extends EventEmitter {
 
     const sequencer = new StageSequencer({
       stages: pipeline.stages,
-      createRunner: (stage) => {
+      createRunner: (stage, previousOutput) => {
         const agentDef = agents[stage.agent];
         if (!agentDef) throw new Error(`Agent not found: ${stage.agent}`);
 
-        const context = buildTemplateContext(task, stage, pipeline, this.projectPaths);
+        const context = buildTemplateContext(task, stage, pipeline, this.projectPaths, previousOutput);
         const resolvedPrompt = resolveTemplate(agentDef.system_prompt || '', context);
 
         const runner = new AgentRunner({

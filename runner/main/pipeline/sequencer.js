@@ -9,13 +9,14 @@ export class StageSequencer {
 
   async run() {
     const results = [];
+    let previousOutput = '';
 
     for (const stage of this.stages) {
       const maxAttempts = 1 + (stage.max_retries || 0);
       let stageResult = null;
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        const runner = this.createRunner(stage);
+        const runner = this.createRunner(stage, previousOutput);
         await this.onStageStart(stage, attempt);
 
         try {
@@ -31,6 +32,7 @@ export class StageSequencer {
       }
 
       results.push({ stage: stage.stage, ...stageResult });
+      previousOutput = stageResult?.summary || '';
 
       if (stageResult.status !== 'success' && stage.critical) {
         return { status: 'failure', results, failedStage: stage.stage };
