@@ -15,9 +15,11 @@ function IconX() {
   );
 }
 
-export default function TaskDetailOverlay({ task, onClose }) {
+export default function TaskDetailOverlay({ task, onClose, onAdvance }) {
   const [status, setStatus] = useState(null);
   const [logs, setLogs] = useState([]);
+  const [showReplan, setShowReplan] = useState(false);
+  const [replanFeedback, setReplanFeedback] = useState('');
   const logRef = useRef(null);
 
   useEffect(() => {
@@ -121,7 +123,7 @@ export default function TaskDetailOverlay({ task, onClose }) {
           )}
 
           {currentStatus === 'failed' && (
-            <button onClick={handleRetry} style={{
+            <button onClick={() => onAdvance?.('retry')} style={{
               padding: '7px 16px', marginBottom: 20, borderRadius: radius.md,
               border: `1px solid ${colors.danger}`, color: colors.danger,
               backgroundColor: colors.surface, cursor: 'pointer', fontSize: 13,
@@ -129,6 +131,71 @@ export default function TaskDetailOverlay({ task, onClose }) {
             }}>
               Retry task
             </button>
+          )}
+
+          {/* Spec viewer for review state */}
+          {currentStatus === 'review' && task.spec && (
+            <div style={{ marginBottom: 20 }}>
+              <h4 style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: colors.text }}>Spec</h4>
+              <div style={{
+                backgroundColor: '#111213', color: '#ced4da', padding: 14, borderRadius: radius.md,
+                fontFamily: "'SF Mono', 'Fira Code', monospace",
+                fontSize: 12, maxHeight: 300, overflow: 'auto', whiteSpace: 'pre-wrap', lineHeight: 1.5,
+              }}>
+                {task.spec}
+              </div>
+            </div>
+          )}
+
+          {/* Approve / Re-plan actions */}
+          {currentStatus === 'review' && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+              <button
+                onClick={() => onAdvance?.('approve')}
+                style={{
+                  padding: '7px 16px', borderRadius: radius.md, border: 'none',
+                  backgroundColor: colors.success, color: '#fff', cursor: 'pointer', fontSize: 13,
+                }}
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => setShowReplan(true)}
+                style={{
+                  padding: '7px 16px', borderRadius: radius.md,
+                  border: `1px solid ${colors.warning}`, backgroundColor: 'transparent',
+                  color: colors.warning, cursor: 'pointer', fontSize: 13,
+                }}
+              >
+                Re-plan
+              </button>
+            </div>
+          )}
+
+          {showReplan && (
+            <div style={{ marginBottom: 20 }}>
+              <textarea
+                value={replanFeedback}
+                onChange={(e) => setReplanFeedback(e.target.value)}
+                placeholder="What should be changed in the plan?"
+                style={{
+                  width: '100%', height: 80, padding: 10, marginBottom: 8,
+                  backgroundColor: colors.bg, color: colors.text,
+                  border: `1px solid ${colors.border}`, borderRadius: radius.md,
+                  fontSize: 13, resize: 'vertical', outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <button
+                onClick={() => { onAdvance?.('re-plan', replanFeedback); setShowReplan(false); setReplanFeedback(''); }}
+                style={{
+                  padding: '7px 16px', borderRadius: radius.md, border: 'none',
+                  backgroundColor: colors.warning, color: '#fff', cursor: 'pointer', fontSize: 13,
+                }}
+              >
+                Send back for re-planning
+              </button>
+            </div>
           )}
 
           {/* Stages */}
@@ -182,6 +249,9 @@ export default function TaskDetailOverlay({ task, onClose }) {
 
 function StatusBadge({ status }) {
   const map = {
+    idea: { bg: colors.surfaceActive, color: '#868e96', label: 'Idea' },
+    planning: { bg: '#2a1a3a', color: '#cc5de8', label: 'Planning' },
+    review: { bg: '#3a3014', color: '#fcc419', label: 'Review' },
     ready: { bg: colors.warningLight, color: colors.warning, label: 'Queued' },
     queued: { bg: colors.warningLight, color: colors.warning, label: 'Queued' },
     in_progress: { bg: colors.accentLight, color: colors.accent, label: 'Running' },
