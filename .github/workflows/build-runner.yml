@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Install runner dependencies
         working-directory: runner
@@ -49,7 +49,6 @@ jobs:
             runner/release/*.AppImage
             runner/release/*.deb
             runner/release/*.exe
-            runner/release/*.nsis
           if-no-files-found: ignore
 
   release:
