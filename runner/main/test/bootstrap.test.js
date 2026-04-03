@@ -42,6 +42,13 @@ describe('bootstrap', () => {
 
     // Default pipeline template exists
     a.ok(existsSync(join(paths.pipelineTemplatesDir, 'default.json')));
+
+    // Brainstorm agents
+    a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-researcher.json')));
+    a.ok(existsSync(join(paths.agentTemplatesDir, 'claude-brainstormer.json')));
+
+    // Brainstorm pipeline
+    a.ok(existsSync(join(paths.pipelineTemplatesDir, 'brainstorm.json')));
   });
 
   it('does not overwrite existing files on second run', async () => {

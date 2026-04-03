@@ -26,6 +26,18 @@ const DEFAULT_AGENTS = {
     output_format: 'stream_json',
     system_prompt: 'You are an implementer working on: {{task.name}} ({{task.id}})\nPipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})\n\nImplement the plan from the previous stage. Write clean, tested code.\n\nEmit progress:\n```specd-status\n{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"...","percent":0}\n```\n\nWhen done:\n```specd-result\n{"status":"success","summary":"...","files_changed":[],"issues":[]}\n```',
   },
+  'claude-researcher': {
+    cmd: 'claude -p --dangerously-skip-permissions',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: 'You are a codebase researcher investigating: {{task.name}} ({{task.id}})\nPipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})\n\nExplore the codebase thoroughly to understand the context for this idea. Read relevant files, check architecture, understand patterns.\n\nProduce a structured research summary covering:\n- Relevant existing code and patterns\n- Dependencies and constraints\n- Potential approaches\n- Risks or concerns\n\nEmit progress:\n```specd-status\n{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"...","percent":0}\n```\n\nWhen done:\n```specd-result\n{"status":"success","summary":"...","files_changed":[],"issues":[]}\n```',
+  },
+  'claude-brainstormer': {
+    cmd: 'claude -p --dangerously-skip-permissions',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: 'You are a design brainstormer working on: {{task.name}} ({{task.id}})\nPipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})\n\nPrevious stage research:\n{{previous_stage_output}}\n\nBased on the research above, design a solution for this idea. Consider multiple approaches, pick the best one, and write a complete spec covering:\n- Architecture and components\n- Data flow\n- Key implementation details\n- Testing strategy\n\nWrite the spec as a clear, actionable document that an engineer can implement from.\n\nEmit progress:\n```specd-status\n{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"...","percent":0}\n```\n\nWhen done, include the full spec in your summary:\n```specd-result\n{"status":"success","summary":"<full spec content>","files_changed":[],"issues":[]}\n```',
+  },
   'claude-reviewer': {
     cmd: 'claude -p --dangerously-skip-permissions',
     input_mode: 'stdin',
@@ -40,6 +52,14 @@ const DEFAULT_PIPELINE = {
     { stage: 'plan', agent: 'claude-planner', critical: true },
     { stage: 'implement', agent: 'claude-implementer', critical: true },
     { stage: 'review', agent: 'claude-reviewer', on_fail: 'retry', max_retries: 2 },
+  ],
+};
+
+const BRAINSTORM_PIPELINE = {
+  name: 'brainstorm',
+  stages: [
+    { stage: 'research', agent: 'claude-researcher', critical: true },
+    { stage: 'brainstorm', agent: 'claude-brainstormer', critical: true },
   ],
 };
 
@@ -66,4 +86,5 @@ export async function bootstrap(paths) {
 
   // Write default pipeline template
   writeIfMissing(join(paths.pipelineTemplatesDir, 'default.json'), DEFAULT_PIPELINE);
+  writeIfMissing(join(paths.pipelineTemplatesDir, 'brainstorm.json'), BRAINSTORM_PIPELINE);
 }
