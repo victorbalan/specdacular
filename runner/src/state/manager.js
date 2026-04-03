@@ -24,8 +24,16 @@ class StateManager extends EventEmitter {
       current_stage: null,
       pipeline,
       stages: [],
+      pr_url: null,
     };
     this._emit('task_registered', { taskId, name });
+  }
+
+  setPrUrl(taskId, prUrl) {
+    if (this.state.tasks[taskId]) {
+      this.state.tasks[taskId].pr_url = prUrl;
+      this._emit('pr_created', { taskId, prUrl });
+    }
   }
 
   updateTaskStatus(taskId, status) {

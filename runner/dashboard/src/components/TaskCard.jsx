@@ -50,6 +50,17 @@ export function TaskCard({ id, task }) {
 
       {expanded && (
         <div className="mt-3">
+          {task.pr_url && (
+            <a
+              href={task.pr_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 mb-3 transition-colors"
+            >
+              PR: {task.pr_url.split('/').pop()}
+            </a>
+          )}
+
           {task.stages && task.stages.length > 0 && (
             <StageTimeline stages={task.stages} />
           )}

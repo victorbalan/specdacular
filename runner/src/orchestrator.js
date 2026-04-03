@@ -216,6 +216,88 @@ class Orchestrator {
     fs.appendFileSync(logFile, line + '\n');
   }
 
+  /**
+   * Create a PR for a task's worktree branch and record the URL.
+   * Called after task success, and also by the periodic sweep.
+   */
+  async _createPRForTask(taskId, taskName, summary, cwd) {
+    // Skip if PR already exists for this task
+    const taskState = this.stateManager.getState().tasks[taskId];
+    if (taskState?.pr_url) return taskState.pr_url;
+
+    // Check if the task YAML already has a pr_url
+    const taskFile = path.join(this.tasksDir, `${taskId}.yaml`);
+    if (fs.existsSync(taskFile)) {
+      const yaml = require('js-yaml');
+      const data = yaml.load(fs.readFileSync(taskFile, 'utf8'));
+      if (data.pr_url) {
+        // Already has a PR — record it in state
+        this.stateManager.setPrUrl(taskId, data.pr_url);
+        this.stateManager.persist();
+        return data.pr_url;
+      }
+    }
+
+    if (!this.worktreeManager) return null;
+
+    // The worktree might already be cleaned up. Check if the branch exists.
+    const branchName = `specd/${taskId}`;
+    try {
+      const { execSync } = require('child_process');
+      const repoRoot = this._findGitRoot();
+      execSync(`git rev-parse --verify "${branchName}"`, { cwd: repoRoot, stdio: 'pipe' });
+    } catch (e) {
+      // Branch doesn't exist — nothing to PR
+      return null;
+    }
+
+    const prUrl = await this.worktreeManager.createPR(taskId, taskName, summary);
+    if (prUrl) {
+      // Save to state
+      this.stateManager.setPrUrl(taskId, prUrl);
+      this.stateManager.persist();
+
+      // Save to task YAML
+      this._writePrUrlToYaml(taskId, prUrl);
+
+      this._appendLog(taskId, `\n--- PR Created: ${prUrl} ---\n`);
+      console.log(`[${taskId}] PR: ${prUrl}`);
+    }
+    return prUrl;
+  }
+
+  /**
+   * Write the PR URL back into the task YAML file.
+   */
+  _writePrUrlToYaml(taskId, prUrl) {
+    const taskFile = path.join(this.tasksDir, `${taskId}.yaml`);
+    if (!fs.existsSync(taskFile)) return;
+    try {
+      const yaml = require('js-yaml');
+      const data = yaml.load(fs.readFileSync(taskFile, 'utf8'));
+      data.pr_url = prUrl;
+      data.status = 'done';
+      fs.writeFileSync(taskFile, yaml.dump(data));
+    } catch (e) {
+      console.error(`[${taskId}] Failed to write PR URL to YAML: ${e.message}`);
+    }
+  }
+
+  /**
+   * Sweep all done tasks and create PRs for any that are missing one.
+   */
+  async sweepPRs() {
+    const state = this.stateManager.getState();
+    for (const [taskId, task] of Object.entries(state.tasks)) {
+      if (task.status === 'done' && !task.pr_url) {
+        console.log(`[${taskId}] Sweep: creating missing PR...`);
+        const summary = task.stages
+          ?.map(s => s.summary).filter(Boolean).join('\n- ') || '';
+        await this._createPRForTask(taskId, task.name, summary, null);
+      }
+    }
+  }
+
   async runOnce() {
     const loader = new ConfigLoader(this.configDir);
     this.tasks = await loader.loadTasks();
@@ -240,7 +322,18 @@ class Orchestrator {
 
     await this.taskWatcher.watch();
 
+    // Run PR sweep on startup to catch any done tasks missing PRs
+    await this.sweepPRs();
+
+    let lastSweep = Date.now();
+    const sweepInterval = 60000; // sweep every 60s
+
     while (this.running) {
+      // Periodic PR sweep
+      if (Date.now() - lastSweep > sweepInterval) {
+        await this.sweepPRs();
+        lastSweep = Date.now();
+      }
       const loader = new ConfigLoader(this.configDir);
       this.tasks = await loader.loadTasks();
 
@@ -273,14 +366,11 @@ class Orchestrator {
           try {
             const result = await this.runTask(task, cwd);
 
-            // Create PR if task succeeded and we used a worktree
-            if (result.status === 'success' && this.worktreeManager && cwd) {
+            // Create PR if task succeeded
+            if (result.status === 'success') {
               const summary = result.results
                 ?.map(r => r.result?.summary).filter(Boolean).join('\n- ') || '';
-              const prUrl = await this.worktreeManager.createPR(task.id, task.name, summary);
-              if (prUrl) {
-                this._appendLog(task.id, `\n--- PR Created: ${prUrl} ---\n`);
-              }
+              await this._createPRForTask(task.id, task.name, summary, cwd);
             }
           } finally {
             this.runningTasks.delete(task.id);

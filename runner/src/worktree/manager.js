@@ -36,7 +36,7 @@ class WorktreeManager {
     return worktreePath;
   }
 
-  async remove(taskId) {
+  async remove(taskId, deleteBranch = false) {
     const worktreePath = this.active.get(taskId);
     if (!worktreePath) return;
 
@@ -49,10 +49,14 @@ class WorktreeManager {
       execSync('git worktree prune', { cwd: this.repoDir, stdio: 'pipe' });
     }
 
-    const branchName = `specd/${taskId}`;
-    try {
-      execSync(`git branch -D "${branchName}"`, { cwd: this.repoDir, stdio: 'pipe' });
-    } catch (e) { /* branch may have been merged/deleted */ }
+    // Only delete the branch if explicitly asked (after PR is merged)
+    // Keep the branch alive so the PR sweep can still push/create PRs
+    if (deleteBranch) {
+      const branchName = `specd/${taskId}`;
+      try {
+        execSync(`git branch -D "${branchName}"`, { cwd: this.repoDir, stdio: 'pipe' });
+      } catch (e) { /* branch may have been merged/deleted */ }
+    }
 
     this.active.delete(taskId);
   }
