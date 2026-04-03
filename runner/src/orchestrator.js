@@ -40,12 +40,59 @@ class Orchestrator {
       fs.mkdirSync(this.logsDir, { recursive: true });
     }
 
+    // Restore completed tasks from status.json (survives restarts)
+    this._restoreState();
+
+    // Also mark tasks as done in YAML if status.json says they're done
+    // (handles case where orchestrator crashed before updating YAML)
+    this._syncTaskYamlStatuses();
+
     const maxParallel = this.config.defaults.max_parallel || 1;
     if (maxParallel > 1) {
       const repoRoot = this._findGitRoot();
       if (repoRoot) {
         this.worktreeManager = new WorktreeManager(repoRoot);
       }
+    }
+  }
+
+  _restoreState() {
+    if (!fs.existsSync(this.statusPath)) return;
+
+    try {
+      const saved = JSON.parse(fs.readFileSync(this.statusPath, 'utf8'));
+      // Restore completed tasks set
+      for (const [taskId, task] of Object.entries(saved.tasks || {})) {
+        if (task.status === 'done') {
+          this.completedTasks.add(taskId);
+        }
+      }
+      // Restore the full state so dashboard shows history
+      this.stateManager.state = saved;
+      this.stateManager.state.started_at = new Date().toISOString();
+
+      const completed = this.completedTasks.size;
+      if (completed > 0) {
+        console.log(`Restored ${completed} completed task(s) from previous run.`);
+      }
+    } catch (e) {
+      console.error(`Failed to restore state: ${e.message}`);
+    }
+  }
+
+  _syncTaskYamlStatuses() {
+    const yaml = require('js-yaml');
+    for (const taskId of this.completedTasks) {
+      const taskFile = path.join(this.tasksDir, `${taskId}.yaml`);
+      if (!fs.existsSync(taskFile)) continue;
+      try {
+        const data = yaml.load(fs.readFileSync(taskFile, 'utf8'));
+        if (data.status === 'ready' || data.status === 'in_progress') {
+          data.status = 'done';
+          fs.writeFileSync(taskFile, yaml.dump(data));
+          console.log(`[${taskId}] Updated YAML status to done`);
+        }
+      } catch (e) { /* ignore parse errors */ }
     }
   }
 
@@ -58,17 +105,19 @@ class Orchestrator {
     return null;
   }
 
+  _isPickable(task, excludeSet) {
+    // Only pick tasks with status: ready
+    if (task.status !== 'ready') return false;
+    if (this.completedTasks.has(task.id)) return false;
+    if (excludeSet.has(task.id)) return false;
+    const deps = task.depends_on || [];
+    return deps.every(dep => this.completedTasks.has(dep));
+  }
+
   pickNextTask() {
     const ready = this.tasks
-      .filter(t => t.status === 'ready')
-      .filter(t => !this.completedTasks.has(t.id))
-      .filter(t => !this.runningTasks.has(t.id))
-      .filter(t => {
-        const deps = t.depends_on || [];
-        return deps.every(dep => this.completedTasks.has(dep));
-      })
+      .filter(t => this._isPickable(t, this.runningTasks))
       .sort((a, b) => (a.priority || 99) - (b.priority || 99));
-
     return ready[0] || null;
   }
 
@@ -77,13 +126,7 @@ class Orchestrator {
     const tempRunning = new Set(this.runningTasks);
     for (let i = 0; i < count; i++) {
       const ready = this.tasks
-        .filter(t => t.status === 'ready')
-        .filter(t => !this.completedTasks.has(t.id))
-        .filter(t => !tempRunning.has(t.id))
-        .filter(t => {
-          const deps = t.depends_on || [];
-          return deps.every(dep => this.completedTasks.has(dep));
-        })
+        .filter(t => this._isPickable(t, tempRunning))
         .sort((a, b) => (a.priority || 99) - (b.priority || 99));
       if (ready[0]) {
         tasks.push(ready[0]);
@@ -186,6 +229,9 @@ class Orchestrator {
       this.completedTasks.add(task.id);
     }
 
+    // Update the task YAML file status so it won't be re-picked on restart
+    this._updateTaskYamlStatus(task.id, finalStatus);
+
     return result;
   }
 
@@ -209,6 +255,19 @@ class Orchestrator {
       on: () => {},
       kill: () => {},
     };
+  }
+
+  _updateTaskYamlStatus(taskId, status) {
+    const taskFile = path.join(this.tasksDir, `${taskId}.yaml`);
+    if (!fs.existsSync(taskFile)) return;
+    try {
+      const yaml = require('js-yaml');
+      const data = yaml.load(fs.readFileSync(taskFile, 'utf8'));
+      data.status = status;
+      fs.writeFileSync(taskFile, yaml.dump(data));
+    } catch (e) {
+      console.error(`[${taskId}] Failed to update YAML status: ${e.message}`);
+    }
   }
 
   _appendLog(taskId, line) {
