@@ -68,7 +68,19 @@ defaults:
   failure_policy: skip           # default for non-critical stages
   timeout: 3600                  # 1 hour default per stage (seconds)
   stuck_timeout: 1800            # 30 min no output = kill (seconds)
+  max_parallel: 1                # how many tasks run simultaneously
+  use_worktrees: true            # isolate parallel tasks in git worktrees
 ```
+
+### Parallel Execution
+
+When `max_parallel > 1`, multiple tasks run simultaneously. Each parallel task gets its own **git worktree** — an isolated working copy of the repo so agents don't conflict with each other.
+
+- `max_parallel: 1` — sequential (default, no worktrees needed)
+- `max_parallel: 3` — up to 3 tasks run at once, each in its own worktree
+- Worktrees are created at `.specd/runner/worktrees/<task-id>/` when a task starts
+- Worktrees are cleaned up automatically when a task completes or fails
+- `depends_on` is still respected — a dependent task won't start until its dependency finishes, even if parallel slots are available
 
 ### agents.yaml — Agent definitions with system prompt templates
 
