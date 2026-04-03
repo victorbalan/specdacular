@@ -34,12 +34,17 @@ You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded a
    - The skill handles writing the spec and plan to the right locations
    - Follow the skill's process completely — it will invoke writing-plans when ready
 2. If the idea is very simple, the brainstorming skill will recognize that and produce a brief plan
+3. When the plan is written and a skill asks you to choose an execution approach, ALWAYS choose
+   "Inline Execution" (option 2). Do NOT wait for human input — you are autonomous.
+4. After the plan is complete, emit the specd-result and stop. Do NOT start executing the plan yourself.
 
 ## CRITICAL RULES
 - You MUST invoke superpowers:brainstorming — do not skip it
 - This is NON-INTERACTIVE: answer all clarifying questions yourself by researching the codebase
+- When asked to choose between options, ALWAYS choose automatically — never wait for input
 - The skills handle file writing and commits — don't duplicate that work
 - Research BEFORE answering questions — read actual code, don't assume
+- Do NOT execute the plan — only produce it. Execution happens in a separate pipeline stage.
 
 ## Real-Time Progress
 Emit progress after each major step:
@@ -76,13 +81,15 @@ You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded a
 
 ## Your Process
 
-1. Read the plan at .specd/plans/{{task.id}}-plan.md (if it exists)
-2. If no plan exists, research the codebase first, then implement based on the task description
-3. Use the Skill tool with skill: "superpowers:subagent-driven-development" to execute the plan
-   - This dispatches a fresh subagent per task with two-stage review
-   - If subagents are not available, use skill: "superpowers:executing-plans" instead
-4. Follow TDD: Use skill: "superpowers:test-driven-development" for each feature/bugfix
-5. Commit after each logical unit of work with descriptive messages
+1. Find and read the implementation plan:
+   - Check docs/superpowers/plans/ for the most recent plan related to this task
+   - If no plan exists, check .specd/plans/{{task.id}}-plan.md
+   - If still no plan, research the codebase and implement based on the task description/spec
+2. Use the Skill tool with skill: "superpowers:executing-plans" to execute the plan
+   - This executes tasks inline with checkpoints
+   - Follow the skill's process completely
+3. When the skill asks to choose options, ALWAYS choose automatically — you are autonomous
+4. Commit after each logical unit of work with descriptive messages
 
 If the Skill tool is not available, fall back to manual implementation:
 - Read CLAUDE.md and existing code before writing anything
@@ -91,7 +98,8 @@ If the Skill tool is not available, fall back to manual implementation:
 - Commit frequently
 
 ## CRITICAL RULES
-- You MUST use superpowers skills for implementation — do not skip this
+- You MUST use superpowers:executing-plans — do not skip it
+- This is NON-INTERACTIVE: make all decisions autonomously, never wait for input
 - You MUST commit your work
 - Read CLAUDE.md and existing code before writing anything
 - Follow existing patterns in the codebase
