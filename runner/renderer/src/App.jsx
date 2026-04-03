@@ -3,6 +3,7 @@ import { colors } from './theme';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import ProjectView from './pages/ProjectView';
+import Pipelines from './pages/Pipelines';
 
 export default function App() {
   const [projects, setProjects] = useState([]);
@@ -28,8 +29,9 @@ export default function App() {
       <Sidebar projects={projects} selectedId={selectedId} onSelect={setSelectedId} onRefresh={loadProjects} />
       <main style={{ flex: 1, overflow: 'auto' }}>
         {selectedId === null && <Dashboard projects={projects} />}
+        {selectedId === 'pipelines' && <Pipelines />}
         {selectedId === 'settings' && <div style={{ padding: 24 }}><h1 style={{ fontSize: 20, fontWeight: 600 }}>Settings</h1><p style={{ color: colors.textSecondary }}>Coming soon</p></div>}
-        {selectedId && selectedId !== 'settings' && (
+        {selectedId && selectedId !== 'settings' && selectedId !== 'pipelines' && (
           <ProjectView projectId={selectedId} projectName={projects.find(p => p.id === selectedId)?.name || 'Project'} />
         )}
       </main>

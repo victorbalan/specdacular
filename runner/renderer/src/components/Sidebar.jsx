@@ -132,6 +132,10 @@ export default function Sidebar({ projects, selectedId, onSelect, onRefresh }) {
       ))}
 
       <div style={{ marginTop: 'auto', paddingTop: 12 }}>
+        <div style={{ height: 1, backgroundColor: colors.sidebarHover, margin: '0 0 8px' }} />
+        <button onClick={() => onSelect('pipelines')} style={navItem(selectedId === 'pipelines')}>
+          Pipelines
+        </button>
         <button onClick={() => onSelect('settings')} style={navItem(selectedId === 'settings')}>
           Settings
         </button>
