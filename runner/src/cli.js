@@ -213,4 +213,130 @@ program
     process.on('SIGTERM', () => { vite.kill(); process.exit(0); });
   });
 
+// ─── specd-runner init ────────────────────────────────────────────
+program
+  .command('init')
+  .description('Initialize .specd/runner/ config in current project')
+  .option('-d, --dir <dir>', 'Project directory', process.cwd())
+  .action((opts) => {
+    const repoPath = path.resolve(opts.dir);
+    const configDir = path.join(repoPath, '.specd', 'runner');
+    const tasksDir = path.join(configDir, 'tasks');
+
+    if (fs.existsSync(path.join(configDir, 'config.yaml'))) {
+      console.log(`Already initialized: ${configDir}`);
+      console.log('Use "specd-runner register" to register this project with the daemon.');
+      return;
+    }
+
+    fs.mkdirSync(tasksDir, { recursive: true });
+
+    fs.writeFileSync(path.join(configDir, 'config.yaml'), `server:
+  port: 3700
+
+notifications:
+  telegram:
+    enabled: false
+
+defaults:
+  pipeline: default
+  failure_policy: skip
+  timeout: 3600
+  stuck_timeout: 1800
+  max_parallel: 1
+`);
+
+    fs.writeFileSync(path.join(configDir, 'agents.yaml'), `agents:
+  claude-planner:
+    cmd: "claude -p --dangerously-skip-permissions"
+    input_mode: stdin
+    output_format: json_block
+    system_prompt: |
+      You are a feature planner working on: {{task.name}} ({{task.id}})
+      Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+      Research the codebase, then create a detailed implementation plan.
+      Write the plan to .specd/plans/{{task.id}}-plan.md and commit it.
+
+      Emit progress:
+      \\\`\\\`\\\`specd-status
+      {"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"...","percent":0,"files_touched":[]}
+      \\\`\\\`\\\`
+
+      When done:
+      \\\`\\\`\\\`specd-result
+      {"status":"success","summary":"...","files_changed":[],"issues":[],"next_suggestions":[]}
+      \\\`\\\`\\\`
+
+  claude-implementer:
+    cmd: "claude -p --dangerously-skip-permissions"
+    input_mode: stdin
+    output_format: json_block
+    system_prompt: |
+      You are implementing: {{task.name}} ({{task.id}})
+      Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+      Follow the plan. Write clean code. Commit your work with git.
+
+      Emit progress and result blocks as above.
+
+  claude-reviewer:
+    cmd: "claude -p --dangerously-skip-permissions"
+    input_mode: stdin
+    output_format: json_block
+    system_prompt: |
+      You are reviewing: {{task.name}} ({{task.id}})
+      Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+      Review the implementation. Write review to .specd/reviews/{{task.id}}-review.md.
+      Set status to failure if critical issues found.
+
+      Emit progress and result blocks as above.
+`);
+
+    fs.writeFileSync(path.join(configDir, 'pipelines.yaml'), `pipelines:
+  default:
+    stages:
+      - stage: plan
+        agent: claude-planner
+        critical: true
+      - stage: implement
+        agent: claude-implementer
+        critical: true
+      - stage: review
+        agent: claude-reviewer
+        on_fail: retry
+        max_retries: 2
+
+  quick-implement:
+    stages:
+      - stage: implement
+        agent: claude-implementer
+        critical: true
+
+  plan-only:
+    stages:
+      - stage: plan
+        agent: claude-planner
+        critical: true
+`);
+
+    fs.writeFileSync(path.join(configDir, '.gitignore'), `status.json
+logs/
+`);
+
+    console.log(`Initialized: ${configDir}`);
+    console.log(`\nCreated:`);
+    console.log(`  config.yaml     — settings (timeouts, parallel, notifications)`);
+    console.log(`  agents.yaml     — agent definitions with system prompts`);
+    console.log(`  pipelines.yaml  — pipeline definitions (default, quick-implement, plan-only)`);
+    console.log(`  tasks/          — drop task YAML files here`);
+    console.log(`  .gitignore      — excludes runtime files`);
+    console.log(`\nNext steps:`);
+    console.log(`  1. Edit agents.yaml to customize for your project`);
+    console.log(`  2. Create a task: .specd/runner/tasks/001-my-feature.yaml`);
+    console.log(`  3. Register:  specd-runner register`);
+    console.log(`  4. Start:     specd-runner start`);
+  });
+
 program.parse();
