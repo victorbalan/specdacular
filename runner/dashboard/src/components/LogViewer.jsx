@@ -7,12 +7,10 @@ export function LogViewer({ taskId, project }) {
   const isNearBottomRef = useRef(true);
   const prevLineCountRef = useRef(0);
 
-  // Track if user is scrolled near the bottom
   const handleScroll = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
-    const threshold = 50;
-    isNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    isNearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
   }, []);
 
   useEffect(() => {
@@ -22,7 +20,6 @@ export function LogViewer({ taskId, project }) {
         const res = await fetch(`/api/projects/${project}/tasks/${taskId}/logs?tail=500`);
         const data = await res.json();
         const newLines = data.lines || [];
-        // Only update state if lines actually changed
         if (newLines.length !== prevLineCountRef.current) {
           prevLineCountRef.current = newLines.length;
           setLines(newLines);
@@ -36,32 +33,41 @@ export function LogViewer({ taskId, project }) {
     fetchLogs();
     interval = setInterval(fetchLogs, 1500);
     return () => clearInterval(interval);
-  }, [taskId]);
+  }, [taskId, project]);
 
-  // Only auto-scroll if user was already at the bottom
   useEffect(() => {
     if (isNearBottomRef.current && containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [lines]);
 
-  if (loading) return <p className="text-gray-500 text-sm">Loading logs...</p>;
-  if (lines.length === 0) return <p className="text-gray-500 text-sm">No logs yet. Waiting for agent output...</p>;
+  if (loading) return (
+    <p className="text-zinc-600 text-[10px] mt-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+      loading...
+    </p>
+  );
+
+  if (lines.length === 0) return (
+    <p className="text-zinc-600 text-[10px] mt-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+      waiting for output...
+    </p>
+  );
 
   return (
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="bg-gray-900 rounded p-3 mt-3 max-h-96 overflow-y-auto font-mono text-xs leading-relaxed"
+      className="bg-zinc-950 rounded border border-zinc-800/40 p-2 mt-2 max-h-48 overflow-y-auto"
+      style={{ fontFamily: "'JetBrains Mono', monospace" }}
     >
       {lines.map((line, i) => (
         <div
           key={i}
-          className={
-            line.startsWith('--- Stage:') ? 'text-blue-400 font-bold mt-2 mb-1' :
-            line.startsWith('[stderr]') ? 'text-red-400' :
-            'text-gray-300 whitespace-pre-wrap'
-          }
+          className={`text-[10px] leading-relaxed ${
+            line.startsWith('--- Stage:') ? 'text-sky-400 font-medium mt-1.5 mb-0.5' :
+            line.startsWith('[stderr]') ? 'text-red-400/70' :
+            'text-zinc-500 whitespace-pre-wrap'
+          }`}
         >
           {line}
         </div>
