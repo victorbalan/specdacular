@@ -25,6 +25,7 @@ export class Orchestrator extends EventEmitter {
     this.running = false;
     this.runningTasks = new Set();
     this.worktreeManager = null;
+    this.activeRunners = new Set();
   }
 
   init() {
@@ -42,14 +43,18 @@ export class Orchestrator extends EventEmitter {
       log.info(`worktree manager initialized for ${this.projectPath}`);
     }
 
-    // Reset stuck tasks from previous run
+    // Resume or reset tasks from previous run
     for (const task of this.getTasks()) {
-      if (task.status === 'in_progress') {
-        log.warn(`resetting stuck task ${task.id} (was in_progress) → ready`);
-        this.updateTask(task.id, { status: 'ready' });
-      } else if (task.status === 'planning') {
-        log.warn(`resetting stuck task ${task.id} (was planning) → idea`);
-        this.updateTask(task.id, { status: 'idea' });
+      if (task.status === 'in_progress' || task.status === 'planning') {
+        const completedStages = this.stateManager.getCompletedStages(task.id);
+        if (completedStages.length > 0) {
+          log.info(`resuming task ${task.id}: "${task.name}" (${completedStages.length} stages completed)`);
+          this._resumeTask(task, completedStages);
+        } else {
+          const resetStatus = task.status === 'planning' ? 'idea' : 'ready';
+          log.warn(`resetting task ${task.id} (no completed stages) → ${resetStatus}`);
+          this.updateTask(task.id, { status: resetStatus });
+        }
       }
     }
 
@@ -123,7 +128,7 @@ export class Orchestrator extends EventEmitter {
         this.updateTask(taskId, { status: 'planning' });
       }
 
-      this._runBrainstormPipeline(task).catch(err => {
+      this._runBrainstormPipeline(task, []).catch(err => {
         console.error(`Brainstorm failed for ${taskId}:`, err);
         this.updateTask(taskId, { status: 'failed', failed_pipeline: 'brainstorm' });
         this.stateManager.updateTaskStatus(taskId, 'failed');
@@ -142,7 +147,7 @@ export class Orchestrator extends EventEmitter {
       const updatedFeedback = [task.feedback, feedback].filter(Boolean).join('\n\n---\n\n');
       this.updateTask(taskId, { status: 'planning', feedback: updatedFeedback });
 
-      this._runBrainstormPipeline({ ...task, feedback: updatedFeedback }).catch(err => {
+      this._runBrainstormPipeline({ ...task, feedback: updatedFeedback }, []).catch(err => {
         console.error(`Re-plan failed for ${taskId}:`, err);
         this.updateTask(taskId, { status: 'failed', failed_pipeline: 'brainstorm' });
         this.stateManager.updateTaskStatus(taskId, 'failed');
@@ -161,7 +166,7 @@ export class Orchestrator extends EventEmitter {
     return null;
   }
 
-  async _runBrainstormPipeline(task) {
+  async _runBrainstormPipeline(task, completedStages) {
     log.info(`starting brainstorm pipeline for ${task.id}: "${task.name}"`);
     const agents = this.templateManager.getAgents(this.projectId);
     const pipelines = this.templateManager.getPipelines(this.projectId);
@@ -169,6 +174,7 @@ export class Orchestrator extends EventEmitter {
 
     this.stateManager.registerTask(task.id, { name: task.name, pipeline: 'brainstorm' });
     this.stateManager.updateTaskStatus(task.id, 'planning');
+    this.updateTask(task.id, { last_pipeline: 'brainstorm' });
 
     const prompt = [task.name, task.description, task.feedback].filter(Boolean).join('\n\n');
     const logPath = join(this.projectPaths.logsDir, `${task.id}.log`);
@@ -186,6 +192,7 @@ export class Orchestrator extends EventEmitter {
 
     const sequencer = new StageSequencer({
       stages: pipeline.stages,
+      completedStages: completedStages || [],
       createRunner: (stage, previousOutput) => {
         const agentDef = agents[stage.agent];
         if (!agentDef) throw new Error(`Agent not found: ${stage.agent}`);
@@ -203,7 +210,14 @@ export class Orchestrator extends EventEmitter {
         runner.on('status', (s) => this.stateManager.updateLiveProgress(task.id, s));
         runner.on('output', () => this.stateManager.persist());
 
-        return { run: () => runner.run(prompt, { cwd, logPath }) };
+        this.activeRunners.add(runner);
+        return {
+          run: () => {
+            const p = runner.run(prompt, { cwd, logPath });
+            p.finally(() => this.activeRunners.delete(runner));
+            return p;
+          }
+        };
       },
       onStageStart: async (stage, attempt) => {
         this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
@@ -259,10 +273,16 @@ export class Orchestrator extends EventEmitter {
     log.info(`  pipeline: ${pipelineName}`);
     const pipeline = resolvePipeline(pipelineName, pipelines, task.stage_overrides, this.config.defaults);
 
+    const completedStages = task.completed_stages || [];
+    if (completedStages.length > 0) {
+      log.info(`resuming task ${task.id} with ${completedStages.length} completed stages`);
+      this.updateTask(task.id, { completed_stages: null });
+    }
+
     this.runningTasks.add(task.id);
     this.stateManager.registerTask(task.id, { name: task.name, pipeline: pipelineName });
     this.stateManager.updateTaskStatus(task.id, 'in_progress');
-    this.updateTask(task.id, { status: 'in_progress' });
+    this.updateTask(task.id, { status: 'in_progress', last_pipeline: pipelineName });
 
     // Create worktree — reuse existing one if brainstorm already created it
     let cwd = this.projectPath;
@@ -285,6 +305,7 @@ export class Orchestrator extends EventEmitter {
 
     const sequencer = new StageSequencer({
       stages: pipeline.stages,
+      completedStages,
       createRunner: (stage, previousOutput) => {
         const agentDef = agents[stage.agent];
         if (!agentDef) throw new Error(`Agent not found: ${stage.agent}`);
@@ -302,7 +323,14 @@ export class Orchestrator extends EventEmitter {
         runner.on('status', (s) => this.stateManager.updateLiveProgress(task.id, s));
         runner.on('output', () => this.stateManager.persist());
 
-        return { run: () => runner.run(task.spec || task.description || task.name, { cwd, logPath }) };
+        this.activeRunners.add(runner);
+        return {
+          run: () => {
+            const p = runner.run(task.spec || task.description || task.name, { cwd, logPath });
+            p.finally(() => this.activeRunners.delete(runner));
+            return p;
+          }
+        };
       },
       onStageStart: async (stage, attempt) => {
         this.stateManager.startStage(task.id, { stage: stage.stage, agent: stage.agent });
@@ -364,6 +392,22 @@ export class Orchestrator extends EventEmitter {
     }
   }
 
+  _resumeTask(task, completedStages) {
+    const pipelineName = task.last_pipeline || (task.status === 'planning' ? 'brainstorm' : 'default');
+
+    if (pipelineName === 'brainstorm') {
+      this._runBrainstormPipeline(task, completedStages).catch(err => {
+        log.error(`resume brainstorm failed for ${task.id}: ${err}`);
+        this.updateTask(task.id, { status: 'failed', failed_pipeline: 'brainstorm' });
+        this.stateManager.updateTaskStatus(task.id, 'failed');
+        this.stateManager.persist();
+      });
+    } else {
+      // Save completed stages on task so runTask can use them
+      this.updateTask(task.id, { status: 'ready', completed_stages: completedStages.map(s => ({ stage: s.stage, summary: s.summary, status: s.status })) });
+    }
+  }
+
   async startLoop(interval = 5000) {
     this.running = true;
 
@@ -386,5 +430,12 @@ export class Orchestrator extends EventEmitter {
 
   stop() {
     this.running = false;
+  }
+
+  killRunningAgents() {
+    log.info(`killing ${this.activeRunners.size} running agents`);
+    for (const runner of this.activeRunners) {
+      runner.kill();
+    }
   }
 }
