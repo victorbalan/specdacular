@@ -4,8 +4,9 @@ import { createLogger } from '../logger.js';
 const log = createLogger('pipeline', '\x1b[33m');
 
 export class StageSequencer {
-  constructor({ stages, createRunner, onStageStart, onStageComplete }) {
+  constructor({ stages, completedStages, createRunner, onStageStart, onStageComplete }) {
     this.stages = stages;
+    this.completedStages = completedStages || [];
     this.createRunner = createRunner;
     this.onStageStart = onStageStart;
     this.onStageComplete = onStageComplete;
@@ -16,6 +17,15 @@ export class StageSequencer {
     let previousOutput = '';
 
     for (const stage of this.stages) {
+      // Check if this stage was already completed (resume case)
+      const completed = this.completedStages.find(s => s.stage === stage.stage && s.status === 'success');
+      if (completed) {
+        log.info(`stage "${stage.stage}" — skipping (already completed)`);
+        results.push({ stage: stage.stage, status: 'success', summary: completed.summary });
+        previousOutput = completed.summary || '';
+        continue;
+      }
+
       const maxAttempts = 1 + (stage.max_retries || 0);
       let stageResult = null;
 
