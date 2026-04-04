@@ -335,9 +335,8 @@ The report should include:
 const DEFAULT_PIPELINE = {
   name: 'default',
   stages: [
-    { stage: 'plan', agent: 'claude-superpower-planner', critical: true },
-    { stage: 'implement', agent: 'claude-implementer', critical: true },
-    { stage: 'review', agent: 'claude-reviewer', on_fail: 'retry', max_retries: 2 },
+    { stage: 'superpowers', agent: 'claude-superpowers', critical: true, timeout: 7200 },
+    { stage: 'review', agent: 'claude-victor-reviewer', on_fail: 'retry', max_retries: 1, timeout: 3600 },
   ],
 };
 
