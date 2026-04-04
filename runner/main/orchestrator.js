@@ -157,9 +157,37 @@ export class Orchestrator extends EventEmitter {
       return this.getTask(taskId);
     }
 
-    if (action === 'retry') {
-      const newStatus = task.failed_pipeline === 'brainstorm' ? 'idea' : 'ready';
-      this.updateTask(taskId, { status: newStatus, failed_pipeline: null });
+    if (action === 'retry' || action === 'retry-fresh') {
+      // Clean slate: remove worktree/branch, clear all state
+      if (this.worktreeManager) {
+        try { this.worktreeManager.remove(taskId, true); } catch {}
+      }
+      this.stateManager.clearTask(taskId);
+      this.updateTask(taskId, {
+        status: 'idea',
+        failed_pipeline: null,
+        pr_url: null,
+        spec: '',
+        feedback: '',
+        completed_stages: null,
+      });
+      return this.getTask(taskId);
+    }
+
+    if (action === 'retry-feedback') {
+      const updatedFeedback = [task.feedback, feedback].filter(Boolean).join('\n\n---\n\n');
+      if (task.failed_pipeline === 'brainstorm') {
+        this.updateTask(taskId, { status: 'planning', feedback: updatedFeedback, failed_pipeline: null });
+        this._runBrainstormPipeline({ ...task, feedback: updatedFeedback }, []).catch(err => {
+          console.error(`Retry brainstorm failed for ${taskId}:`, err);
+          this.updateTask(taskId, { status: 'failed', failed_pipeline: 'brainstorm' });
+          this.stateManager.updateTaskStatus(taskId, 'failed');
+          this.stateManager.persist();
+        });
+      } else {
+        this.stateManager.clearTask(taskId);
+        this.updateTask(taskId, { status: 'ready', feedback: updatedFeedback, failed_pipeline: null, completed_stages: null });
+      }
       return this.getTask(taskId);
     }
 
