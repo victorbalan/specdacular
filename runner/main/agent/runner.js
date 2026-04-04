@@ -38,6 +38,7 @@ export class AgentRunner extends EventEmitter {
       const logStream = logPath ? createWriteStream(logPath, { flags: 'a' }) : null;
       let lastOutputAt = Date.now();
       let result = null;
+      let stuckKilled = false;
 
       const parser = new StreamParser();
       parser.on('status', (s) => {
@@ -120,6 +121,7 @@ export class AgentRunner extends EventEmitter {
       const stuckCheck = setInterval(() => {
         if (Date.now() - lastOutputAt > this.stuckTimeout) {
           log.error(`agent stuck — no output for ${this.stuckTimeout / 1000}s, killing`);
+          stuckKilled = true;
           proc.kill('SIGTERM');
           setTimeout(() => proc.kill('SIGKILL'), 5000);
         }
@@ -132,7 +134,9 @@ export class AgentRunner extends EventEmitter {
         if (logStream) logStream.end();
         if (stdout.trim()) handleLine(stdout.trim());
 
-        if (result) {
+        if (stuckKilled) {
+          resolve({ status: 'failure', summary: `Agent stuck — no output for ${this.stuckTimeout / 1000}s` });
+        } else if (result) {
           resolve(result);
         } else if (code === 0) {
           resolve({ status: 'success', summary: 'Agent completed without explicit result' });
