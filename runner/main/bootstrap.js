@@ -8,7 +8,7 @@ const DEFAULT_CONFIG = {
     pipeline: 'default',
     failure_policy: 'skip',
     timeout: 3600,
-    stuck_timeout: 1800,
+    stuck_timeout: 300,
     max_parallel: 1,
   },
 };

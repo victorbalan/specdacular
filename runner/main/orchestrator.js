@@ -42,6 +42,17 @@ export class Orchestrator extends EventEmitter {
       log.info(`worktree manager initialized for ${this.projectPath}`);
     }
 
+    // Reset stuck tasks from previous run
+    for (const task of this.getTasks()) {
+      if (task.status === 'in_progress') {
+        log.warn(`resetting stuck task ${task.id} (was in_progress) → ready`);
+        this.updateTask(task.id, { status: 'ready' });
+      } else if (task.status === 'planning') {
+        log.warn(`resetting stuck task ${task.id} (was planning) → idea`);
+        this.updateTask(task.id, { status: 'idea' });
+      }
+    }
+
     // Forward state events
     this.stateManager.on('change', (event) => {
       this.emit('change', { ...event, project: this.projectId });
