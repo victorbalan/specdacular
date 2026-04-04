@@ -20,6 +20,8 @@ export default function TaskDetailOverlay({ task, onClose, onAdvance }) {
   const [logs, setLogs] = useState([]);
   const [showReplan, setShowReplan] = useState(false);
   const [replanFeedback, setReplanFeedback] = useState('');
+  const [showRetryFeedback, setShowRetryFeedback] = useState(false);
+  const [retryFeedback, setRetryFeedback] = useState('');
   const logRef = useRef(null);
 
   useEffect(() => {
@@ -45,10 +47,6 @@ export default function TaskDetailOverlay({ task, onClose, onAdvance }) {
     document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
   }, [onClose]);
-
-  const handleRetry = async () => {
-    await window.specd.invoke('retry-task', task.projectId, task.id);
-  };
 
   const currentStatus = status?.status || task.status;
 
@@ -126,15 +124,57 @@ export default function TaskDetailOverlay({ task, onClose, onAdvance }) {
             </button>
           )}
 
-          {currentStatus === 'failed' && (
-            <button onClick={() => onAdvance?.('retry')} style={{
-              padding: '7px 16px', marginBottom: 20, borderRadius: radius.md,
-              border: `1px solid ${colors.danger}`, color: colors.danger,
-              backgroundColor: colors.surface, cursor: 'pointer', fontSize: 13,
-              transition: 'all 0.15s ease',
-            }}>
-              Retry task
-            </button>
+          {(currentStatus === 'failed' || currentStatus === 'done') && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+              <button
+                onClick={() => onAdvance?.('retry-fresh')}
+                style={{
+                  padding: '7px 16px', borderRadius: radius.md,
+                  border: `1px solid ${colors.danger}`, color: colors.danger,
+                  backgroundColor: 'transparent', cursor: 'pointer', fontSize: 13,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Retry from scratch
+              </button>
+              <button
+                onClick={() => setShowRetryFeedback(true)}
+                style={{
+                  padding: '7px 16px', borderRadius: radius.md,
+                  border: `1px solid ${colors.warning}`, color: colors.warning,
+                  backgroundColor: 'transparent', cursor: 'pointer', fontSize: 13,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Retry with feedback
+              </button>
+            </div>
+          )}
+
+          {showRetryFeedback && (
+            <div style={{ marginBottom: 20 }}>
+              <textarea
+                value={retryFeedback}
+                onChange={(e) => setRetryFeedback(e.target.value)}
+                placeholder="What should be changed? The agent will see existing code and this feedback."
+                style={{
+                  width: '100%', height: 80, padding: 10, marginBottom: 8,
+                  backgroundColor: colors.bg, color: colors.text,
+                  border: `1px solid ${colors.border}`, borderRadius: radius.md,
+                  fontSize: 13, resize: 'vertical', outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <button
+                onClick={() => { onAdvance?.('retry-feedback', retryFeedback); setShowRetryFeedback(false); setRetryFeedback(''); }}
+                style={{
+                  padding: '7px 16px', borderRadius: radius.md, border: 'none',
+                  backgroundColor: colors.warning, color: '#fff', cursor: 'pointer', fontSize: 13,
+                }}
+              >
+                Retry with this feedback
+              </button>
+            </div>
           )}
 
           {/* Spec viewer for review state */}
