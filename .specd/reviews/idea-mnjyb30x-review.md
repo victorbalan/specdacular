@@ -1,7 +1,7 @@
 # Code Review: Kanban Board Refactor (idea-mnjyb30x)
 
 **Reviewer:** Claude Code (superpowers:code-reviewer)  
-**Date:** 2026-04-04  
+**Date:** 2026-04-04 (review #2)  
 **Commits:** aaf9111..058854a (3 commits)  
 **Files changed:** `runner/renderer/src/components/KanbanBoard.jsx`  
 **Plan:** `docs/superpowers/plans/2026-04-04-kanban-board-refactor.md`  
@@ -9,68 +9,68 @@
 
 ## Status: failure
 
+## Summary
+
+The implementation correctly consolidates the kanban board from 7 columns to 4 and adds sub-state badges to cards. Code quality is good and the change is well-scoped to a single file. However, a critical bug from the prior review remains unfixed: the `queued` status was dropped from the column mapping, making tasks in that state invisible.
+
 ## Strengths
 
-- Implementation follows the plan and spec step-by-step for all specified changes
-- Single-file scope respected (UI-only change as promised)
-- The `addButton` property on columns is cleaner than `col.key === 'idea'`
-- Nullish coalescing (`?? 99`) in sort provides safe fallback for unknown statuses
-- Sub-state badge styling is consistent with existing project name badge
-- All preserved behaviors intact: add button, action buttons, auto-execute, delete, PR link, TaskDetailOverlay
+- Clean, minimal diff -- only touches what the spec requires
+- `addButton` property on column config is cleaner than hardcoded key check
+- `STATUS_PRIORITY` with nullish coalescing (`?? 99`) is a safe, extensible sort approach
+- Sub-state badge styling is consistent with existing project name badge pattern
+- All preserved behaviors verified: add button, ACTION_MAP buttons, auto-execute badge, delete button, PR link, TaskDetailOverlay click-through
 
 ## Issues
 
-### CRITICAL: `queued` status dropped from column mapping
+### CRITICAL: `queued` status dropped from column mapping (unfixed from review #1)
 
-**File:** `runner/renderer/src/components/KanbanBoard.jsx:7`
+**File:** `KanbanBoard.jsx:7` (COLUMNS), `KanbanBoard.jsx:12-20` (SUB_STATE_LABELS), `KanbanBoard.jsx:22-27` (STATUS_PRIORITY)
 
-The old COLUMNS definition included `'queued'` in the Ready column:
-```jsx
-{ key: 'ready', label: 'Queued', color: colors.warning, statuses: ['ready', 'queued'] },
-```
+The old COLUMNS had `statuses: ['ready', 'queued']` for the Ready column. The new definition only has `['review', 'ready']` -- `queued` is gone entirely. The backend actively assigns `queued` status:
 
-The new definition only maps `['review', 'ready']` -- `'queued'` is gone. The backend actively sets tasks to `'queued'` status:
-- `runner/main/state/manager.js:20` - sets status to `queued` when registering tasks
-- `runner/renderer/src/components/TaskDetailOverlay.jsx:353` - has a badge definition for `queued`
-- `runner/renderer/src/components/TaskList.jsx:1-2` - maps `queued` in both STATUS_ICONS and STATUS_COLORS
+- `runner/main/state/manager.js:20` -- sets `status: 'queued'` when registering tasks
+- `runner/renderer/src/components/TaskDetailOverlay.jsx:353` -- has badge for `queued`
+- `runner/renderer/src/components/TaskList.jsx:1-2` -- maps `queued` in STATUS_ICONS and STATUS_COLORS
+- `runner/tests/state/manager.test.js:35` -- tests assert `queued` status
 
-**Impact:** Any task with `status === 'queued'` becomes invisible on the kanban board -- it appears in no column.
+**Impact:** Tasks with `status === 'queued'` are invisible on the board. They appear in no column.
 
-**Fix required in `KanbanBoard.jsx`:**
-1. Add `'queued'` to Ready column statuses (line 7): `statuses: ['review', 'ready', 'queued']`
-2. Add to `SUB_STATE_LABELS` (line 14): `queued: { label: 'Queued', color: colors.warning }`
-3. Add to `STATUS_PRIORITY` (line 24): `queued: 2` (after `ready: 1`)
+**Required fix (3 lines):**
+1. Line 7: `statuses: ['review', 'ready', 'queued']`
+2. Add to SUB_STATE_LABELS: `queued: { label: 'Queued', color: colors.warning },`
+3. Add to STATUS_PRIORITY: `queued: 2`
 
-**Root cause:** This bug originates in the spec and plan, neither of which listed `queued` as a status. The old COLUMNS had it but the spec's "Current State" table missed it.
+**Root cause:** The spec and plan both omitted `queued` from the status inventory table. The old code had it but neither design doc captured it.
 
-### IMPORTANT: Spec and plan docs should be updated
+### IMPORTANT: Spec and plan omit `queued` status
 
-Both `docs/superpowers/specs/2026-04-04-kanban-board-refactor-design.md` and `docs/superpowers/plans/2026-04-04-kanban-board-refactor.md` should include `queued` alongside `ready` to prevent the same oversight if someone re-implements from the spec.
+Both `docs/superpowers/specs/2026-04-04-kanban-board-refactor-design.md` (line 19, "Current State" table) and the plan should list `queued` alongside `ready` to prevent re-introduction of this bug.
 
-### MINOR: Secondary sort by creation date not implemented
+### MINOR: Redundant "Idea" badge in Backlog column
 
-**File:** `runner/renderer/src/components/KanbanBoard.jsx:57`
+**File:** `KanbanBoard.jsx:12`
 
-The spec states: "tasks are sorted by status priority... **then by creation date.**" The implementation only sorts by `STATUS_PRIORITY`. If the backend already returns tasks sorted by creation date and JS `.sort()` is stable (it is in V8), this works incidentally. But the spec requirement is not explicitly met.
+Backlog only contains `idea` status. Every card shows an "Idea" badge, but the spec table shows `--` for Backlog badges (line 29). This is cosmetic -- the badge is redundant since the column name already conveys this. Could be fixed by not rendering SUB_STATE_LABELS for single-status columns, or by removing the `idea` entry from SUB_STATE_LABELS.
 
-### MINOR: Redundant sub-state badge on Backlog column
+### MINOR: Secondary sort by creation date missing
 
-The Backlog column only contains `idea` status. Every card shows an "Idea" badge, which is redundant since the column name already conveys this. The spec's table shows `--` for Backlog badges, implying none should appear.
+**File:** `KanbanBoard.jsx:57`
 
-### MINOR: Stale variable name `isIdeasCol`
+The spec says: "sorted by status priority, then by creation date." Only status priority sort is implemented. This works if backend returns tasks in creation order and V8's `.sort()` is stable (it is), but the spec requirement isn't explicitly met.
 
-**File:** `runner/renderer/src/components/KanbanBoard.jsx:58`
+### MINOR: `isIdeasCol` variable name is stale
 
-The column is now "Backlog", not "Ideas". `isIdeasCol` should be renamed to `hasAddButton` or `showAddButton` for clarity.
+**File:** `KanbanBoard.jsx:58`
 
-## Summary
+Column is now "Backlog", not "Ideas". Variable should be `hasAddButton` or similar.
 
-| Severity | Issue |
-|----------|-------|
-| Critical | `queued` status dropped -- tasks become invisible |
-| Important | Spec/plan docs missing `queued` status |
-| Minor | Secondary sort by creation date not implemented per spec |
-| Minor | Redundant "Idea" badge on single-status Backlog column |
-| Minor | `isIdeasCol` variable name is stale |
+## Assessment
 
-The critical `queued` status issue must be fixed before merging. Tasks in the `queued` state will not render on the board, which is a data visibility bug.
+| Severity | Count | Issues |
+|----------|-------|--------|
+| Critical | 1 | `queued` status invisible on board |
+| Important | 1 | Spec/plan docs missing `queued` |
+| Minor | 3 | Redundant badge, missing secondary sort, stale variable name |
+
+**Verdict:** The critical `queued` bug must be fixed before merge. The 3-line fix is straightforward. Minor issues can be addressed optionally.
