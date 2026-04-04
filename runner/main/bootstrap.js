@@ -66,6 +66,120 @@ Emit progress after each major step:
 {"status":"success","summary":"<brief description of what was planned>"}
 \`\`\``,
   },
+  'claude-superpowers': {
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: `You are implementing: {{task.name}} ({{task.id}})
+Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+You have FULL access to all Claude Code tools: Read, Write, Edit, Bash, Grep, Glob, Agent, Skill.
+
+## IMPORTANT: You have superpowers skills available
+
+You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded automatically.
+
+## Your Process
+
+1. Use the Skill tool with skill: "superpowers:brainstorming" to explore the idea
+   - Answer your own clarifying questions using codebase research (this is non-interactive — no human to ask)
+   - The skill handles writing the spec and plan to the right locations
+   - Follow the skill's process completely — it will invoke writing-plans when ready
+2. When the plan is written and a skill asks you to choose an execution approach, ALWAYS choose
+   "Subagent-Driven Development" (option 1). This gives per-task sub-agents with spec + code quality reviews.
+3. The subagent-driven-development skill will execute each task with isolated sub-agents
+4. When subagent-driven-development finishes and invokes finishing-a-development-branch,
+   choose option 3 "Keep the branch as-is" — the runner manages branch lifecycle and PR creation.
+
+## CRITICAL RULES
+- You MUST invoke superpowers:brainstorming — do not skip it
+- This is NON-INTERACTIVE: answer all clarifying questions yourself by researching the codebase
+- When asked to choose between options, ALWAYS choose automatically — never wait for input
+- Choose "Subagent-Driven Development" (option 1) for execution
+- Choose "Keep the branch as-is" (option 3) when finishing-a-development-branch runs
+- Research BEFORE answering questions — read actual code, don't assume
+- Commit your work throughout
+
+## Real-Time Progress
+Emit progress after each major step:
+
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"researching codebase","percent":10}
+\`\`\`
+
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"brainstorming design","percent":25}
+\`\`\`
+
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"writing plan","percent":40}
+\`\`\`
+
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"executing task N/M","percent":60}
+\`\`\`
+
+## When Done
+\`\`\`specd-result
+{"status":"success","summary":"what was implemented","files_changed":["list","of","files"],"issues":[],"next_suggestions":[]}
+\`\`\``,
+  },
+  'claude-victor-reviewer': {
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: `You are reviewing: {{task.name}} ({{task.id}})
+Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+You have FULL access to all Claude Code tools including Skill.
+
+## IMPORTANT: You have the victor:review skill available
+
+You MUST use the Skill tool to invoke skills.
+
+## Your Process
+
+1. Understand what was implemented:
+   - Read the previous stage summary: {{previous_stage_output}}
+   - Run: git log --oneline main..HEAD to see all commits on this branch
+   - Run: git diff --stat main..HEAD to see changed files
+2. Invoke the Skill tool with skill: "victor:review" to perform a deep parallel review
+   - This spawns 5 specialized review agents (Security, Logic Bugs, Database, API, Frontend)
+   - They analyze all changes and produce a structured review with priority tiers
+3. Analyze the review findings by tier:
+   - CRITICAL (security vulnerabilities, data loss, auth bypasses) — MUST fix
+   - BUGS (logic errors, race conditions, runtime crashes) — MUST fix
+   - MEDIUM (validation gaps, convention violations) — fix only if the fix is obvious and safe
+   - MINOR (code quality, consistency) — do NOT fix
+4. For each issue you fix:
+   - Make the fix
+   - Commit: git commit -m "fix({{task.id}}): <what was fixed>"
+5. Write the full review report to .specd/reviews/{{task.id}}-review.md
+   - Include all findings (fixed and unfixed)
+   - Mark which ones were auto-fixed
+6. Commit the review: git add .specd/reviews/ && git commit -m "docs({{task.id}}): code review"
+
+## CRITICAL RULES
+- You MUST invoke the victor:review skill — do not skip it
+- ALWAYS fix Critical and Bugs tier issues
+- Do NOT fix Minor issues — they are not worth the risk of introducing regressions
+- Be specific in your review report: reference file paths and line numbers
+- If Critical issues remain unfixed (too complex, unclear fix), set status to "failure"
+
+## Real-Time Progress
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"reviewing changes","percent":30}
+\`\`\`
+
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"fixing issues","percent":70}
+\`\`\`
+
+## When Done
+\`\`\`specd-result
+{"status":"success or failure","summary":"review findings and fixes","files_changed":[".specd/reviews/{{task.id}}-review.md"],"issues":[],"next_suggestions":[]}
+\`\`\``,
+  },
   'claude-implementer': {
     cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
     input_mode: 'stdin',
@@ -221,9 +335,8 @@ The report should include:
 const DEFAULT_PIPELINE = {
   name: 'default',
   stages: [
-    { stage: 'plan', agent: 'claude-superpower-planner', critical: true },
-    { stage: 'implement', agent: 'claude-implementer', critical: true },
-    { stage: 'review', agent: 'claude-reviewer', on_fail: 'retry', max_retries: 2 },
+    { stage: 'superpowers', agent: 'claude-superpowers', critical: true, timeout: 7200 },
+    { stage: 'review', agent: 'claude-victor-reviewer', on_fail: 'retry', max_retries: 1, timeout: 3600 },
   ],
 };
 
