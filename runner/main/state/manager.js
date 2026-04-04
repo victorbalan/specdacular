@@ -79,6 +79,12 @@ export class StateManager extends EventEmitter {
     return task.stages.filter(s => s.status === 'success');
   }
 
+  clearTask(taskId) {
+    delete this.state.tasks[taskId];
+    this.persist();
+    this._emit('task_cleared', { taskId });
+  }
+
   persist() {
     writeFileSync(this.statusPath, JSON.stringify(this.state, null, 2));
   }
