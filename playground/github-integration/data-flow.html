@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Flow Scenarios - GitHub Project Integration Research</title>
+  <style>
+    :root {
+      --color-local: #4ade80;
+      --color-github: #fb923c;
+      --color-interface: #60a5fa;
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-text: #e2e8f0;
+      --color-muted: #94a3b8;
+      --color-border: #334155;
+      --color-danger: #f87171;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--color-interface);
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-interface);
+      margin-bottom: 0.35rem;
+    }
+
+    header .subtitle {
+      font-size: 0.85rem;
+      color: var(--color-muted);
+    }
+
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0;
+    }
+
+    .tab-bar button {
+      font-family: inherit;
+      font-size: 0.75rem;
+      padding: 0.6rem 1rem;
+      background: transparent;
+      color: var(--color-muted);
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-bar button:hover {
+      color: var(--color-text);
+    }
+
+    .tab-bar button.active {
+      color: var(--color-interface);
+      border-bottom-color: var(--color-interface);
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .controls button {
+      font-family: inherit;
+      font-size: 0.75rem;
+      padding: 0.45rem 1rem;
+      background: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .controls button:hover {
+      border-color: var(--color-interface);
+    }
+
+    .controls button.primary {
+      background: var(--color-interface);
+      color: var(--color-bg);
+      border-color: var(--color-interface);
+      font-weight: 600;
+    }
+
+    .controls button.primary:hover {
+      opacity: 0.9;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--color-muted);
+    }
+
+    .speed-control input[type="range"] {
+      width: 100px;
+      accent-color: var(--color-interface);
+    }
+
+    .speed-label {
+      min-width: 2.5em;
+      text-align: right;
+    }
+
+    /* Visualization */
+    .viz-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .timeline {
+      position: relative;
+    }
+
+    .timeline-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .timeline-header .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .timeline-header.local .dot { background: var(--color-local); }
+    .timeline-header.github .dot { background: var(--color-github); }
+
+    .timeline-track {
+      position: relative;
+      padding-left: 20px;
+      min-height: 60px;
+    }
+
+    .timeline-track::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--color-border);
+    }
+
+    .step {
+      position: relative;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .step-marker {
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--color-border);
+      background: var(--color-bg);
+      z-index: 1;
+    }
+
+    .step.visible .step-marker {
+      border-color: currentColor;
+      background: currentColor;
+    }
+
+    .step.local { color: var(--color-local); }
+    .step.github { color: var(--color-github); }
+    .step.blocked { color: var(--color-danger); }
+
+    .step-content {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .step.visible .step-content {
+      border-color: currentColor;
+      border-left-width: 3px;
+    }
+
+    .step-number {
+      font-weight: 700;
+      font-size: 0.65rem;
+      opacity: 0.7;
+      margin-right: 0.35rem;
+    }
+
+    .step-label {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    .step-detail {
+      color: var(--color-muted);
+      font-size: 0.7rem;
+      margin-top: 0.2rem;
+    }
+
+    .step-bar {
+      height: 4px;
+      border-radius: 2px;
+      margin-top: 0.35rem;
+      background: currentColor;
+      opacity: 0.4;
+      transition: width 0.4s ease;
+      max-width: 100%;
+    }
+
+    .step-duration {
+      font-size: 0.65rem;
+      color: var(--color-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* Blocked overlay */
+    .blocked-overlay {
+      display: none;
+      background: rgba(248, 113, 113, 0.08);
+      border: 2px dashed var(--color-danger);
+      border-radius: 8px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .blocked-overlay.visible {
+      display: block;
+    }
+
+    .blocked-overlay .blocked-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-danger);
+    }
+
+    .blocked-overlay .blocked-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--color-danger);
+      margin-bottom: 0.35rem;
+    }
+
+    .blocked-overlay .blocked-reason {
+      font-size: 0.7rem;
+      color: var(--color-muted);
+      line-height: 1.5;
+    }
+
+    /* Summary row */
+    .summary-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .summary-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .summary-card.visible {
+      opacity: 1;
+    }
+
+    .summary-card.local {
+      border-left: 3px solid var(--color-local);
+    }
+
+    .summary-card.github {
+      border-left: 3px solid var(--color-github);
+    }
+
+    .summary-card.github.blocked {
+      border-left-color: var(--color-danger);
+    }
+
+    .summary-time {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .summary-card.local .summary-time { color: var(--color-local); }
+    .summary-card.github .summary-time { color: var(--color-github); }
+    .summary-card.github.blocked .summary-time { color: var(--color-danger); }
+
+    .api-badge {
+      display: inline-block;
+      background: rgba(251, 146, 60, 0.15);
+      color: var(--color-github);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      margin-left: 0.5rem;
+    }
+
+    .api-badge.danger {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--color-danger);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      font-size: 0.8rem;
+      color: var(--color-muted);
+    }
+
+    footer a {
+      color: var(--color-interface);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .viz-container, .summary-row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .tab-bar {
+        gap: 0;
+      }
+
+      .tab-bar button {
+        font-size: 0.65rem;
+        padding: 0.5rem 0.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a class="back-link" href="index.html">&larr; Back to Index</a>
+
+    <header>
+      <h1>Data Flow Scenarios</h1>
+      <p class="subtitle">Step-by-step animated comparison of local vs GitHub data flows</p>
+    </header>
+
+    <div class="tab-bar" id="tabBar"></div>
+
+    <div class="controls">
+      <button class="primary" id="btnPlay">Play</button>
+      <button id="btnStep">Step</button>
+      <button id="btnReset">Reset</button>
+      <div class="speed-control">
+        <span>Speed</span>
+        <input type="range" id="speedSlider" min="0.5" max="2" step="0.25" value="1">
+        <span class="speed-label" id="speedLabel">1x</span>
+      </div>
+    </div>
+
+    <div class="viz-container">
+      <div class="timeline" id="localTimeline">
+        <div class="timeline-header local">
+          <span class="dot"></span>
+          <span>Local</span>
+        </div>
+        <div class="timeline-track" id="localTrack"></div>
+      </div>
+      <div class="timeline" id="githubTimeline">
+        <div class="timeline-header github">
+          <span class="dot"></span>
+          <span>GitHub</span>
+        </div>
+        <div class="timeline-track" id="githubTrack"></div>
+      </div>
+    </div>
+
+    <div class="summary-row" id="summaryRow">
+      <div class="summary-card local" id="localSummary">
+        <div>
+          <span>Total time</span>
+          <span class="summary-time" id="localTime">--</span>
+        </div>
+        <div>
+          <span id="localApiCount"></span>
+        </div>
+      </div>
+      <div class="summary-card github" id="githubSummary">
+        <div>
+          <span>Total time</span>
+          <span class="summary-time" id="githubTime">--</span>
+        </div>
+        <div>
+          <span id="githubApiCount"></span>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Part of the <a href="index.html">GitHub Project Integration Research</a> playgrounds
+    </footer>
+
+  </div>
+
+  <script>
+    // === Scenario Data ===
+    const scenarios = [
+      {
+        name: 'Create a Task',
+        localSteps: [
+          { label: 'Orchestrator receives createIdea() call', duration: 0, detail: 'Entry point' },
+          { label: 'Generate task ID', duration: 0, detail: 'crypto.randomUUID()' },
+          { label: 'Build task object JSON', duration: 0, detail: 'Assemble fields in memory' },
+          { label: 'writeFileSync to tasks dir', duration: 1, detail: '.specd/tasks/{id}.json' },
+          { label: 'Done', duration: 0, detail: 'Task persisted locally' },
+        ],
+        githubSteps: [
+          { label: 'Orchestrator receives createIdea() call', duration: 0, detail: 'Entry point' },
+          { label: 'gh issue create', duration: 400, detail: 'POST /repos/{owner}/{repo}/issues' },
+          { label: 'gh project item-add', duration: 300, detail: 'addProjectV2ItemById mutation' },
+          { label: 'Look up Status field ID', duration: 300, detail: 'projectV2 fields query' },
+          { label: 'Look up "Idea" option ID', duration: 0, detail: 'Cached from previous query' },
+          { label: 'gh project item-edit to set status', duration: 300, detail: 'updateProjectV2ItemFieldValue mutation' },
+          { label: 'Done', duration: 0, detail: 'Issue + project item created' },
+        ],
+        localTotal: '~1ms',
+        githubTotal: '~1300ms',
+        localApiCalls: 0,
+        githubApiCalls: 4,
+      },
+      {
+        name: 'Update Task Status',
+        localSteps: [
+          { label: 'readFileSync task JSON', duration: 0, detail: '.specd/tasks/{id}.json' },
+          { label: 'Modify status field in memory', duration: 0, detail: 'task.status = newStatus' },
+          { label: 'writeFileSync updated JSON', duration: 1, detail: 'Atomic write with 2-space indent' },
+          { label: 'stateManager.updateTaskStatus', duration: 0, detail: 'In-memory state update + event emit' },
+          { label: 'Done', duration: 0, detail: 'Status updated locally' },
+        ],
+        githubSteps: [
+          { label: 'Look up project item ID', duration: 300, detail: 'projectV2Items query by issue' },
+          { label: 'Look up Status field ID', duration: 0, detail: 'Cached if warm' },
+          { label: 'Look up target option ID', duration: 300, detail: 'projectV2 field options query' },
+          { label: 'updateProjectV2ItemFieldValue mutation', duration: 300, detail: 'Set new status value' },
+          { label: 'Done', duration: 0, detail: 'Project board updated' },
+        ],
+        localTotal: '~1ms',
+        githubTotal: '~900ms',
+        localApiCalls: 0,
+        githubApiCalls: 3,
+      },
+      {
+        name: 'Live Progress Update',
+        localSteps: [
+          { label: 'Agent emits specd-status', duration: 0, detail: 'stdout marker: <!-- specd-status: {...} -->' },
+          { label: 'Parser fires progress event', duration: 0, detail: 'statusLine hook intercepts' },
+          { label: 'stateManager update', duration: 0, detail: 'In-memory state mutation' },
+          { label: 'Event emitted to listeners', duration: 0, detail: 'EventEmitter pattern' },
+          { label: 'WebSocket broadcast to UI', duration: 0, detail: 'Real-time push to connected clients' },
+          { label: 'Done', duration: 0, detail: 'Updates every 2-5 seconds' },
+        ],
+        githubSteps: [],
+        blocked: true,
+        blockedTitle: 'NOT FEASIBLE',
+        blockedReason: 'Live progress updates every 2-5s would require 720-1800 API calls/hour. GitHub rate limit is 5000 points/hour total for ALL operations. A single project would consume 14-36% of the entire budget on progress updates alone.',
+        localTotal: '<1ms',
+        githubTotal: 'N/A',
+        localApiCalls: 0,
+        githubApiCalls: null,
+        githubApiLabel: '720-1800/hr',
+      },
+      {
+        name: 'Resume from Checkpoint',
+        localSteps: [
+          { label: 'Read status.json', duration: 1, detail: '.specd/tasks/{id}/status.json' },
+          { label: 'getCompletedStages()', duration: 0, detail: 'Filter stages with status: "complete"' },
+          { label: 'Pass to StageSequencer', duration: 0, detail: 'sequencer.resume(completedStages)' },
+          { label: 'Skip completed stages', duration: 0, detail: 'Advance pointer past done stages' },
+          { label: 'Done', duration: 0, detail: 'Resume from next incomplete stage' },
+        ],
+        githubSteps: [
+          { label: 'Find issue via search', duration: 400, detail: 'GET /search/issues?q=specd-{id}' },
+          { label: 'Read issue comments', duration: 300, detail: 'GET /issues/{n}/comments (checkpoint JSON)' },
+          { label: 'Parse checkpoint JSON', duration: 0, detail: 'Extract completed stages from comment body' },
+          { label: 'Pass to StageSequencer', duration: 0, detail: 'sequencer.resume(completedStages)' },
+          { label: 'Done', duration: 0, detail: 'Resume from next incomplete stage' },
+        ],
+        localTotal: '~1ms',
+        githubTotal: '~700ms',
+        localApiCalls: 0,
+        githubApiCalls: 2,
+      },
+      {
+        name: 'Stage Completion + PR',
+        localSteps: [
+          { label: 'completeStage()', duration: 0, detail: 'Mark stage done in memory' },
+          { label: 'Persist status.json', duration: 1, detail: 'writeFileSync checkpoint' },
+          { label: 'hasChanges() check', duration: 0, detail: 'git status --porcelain' },
+          { label: 'git push', duration: 800, detail: 'Push branch to remote' },
+          { label: 'createDraftPR()', duration: 400, detail: 'gh pr create --draft' },
+          { label: 'updateTask with PR URL', duration: 1, detail: 'Write PR link to task JSON' },
+          { label: 'Done', duration: 0, detail: 'Stage complete, PR open' },
+        ],
+        githubSteps: [
+          { label: 'Update issue comment', duration: 300, detail: 'PATCH /issues/{n}/comments/{c} (checkpoint)' },
+          { label: 'Update project status field', duration: 300, detail: 'updateProjectV2ItemFieldValue mutation' },
+          { label: 'git push', duration: 800, detail: 'Push branch to remote' },
+          { label: 'gh pr create with "Fixes #N"', duration: 400, detail: 'Native issue linking via PR body' },
+          { label: 'Done', duration: 0, detail: 'PR auto-linked to issue (native)' },
+        ],
+        localTotal: '~1202ms',
+        githubTotal: '~1800ms',
+        localApiCalls: 1,
+        githubApiCalls: 3,
+        note: 'Both approaches share git push + PR creation time. GitHub benefits from native issue-PR linking.',
+      },
+    ];
+
+    // === State ===
+    let activeScenario = 0;
+    let currentStep = -1; // -1 = nothing shown
+    let isPlaying = false;
+    let playTimer = null;
+    let speed = 1;
+
+    // === DOM refs ===
+    const tabBar = document.getElementById('tabBar');
+    const localTrack = document.getElementById('localTrack');
+    const githubTrack = document.getElementById('githubTrack');
+    const localSummary = document.getElementById('localSummary');
+    const githubSummary = document.getElementById('githubSummary');
+    const localTimeEl = document.getElementById('localTime');
+    const githubTimeEl = document.getElementById('githubTime');
+    const localApiEl = document.getElementById('localApiCount');
+    const githubApiEl = document.getElementById('githubApiCount');
+    const btnPlay = document.getElementById('btnPlay');
+    const btnStep = document.getElementById('btnStep');
+    const btnReset = document.getElementById('btnReset');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedLabel = document.getElementById('speedLabel');
+
+    // === Render tabs ===
+    function renderTabs() {
+      tabBar.innerHTML = '';
+      scenarios.forEach(function(s, i) {
+        const btn = document.createElement('button');
+        btn.textContent = s.name;
+        if (i === activeScenario) btn.classList.add('active');
+        btn.addEventListener('click', function() {
+          selectScenario(i);
+        });
+        tabBar.appendChild(btn);
+      });
+    }
+
+    // === Render steps for a track ===
+    function renderSteps(track, steps, side) {
+      track.innerHTML = '';
+      steps.forEach(function(step, i) {
+        const el = document.createElement('div');
+        el.className = 'step ' + side;
+        el.setAttribute('data-index', i);
+
+        // Bar width proportional to duration (max bar = 100%, scale relative to longest in scenario)
+        const scenario = scenarios[activeScenario];
+        const allDurations = scenario.localSteps.concat(scenario.githubSteps).map(function(s) { return s.duration; });
+        const maxDur = Math.max.apply(null, allDurations.concat([1]));
+        const barPct = step.duration > 0 ? Math.max(10, (step.duration / maxDur) * 100) : 6;
+
+        el.innerHTML =
+          '<div class="step-marker"></div>' +
+          '<div class="step-content">' +
+            '<div><span class="step-number">' + (i + 1) + '.</span> <span class="step-label">' + escapeHtml(step.label) + '</span></div>' +
+            '<div class="step-detail">' + escapeHtml(step.detail) + '</div>' +
+            '<div class="step-bar" style="width: ' + barPct + '%;"></div>' +
+            '<div class="step-duration">' + formatDuration(step.duration) + '</div>' +
+          '</div>';
+
+        track.appendChild(el);
+      });
+    }
+
+    function renderBlockedOverlay(track, scenario) {
+      const el = document.createElement('div');
+      el.className = 'blocked-overlay';
+      el.setAttribute('id', 'blockedOverlay');
+      el.innerHTML =
+        '<div class="blocked-icon">&#x2717;</div>' +
+        '<div class="blocked-title">' + escapeHtml(scenario.blockedTitle) + '</div>' +
+        '<div class="blocked-reason">' + escapeHtml(scenario.blockedReason) + '</div>';
+      track.appendChild(el);
+    }
+
+    // === Render scenario ===
+    function renderScenario() {
+      const scenario = scenarios[activeScenario];
+      renderSteps(localTrack, scenario.localSteps, 'local');
+
+      if (scenario.blocked) {
+        githubTrack.innerHTML = '';
+        renderBlockedOverlay(githubTrack, scenario);
+      } else {
+        renderSteps(githubTrack, scenario.githubSteps, 'github');
+      }
+
+      // Reset summaries
+      localSummary.classList.remove('visible');
+      githubSummary.classList.remove('visible');
+      githubSummary.classList.remove('blocked');
+      localTimeEl.textContent = '--';
+      githubTimeEl.textContent = '--';
+      localApiEl.innerHTML = '';
+      githubApiEl.innerHTML = '';
+    }
+
+    function showSummary() {
+      const scenario = scenarios[activeScenario];
+
+      localSummary.classList.add('visible');
+      localTimeEl.textContent = scenario.localTotal;
+      if (scenario.localApiCalls > 0) {
+        localApiEl.innerHTML = '<span class="api-badge">' + scenario.localApiCalls + ' API call' + (scenario.localApiCalls !== 1 ? 's' : '') + '</span>';
+      } else {
+        localApiEl.innerHTML = '<span class="api-badge">0 API calls</span>';
+      }
+
+      githubSummary.classList.add('visible');
+      githubTimeEl.textContent = scenario.githubTotal;
+
+      if (scenario.blocked) {
+        githubSummary.classList.add('blocked');
+        var apiLabel = scenario.githubApiLabel || 'N/A';
+        githubApiEl.innerHTML = '<span class="api-badge danger">' + apiLabel + '</span>';
+      } else if (scenario.githubApiCalls !== null) {
+        githubApiEl.innerHTML = '<span class="api-badge">' + scenario.githubApiCalls + ' API call' + (scenario.githubApiCalls !== 1 ? 's' : '') + '</span>';
+      }
+    }
+
+    // === Animation helpers ===
+    function getTotalStepCount() {
+      var scenario = scenarios[activeScenario];
+      return Math.max(scenario.localSteps.length, scenario.blocked ? 1 : scenario.githubSteps.length);
+    }
+
+    function revealStep(index) {
+      var scenario = scenarios[activeScenario];
+
+      // Reveal local step
+      var localStepEls = localTrack.querySelectorAll('.step');
+      if (index < localStepEls.length) {
+        localStepEls[index].classList.add('visible');
+      }
+
+      if (scenario.blocked) {
+        // Show blocked overlay on first step
+        if (index === 0) {
+          var overlay = document.getElementById('blockedOverlay');
+          if (overlay) overlay.classList.add('visible');
+        }
+      } else {
+        // Reveal github step
+        var githubStepEls = githubTrack.querySelectorAll('.step');
+        if (index < githubStepEls.length) {
+          githubStepEls[index].classList.add('visible');
+        }
+      }
+    }
+
+    function getStepDelay(index) {
+      var scenario = scenarios[activeScenario];
+      // Use the max duration of local/github step at this index for pacing
+      var localDur = (index < scenario.localSteps.length) ? scenario.localSteps[index].duration : 0;
+      var githubDur = (!scenario.blocked && index < scenario.githubSteps.length) ? scenario.githubSteps[index].duration : 0;
+      var baseDur = Math.max(localDur, githubDur);
+      // Scale durations for animation: 0ms -> 200ms base, up to max ~600ms for 800ms real
+      var animDelay = 200 + (baseDur / 800) * 400;
+      return animDelay / speed;
+    }
+
+    // === Controls ===
+    function selectScenario(index) {
+      stopPlaying();
+      activeScenario = index;
+      currentStep = -1;
+      renderTabs();
+      renderScenario();
+      updatePlayButton();
+    }
+
+    function stepForward() {
+      var total = getTotalStepCount();
+      if (currentStep < total - 1) {
+        currentStep++;
+        revealStep(currentStep);
+        if (currentStep === total - 1) {
+          showSummary();
+        }
+      }
+      updatePlayButton();
+    }
+
+    function resetAnimation() {
+      stopPlaying();
+      currentStep = -1;
+      renderScenario();
+      updatePlayButton();
+    }
+
+    function playAnimation() {
+      if (isPlaying) {
+        stopPlaying();
+        return;
+      }
+      var total = getTotalStepCount();
+      if (currentStep >= total - 1) {
+        // Already at end, reset first
+        currentStep = -1;
+        renderScenario();
+      }
+      isPlaying = true;
+      updatePlayButton();
+      scheduleNextStep();
+    }
+
+    function scheduleNextStep() {
+      var total = getTotalStepCount();
+      if (currentStep >= total - 1) {
+        stopPlaying();
+        return;
+      }
+      var delay = getStepDelay(currentStep + 1);
+      playTimer = setTimeout(function() {
+        stepForward();
+        if (isPlaying) {
+          scheduleNextStep();
+        }
+      }, delay);
+    }
+
+    function stopPlaying() {
+      isPlaying = false;
+      if (playTimer) {
+        clearTimeout(playTimer);
+        playTimer = null;
+      }
+      updatePlayButton();
+    }
+
+    function updatePlayButton() {
+      var total = getTotalStepCount();
+      if (isPlaying) {
+        btnPlay.textContent = 'Pause';
+      } else if (currentStep >= total - 1) {
+        btnPlay.textContent = 'Replay';
+      } else {
+        btnPlay.textContent = 'Play';
+      }
+    }
+
+    // === Utils ===
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatDuration(ms) {
+      if (ms === 0) return '<1ms';
+      if (ms < 1000) return ms + 'ms';
+      return (ms / 1000).toFixed(1) + 's';
+    }
+
+    // === Event listeners ===
+    btnPlay.addEventListener('click', playAnimation);
+    btnStep.addEventListener('click', function() {
+      stopPlaying();
+      stepForward();
+    });
+    btnReset.addEventListener('click', resetAnimation);
+
+    speedSlider.addEventListener('input', function() {
+      speed = parseFloat(speedSlider.value);
+      speedLabel.textContent = speed + 'x';
+    });
+
+    // === Init ===
+    renderTabs();
+    renderScenario();
+  </script>
+</body>
+</html>
