@@ -1,7 +1,10 @@
 // runner/main/ipc.js
 import { ipcMain, dialog, shell } from 'electron';
-import { readFileSync, existsSync, readdirSync, unlinkSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, unlinkSync, writeFileSync, mkdirSync } from 'fs';
 import { join, basename } from 'path';
+import { createLogger } from './logger.js';
+
+const log = createLogger('ipc', '\x1b[34m');
 
 export function setupIpc(getContext) {
   ipcMain.handle('get-projects', () => {
@@ -66,7 +69,7 @@ export function setupIpc(getContext) {
   });
 
   ipcMain.handle('register-project', async () => {
-    const { db } = getContext();
+    const { db, paths, config, orchestrators } = getContext();
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory'],
       title: 'Select project folder',
@@ -76,7 +79,28 @@ export function setupIpc(getContext) {
     const existing = db.findByPath(folderPath);
     if (existing) return existing;
     const name = basename(folderPath);
-    return db.register(name, folderPath);
+    const project = db.register(name, folderPath);
+    log.info(`registered project: ${name} (${project.id}) → ${folderPath}`);
+
+    // Create project dir + project.json
+    const projectPaths = paths.forProject(project.id);
+    mkdirSync(projectPaths.dir, { recursive: true });
+    writeFileSync(projectPaths.projectJson, JSON.stringify({
+      name: project.name,
+      path: project.path,
+      registeredAt: project.registeredAt,
+    }, null, 2));
+    log.info(`created project.json for ${project.id}`);
+
+    // Init orchestrator for new project
+    const { Orchestrator } = await import('./orchestrator.js');
+    const orch = new Orchestrator({ projectId: project.id, paths, config });
+    orch.init();
+    orchestrators.set(project.id, orch);
+    orch.startLoop().catch(err => log.error(`loop error for ${project.id}: ${err}`));
+    log.info(`orchestrator started for ${project.id}`);
+
+    return project;
   });
 
   ipcMain.handle('unregister-project', (event, projectId) => {
