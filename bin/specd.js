@@ -210,37 +210,7 @@ if (command === 'llm-init') {
 } else if (command === 'runner') {
   const subcommand = args[1];
 
-  if (subcommand === 'register') {
-    const folderPath = resolve(args[2] || '.');
-    if (!existsSync(folderPath)) {
-      console.error(`Path does not exist: ${folderPath}`);
-      process.exit(1);
-    }
-    const name = args[3] || folderPath.split('/').pop();
-    const db = loadDb();
-    const existing = db.projects.find(p => p.path === folderPath);
-    if (existing) {
-      console.log(`Already registered: ${existing.name} (${existing.id})`);
-      process.exit(0);
-    }
-    const id = Math.random().toString(36).slice(2, 10);
-    db.projects.push({
-      id,
-      name,
-      path: folderPath,
-      active: true,
-      registeredAt: new Date().toISOString(),
-    });
-    saveDb(db);
-    console.log(`Registered: ${name} (${id}) → ${folderPath}`);
-  } else if (subcommand === 'unregister') {
-    const id = args[2];
-    if (!id) { console.error('Usage: specd runner unregister <id>'); process.exit(1); }
-    const db = loadDb();
-    db.projects = db.projects.filter(p => p.id !== id);
-    saveDb(db);
-    console.log(`Unregistered: ${id}`);
-  } else if (subcommand === 'projects') {
+  if (subcommand === 'projects') {
     const db = loadDb();
     if (db.projects.length === 0) {
       console.log('No projects registered. Run: specd runner register <path>');
@@ -286,8 +256,6 @@ if (command === 'llm-init') {
   console.log('  specd llm-init [--local]      Install Claude Code commands/agents');
   console.log('  specd install-runner           Download and install the Specd Runner app');
   console.log('  specd runner                   Launch the Specd Runner app');
-  console.log('  specd runner register <path>   Register a project folder');
-  console.log('  specd runner unregister <id>   Remove a project');
   console.log('  specd runner projects          List registered projects');
   console.log('  specd runner status            Show task status');
 }
