@@ -73,6 +73,12 @@ export class StateManager extends EventEmitter {
     this._emit('pr_created', { taskId, prUrl });
   }
 
+  getCompletedStages(taskId) {
+    const task = this.state.tasks?.[taskId];
+    if (!task) return [];
+    return task.stages.filter(s => s.status === 'success');
+  }
+
   persist() {
     writeFileSync(this.statusPath, JSON.stringify(this.state, null, 2));
   }

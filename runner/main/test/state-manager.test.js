@@ -69,4 +69,23 @@ describe('StateManager', () => {
     a.equal(events.length, 1);
     a.equal(events[0].type, 'task_registered');
   });
+
+  it('returns completed stages', () => {
+    sm.registerTask('task-001', { name: 'Test', pipeline: 'default' });
+    sm.startStage('task-001', { stage: 'plan', agent: 'claude-planner' });
+    sm.completeStage('task-001', 'success', 'Planned it');
+    sm.startStage('task-001', { stage: 'implement', agent: 'claude-implementer' });
+    sm.completeStage('task-001', 'success', 'Built it');
+    sm.startStage('task-001', { stage: 'review', agent: 'claude-reviewer' });
+
+    const completed = sm.getCompletedStages('task-001');
+    a.equal(completed.length, 2);
+    a.equal(completed[0].stage, 'plan');
+    a.equal(completed[0].summary, 'Planned it');
+    a.equal(completed[1].stage, 'implement');
+  });
+
+  it('returns empty array for unknown task', () => {
+    a.deepEqual(sm.getCompletedStages('nonexistent'), []);
+  });
 });
