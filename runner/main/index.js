@@ -11,6 +11,7 @@ import { ProjectDB } from './db.js';
 import { Orchestrator } from './orchestrator.js';
 import { createServer } from './server/index.js';
 import { setupIpc } from './ipc.js';
+import { createLogger } from './logger.js';
 
 let mainWindow;
 const paths = new Paths();
@@ -100,9 +101,38 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
-app.on('before-quit', () => {
+let isShuttingDown = false;
+
+function gracefulShutdown() {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  const shutdownLog = createLogger('shutdown', '\x1b[31m');
+  shutdownLog.info('shutting down...');
+
+  // Stop orchestrator loops
   for (const orch of orchestrators.values()) {
     orch.stop();
   }
+
+  // Kill running agents gracefully
+  for (const orch of orchestrators.values()) {
+    orch.killRunningAgents();
+  }
+
+  // Stop server
   if (server) server.stop();
+
+  shutdownLog.info('waiting 5s for agents to finish...');
+  setTimeout(() => {
+    shutdownLog.info('exiting');
+    app.exit(0);
+  }, 5000);
+}
+
+app.on('before-quit', (e) => {
+  if (!isShuttingDown) {
+    e.preventDefault();
+    gracefulShutdown();
+  }
 });
