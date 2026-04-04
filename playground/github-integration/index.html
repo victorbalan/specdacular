@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Project Integration Research</title>
+  <style>
+    :root {
+      --color-local: #4ade80;
+      --color-github: #fb923c;
+      --color-interface: #60a5fa;
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-text: #e2e8f0;
+      --color-muted: #94a3b8;
+      --color-border: #334155;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-interface);
+      margin-bottom: 0.5rem;
+    }
+
+    header .subtitle {
+      font-size: 0.95rem;
+      color: var(--color-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    @media (max-width: 640px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--color-interface);
+      box-shadow: 0 0 16px rgba(96, 165, 250, 0.15);
+    }
+
+    .card .icon {
+      margin-bottom: 0.75rem;
+    }
+
+    .card .icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+    }
+
+    .card .desc {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .card .link {
+      font-size: 0.8rem;
+      color: var(--color-interface);
+      font-weight: 600;
+    }
+
+    /* Key Findings */
+    .findings {
+      margin-bottom: 3rem;
+    }
+
+    .findings h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .findings ol {
+      list-style: none;
+      counter-reset: finding;
+    }
+
+    .findings ol li {
+      counter-increment: finding;
+      padding: 0.6rem 0;
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+
+    .findings ol li:last-child {
+      border-bottom: none;
+    }
+
+    .findings ol li::before {
+      content: counter(finding);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-bg);
+      background: var(--color-github);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      font-size: 0.8rem;
+      color: var(--color-muted);
+    }
+
+    footer a {
+      color: var(--color-interface);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>GitHub Project Integration Research</h1>
+      <p class="subtitle">Comparing local state management vs GitHub Projects V2 for Specdacular's task runner</p>
+      <p>This is a research deliverable exploring how Specdacular could integrate with GitHub Projects V2 for task tracking and state management. These interactive playgrounds visualize architectural trade-offs, data flows, and CLI mappings. No production code is included.</p>
+    </header>
+
+    <div class="card-grid">
+
+      <a class="card" href="comparison.html">
+        <div class="icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="6" width="12" height="20" rx="2" stroke="#4ade80" stroke-width="2"/>
+            <rect x="18" y="6" width="12" height="20" rx="2" stroke="#fb923c" stroke-width="2"/>
+            <line x1="16" y1="10" x2="16" y2="22" stroke="#60a5fa" stroke-width="2" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <h2>Architecture Comparison</h2>
+        <p class="desc">Side-by-side view of local vs GitHub state management. Interactive field mapping table.</p>
+        <span class="link">Open &rarr;</span>
+      </a>
+
+      <a class="card" href="data-flow.html">
+        <div class="icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="6" cy="16" r="4" stroke="#4ade80" stroke-width="2"/>
+            <circle cx="26" cy="16" r="4" stroke="#fb923c" stroke-width="2"/>
+            <line x1="10" y1="16" x2="22" y2="16" stroke="#60a5fa" stroke-width="2"/>
+            <polyline points="19,13 22,16 19,19" stroke="#60a5fa" stroke-width="2" fill="none"/>
+          </svg>
+        </div>
+        <h2>Data Flow Scenarios</h2>
+        <p class="desc">Step-by-step animated data flows for 5 task lifecycle operations.</p>
+        <span class="link">Open &rarr;</span>
+      </a>
+
+      <a class="card" href="architecture.html">
+        <div class="icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="24" height="8" rx="2" stroke="#60a5fa" stroke-width="2"/>
+            <rect x="4" y="20" width="10" height="8" rx="2" stroke="#4ade80" stroke-width="2"/>
+            <rect x="18" y="20" width="10" height="8" rx="2" stroke="#fb923c" stroke-width="2"/>
+            <line x1="9" y1="12" x2="9" y2="20" stroke="#334155" stroke-width="2"/>
+            <line x1="23" y1="12" x2="23" y2="20" stroke="#334155" stroke-width="2"/>
+          </svg>
+        </div>
+        <h2>Approach Explorer</h2>
+        <p class="desc">Three-tab view comparing Full GitHub, Hybrid, and Pluggable Backend approaches.</p>
+        <span class="link">Open &rarr;</span>
+      </a>
+
+      <a class="card" href="cli-commands.html">
+        <div class="icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="28" height="24" rx="3" stroke="#60a5fa" stroke-width="2"/>
+            <polyline points="8,14 12,18 8,22" stroke="#4ade80" stroke-width="2" fill="none"/>
+            <line x1="16" y1="22" x2="24" y2="22" stroke="#94a3b8" stroke-width="2"/>
+          </svg>
+        </div>
+        <h2>CLI Command Reference</h2>
+        <p class="desc">Every local operation mapped to its gh CLI equivalent with expandable examples.</p>
+        <span class="link">Open &rarr;</span>
+      </a>
+
+    </div>
+
+    <section class="findings">
+      <h2>Key Findings</h2>
+      <ol>
+        <li>Live progress is the critical gap &mdash; GitHub Projects has no native support for streaming agent output or real-time status updates.</li>
+        <li>GitHub Projects V2 is API-mature enough &mdash; GraphQL mutations cover field updates, item creation, and status transitions needed for task tracking.</li>
+        <li>PR integration is already GitHub-native &mdash; linking tasks to pull requests requires no custom bridge; the existing data model supports it.</li>
+        <li>Pluggable backend preserves optionality &mdash; an interface layer lets teams choose local-only, GitHub-only, or hybrid without code changes.</li>
+        <li>Offline/latency trade-off is real &mdash; local state is instant and works offline; GitHub sync adds network dependency and eventual consistency concerns.</li>
+        <li>Spec storage needs a strategy &mdash; design specs are large markdown files that don't map cleanly to GitHub Project item fields or descriptions.</li>
+      </ol>
+    </section>
+
+    <footer>
+      Design spec: <a href="../../docs/superpowers/specs/2026-04-04-github-project-integration-design.md">docs/superpowers/specs/2026-04-04-github-project-integration-design.md</a>
+    </footer>
+
+  </div>
+</body>
+</html>

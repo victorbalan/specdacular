@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLI Commands Reference — GitHub Project Integration</title>
+<style>
+  :root {
+    --color-local: #4ade80;
+    --color-github: #fb923c;
+    --color-interface: #60a5fa;
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-text: #e2e8f0;
+    --color-muted: #94a3b8;
+    --color-border: #334155;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  a { color: var(--color-interface); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+  .back-link:hover { color: var(--color-interface); }
+
+  header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  header h1 {
+    font-size: 1.5rem;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+  }
+  header p {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+  }
+
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    outline: none;
+  }
+  .search-input:focus {
+    border-color: var(--color-interface);
+  }
+  .search-input::placeholder {
+    color: var(--color-muted);
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn:hover {
+    border-color: var(--color-interface);
+    color: var(--color-text);
+  }
+
+  .accordion { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .row {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .row.open { border-color: var(--color-interface); }
+
+  .row-header {
+    display: grid;
+    grid-template-columns: 2fr 2fr 2fr auto;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--color-surface);
+    cursor: pointer;
+    gap: 1rem;
+    user-select: none;
+  }
+  .row-header:hover { background: #253347; }
+
+  .op-name {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 0.9rem;
+  }
+
+  .summary-local {
+    font-size: 0.8rem;
+    color: var(--color-local);
+  }
+
+  .summary-github {
+    font-size: 0.8rem;
+    color: var(--color-github);
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge-full     { background: #166534; color: #4ade80; }
+  .badge-better   { background: #14532d; color: #86efac; }
+  .badge-partial  { background: #713f12; color: #fbbf24; }
+  .badge-awkward  { background: #78350f; color: #fcd34d; }
+  .badge-lost     { background: #7f1d1d; color: #fca5a5; }
+
+  .row-detail {
+    display: none;
+    padding: 1rem;
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+  }
+  .row.open .row-detail { display: block; }
+
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .panel {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .panel-local .panel-header {
+    background: #0a2a1a;
+    color: var(--color-local);
+  }
+  .panel-github .panel-header {
+    background: #2a1a0a;
+    color: var(--color-github);
+  }
+
+  .panel pre {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    background: var(--color-surface);
+    margin: 0;
+  }
+
+  .panel pre .cmt { color: #6b7280; font-style: italic; }
+  .panel pre .str { color: #fbbf24; }
+  .panel pre .kw  { color: #c084fc; }
+
+  @media (max-width: 800px) {
+    .row-header { grid-template-columns: 1fr; gap: 0.25rem; }
+    .panels { grid-template-columns: 1fr; }
+    body { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-link">&larr; Back to Index</a>
+
+<header>
+  <h1>CLI Commands Reference</h1>
+  <p>Side-by-side comparison of local filesystem operations vs GitHub CLI equivalents for every task management operation.</p>
+</header>
+
+<div class="controls">
+  <input type="text" class="search-input" id="searchInput" placeholder="Filter operations...">
+  <button class="btn" id="expandAll">Expand All</button>
+  <button class="btn" id="collapseAll">Collapse All</button>
+</div>
+
+<div class="accordion" id="accordion"></div>
+
+<script>
+function highlight(code, lang) {
+  const escaped = code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return escaped
+    .replace(/(\/\/.*$|#.*$)/gm, '<span class="cmt">$1</span>')
+    .replace(/(".*?"|'.*?'|`.*?`)/g, '<span class="str">$1</span>')
+    .replace(/\b(const|let|function|return|async|await|import|new|if|var|for|of)\b/g, '<span class="kw">$1</span>');
+}
+
+const operations = [
+  {
+    name: "1. Create Task",
+    localSummary: "writeFileSync(taskPath, JSON.stringify(task))",
+    githubSummary: "gh issue create + gh project item-add",
+    badge: "full",
+    badgeLabel: "Full",
+    localCode: `const task = {
+  id: \`idea-\${Date.now().toString(36)}\`,
+  name,
+  status: 'idea',
+  created: new Date().toISOString(),
+  spec: null,
+  feedback: [],
+  pr_url: null
+};
+
+// Write task to local filesystem
+const taskPath = join(tasksDir, \`\${task.id}.json\`);
+writeFileSync(taskPath, JSON.stringify(task, null, 2));
+
+// Confirm creation
+console.log(\`Created task \${task.id} at \${taskPath}\`);`,
+    localLang: "javascript",
+    githubCode: `# Step 1: Create an issue for the task
+gh issue create \\
+  --title "Feature name" \\
+  --body "Description of the task" \\
+  --label "idea" \\
+  --project "Specd Tasks"
+
+# Step 2: Look up project field IDs
+gh project field-list 1 --owner @me --format json
+
+# Step 3: Set initial status to "idea"
+gh project item-edit --id ITEM_ID \\
+  --field-id STATUS_FIELD_ID \\
+  --project-id PROJECT_ID \\
+  --single-select-option-id IDEA_OPTION_ID
+
+# Note: Requires 2-3 API calls vs 1 local write`,
+    githubLang: "bash"
+  },
+  {
+    name: "2. Update Status",
+    localSummary: "readFileSync -> modify -> writeFileSync",
+    githubSummary: "gh project item-edit --field-id ... --single-select-option-id ...",
+    badge: "full",
+    badgeLabel: "Full",
+    localCode: `const taskPath = join(tasksDir, \`\${taskId}.json\`);
+
+// Read current task
+const task = JSON.parse(readFileSync(taskPath, 'utf8'));
+
+// Update status
+task.status = newStatus;
+task.updated = new Date().toISOString();
+
+// Write back
+writeFileSync(taskPath, JSON.stringify(task, null, 2));
+
+console.log(\`Task \${taskId} status: \${task.status} -> \${newStatus}\`);`,
+    localLang: "javascript",
+    githubCode: `# Look up the project item ID for the issue
+gh project item-list 1 --owner @me --format json \\
+  | jq '.items[] | select(.content.number == 42)'
+
+# Look up field ID and option IDs
+gh project field-list 1 --owner @me --format json \\
+  | jq '.fields[] | select(.name == "Status")'
+
+# Update the status field
+gh project item-edit --id ITEM_ID \\
+  --field-id STATUS_FIELD_ID \\
+  --project-id PROJECT_ID \\
+  --single-select-option-id IN_PROGRESS_OPTION_ID
+
+# Direct mapping but requires ID lookups each time
+# (can cache field IDs across calls)`,
+    githubLang: "bash"
+  },
+  {
+    name: "3. Get All Tasks",
+    localSummary: "readdirSync(tasksDir).map(f => JSON.parse(readFileSync(...)))",
+    githubSummary: "gh project item-list --format json",
+    badge: "full",
+    badgeLabel: "Full",
+    localCode: `const tasksDir = join(projectDir, '.specd', 'tasks');
+
+// Read all task files
+const tasks = readdirSync(tasksDir)
+  .filter(f => f.endsWith('.json'))
+  .map(f => {
+    const content = readFileSync(join(tasksDir, f), 'utf8');
+    return JSON.parse(content);
+  });
+
+// Sort by created date
+tasks.sort((a, b) => new Date(b.created) - new Date(a.created));
+
+console.log(\`Found \${tasks.length} tasks\`);
+return tasks;`,
+    localLang: "javascript",
+    githubCode: `# List all items in the project with their fields
+gh project item-list 1 --owner @me --format json
+
+# Filter by status
+gh project item-list 1 --owner @me --format json \\
+  | jq '.items[] | select(.status == "In Progress")'
+
+# Get detailed info including labels
+gh project item-list 1 --owner @me --format json \\
+  | jq '[.items[] | {
+    id: .content.number,
+    title: .content.title,
+    status: .status,
+    type: .content.type
+  }]'
+
+# Note: Single API call returns all items with fields`,
+    githubLang: "bash"
+  },
+  {
+    name: "4. Get Single Task",
+    localSummary: "JSON.parse(readFileSync(join(tasksDir, id + '.json')))",
+    githubSummary: "gh issue view N --json title,body,labels,state",
+    badge: "full",
+    badgeLabel: "Full",
+    localCode: `const taskPath = join(tasksDir, \`\${taskId}.json\`);
+
+// Read and parse
+if (!existsSync(taskPath)) {
+  throw new Error(\`Task \${taskId} not found\`);
+}
+
+const task = JSON.parse(readFileSync(taskPath, 'utf8'));
+
+console.log(\`Task: \${task.name}\`);
+console.log(\`Status: \${task.status}\`);
+console.log(\`Created: \${task.created}\`);
+return task;`,
+    localLang: "javascript",
+    githubCode: `# Get full issue details as JSON
+gh issue view 42 --json title,body,labels,state,comments,assignees
+
+# Get just the body (spec content)
+gh issue view 42 --json body --jq '.body'
+
+# Get with project field values
+gh issue view 42 --json projectItems \\
+  --jq '.projectItems[] | {
+    project: .project.title,
+    status: .status.name
+  }'
+
+# Note: One call gets all data including comments`,
+    githubLang: "bash"
+  },
+  {
+    name: "5. Store Spec",
+    localSummary: "task.spec = specText in JSON file",
+    githubSummary: "gh issue edit N --body \"spec content\"",
+    badge: "partial",
+    badgeLabel: "Partial",
+    localCode: `const taskPath = join(tasksDir, \`\${taskId}.json\`);
+const task = JSON.parse(readFileSync(taskPath, 'utf8'));
+
+// Store full spec text (no size limit)
+task.spec = specText;
+task.specUpdated = new Date().toISOString();
+
+writeFileSync(taskPath, JSON.stringify(task, null, 2));
+
+// Local files can store specs of any size
+// Typical spec: 5-50KB of text
+console.log(\`Stored spec (\${specText.length} chars) for \${taskId}\`);`,
+    localLang: "javascript",
+    githubCode: `# Store spec as issue body
+gh issue edit 42 --body "## Spec
+
+Full specification text goes here...
+
+## Requirements
+- Requirement 1
+- Requirement 2
+"
+
+# WARNING: GitHub issue body limit is ~65,536 characters
+# Large specs may need to be split or linked
+
+# Alternative: attach as a comment with label
+gh issue comment 42 --body "## Spec v1.2
+\`\`\`json
+{ full spec JSON here if needed }
+\`\`\`
+"
+
+# Or link to a file in the repo
+gh issue edit 42 --body "Spec: [link](../docs/specs/feature.md)"`,
+    githubLang: "bash"
+  },
+  {
+    name: "6. Store Feedback",
+    localSummary: "task.feedback = text in JSON file",
+    githubSummary: "gh issue comment N --body \"feedback text\"",
+    badge: "better",
+    badgeLabel: "Better",
+    localCode: `const taskPath = join(tasksDir, \`\${taskId}.json\`);
+const task = JSON.parse(readFileSync(taskPath, 'utf8'));
+
+// Append feedback (overwrites or appends to array)
+if (!Array.isArray(task.feedback)) {
+  task.feedback = [];
+}
+task.feedback.push({
+  text: feedbackText,
+  timestamp: new Date().toISOString()
+});
+
+writeFileSync(taskPath, JSON.stringify(task, null, 2));
+
+// Local: flat array, no threading, no author info
+console.log(\`Added feedback #\${task.feedback.length}\`);`,
+    localLang: "javascript",
+    githubCode: `# Add feedback as a comment (threaded, timestamped, attributed)
+gh issue comment 42 --body "## Feedback
+
+The implementation looks good but needs:
+- Better error handling in the parser
+- More test coverage for edge cases
+
+Tested on: macOS 14.2, Node 20.x"
+
+# GitHub automatically adds:
+# - Author attribution
+# - Timestamp
+# - Markdown rendering
+# - Email notifications to subscribers
+# - Reactions support
+
+# List all feedback/comments
+gh issue view 42 --json comments \\
+  --jq '.comments[] | {
+    author: .author.login,
+    date: .createdAt,
+    body: .body
+  }'`,
+    githubLang: "bash"
+  },
+  {
+    name: "7. Link PR",
+    localSummary: "updateTask(id, { pr_url: url })",
+    githubSummary: "Automatic via Fixes #N in PR body",
+    badge: "better",
+    badgeLabel: "Better",
+    localCode: `const taskPath = join(tasksDir, \`\${taskId}.json\`);
+const task = JSON.parse(readFileSync(taskPath, 'utf8'));
+
+// Manually store PR URL
+task.pr_url = prUrl;
+task.pr_linked = new Date().toISOString();
+
+writeFileSync(taskPath, JSON.stringify(task, null, 2));
+
+// Must manually track the relationship
+// No automatic status updates when PR merges
+// No bidirectional linking
+console.log(\`Linked PR \${prUrl} to task \${taskId}\`);`,
+    localLang: "javascript",
+    githubCode: `# Option 1: Use closing keywords in PR body (automatic)
+gh pr create \\
+  --title "Implement feature X" \\
+  --body "Fixes #42
+
+## Changes
+- Added parser module
+- Updated config schema"
+
+# GitHub automatically:
+# - Links PR to issue #42
+# - Closes issue when PR merges
+# - Shows PR status on issue timeline
+# - Updates project board status
+
+# Option 2: Manual linking without auto-close
+gh pr create \\
+  --title "Implement feature X" \\
+  --body "Related to #42"
+
+# Option 3: Link after PR creation
+gh issue develop 42 --checkout
+# Creates branch linked to issue`,
+    githubLang: "bash"
+  },
+  {
+    name: "8. Live Progress",
+    localSummary: "stateManager.updateLiveProgress(taskId, { progress, percent })",
+    githubSummary: "NOT FEASIBLE -- rate limits prevent 2-5s updates",
+    badge: "lost",
+    badgeLabel: "Lost",
+    localCode: `// Update progress every 2-5 seconds during execution
+const interval = setInterval(() => {
+  const progress = agent.getProgress();
+
+  stateManager.updateLiveProgress(taskId, {
+    stage: progress.currentStage,
+    percent: progress.percent,
+    message: progress.statusMessage,
+    timestamp: Date.now()
+  });
+
+  // Instant local filesystem write (~1ms)
+  // StatusLine hook reads this for live display
+}, 2000);
+
+// On completion
+clearInterval(interval);
+stateManager.updateLiveProgress(taskId, {
+  stage: 'complete',
+  percent: 100,
+  message: 'Done'
+});`,
+    localLang: "javascript",
+    githubCode: `# NOT FEASIBLE with GitHub API
+#
+# GitHub API rate limits:
+# - 5,000 requests/hour (authenticated)
+# - Updating every 2-5 seconds = 720-1800 req/hour
+# - For a SINGLE task -- multiple tasks would exceed limits
+#
+# Even if rate limits allowed it:
+# - Minimum API latency: ~200-500ms per call
+# - Issue comment edits trigger notifications
+# - Project field updates are slow
+#
+# Possible workarounds (all poor):
+# 1. Update a gist with progress (still rate limited)
+# 2. Use check-run API (designed for CI, not task progress)
+# 3. Batch updates every 30-60s (loses "live" feel)
+#
+# VERDICT: This operation has no GitHub equivalent.
+# Live progress must remain local-only.`,
+    githubLang: "bash"
+  },
+  {
+    name: "9. Completed Stages (Checkpoint)",
+    localSummary: "stateManager.getCompletedStages(taskId) returns array",
+    githubSummary: "Parse JSON from issue comment code block",
+    badge: "awkward",
+    badgeLabel: "Awkward",
+    localCode: `// Get completed stages for a task
+const stages = stateManager.getCompletedStages(taskId);
+// Returns: ['spec', 'review', 'implement']
+
+// Check if a specific stage is complete
+if (stages.includes('spec')) {
+  console.log('Spec stage already done, skipping...');
+}
+
+// Save a new checkpoint
+stateManager.saveCheckpoint(taskId, {
+  completedStages: [...stages, 'test'],
+  lastStage: 'test',
+  timestamp: Date.now()
+});
+
+// Fast array lookup, native data structure
+// Perfect for resume-on-restart logic`,
+    localLang: "javascript",
+    githubCode: `# Store checkpoint as a specially formatted comment
+gh issue comment 42 --body '## Pipeline Checkpoint
+<!-- specd:checkpoint -->
+\`\`\`json
+{
+  "completedStages": ["spec", "review", "implement"],
+  "lastStage": "implement",
+  "timestamp": "2026-04-04T10:30:00Z"
+}
+\`\`\`'
+
+# Read checkpoint back by finding the comment
+gh issue view 42 --json comments \\
+  --jq '.comments[]
+    | select(.body | contains("specd:checkpoint"))
+    | .body' \\
+  | sed -n '/\`\`\`json/,/\`\`\`/p' \\
+  | sed '1d;$d' \\
+  | jq '.completedStages'
+
+# Update: edit the checkpoint comment (need comment ID)
+gh api repos/{owner}/{repo}/issues/42/comments \\
+  --jq '.[] | select(.body | contains("specd:checkpoint")) | .id'
+
+# Then update it
+gh api -X PATCH repos/{owner}/{repo}/issues/comments/COMMENT_ID \\
+  -f body='updated checkpoint JSON...'
+
+# AWKWARD: requires parsing, comment ID lookups, fragile`,
+    githubLang: "bash"
+  },
+  {
+    name: "10. Delete Task",
+    localSummary: "unlinkSync(join(tasksDir, id + '.json'))",
+    githubSummary: "gh issue close N --reason \"not planned\" + archive",
+    badge: "full",
+    badgeLabel: "Full",
+    localCode: `const taskPath = join(tasksDir, \`\${taskId}.json\`);
+
+// Check existence
+if (!existsSync(taskPath)) {
+  throw new Error(\`Task \${taskId} not found\`);
+}
+
+// Delete permanently
+unlinkSync(taskPath);
+
+// Optionally clean up related files
+const specPath = join(specsDir, \`\${taskId}-spec.md\`);
+if (existsSync(specPath)) {
+  unlinkSync(specPath);
+}
+
+// Gone forever -- no recovery without git
+console.log(\`Deleted task \${taskId}\`);`,
+    localLang: "javascript",
+    githubCode: `# Close with "not planned" reason (soft delete)
+gh issue close 42 --reason "not planned" \\
+  --comment "Task cancelled: no longer needed"
+
+# Archive from project board
+gh project item-archive --id ITEM_ID --project-id PROJECT_ID
+
+# Different semantics:
+# - Local: permanent deletion (unlink)
+# - GitHub: issue still exists, just closed + archived
+# - GitHub preserves full history and comments
+# - Can be reopened: gh issue reopen 42
+
+# For hard delete (admin only, not recommended):
+# gh api -X DELETE repos/{owner}/{repo}/issues/42
+# Note: GitHub does NOT support issue deletion via API
+# Issues are permanent records`,
+    githubLang: "bash"
+  }
+];
+
+function buildAccordion() {
+  const container = document.getElementById('accordion');
+  container.innerHTML = '';
+
+  operations.forEach((op, index) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.dataset.name = op.name.toLowerCase();
+
+    const badgeClass = 'badge-' + op.badge;
+
+    row.innerHTML = `
+      <div class="row-header">
+        <span class="op-name">${op.name}</span>
+        <span class="summary-local">${escapeHtml(op.localSummary)}</span>
+        <span class="summary-github">${escapeHtml(op.githubSummary)}</span>
+        <span class="badge ${badgeClass}">${op.badgeLabel}</span>
+      </div>
+      <div class="row-detail">
+        <div class="panels">
+          <div class="panel panel-local">
+            <div class="panel-header">Local</div>
+            <pre>${highlight(op.localCode, op.localLang)}</pre>
+          </div>
+          <div class="panel panel-github">
+            <div class="panel-header">GitHub</div>
+            <pre>${highlight(op.githubCode, op.githubLang)}</pre>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const header = row.querySelector('.row-header');
+    header.addEventListener('click', () => {
+      row.classList.toggle('open');
+    });
+
+    container.appendChild(row);
+  });
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function highlight(code, lang) {
+  const escaped = code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return escaped
+    .replace(/(\/\/.*$|#.*$)/gm, '<span class="cmt">$1</span>')
+    .replace(/(".*?"|'.*?'|`.*?`)/g, '<span class="str">$1</span>')
+    .replace(/\b(const|let|function|return|async|await|import|new|if|var|for|of)\b/g, '<span class="kw">$1</span>');
+}
+
+// Search/filter
+document.getElementById('searchInput').addEventListener('input', function() {
+  const query = this.value.toLowerCase();
+  document.querySelectorAll('.row').forEach(row => {
+    const match = row.dataset.name.includes(query);
+    row.style.display = match ? '' : 'none';
+  });
+});
+
+// Expand/Collapse all
+document.getElementById('expandAll').addEventListener('click', () => {
+  document.querySelectorAll('.row').forEach(row => row.classList.add('open'));
+});
+
+document.getElementById('collapseAll').addEventListener('click', () => {
+  document.querySelectorAll('.row').forEach(row => row.classList.remove('open'));
+});
+
+// Build on load
+buildAccordion();
+</script>
+</body>
+</html>
