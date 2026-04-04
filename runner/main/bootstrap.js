@@ -9,7 +9,7 @@ const DEFAULT_CONFIG = {
     failure_policy: 'skip',
     timeout: 3600,
     stuck_timeout: 300,
-    max_parallel: 1,
+    max_parallel: 3,
   },
 };
 
