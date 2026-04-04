@@ -119,7 +119,7 @@ export class AgentRunner extends EventEmitter {
       // Stuck detection
       const stuckCheck = setInterval(() => {
         if (Date.now() - lastOutputAt > this.stuckTimeout) {
-          this.emit('error', new Error('Agent stuck — no output'));
+          log.error(`agent stuck — no output for ${this.stuckTimeout / 1000}s, killing`);
           proc.kill('SIGTERM');
           setTimeout(() => proc.kill('SIGKILL'), 5000);
         }
