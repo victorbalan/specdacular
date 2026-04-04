@@ -17,6 +17,18 @@ export class AgentRunner extends EventEmitter {
     this.stuckTimeout = (stuck_timeout || 1800) * 1000;
   }
 
+  kill() {
+    if (this.proc && !this.proc.killed) {
+      log.info(`  killing agent pid=${this.proc.pid}`);
+      this.proc.kill('SIGTERM');
+      setTimeout(() => {
+        if (this.proc && !this.proc.killed) {
+          this.proc.kill('SIGKILL');
+        }
+      }, 5000);
+    }
+  }
+
   async run(prompt, { cwd, logPath } = {}) {
     return new Promise((resolve, reject) => {
       const fullPrompt = this.systemPrompt ? `${this.systemPrompt}\n\n${prompt}` : prompt;
@@ -34,6 +46,7 @@ export class AgentRunner extends EventEmitter {
         env: { ...process.env },
       });
 
+      this.proc = proc;
       log.info(`  pid: ${proc.pid}`);
       const logStream = logPath ? createWriteStream(logPath, { flags: 'a' }) : null;
       let lastOutputAt = Date.now();
@@ -128,6 +141,7 @@ export class AgentRunner extends EventEmitter {
       }, 30000);
 
       proc.on('close', (code) => {
+        this.proc = null;
         log.info(`  process exited: code=${code} pid=${proc.pid}`);
         clearTimeout(globalTimer);
         clearInterval(stuckCheck);
