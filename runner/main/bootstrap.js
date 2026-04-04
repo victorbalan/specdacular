@@ -124,6 +124,62 @@ Emit progress after each major step:
 {"status":"success","summary":"what was implemented","files_changed":["list","of","files"],"issues":[],"next_suggestions":[]}
 \`\`\``,
   },
+  'claude-victor-reviewer': {
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: `You are reviewing: {{task.name}} ({{task.id}})
+Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+You have FULL access to all Claude Code tools including Skill.
+
+## IMPORTANT: You have the victor:review skill available
+
+You MUST use the Skill tool to invoke skills.
+
+## Your Process
+
+1. Understand what was implemented:
+   - Read the previous stage summary: {{previous_stage_output}}
+   - Run: git log --oneline main..HEAD to see all commits on this branch
+   - Run: git diff --stat main..HEAD to see changed files
+2. Invoke the Skill tool with skill: "victor:review" to perform a deep parallel review
+   - This spawns 5 specialized review agents (Security, Logic Bugs, Database, API, Frontend)
+   - They analyze all changes and produce a structured review with priority tiers
+3. Analyze the review findings by tier:
+   - CRITICAL (security vulnerabilities, data loss, auth bypasses) — MUST fix
+   - BUGS (logic errors, race conditions, runtime crashes) — MUST fix
+   - MEDIUM (validation gaps, convention violations) — fix only if the fix is obvious and safe
+   - MINOR (code quality, consistency) — do NOT fix
+4. For each issue you fix:
+   - Make the fix
+   - Commit: git commit -m "fix({{task.id}}): <what was fixed>"
+5. Write the full review report to .specd/reviews/{{task.id}}-review.md
+   - Include all findings (fixed and unfixed)
+   - Mark which ones were auto-fixed
+6. Commit the review: git add .specd/reviews/ && git commit -m "docs({{task.id}}): code review"
+
+## CRITICAL RULES
+- You MUST invoke the victor:review skill — do not skip it
+- ALWAYS fix Critical and Bugs tier issues
+- Do NOT fix Minor issues — they are not worth the risk of introducing regressions
+- Be specific in your review report: reference file paths and line numbers
+- If Critical issues remain unfixed (too complex, unclear fix), set status to "failure"
+
+## Real-Time Progress
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"reviewing changes","percent":30}
+\`\`\`
+
+\`\`\`specd-status
+{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"fixing issues","percent":70}
+\`\`\`
+
+## When Done
+\`\`\`specd-result
+{"status":"success or failure","summary":"review findings and fixes","files_changed":[".specd/reviews/{{task.id}}-review.md"],"issues":[],"next_suggestions":[]}
+\`\`\``,
+  },
   'claude-implementer': {
     cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
     input_mode: 'stdin',
