@@ -3,14 +3,28 @@ import { colors, radius, shadows } from '../theme';
 import TaskDetailOverlay from './TaskDetailOverlay';
 
 const COLUMNS = [
-  { key: 'idea', label: 'Ideas', color: '#868e96', statuses: ['idea'] },
-  { key: 'planning', label: 'Planning', color: '#cc5de8', statuses: ['planning'] },
-  { key: 'review', label: 'Review', color: '#fcc419', statuses: ['review'] },
-  { key: 'ready', label: 'Queued', color: colors.warning, statuses: ['ready', 'queued'] },
-  { key: 'in_progress', label: 'Running', color: colors.accent, statuses: ['in_progress'] },
-  { key: 'done', label: 'Done', color: colors.success, statuses: ['done'] },
-  { key: 'failed', label: 'Failed', color: colors.danger, statuses: ['failed'] },
+  { key: 'backlog', label: 'Backlog', color: '#868e96', statuses: ['idea'], addButton: true },
+  { key: 'ready', label: 'Ready', color: colors.warning, statuses: ['review', 'ready'] },
+  { key: 'in_progress', label: 'In Progress', color: colors.accent, statuses: ['planning', 'in_progress'] },
+  { key: 'finished', label: 'Finished', color: colors.success, statuses: ['done', 'failed'] },
 ];
+
+const SUB_STATE_LABELS = {
+  idea: { label: 'Idea', color: '#868e96' },
+  review: { label: 'Needs Review', color: '#fcc419' },
+  ready: { label: 'Queued', color: colors.warning },
+  planning: { label: 'Planning', color: '#cc5de8' },
+  in_progress: { label: 'Running', color: colors.accent },
+  done: { label: 'Done', color: colors.success },
+  failed: { label: 'Failed', color: colors.danger },
+};
+
+const STATUS_PRIORITY = {
+  idea: 0,
+  review: 0, ready: 1,
+  planning: 0, in_progress: 1,
+  done: 0, failed: 1,
+};
 
 const ACTION_MAP = {
   idea: { label: 'Plan', action: 'plan' },
@@ -31,15 +45,17 @@ export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
     <>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${COLUMNS.length}, minmax(140px, 1fr))`,
+        gridTemplateColumns: `repeat(${COLUMNS.length}, minmax(200px, 1fr))`,
         gap: 10,
         flex: 1,
         minHeight: 0,
         overflowX: 'auto',
       }}>
         {COLUMNS.map(col => {
-          const colTasks = tasks.filter(t => col.statuses.includes(t.status));
-          const isIdeasCol = col.key === 'idea';
+          const colTasks = tasks
+            .filter(t => col.statuses.includes(t.status))
+            .sort((a, b) => (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99));
+          const isIdeasCol = col.addButton;
 
           return (
             <div key={col.key} style={{
@@ -317,12 +333,23 @@ function TaskCard({ task, action, onClick, onAction, onRefresh }) {
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{
-          backgroundColor: colors.bg, borderRadius: radius.sm,
-          padding: '1px 5px', fontSize: 10, fontWeight: 500, color: colors.textSecondary,
-        }}>
-          {task.projectName}
-        </span>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          <span style={{
+            backgroundColor: colors.bg, borderRadius: radius.sm,
+            padding: '1px 5px', fontSize: 10, fontWeight: 500, color: colors.textSecondary,
+          }}>
+            {task.projectName}
+          </span>
+          {SUB_STATE_LABELS[task.status] && (
+            <span style={{
+              backgroundColor: colors.bg, borderRadius: radius.sm,
+              padding: '1px 5px', fontSize: 10, fontWeight: 500,
+              color: SUB_STATE_LABELS[task.status].color,
+            }}>
+              {SUB_STATE_LABELS[task.status].label}
+            </span>
+          )}
+        </div>
         {action && (
           <button
             onClick={(e) => { e.stopPropagation(); onAction(action.action); }}
