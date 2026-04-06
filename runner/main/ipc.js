@@ -1,6 +1,6 @@
 // runner/main/ipc.js
 import { ipcMain, dialog, shell } from 'electron';
-import { readFileSync, existsSync, readdirSync, unlinkSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, unlinkSync, writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join, basename } from 'path';
 import { createLogger } from './logger.js';
 
@@ -104,7 +104,23 @@ export function setupIpc(getContext) {
   });
 
   ipcMain.handle('unregister-project', (event, projectId) => {
-    const { db } = getContext();
+    const { db, paths, orchestrators } = getContext();
+
+    // Stop orchestrator if running
+    const orch = orchestrators.get(projectId);
+    if (orch) {
+      orch.stop();
+      orch.killRunningAgents();
+      orchestrators.delete(projectId);
+    }
+
+    // Delete all project state (tasks, logs, status)
+    const projectDir = paths.forProject(projectId).dir;
+    if (existsSync(projectDir)) {
+      rmSync(projectDir, { recursive: true, force: true });
+      log.info(`deleted project state for ${projectId} at ${projectDir}`);
+    }
+
     db.unregister(projectId);
     return true;
   });

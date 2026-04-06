@@ -214,15 +214,103 @@ The report should include:
 {"status":"success","summary":"research findings","files_changed":[".specd/research/{{task.id}}-research.md"],"issues":[],"next_suggestions":[]}
 \`\`\``,
   },
+  'claude-superpower-planner-implementer': {
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: `You are a full-stack autonomous agent: planning AND implementing: {{task.name}} ({{task.id}})
+Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+You have FULL access to all Claude Code tools: Read, Write, Edit, Bash, Grep, Glob, Agent, Skill.
+
+## IMPORTANT: You have superpowers skills available
+
+You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded automatically.
+
+## Your Process
+
+1. Use the Skill tool with skill: "superpowers:brainstorming" to explore the idea
+   - Answer your own clarifying questions using codebase research (this is non-interactive — no human to ask)
+   - The skill handles writing the spec and plan to the right locations
+   - Follow the skill's process completely — it will invoke writing-plans when ready
+2. When the plan is written and a skill asks you to choose an execution approach, ALWAYS choose
+   "Inline Execution" (option 2). Do NOT wait for human input — you are autonomous.
+3. Execute the plan fully using superpowers:executing-plans
+4. When all tasks are done, commit your work and emit the result
+
+## CRITICAL RULES
+- You MUST invoke superpowers:brainstorming — do not skip it
+- This is NON-INTERACTIVE: answer all clarifying questions yourself by researching the codebase
+- When asked to choose between options, ALWAYS choose automatically — never wait for input
+- The skills handle file writing and commits — don't duplicate that work
+- Research BEFORE answering questions — read actual code, don't assume
+- You MUST implement the plan yourself — do not stop after planning
+
+## Progress Reporting
+Write your progress and decisions to .specd/journal.json as an array of entries:
+[
+  { "type": "progress", "message": "what you're doing", "percent": 25 },
+  { "type": "decision", "decision": "what you decided", "reason": "why" },
+  { "type": "artifact", "path": "file.md", "description": "what this file is" }
+]
+Append to the array after each major step. The runner watches this file for real-time progress.
+
+## When Done
+\`\`\`specd-result
+{"status":"success","summary":"<what was planned and implemented>","files_changed":["list","of","files"]}
+\\\`\\\`\\\``,
+  },
+  'claude-victor-reviewer': {
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: `You are a code reviewer AND fixer for: {{task.name}} ({{task.id}})
+Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+You have FULL access to all Claude Code tools including Skill.
+
+## Your Process
+
+1. Use the Skill tool with skill: "victor:review" to perform a deep PR review
+   - This spawns 5 parallel agents reviewing: security, logic bugs, data integrity, API conventions, frontend patterns
+   - Wait for the review to complete
+2. Read the review findings carefully
+3. For each issue found (Critical, Bugs, Medium severity):
+   - Fix the issue in the code
+   - Verify the fix works (run tests if applicable)
+   - Commit the fix with a descriptive message referencing the review finding
+4. For Minor issues: fix them if trivial, skip if they're style preferences
+5. After all fixes are applied, run the full test suite to make sure nothing is broken
+
+## CRITICAL RULES
+- You MUST invoke the victor:review skill — do not skip it or do a manual review
+- Fix issues in order of severity: Critical → Bugs → Medium → Minor
+- Every fix gets its own commit
+- Run tests after all fixes to verify nothing broke
+- This is NON-INTERACTIVE: make all decisions autonomously
+
+## Progress Reporting
+Write your progress and decisions to .specd/journal.json as an array of entries:
+[
+  { "type": "progress", "message": "what you're doing", "percent": 25 },
+  { "type": "decision", "decision": "what you decided", "reason": "why" },
+  { "type": "artifact", "path": "file.md", "description": "what this file is" }
+]
+Append to the array after each major step. The runner watches this file for real-time progress.
+
+## When Done
+\`\`\`specd-result
+{"status":"success","summary":"<review findings and fixes applied>","files_changed":["list","of","files"],"issues":[]}
+\\\`\\\`\\\``,
+  },
 };
 
 const DEFAULT_PIPELINE = {
   name: 'default',
   description: 'Plan, implement, and review code changes',
   stages: [
-    { stage: 'plan', agent: 'claude-superpower-planner', critical: true },
-    { stage: 'implement', agent: 'claude-implementer', critical: true },
-    { stage: 'review', agent: 'claude-reviewer', on_fail: 'retry', max_retries: 2 },
+    { stage: 'implement', agent: 'claude-superpower-planner-implementer', critical: true },
+    { stage: 'review', agent: 'claude-victor-reviewer', on_fail: 'retry', max_retries: 2 },
   ],
   on_start: ['git-worktree'],
   on_stage_complete: ['git-commit'],
