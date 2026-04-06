@@ -7,13 +7,6 @@ generated_by: specd
 
 > Always read this file first. These rules apply to every code change.
 
-## Zero Dependencies
-
-- No `dependencies` or `devDependencies` in package.json — this is by design
-- Use only Node.js built-ins: `fs`, `path`, `os`, `child_process`, `readline`
-- ANSI escape codes for colors, not chalk/ora/inquirer
-- If you need a feature, implement with built-ins or skip it
-
 ## Path Conventions
 
 - Source files use `~/.claude/` prefix — the installer rewrites paths per install type

@@ -1,3 +1,4 @@
+// runner/main/paths.js
 import { join } from 'path';
 import { homedir, platform } from 'os';
 
@@ -19,6 +20,7 @@ export class Paths {
   get agentTemplatesDir() { return join(this.root, 'templates', 'agents'); }
   get pipelineTemplatesDir() { return join(this.root, 'templates', 'pipelines'); }
   get projectsDir() { return join(this.root, 'projects'); }
+  get actionsDir() { return join(this.root, 'actions'); }
   get electronDir() { return join(this.root, 'electron'); }
 
   forProject(projectId) {
@@ -29,8 +31,6 @@ export class Paths {
       statusJson: join(dir, 'status.json'),
       tasksDir: join(dir, 'tasks'),
       logsDir: join(dir, 'logs'),
-      agentsDir: join(dir, 'agents'),
-      pipelinesDir: join(dir, 'pipelines'),
     };
   }
 }

@@ -1,0 +1,148 @@
+<h2>Runner Framework: Architecture Approaches</h2>
+<p class="subtitle">How should the framework separate "engine" from "user workflows"?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Plugin Architecture</h3>
+      <p><strong>Framework owns the loop. Users plug in behaviors.</strong></p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-header">How it works</div>
+        <div class="mockup-body" style="font-family: monospace; font-size: 13px; line-height: 1.8;">
+          <div style="color: #7c3aed; font-weight: bold;">FRAMEWORK (fixed)</div>
+          <div style="padding-left: 16px; border-left: 3px solid #7c3aed; margin: 8px 0;">
+            Task Queue → Pipeline Engine → Stage Runner<br>
+            State Machine → Event Bus → Persistence<br>
+            Process Manager → Output Parser → UI Server
+          </div>
+          <div style="color: #059669; font-weight: bold; margin-top: 12px;">PLUGINS (user-defined)</div>
+          <div style="padding-left: 16px; border-left: 3px solid #059669; margin: 8px 0;">
+            <strong>Executors:</strong> claude-code, codex, shell-script, http-api<br>
+            <strong>Hooks:</strong> post-stage-git-commit, post-pipeline-create-pr<br>
+            <strong>Reporters:</strong> telegram, slack, webhook
+          </div>
+          <div style="margin-top: 12px; padding: 8px; background: #f0fdf4; border-radius: 6px; font-family: sans-serif; font-size: 12px;">
+            <strong>Git/PR management</strong> = a built-in plugin called <code>git-workflow</code>.<br>
+            Ships by default, users can disable or replace it.
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Simple mental model — "fill in the slots"</li>
+          <li>Framework handles all the hard stuff (queue, resume, state)</li>
+          <li>Easy to share plugins between users</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Plugin API becomes a contract you can't easily change</li>
+          <li>Limited flexibility — if the framework loop doesn't fit, you're stuck</li>
+          <li>Risk of "plugin hell" — too many extension points</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Composable Primitives</h3>
+      <p><strong>Framework provides building blocks. Users compose their own engine.</strong></p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-header">How it works</div>
+        <div class="mockup-body" style="font-family: monospace; font-size: 13px; line-height: 1.8;">
+          <div style="color: #7c3aed; font-weight: bold;">PRIMITIVES (library)</div>
+          <div style="padding-left: 16px; border-left: 3px solid #7c3aed; margin: 8px 0;">
+            <code>TaskQueue</code> — priority queue with concurrency<br>
+            <code>Pipeline</code> — stage sequencer with retry/resume<br>
+            <code>AgentProcess</code> — spawn + parse + timeout<br>
+            <code>StateMachine</code> — define states + transitions<br>
+            <code>StateStore</code> — persist + broadcast changes<br>
+            <code>EventBus</code> — pub/sub for everything
+          </div>
+          <div style="color: #059669; font-weight: bold; margin-top: 12px;">USER CODE (compose freely)</div>
+          <div style="padding-left: 16px; border-left: 3px solid #059669; margin: 8px 0;">
+            <code style="color:#059669">const engine = new Pipeline([</code><br>
+            <code style="color:#059669">&nbsp; stage('plan', claude({ prompt: '...' })),</code><br>
+            <code style="color:#059669">&nbsp; stage('build', codex({ prompt: '...' })),</code><br>
+            <code style="color:#059669">&nbsp; stage('notify', webhook({ url: '...' })),</code><br>
+            <code style="color:#059669">])</code>
+          </div>
+          <div style="margin-top: 12px; padding: 8px; background: #f0fdf4; border-radius: 6px; font-family: sans-serif; font-size: 12px;">
+            <strong>Git/PR management</strong> = a utility function you call in stage callbacks.<br>
+            <code>afterStage(gitCommit())</code> / <code>afterPipeline(createPR())</code>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Maximum flexibility — combine pieces however you want</li>
+          <li>No framework lock-in — use only what you need</li>
+          <li>Easier to test individual pieces</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>More work for users — they assemble the engine themselves</li>
+          <li>Harder to build a UI on top (no standard shape)</li>
+          <li>"Library fatigue" — too many choices for beginners</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Config-Driven Engine + Escape Hatches</h3>
+      <p><strong>Declare workflows in JSON/YAML. Drop to code only when needed.</strong></p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-header">How it works</div>
+        <div class="mockup-body" style="font-family: monospace; font-size: 13px; line-height: 1.8;">
+          <div style="color: #7c3aed; font-weight: bold;">ENGINE (fixed, opinionated)</div>
+          <div style="padding-left: 16px; border-left: 3px solid #7c3aed; margin: 8px 0;">
+            Reads pipeline definitions → runs them<br>
+            Built-in executors: claude, codex, shell, http<br>
+            Built-in state machine, persistence, UI
+          </div>
+          <div style="color: #dc2626; font-weight: bold; margin-top: 12px;">PIPELINE CONFIG (JSON)</div>
+          <div style="padding-left: 16px; border-left: 3px solid #dc2626; margin: 8px 0; font-size: 12px;">
+            <code>{</code><br>
+            <code>&nbsp; "name": "research",</code><br>
+            <code>&nbsp; "stages": [</code><br>
+            <code>&nbsp; &nbsp; { "name": "gather", "executor": "claude",</code><br>
+            <code>&nbsp; &nbsp; &nbsp; "prompt": "Research {{task.topic}}..." },</code><br>
+            <code>&nbsp; &nbsp; { "name": "analyze", "executor": "claude",</code><br>
+            <code>&nbsp; &nbsp; &nbsp; "prompt": "Analyze: {{prev.output}}..." },</code><br>
+            <code>&nbsp; &nbsp; { "name": "report", "executor": "shell",</code><br>
+            <code>&nbsp; &nbsp; &nbsp; "cmd": "pandoc -o report.pdf" }</code><br>
+            <code>&nbsp; ],</code><br>
+            <code>&nbsp; "on_complete": { "action": "webhook", "url": "..." }</code><br>
+            <code>}</code>
+          </div>
+          <div style="color: #059669; font-weight: bold; margin-top: 12px;">ESCAPE HATCHES (when JSON isn't enough)</div>
+          <div style="padding-left: 16px; border-left: 3px solid #059669; margin: 8px 0;">
+            Custom executor: <code>"executor": "./my-script.js"</code><br>
+            Stage hooks: <code>"before": "./validate.js"</code><br>
+            Custom state transitions: <code>"on_fail": "./decide.js"</code>
+          </div>
+          <div style="margin-top: 12px; padding: 8px; background: #f0fdf4; border-radius: 6px; font-family: sans-serif; font-size: 12px;">
+            <strong>Git/PR management</strong> = a built-in "action" you reference in config.<br>
+            <code>"on_complete": { "action": "git-pr" }</code> — zero code needed.
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Lowest barrier to entry — just write JSON</li>
+          <li>UI can introspect pipeline definitions natively</li>
+          <li>Closest to what you already have (pipeline.json)</li>
+          <li>Escape hatches prevent hitting walls</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Config languages always grow — risk of "YAML programming"</li>
+          <li>Escape hatches can become the norm if config is too limited</li>
+          <li>Harder to type-check and debug than real code</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>

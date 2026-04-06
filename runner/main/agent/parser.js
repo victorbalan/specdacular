@@ -37,3 +37,26 @@ export class StreamParser extends EventEmitter {
     }
   }
 }
+
+export class JsonlParser extends EventEmitter {
+  feed(line) {
+    try {
+      const obj = JSON.parse(line);
+      if (obj.type === 'status') {
+        this.emit('status', obj);
+      } else if (obj.type === 'result') {
+        this.emit('result', obj);
+      } else {
+        this.emit('output', line);
+      }
+    } catch {
+      this.emit('output', line);
+    }
+  }
+}
+
+export class PlainParser extends EventEmitter {
+  feed(line) {
+    this.emit('output', line);
+  }
+}

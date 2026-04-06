@@ -23,7 +23,5 @@ describe('Paths', () => {
     a.equal(pp.statusJson, '/tmp/test-specd/projects/abc123/status.json');
     a.equal(pp.tasksDir, '/tmp/test-specd/projects/abc123/tasks');
     a.equal(pp.logsDir, '/tmp/test-specd/projects/abc123/logs');
-    a.equal(pp.agentsDir, '/tmp/test-specd/projects/abc123/agents');
-    a.equal(pp.pipelinesDir, '/tmp/test-specd/projects/abc123/pipelines');
   });
 });
