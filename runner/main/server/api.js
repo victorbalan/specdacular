@@ -150,9 +150,11 @@ export function createApiRouter(getContext) {
     const orch = orchestrators.get(req.params.id);
     if (!orch) return res.status(404).json({ error: 'Project not found' });
 
-    const task = orch.updateTask(req.params.taskId, { status: 'ready' });
-    if (!task) return res.status(404).json({ error: 'Task not found' });
-    res.json(task);
+    const mode = req.body.mode || 'fresh';
+    const action = mode === 'feedback' ? 'retry-feedback' : 'retry-fresh';
+    const result = orch.advanceTask(req.params.taskId, action, req.body.feedback);
+    if (!result) return res.status(404).json({ error: 'Task not found' });
+    res.json(result);
   });
 
   // Advance task (plan, approve, re-plan, retry)

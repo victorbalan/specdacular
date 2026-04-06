@@ -7,7 +7,7 @@ export function resolveTemplate(template, variables) {
 
 export function buildTemplateContext(task, stage, pipeline, paths, previousOutput) {
   return {
-    task: { id: task.id, name: task.name, spec: task.spec || '' },
+    task: { id: task.id, name: task.name, spec: task.spec || '', feedback: task.feedback || '' },
     stage: { name: stage.stage, index: stage.index, total: stage.total },
     pipeline: { name: pipeline.name },
     status_file: paths?.statusJson || '',

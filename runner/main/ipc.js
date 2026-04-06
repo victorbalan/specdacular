@@ -57,7 +57,7 @@ export function setupIpc(getContext) {
     const { orchestrators } = getContext();
     const orch = orchestrators.get(projectId);
     if (!orch) return null;
-    return orch.updateTask(taskId, { status: 'ready' });
+    return orch.advanceTask(taskId, 'retry-fresh');
   });
 
   ipcMain.handle('get-task-logs', (event, projectId, taskId) => {

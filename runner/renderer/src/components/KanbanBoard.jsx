@@ -29,7 +29,6 @@ const STATUS_PRIORITY = {
 const ACTION_MAP = {
   idea: { label: 'Plan', action: 'plan' },
   review: { label: 'Approve', action: 'approve' },
-  failed: { label: 'Retry', action: 'retry' },
 };
 
 export default function KanbanBoard({ tasks, projectId, projects, onRefresh }) {
