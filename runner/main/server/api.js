@@ -1,8 +1,9 @@
 // runner/main/server/api.js
 import { Router } from 'express';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
+import { TemplateManager } from '../template-manager.js';
 
 export function createApiRouter(getContext) {
   const router = Router();
@@ -38,6 +39,46 @@ export function createApiRouter(getContext) {
       };
     });
     res.json(projects);
+  });
+
+  // Global pipeline list
+  router.get('/pipelines', (req, res) => {
+    const { paths } = getContext();
+    const tm = new TemplateManager(paths);
+    const pipelines = tm.getPipelines();
+    res.json(Object.entries(pipelines).map(([name, config]) => ({
+      name,
+      description: config.description || '',
+      stages: (config.stages || []).map(s => ({ name: s.stage, agent: s.agent })),
+    })));
+  });
+
+  // Global agent list
+  router.get('/agents', (req, res) => {
+    const { paths } = getContext();
+    const tm = new TemplateManager(paths);
+    const agents = tm.getAgents();
+    res.json(Object.entries(agents).map(([name, config]) => ({
+      name,
+      cmd: config.cmd,
+      output_format: config.output_format,
+    })));
+  });
+
+  // Update pipeline
+  router.put('/pipelines/:name', (req, res) => {
+    const { paths } = getContext();
+    const filePath = join(paths.pipelineTemplatesDir, `${req.params.name}.json`);
+    writeFileSync(filePath, JSON.stringify(req.body, null, 2));
+    res.json({ status: 'ok', name: req.params.name });
+  });
+
+  // Update agent
+  router.put('/agents/:name', (req, res) => {
+    const { paths } = getContext();
+    const filePath = join(paths.agentTemplatesDir, `${req.params.name}.json`);
+    writeFileSync(filePath, JSON.stringify(req.body, null, 2));
+    res.json({ status: 'ok', name: req.params.name });
   });
 
   // Global status
@@ -88,12 +129,14 @@ export function createApiRouter(getContext) {
       name: req.body.name,
       description: req.body.description || '',
       project_id: req.params.id,
-      working_dir: req.body.working_dir || '.',
-      pipeline: req.body.pipeline || 'default',
-      status: req.body.status || 'ready',
+      pipeline: req.body.pipeline || null,
+      status: req.body.status || 'idea',
       priority: req.body.priority || 10,
       depends_on: req.body.depends_on || [],
       spec: req.body.spec || '',
+      feedback: '',
+      auto_execute: !!req.body.auto_execute,
+      pr_url: null,
       created_at: new Date().toISOString(),
     };
 
@@ -136,6 +179,14 @@ export function createApiRouter(getContext) {
     const lines = content.split('\n');
     const tail = parseInt(req.query.tail) || 200;
     res.json({ lines: lines.slice(-tail) });
+  });
+
+  // Execution context for a task
+  router.get('/projects/:id/tasks/:taskId/context', (req, res) => {
+    const { paths } = getContext();
+    const contextPath = join(paths.forProject(req.params.id).dir, 'contexts', `${req.params.taskId}.json`);
+    if (!existsSync(contextPath)) return res.status(404).json({ error: 'Context not found' });
+    res.json(JSON.parse(readFileSync(contextPath, 'utf-8')));
   });
 
   return router;
