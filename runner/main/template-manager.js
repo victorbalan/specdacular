@@ -1,3 +1,4 @@
+// runner/main/template-manager.js
 import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 
@@ -6,26 +7,12 @@ export class TemplateManager {
     this.paths = paths;
   }
 
-  getAgents(projectId) {
-    const global = this._loadDir(this.paths.agentTemplatesDir);
-    if (!projectId) return global;
-
-    const projectAgentsDir = join(this.paths.projectsDir, projectId, 'agents');
-    if (!existsSync(projectAgentsDir)) return global;
-
-    const overrides = this._loadDir(projectAgentsDir);
-    return { ...global, ...overrides };
+  getAgents() {
+    return this._loadDir(this.paths.agentTemplatesDir);
   }
 
-  getPipelines(projectId) {
-    const global = this._loadDir(this.paths.pipelineTemplatesDir);
-    if (!projectId) return global;
-
-    const projectPipelinesDir = join(this.paths.projectsDir, projectId, 'pipelines');
-    if (!existsSync(projectPipelinesDir)) return global;
-
-    const overrides = this._loadDir(projectPipelinesDir);
-    return { ...global, ...overrides };
+  getPipelines() {
+    return this._loadDir(this.paths.pipelineTemplatesDir);
   }
 
   _loadDir(dir) {
