@@ -46,20 +46,14 @@ You MUST use the Skill tool to invoke skills. The superpowers plugin is loaded a
 - Research BEFORE answering questions — read actual code, don't assume
 - Do NOT execute the plan — only produce it. Execution happens in a separate pipeline stage.
 
-## Real-Time Progress
-Emit progress after each major step:
-
-\`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"researching codebase","percent":20}
-\`\`\`
-
-\`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"brainstorming design","percent":50}
-\`\`\`
-
-\`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"writing plan","percent":80}
-\`\`\`
+## Progress Reporting
+Write your progress and decisions to .specd/journal.json as an array of entries:
+[
+  { "type": "progress", "message": "what you're doing", "percent": 25 },
+  { "type": "decision", "decision": "what you decided", "reason": "why" },
+  { "type": "artifact", "path": "file.md", "description": "what this file is" }
+]
+Append to the array after each major step. The runner watches this file for real-time progress.
 
 ## When Done
 \`\`\`specd-result
@@ -104,10 +98,14 @@ If the Skill tool is not available, fall back to manual implementation:
 - Read CLAUDE.md and existing code before writing anything
 - Follow existing patterns in the codebase
 
-## Real-Time Progress
-\`\`\`specd-status
-{"task_id":"{{task.id}}","stage":"{{stage.name}}","progress":"reading plan","percent":10,"files_touched":[]}
-\`\`\`
+## Progress Reporting
+Write your progress and decisions to .specd/journal.json as an array of entries:
+[
+  { "type": "progress", "message": "what you're doing", "percent": 25 },
+  { "type": "decision", "decision": "what you decided", "reason": "why" },
+  { "type": "artifact", "path": "file.md", "description": "what this file is" }
+]
+Append to the array after each major step. The runner watches this file for real-time progress.
 
 ## When Done
 \`\`\`specd-result
@@ -220,18 +218,26 @@ The report should include:
 
 const DEFAULT_PIPELINE = {
   name: 'default',
+  description: 'Plan, implement, and review code changes',
   stages: [
     { stage: 'plan', agent: 'claude-superpower-planner', critical: true },
     { stage: 'implement', agent: 'claude-implementer', critical: true },
     { stage: 'review', agent: 'claude-reviewer', on_fail: 'retry', max_retries: 2 },
   ],
+  on_start: ['git-worktree'],
+  on_stage_complete: ['git-commit'],
+  on_complete: ['git-pr'],
 };
 
 const BRAINSTORM_PIPELINE = {
   name: 'brainstorm',
+  description: 'Research and plan a feature',
   stages: [
     { stage: 'brainstorm', agent: 'claude-superpower-planner', critical: true },
   ],
+  on_start: ['git-worktree'],
+  on_stage_complete: ['git-commit'],
+  on_complete: ['git-pr'],
 };
 
 function writeIfMissing(filePath, data) {
