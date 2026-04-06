@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { randomUUID } from 'crypto';
+import { basename } from 'path';
 
 export class ProjectDB {
   constructor(dbPath) {
@@ -8,8 +8,11 @@ export class ProjectDB {
   }
 
   register(name, folderPath) {
+    const baseName = basename(folderPath);
+    const id = this._uniqueId(baseName);
+
     const project = {
-      id: randomUUID().slice(0, 8),
+      id,
       name,
       path: folderPath,
       active: true,
@@ -18,6 +21,14 @@ export class ProjectDB {
     this.data.projects.push(project);
     this._save();
     return project;
+  }
+
+  _uniqueId(baseName) {
+    const existingIds = new Set(this.data.projects.map(p => p.id));
+    if (!existingIds.has(baseName)) return baseName;
+    let suffix = 2;
+    while (existingIds.has(`${baseName}-${suffix}`)) suffix++;
+    return `${baseName}-${suffix}`;
   }
 
   unregister(id) {

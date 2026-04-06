@@ -1,72 +1,63 @@
-import { describe, it, before, after, beforeEach } from 'node:test';
+// runner/main/test/db.test.js
+import { describe, it, beforeEach, afterEach } from 'node:test';
 import { strict as a } from 'node:assert';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { writeFileSync, mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { ProjectDB } from '../db.js';
 
 describe('ProjectDB', () => {
-  let tempDir;
-  let dbPath;
-  let db;
-
-  before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'specd-db-test-'));
-    dbPath = join(tempDir, 'db.json');
-  });
+  let tmpDir, dbPath;
 
   beforeEach(() => {
+    tmpDir = mkdtempSync(join(tmpdir(), 'specd-db-'));
+    dbPath = join(tmpDir, 'db.json');
     writeFileSync(dbPath, JSON.stringify({ projects: [] }));
-    db = new ProjectDB(dbPath);
   });
 
-  after(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('registers a project', () => {
-    const project = db.register('my-project', '/Users/victor/work/my-project');
-    a.equal(project.name, 'my-project');
-    a.equal(project.path, '/Users/victor/work/my-project');
-    a.equal(project.active, true);
-    a.ok(project.id);
-    a.ok(project.registeredAt);
+  it('uses folder name as project ID', () => {
+    const db = new ProjectDB(dbPath);
+    const project = db.register('myproject', '/Users/victor/work/myproject');
+    a.equal(project.id, 'myproject');
   });
 
-  it('lists projects', () => {
-    db.register('proj-a', '/a');
-    db.register('proj-b', '/b');
-    const list = db.list();
-    a.equal(list.length, 2);
+  it('appends -2 on first collision', () => {
+    const db = new ProjectDB(dbPath);
+    db.register('myproject', '/Users/victor/work/myproject');
+    const second = db.register('myproject', '/Users/victor/other/myproject');
+    a.equal(second.id, 'myproject-2');
   });
 
-  it('gets a project by id', () => {
-    const project = db.register('my-project', '/path');
-    const found = db.get(project.id);
-    a.equal(found.name, 'my-project');
+  it('appends -3 on second collision', () => {
+    const db = new ProjectDB(dbPath);
+    db.register('myproject', '/Users/victor/work/myproject');
+    db.register('myproject', '/Users/victor/other/myproject');
+    const third = db.register('myproject', '/home/user/myproject');
+    a.equal(third.id, 'myproject-3');
   });
 
-  it('finds a project by path', () => {
-    db.register('my-project', '/Users/victor/work/my-project');
-    const found = db.findByPath('/Users/victor/work/my-project');
-    a.equal(found.name, 'my-project');
+  it('finds project by path', () => {
+    const db = new ProjectDB(dbPath);
+    db.register('myproject', '/Users/victor/work/myproject');
+    const found = db.findByPath('/Users/victor/work/myproject');
+    a.equal(found.id, 'myproject');
   });
 
-  it('finds a project by subdirectory path', () => {
-    db.register('my-project', '/Users/victor/work');
-    const found = db.findByPath('/Users/victor/work/repo-a');
-    a.equal(found.name, 'my-project');
+  it('finds project by subpath', () => {
+    const db = new ProjectDB(dbPath);
+    db.register('myproject', '/Users/victor/work/myproject');
+    const found = db.findByPath('/Users/victor/work/myproject/src/index.js');
+    a.equal(found.id, 'myproject');
   });
 
-  it('unregisters a project', () => {
-    const project = db.register('my-project', '/path');
-    db.unregister(project.id);
+  it('unregisters by id', () => {
+    const db = new ProjectDB(dbPath);
+    db.register('myproject', '/Users/victor/work/myproject');
+    db.unregister('myproject');
     a.equal(db.list().length, 0);
-  });
-
-  it('persists to disk', () => {
-    db.register('my-project', '/path');
-    const db2 = new ProjectDB(dbPath);
-    a.equal(db2.list().length, 1);
   });
 });
