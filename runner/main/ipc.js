@@ -93,7 +93,7 @@ export function setupIpc(getContext) {
     log.info(`created project.json for ${project.id}`);
 
     // Init orchestrator for new project
-    const { Orchestrator } = await import('./orchestrator.js');
+    const { Orchestrator } = await import('./engine/orchestrator.js');
     const orch = new Orchestrator({ projectId: project.id, paths, config });
     orch.init();
     orchestrators.set(project.id, orch);

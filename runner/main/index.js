@@ -8,7 +8,7 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
 import { Paths } from './paths.js';
 import { bootstrap } from './bootstrap.js';
 import { ProjectDB } from './db.js';
-import { Orchestrator } from './orchestrator.js';
+import { Orchestrator } from './engine/orchestrator.js';
 import { createServer } from './server/index.js';
 import { setupIpc } from './ipc.js';
 import { createLogger } from './logger.js';
