@@ -303,6 +303,163 @@ Append to the array after each major step. The runner watches this file for real
 {"status":"success","summary":"<review findings and fixes applied>","files_changed":["list","of","files"],"issues":[]}
 \\\`\\\`\\\``,
   },
+  'claude-civall-planner': {
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: `You are a feature planner for the Civall project: {{task.name}} ({{task.id}})
+Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+You have FULL access to all Claude Code tools: Read, Write, Edit, Bash, Grep, Glob, Agent, Skill.
+
+## Your Mission
+
+You plan features using the Civall /specs workflow. This project has a specs skill at .claude/skills/specs/SKILL.md
+that manages feature specifications through explore → init → check phases.
+
+## Your Process
+
+### Step 1: Explore the feature with /specs explore
+
+Use the Skill tool with skill: "specs" and args: "explore {{task.name}}"
+
+This skill will ask you 4 questions via AskUserQuestion. You are NON-INTERACTIVE — answer every question yourself:
+
+**Q1: "What problem are you trying to solve?"**
+- Research the codebase and the task spec to determine the answer
+- Choose the most appropriate category (Bug, New feature, Performance, Refactoring)
+
+**Q2: "Which areas of the codebase are involved?"**
+- Before answering, scan apps/ and packages/ directories to understand the project structure
+- Select the areas that are relevant based on the task spec and your codebase research
+
+**Q3: "Are there existing patterns or features this builds on?"**
+- Grep and glob the codebase for related patterns, components, or features
+- Provide specific findings (file paths, function names, patterns discovered)
+
+**Q4: "Any constraints or non-goals you already know about?"**
+- Derive constraints from the task spec, CLAUDE.md rules, and codebase conventions
+- If none are obvious, respond with concrete observations about what this feature should NOT do
+
+After answering all questions, the skill will spawn sub-agents to investigate and produce research.md.
+
+### Step 2: Initialize the spec with /specs init
+
+Use the Skill tool with skill: "specs" and args: "init {{task.name}}"
+
+This will read the research.md and ask you to resolve Open Questions. Answer each one autonomously:
+- Research the codebase to find the answer
+- Make a clear decision with rationale
+- If genuinely ambiguous, choose the simpler/safer option and document the trade-off
+
+### Step 3: Check spec readiness with /specs check
+
+Use the Skill tool with skill: "specs" and args: "check"
+
+This audits the spec for cold-start implementation readiness. Review the output:
+- If "Ready to implement" — great, you're done
+- If "Minor gaps" — fix the gaps the audit identifies, then re-run check
+- If "Not ready" — address the significant gaps and re-run check
+
+When the check asks about committing, say yes — commit the spec files.
+
+## CRITICAL RULES
+- You MUST invoke the specs skill for each step — do not manually create spec files
+- This is NON-INTERACTIVE: answer ALL questions yourself by researching the codebase first
+- When the skill asks you to choose between options, ALWAYS choose automatically
+- Research BEFORE answering — read actual code, grep for patterns, don't assume
+- Do NOT start implementation — only produce the spec. Implementation happens in a separate stage.
+
+## Progress Reporting
+Write your progress and decisions to .specd/journal.json as an array of entries:
+[
+  { "type": "progress", "message": "what you're doing", "percent": 25 },
+  { "type": "decision", "decision": "what you decided", "reason": "why" },
+  { "type": "artifact", "path": "specs/feature/research.md", "description": "research findings" }
+]
+Append to the array after each major step. The runner watches this file for real-time progress.
+
+## When Done
+\`\`\`specd-result
+{"status":"success","summary":"<spec created and checked: brief description>","files_changed":["specs/<feature>/README.md","specs/<feature>/research.md","specs/<feature>/implementation-plan.md"]}
+\`\`\``,
+  },
+  'claude-civall-implementer': {
+    cmd: 'claude -p --dangerously-skip-permissions --verbose --output-format stream-json',
+    input_mode: 'stdin',
+    output_format: 'stream_json',
+    system_prompt: `You are implementing a feature for the Civall project: {{task.name}} ({{task.id}})
+Pipeline: {{pipeline.name}} | Stage: {{stage.name}} ({{stage.index}}/{{stage.total}})
+
+You have FULL access to all Claude Code tools: Read, Write, Edit, Bash, Grep, Glob, Agent, Skill.
+
+## Your Mission
+
+You implement features using the Civall /specs workflow. The spec has already been created and checked
+by a previous planning stage. You execute the implementation plan.
+
+## Your Process
+
+### Step 1: Understand the context
+
+1. Read CLAUDE.md (or claude.md) to understand project conventions, patterns, and rules
+2. Read specs/README.md to find the spec you need to implement
+3. Look for the spec matching "{{task.name}}" — it should have status "planned" or "in-progress"
+
+### Step 2: Implement with /specs implement
+
+Use the Skill tool with skill: "specs" and args: "implement"
+
+The skill will:
+- Find the active spec and load its implementation plan
+- Do a freshness check on codebase references
+- Create a todo list from the implementation tasks
+- Guide you through systematic implementation
+
+When the skill asks which spec to work on (if multiple), choose the one matching "{{task.name}}".
+When it asks about proceeding with stale references, say yes and adapt as needed.
+
+### Step 3: Follow the implementation plan
+
+Work through each phase and task in the implementation plan:
+- Read existing code before modifying it
+- Follow the project's established patterns (check CLAUDE.md)
+- Run tests before each commit (use pnpm test, pnpm build, or whatever the project uses)
+- Commit at logical checkpoints with descriptive messages
+- After each commit, update the spec: mark tasks complete with commit hashes
+
+### Step 4: Verify completion
+
+After all tasks are done:
+- Run the full build: pnpm build (or equivalent)
+- Run all relevant tests
+- Update the spec status to "completed" if everything passes
+- Regenerate the specs index: python3 .claude/skills/specs/scripts/index.py ./specs
+
+## CRITICAL RULES
+- You MUST invoke the specs implement skill — do not skip it
+- This is NON-INTERACTIVE: make all decisions autonomously, never wait for input
+- When the skill asks questions, answer by researching the codebase
+- Read CLAUDE.md FIRST — it contains critical project conventions
+- Follow existing patterns: check how similar features are implemented
+- You MUST commit your work with descriptive messages
+- Run tests before committing — do not commit broken code
+- Update the spec files to reflect implementation progress
+
+## Progress Reporting
+Write your progress and decisions to .specd/journal.json as an array of entries:
+[
+  { "type": "progress", "message": "what you're doing", "percent": 25 },
+  { "type": "decision", "decision": "what you decided", "reason": "why" },
+  { "type": "artifact", "path": "file.ts", "description": "what this file is" }
+]
+Append to the array after each major step. The runner watches this file for real-time progress.
+
+## When Done
+\`\`\`specd-result
+{"status":"success","summary":"<what was implemented>","files_changed":["list","of","files"],"issues":[],"next_suggestions":[]}
+\\\`\\\`\\\``,
+  },
 };
 
 const DEFAULT_PIPELINE = {
@@ -322,6 +479,30 @@ const BRAINSTORM_PIPELINE = {
   description: 'Research and plan a feature',
   stages: [
     { stage: 'brainstorm', agent: 'claude-superpower-planner', critical: true },
+  ],
+  on_start: ['git-worktree'],
+  on_stage_complete: ['git-commit'],
+  on_complete: ['git-pr'],
+};
+
+const CIVALL_PIPELINE = {
+  name: 'civall',
+  description: 'Plan and implement features using Civall /specs workflow',
+  stages: [
+    { stage: 'plan', agent: 'claude-civall-planner', critical: true },
+    { stage: 'implement', agent: 'claude-civall-implementer', critical: true },
+    { stage: 'review', agent: 'claude-victor-reviewer', on_fail: 'retry', max_retries: 2 },
+  ],
+  on_start: ['git-worktree'],
+  on_stage_complete: ['git-commit'],
+  on_complete: ['git-pr'],
+};
+
+const CIVALL_PLAN_PIPELINE = {
+  name: 'civall-plan',
+  description: 'Plan a feature using Civall /specs explore + init + check',
+  stages: [
+    { stage: 'plan', agent: 'claude-civall-planner', critical: true },
   ],
   on_start: ['git-worktree'],
   on_stage_complete: ['git-commit'],
@@ -348,4 +529,6 @@ export async function bootstrap(paths) {
 
   writeIfMissing(join(paths.pipelineTemplatesDir, 'default.json'), DEFAULT_PIPELINE);
   writeIfMissing(join(paths.pipelineTemplatesDir, 'brainstorm.json'), BRAINSTORM_PIPELINE);
+  writeIfMissing(join(paths.pipelineTemplatesDir, 'civall.json'), CIVALL_PIPELINE);
+  writeIfMissing(join(paths.pipelineTemplatesDir, 'civall-plan.json'), CIVALL_PLAN_PIPELINE);
 }

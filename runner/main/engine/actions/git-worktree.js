@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { mkdirSync } from 'fs';
+import { mkdirSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 import { tmpdir } from 'os';
 import { createLogger } from '../../logger.js';
@@ -22,6 +22,16 @@ export const gitWorktreeAction = {
     const worktreePath = join(worktreesDir, task.id);
 
     mkdirSync(worktreesDir, { recursive: true });
+
+    // Reuse existing worktree on retry — preserves previous work
+    if (existsSync(worktreePath)) {
+      log.info(`reusing existing worktree at ${worktreePath}`);
+      context.git = context.git || {};
+      context.git.branch = branch;
+      context.git.worktree = worktreePath;
+      context._runtime.cwd = worktreePath;
+      return;
+    }
 
     try {
       execSync(`git branch ${branch}`, { cwd: repoDir, stdio: 'pipe' });

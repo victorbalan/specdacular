@@ -125,11 +125,11 @@ export function setupIpc(getContext) {
     return true;
   });
 
-  ipcMain.handle('create-idea', (event, projectId, name, description, autoExecute) => {
+  ipcMain.handle('create-idea', (event, projectId, name, description, autoExecute, pipeline) => {
     const { orchestrators } = getContext();
     const orch = orchestrators.get(projectId);
     if (!orch) return null;
-    return orch.createIdea(name, description, autoExecute);
+    return orch.createIdea(name, description, autoExecute, pipeline);
   });
 
   ipcMain.handle('toggle-auto-execute', (event, projectId, taskId) => {

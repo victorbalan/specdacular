@@ -70,15 +70,15 @@ export class Orchestrator extends EventEmitter {
     return updated;
   }
 
-  createIdea(name, description, autoExecute) {
-    log.info(`creating idea: "${name}"`);
+  createIdea(name, description, autoExecute, pipeline) {
+    log.info(`creating idea: "${name}"${pipeline ? ` (pipeline: ${pipeline})` : ''}`);
     const id = `idea-${Date.now().toString(36)}`;
     const task = {
       id,
       name,
       description: description || '',
       project_id: this.projectId,
-      pipeline: null,
+      pipeline: pipeline || null,
       status: 'idea',
       priority: 10,
       depends_on: [],

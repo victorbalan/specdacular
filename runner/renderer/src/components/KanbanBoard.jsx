@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { colors, radius, shadows } from '../theme';
 import TaskDetailOverlay from './TaskDetailOverlay';
 
@@ -146,13 +146,23 @@ function AddIdeaModal({ projectId, projects, onClose, onCreated }) {
   const [description, setDescription] = useState('');
   const [autoExecute, setAutoExecute] = useState(false);
   const [selectedProject, setSelectedProject] = useState(projectId || projects?.[0]?.id || '');
+  const [pipelines, setPipelines] = useState([]);
+  const [selectedPipeline, setSelectedPipeline] = useState('');
+
+  useEffect(() => {
+    window.specd.invoke('get-pipeline-files').then(files => {
+      setPipelines(files || []);
+      const def = files?.find(f => f.name === 'default');
+      if (def) setSelectedPipeline(def.name);
+    });
+  }, []);
 
   const handleSubmit = async () => {
     const name = title.trim();
     if (!name) return;
     const pid = projectId || selectedProject;
     if (!pid) return;
-    await window.specd.invoke('create-idea', pid, name, description.trim(), autoExecute);
+    await window.specd.invoke('create-idea', pid, name, description.trim(), autoExecute, selectedPipeline || null);
     onCreated();
   };
 
@@ -234,6 +244,29 @@ function AddIdeaModal({ projectId, projects, onClose, onCreated }) {
               fontFamily: 'inherit',
             }}
           />
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, marginBottom: 4, display: 'block' }}>
+            Pipeline
+          </label>
+          <select
+            value={selectedPipeline}
+            onChange={(e) => setSelectedPipeline(e.target.value)}
+            style={{
+              width: '100%', padding: '8px 10px',
+              backgroundColor: colors.bg, color: colors.text,
+              border: `1px solid ${colors.border}`, borderRadius: radius.sm,
+              fontSize: 13, outline: 'none',
+            }}
+          >
+            <option value="">None (select later)</option>
+            {pipelines.map(p => (
+              <option key={p.name} value={p.name}>
+                {p.name}{p.content?.description ? ` — ${p.content.description}` : ''}
+              </option>
+            ))}
+          </select>
         </div>
 
         <label style={{
