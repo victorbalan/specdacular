@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Comparison - GitHub Project Integration</title>
+<style>
+  :root {
+    --color-local: #4ade80;
+    --color-github: #fb923c;
+    --color-interface: #60a5fa;
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-text: #e2e8f0;
+    --color-muted: #94a3b8;
+    --color-border: #334155;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  a { color: var(--color-interface); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .nav-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nav-top .back { font-size: 0.9rem; }
+
+  .nav-anchors {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-muted);
+  }
+
+  .subtitle {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  section {
+    margin-bottom: 3rem;
+  }
+
+  /* Section 1: Architecture diagrams */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .arch-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .arch-panel h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .arch-panel svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Section 2: Mapping table */
+  .filter-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .filter-btn {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-muted);
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--color-interface); color: var(--color-text); }
+  .filter-btn.active { background: var(--color-interface); color: var(--color-bg); border-color: var(--color-interface); }
+
+  .mapping-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .mapping-table th {
+    background: var(--color-surface);
+    color: var(--color-muted);
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 2px solid var(--color-border);
+    position: sticky;
+    top: 0;
+  }
+
+  .mapping-table td {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .mapping-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  .mapping-table tr.fidelity-perfect td:first-child { border-left: 3px solid var(--color-local); }
+  .mapping-table tr.fidelity-workaround td:first-child { border-left: 3px solid #facc15; }
+  .mapping-table tr.fidelity-gap td:first-child { border-left: 3px solid #f87171; }
+
+  .mapping-table tr.dimmed td { opacity: 0.25; }
+
+  .fidelity-perfect .fidelity-cell { color: var(--color-local); }
+  .fidelity-workaround .fidelity-cell { color: #facc15; }
+  .fidelity-gap .fidelity-cell { color: #f87171; }
+
+  .detail-row td {
+    padding: 0;
+    border-left: none !important;
+    cursor: default;
+  }
+
+  .detail-panel {
+    background: rgba(255,255,255,0.02);
+    padding: 1rem 1.5rem;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    line-height: 1.8;
+  }
+
+  .detail-panel strong { color: var(--color-text); }
+
+  /* Section 3: Scorecard */
+  .scorecard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .scorecard-table th {
+    background: var(--color-surface);
+    color: var(--color-muted);
+    text-align: left;
+    padding: 0.6rem 1rem;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .scorecard-table td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .scorecard-table th:nth-child(2),
+  .scorecard-table th:nth-child(3),
+  .scorecard-table td:nth-child(2),
+  .scorecard-table td:nth-child(3) {
+    text-align: center;
+    width: 200px;
+  }
+
+  .indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot-green { background: var(--color-local); }
+  .dot-red { background: #f87171; }
+  .dot-yellow { background: #facc15; }
+
+  @media (max-width: 900px) {
+    .arch-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav-top">
+  <a href="index.html" class="back">&larr; Back to Index</a>
+  <div class="nav-anchors">
+    <a href="#architecture">Architecture</a>
+    <a href="#mapping">Field Mapping</a>
+    <a href="#scorecard">Scorecard</a>
+  </div>
+</nav>
+
+<h1>Architecture Comparison</h1>
+<p class="subtitle">Local State vs. GitHub Projects &mdash; side-by-side analysis</p>
+
+<!-- ===== SECTION 1: Architecture Diagrams ===== -->
+<section id="architecture">
+  <h2>1. Architecture Diagrams</h2>
+  <div class="arch-grid">
+    <div class="arch-panel">
+      <h3 style="color: var(--color-local);">Local State Architecture</h3>
+      <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+          </marker>
+          <marker id="arrow-orange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="none" stroke="#fb923c" stroke-width="1.5"/>
+          </marker>
+          <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+          </marker>
+        </defs>
+
+        <!-- Orchestrator -->
+        <rect x="180" y="40" width="160" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="260" y="67" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">Orchestrator</text>
+
+        <!-- StateManager -->
+        <rect x="180" y="140" width="160" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="260" y="167" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">StateManager</text>
+
+        <!-- tasks/*.json -->
+        <rect x="60" y="240" width="150" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="88" y="266" fill="#4ade80" font-family="monospace" font-size="18">&#128196;</text>
+        <text x="107" y="267" fill="#e2e8f0" font-family="monospace" font-size="12">tasks/*.json</text>
+
+        <!-- status.json -->
+        <rect x="240" y="240" width="150" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="268" y="266" fill="#4ade80" font-family="monospace" font-size="18">&#128196;</text>
+        <text x="287" y="267" fill="#e2e8f0" font-family="monospace" font-size="12">status.json</text>
+
+        <!-- AgentRunner -->
+        <rect x="410" y="40" width="150" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="485" y="67" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">AgentRunner</text>
+
+        <!-- WorktreeManager -->
+        <rect x="410" y="140" width="150" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="485" y="167" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="12">WorktreeManager</text>
+
+        <!-- GitHub PRs -->
+        <rect x="410" y="240" width="150" height="44" rx="8" fill="#1e293b" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="485" y="267" text-anchor="middle" fill="#fb923c" font-family="monospace" font-size="13">GitHub PRs</text>
+
+        <!-- Arrows -->
+        <!-- Orchestrator -> StateManager -->
+        <line x1="260" y1="84" x2="260" y2="140" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="272" y="118" fill="#94a3b8" font-family="monospace" font-size="9">r/w</text>
+
+        <!-- StateManager -> tasks -->
+        <line x1="220" y1="184" x2="160" y2="240" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="170" y="212" fill="#94a3b8" font-family="monospace" font-size="9">write</text>
+
+        <!-- StateManager -> status -->
+        <line x1="300" y1="184" x2="340" y2="240" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="330" y="212" fill="#94a3b8" font-family="monospace" font-size="9">write</text>
+
+        <!-- Orchestrator -> AgentRunner -->
+        <line x1="340" y1="62" x2="410" y2="62" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="368" y="55" fill="#94a3b8" font-family="monospace" font-size="9">spawn</text>
+
+        <!-- AgentRunner -> WorktreeManager -->
+        <line x1="485" y1="84" x2="485" y2="140" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+        <!-- WorktreeManager -> GitHub PRs -->
+        <line x1="485" y1="184" x2="485" y2="240" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
+        <text x="497" y="218" fill="#94a3b8" font-family="monospace" font-size="9">push</text>
+      </svg>
+    </div>
+
+    <div class="arch-panel">
+      <h3 style="color: var(--color-github);">GitHub Projects Architecture</h3>
+      <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-green2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+          </marker>
+          <marker id="arrow-orange2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6" fill="none" stroke="#fb923c" stroke-width="1.5"/>
+          </marker>
+        </defs>
+
+        <!-- Orchestrator -->
+        <rect x="180" y="40" width="160" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="260" y="67" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">Orchestrator</text>
+
+        <!-- GitHub Sync Layer -->
+        <rect x="160" y="140" width="190" height="44" rx="8" fill="#1e293b" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="255" y="167" text-anchor="middle" fill="#fb923c" font-family="monospace" font-size="12">GitHub Sync Layer</text>
+
+        <!-- Project V2 -->
+        <rect x="60" y="250" width="140" height="44" rx="8" fill="#1e293b" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="130" y="277" text-anchor="middle" fill="#fb923c" font-family="monospace" font-size="13">Project V2</text>
+
+        <!-- Issues -->
+        <rect x="230" y="250" width="120" height="44" rx="8" fill="#1e293b" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="290" y="277" text-anchor="middle" fill="#fb923c" font-family="monospace" font-size="13">Issues</text>
+
+        <!-- AgentRunner -->
+        <rect x="420" y="40" width="140" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="490" y="67" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">AgentRunner</text>
+
+        <!-- WorktreeManager -->
+        <rect x="420" y="140" width="140" height="44" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="490" y="167" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="12">WorktreeManager</text>
+
+        <!-- Pull Requests -->
+        <rect x="420" y="250" width="140" height="44" rx="8" fill="#1e293b" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="490" y="277" text-anchor="middle" fill="#fb923c" font-family="monospace" font-size="12">Pull Requests</text>
+
+        <!-- Orchestrator -> Sync Layer -->
+        <line x1="260" y1="84" x2="260" y2="140" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange2)"/>
+        <text x="272" y="118" fill="#94a3b8" font-family="monospace" font-size="9">r/w</text>
+
+        <!-- Sync Layer -> Project V2 -->
+        <line x1="210" y1="184" x2="150" y2="250" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange2)"/>
+        <text x="148" y="220" fill="#94a3b8" font-family="monospace" font-size="9">GraphQL</text>
+
+        <!-- Sync Layer -> Issues -->
+        <line x1="290" y1="184" x2="300" y2="250" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange2)"/>
+        <text x="308" y="220" fill="#94a3b8" font-family="monospace" font-size="9">REST</text>
+
+        <!-- Orchestrator -> AgentRunner -->
+        <line x1="340" y1="62" x2="420" y2="62" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green2)"/>
+        <text x="372" y="55" fill="#94a3b8" font-family="monospace" font-size="9">spawn</text>
+
+        <!-- AgentRunner -> WorktreeManager -->
+        <line x1="490" y1="84" x2="490" y2="140" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green2)"/>
+
+        <!-- WorktreeManager -> Pull Requests -->
+        <line x1="490" y1="184" x2="490" y2="250" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange2)"/>
+        <text x="502" y="220" fill="#94a3b8" font-family="monospace" font-size="9">REST</text>
+
+        <!-- Issues -> Pull Requests link -->
+        <path d="M350,272 Q385,272 420,272" fill="none" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="375" y="264" fill="#94a3b8" font-family="monospace" font-size="8">linked</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 2: Field Mapping Table ===== -->
+<section id="mapping">
+  <h2>2. Data Field Mapping</h2>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All (18)</button>
+    <button class="filter-btn" data-filter="perfect">Perfect Match (10)</button>
+    <button class="filter-btn" data-filter="workaround">Workarounds (5)</button>
+    <button class="filter-btn" data-filter="gap">Gaps (3)</button>
+  </div>
+
+  <table class="mapping-table" id="mappingTable">
+    <thead>
+      <tr>
+        <th>Local Field</th>
+        <th>Type</th>
+        <th>GitHub Equivalent</th>
+        <th>Storage Location</th>
+        <th>Fidelity</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- ===== SECTION 3: Capability Scorecard ===== -->
+<section id="scorecard">
+  <h2>3. Capability Scorecard</h2>
+
+  <table class="scorecard-table">
+    <thead>
+      <tr>
+        <th>Capability</th>
+        <th>Local</th>
+        <th>GitHub</th>
+      </tr>
+    </thead>
+    <tbody id="scorecardBody"></tbody>
+  </table>
+</section>
+
+<script>
+// ===== Field Mapping Data =====
+const mappingData = [
+  { local: "id", type: "string", github: "Issue number", storage: "Issue", fidelity: "perfect", notes: "Direct 1:1 mapping. Issue number is unique per repo and immutable." },
+  { local: "name", type: "string", github: "Issue title", storage: "Issue", fidelity: "perfect", notes: "Exact match. Title supports full Unicode, 256 char limit." },
+  { local: "description", type: "string", github: "Issue body (intro)", storage: "Issue body", fidelity: "perfect", notes: "First section of issue body used as description." },
+  { local: "status", type: "enum", github: "Status field", storage: "Project V2 field", fidelity: "perfect", notes: "Single-select project field. Maps directly to local status enum." },
+  { local: "priority", type: "enum", github: "Priority field", storage: "Project V2 field", fidelity: "perfect", notes: "Single-select project field with matching priority levels." },
+  { local: "feedback", type: "string[]", github: "Issue comments", storage: "Issue", fidelity: "perfect", notes: "Each feedback entry becomes a comment. Timestamps preserved." },
+  { local: "auto_execute", type: "boolean", github: "Custom field", storage: "Project V2 field", fidelity: "perfect", notes: "Boolean custom field on project. True/false toggle." },
+  { local: "pr_url", type: "string", github: "Linked PR", storage: "Issue sidebar", fidelity: "perfect", notes: "Native PR linking via issue references or API." },
+  { local: "pipeline", type: "string", github: "Custom field", storage: "Project V2 field", fidelity: "perfect", notes: "Text custom field storing pipeline identifier." },
+  { local: "created_at", type: "ISO date", github: "Issue created_at", storage: "Issue", fidelity: "perfect", notes: "Automatic timestamp, read-only after creation." },
+  { local: "project_id", type: "string", github: "Project V2 ID", storage: "Project", fidelity: "workaround", notes: "Project ID available via GraphQL. Requires additional query to resolve." },
+  { local: "depends_on", type: "string[]", github: "Task list / text field", storage: "Issue body", fidelity: "workaround", notes: "GitHub task lists provide partial support. No native dependency graph." },
+  { local: "spec", type: "string (large)", github: "Issue body", storage: "Issue body", fidelity: "workaround", notes: "Issue body limited to ~65K chars. Large specs may need truncation or linked gists." },
+  { local: "last_pipeline", type: "object", github: "Custom field", storage: "Project V2 field", fidelity: "workaround", notes: "Serialized to JSON string in text field. Limited to 1024 chars." },
+  { local: "failed_pipeline", type: "object", github: "Custom field", storage: "Project V2 field", fidelity: "workaround", notes: "Serialized to JSON string in text field. Same size constraints." },
+  { local: "live_progress", type: "stream", github: "NOT FEASIBLE", storage: "N/A", fidelity: "gap", notes: "GitHub has no real-time streaming. Polling at best gives ~1s intervals with rate limit cost." },
+  { local: "last_output_at", type: "ISO date", github: "NOT FEASIBLE", storage: "N/A", fidelity: "gap", notes: "No sub-second timestamp tracking. Issue updated_at only reflects API writes." },
+  { local: "stage_overrides", type: "object", github: "NOT FEASIBLE", storage: "N/A", fidelity: "gap", notes: "Complex nested objects with no reasonable GitHub representation. Would require external storage." }
+];
+
+// ===== Render Mapping Table =====
+const tbody = document.querySelector("#mappingTable tbody");
+
+function renderMappingTable(filter) {
+  tbody.innerHTML = "";
+  mappingData.forEach((row, i) => {
+    if (filter !== "all" && row.fidelity !== filter) {
+      // still render but dimmed
+    }
+    const tr = document.createElement("tr");
+    tr.className = `fidelity-${row.fidelity}`;
+    if (filter !== "all" && row.fidelity !== filter) {
+      tr.classList.add("dimmed");
+    }
+    tr.dataset.index = i;
+
+    const fidelityLabel = { perfect: "Perfect", workaround: "Workaround", gap: "Gap" }[row.fidelity];
+
+    tr.innerHTML = `
+      <td><code>${row.local}</code></td>
+      <td>${row.type}</td>
+      <td>${row.github}</td>
+      <td>${row.storage}</td>
+      <td class="fidelity-cell">${fidelityLabel}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${row.notes.split(".")[0]}</td>
+    `;
+
+    tr.addEventListener("click", () => toggleDetail(tr, row));
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleDetail(tr, row) {
+  const next = tr.nextElementSibling;
+  if (next && next.classList.contains("detail-row")) {
+    next.remove();
+    return;
+  }
+  // Remove any other open detail
+  document.querySelectorAll(".detail-row").forEach(el => el.remove());
+
+  const detailTr = document.createElement("tr");
+  detailTr.className = "detail-row";
+  detailTr.innerHTML = `<td colspan="6"><div class="detail-panel">
+    <strong>${row.local}</strong> &rarr; <strong>${row.github}</strong><br>
+    <strong>Type:</strong> ${row.type} &nbsp;|&nbsp; <strong>Storage:</strong> ${row.storage} &nbsp;|&nbsp; <strong>Fidelity:</strong> ${row.fidelity}<br>
+    ${row.notes}
+  </div></td>`;
+  tr.after(detailTr);
+}
+
+// ===== Filter Buttons =====
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderMappingTable(btn.dataset.filter);
+  });
+});
+
+renderMappingTable("all");
+
+// ===== Scorecard Data =====
+const scorecardData = [
+  { cap: "Read latency",    local: { text: "~0ms", color: "green" },                      github: { text: "200-600ms", color: "red" } },
+  { cap: "Write latency",   local: { text: "~0ms", color: "green" },                      github: { text: "200-600ms", color: "red" } },
+  { cap: "Offline support", local: { text: "Full", color: "green" },                       github: { text: "None", color: "red" } },
+  { cap: "Live progress",   local: { text: "Yes", color: "green" },                        github: { text: "No", color: "red" } },
+  { cap: "Collaboration",   local: { text: "No", color: "red" },                           github: { text: "Yes", color: "green" } },
+  { cap: "Audit trail",     local: { text: "No", color: "red" },                           github: { text: "Yes", color: "green" } },
+  { cap: "Built-in UI",     local: { text: "No", color: "red" },                           github: { text: "Yes - Kanban/Table/Roadmap", color: "green" } },
+  { cap: "PR integration",  local: { text: "Manual", color: "yellow" },                    github: { text: "Native", color: "green" } },
+  { cap: "Rate limits",     local: { text: "None", color: "green" },                       github: { text: "5000 pts/hr", color: "yellow" } },
+  { cap: "Custom data",     local: { text: "Unlimited", color: "green" },                  github: { text: "Limited fields", color: "yellow" } }
+];
+
+const scorecardBody = document.getElementById("scorecardBody");
+scorecardData.forEach(row => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${row.cap}</td>
+    <td><span class="indicator"><span class="dot dot-${row.local.color}"></span>${row.local.text}</span></td>
+    <td><span class="indicator"><span class="dot dot-${row.github.color}"></span>${row.github.text}</span></td>
+  `;
+  scorecardBody.appendChild(tr);
+});
+</script>
+
+</body>
+</html>
