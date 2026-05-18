@@ -28,5 +28,15 @@ export const gitCommitAction = {
     context.git.commits.push(commitHash);
 
     log.info(`committed ${commitHash}: ${message}`);
+
+    const branch = context.git?.branch;
+    if (branch) {
+      try {
+        execSync(`git push origin ${branch}`, { cwd, stdio: 'pipe' });
+        log.info(`pushed ${commitHash} to origin/${branch}`);
+      } catch (err) {
+        log.warn(`failed to push ${branch}: ${err.message}`);
+      }
+    }
   },
 };

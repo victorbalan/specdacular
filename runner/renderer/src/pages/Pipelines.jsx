@@ -35,11 +35,12 @@ export default function Pipelines() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto', flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto', flex: 1, minHeight: 0 }}>
         {items.map(item => (
           <div key={item.name} style={{
             backgroundColor: colors.surface, borderRadius: radius.md,
             border: `1px solid ${colors.border}`, overflow: 'hidden',
+            display: 'flex', flexDirection: 'column', flexShrink: 0,
           }}>
             <div style={{
               padding: '10px 14px', borderBottom: `1px solid ${colors.border}`,
@@ -51,7 +52,8 @@ export default function Pipelines() {
               padding: 14, margin: 0, fontSize: 11, lineHeight: 1.6,
               color: '#ced4da', backgroundColor: '#111213',
               fontFamily: "'SF Mono', 'Fira Code', monospace",
-              overflow: 'auto', maxHeight: 300,
+              overflow: 'auto', maxHeight: 700, minHeight: 200,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word',
             }}>
               {JSON.stringify(item.content, null, 2)}
             </pre>

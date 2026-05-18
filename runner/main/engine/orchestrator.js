@@ -28,6 +28,7 @@ export class Orchestrator extends EventEmitter {
     this.running = false;
     this.runningTasks = new Set();
     this.activeRunners = new Set();
+    this.runnersByTask = new Map();
   }
 
   init() {
@@ -171,15 +172,29 @@ export class Orchestrator extends EventEmitter {
               if (entry.type === 'progress') {
                 this.stateManager.updateLiveProgress(task.id, entry);
               }
+              if (entry.type === 'decision') {
+                this._commitOnDecision(cwd, ctx, entry).catch(err =>
+                  log.warn(`decision commit failed: ${err.message}`)
+                );
+              }
             }
           }
         });
 
         this.activeRunners.add(runner);
+        if (!this.runnersByTask.has(task.id)) this.runnersByTask.set(task.id, new Set());
+        this.runnersByTask.get(task.id).add(runner);
         return {
           run: () => {
             const p = runner.run(task.spec || task.description || task.name, { cwd, logPath });
-            p.finally(() => this.activeRunners.delete(runner));
+            p.finally(() => {
+              this.activeRunners.delete(runner);
+              const set = this.runnersByTask.get(task.id);
+              if (set) {
+                set.delete(runner);
+                if (set.size === 0) this.runnersByTask.delete(task.id);
+              }
+            });
             return p;
           },
         };
@@ -230,10 +245,11 @@ export class Orchestrator extends EventEmitter {
     }
 
     if (action === 'plan') {
+      const planPipeline = task.pipeline || 'brainstorm';
       this.updateTask(taskId, { status: 'planning', feedback: feedback || task.feedback });
-      this._runPipeline(task, 'brainstorm').catch(err => {
-        log.error(`brainstorm failed for ${taskId}: ${err}`);
-        this.updateTask(taskId, { status: 'failed', failed_pipeline: 'brainstorm' });
+      this._runPipeline(task, planPipeline).catch(err => {
+        log.error(`${planPipeline} failed for ${taskId}: ${err}`);
+        this.updateTask(taskId, { status: 'failed', failed_pipeline: planPipeline });
         this.stateManager.updateTaskStatus(taskId, 'failed');
         this.stateManager.persist();
       });
@@ -241,11 +257,12 @@ export class Orchestrator extends EventEmitter {
     }
 
     if (action === 're-plan') {
+      const planPipeline = task.pipeline || 'brainstorm';
       const updatedFeedback = [task.feedback, feedback].filter(Boolean).join('\n\n---\n\n');
       this.updateTask(taskId, { status: 'planning', feedback: updatedFeedback });
-      this._runPipeline({ ...task, feedback: updatedFeedback }, 'brainstorm').catch(err => {
-        log.error(`re-plan failed for ${taskId}: ${err}`);
-        this.updateTask(taskId, { status: 'failed', failed_pipeline: 'brainstorm' });
+      this._runPipeline({ ...task, feedback: updatedFeedback }, planPipeline).catch(err => {
+        log.error(`re-plan (${planPipeline}) failed for ${taskId}: ${err}`);
+        this.updateTask(taskId, { status: 'failed', failed_pipeline: planPipeline });
         this.stateManager.updateTaskStatus(taskId, 'failed');
         this.stateManager.persist();
       });
@@ -294,5 +311,57 @@ export class Orchestrator extends EventEmitter {
 
   killRunningAgents() {
     for (const runner of this.activeRunners) runner.kill();
+  }
+
+  async _commitOnDecision(cwd, ctx, entry) {
+    if (!cwd) return;
+    const { execSync } = await import('child_process');
+    let status = '';
+    try {
+      status = execSync('git status --porcelain', { cwd, encoding: 'utf-8' }).trim();
+    } catch {
+      return;
+    }
+    if (!status) return;
+    const decision = (entry.decision || 'decision').toString().replace(/"/g, "'").slice(0, 72);
+    const stageName = ctx._runtime?.currentStage || 'agent';
+    const taskId = ctx.task?.id || 'task';
+    const message = `chore(${taskId}): ${stageName} decision — ${decision}`;
+    try {
+      execSync('git add -A', { cwd, stdio: 'pipe' });
+      execSync(`git commit -m "${message}"`, { cwd, stdio: 'pipe' });
+      const hash = execSync('git rev-parse --short HEAD', { cwd, encoding: 'utf-8' }).trim();
+      log.info(`decision-commit ${hash}: ${message}`);
+      const branch = ctx.git?.branch;
+      if (branch) {
+        try {
+          execSync(`git push origin ${branch}`, { cwd, stdio: 'pipe' });
+        } catch (err) {
+          log.warn(`decision push failed: ${err.message}`);
+        }
+      }
+    } catch (err) {
+      log.warn(`decision commit skipped: ${err.message}`);
+    }
+  }
+
+  stopTask(taskId) {
+    log.info(`stopping task ${taskId}`);
+    const runners = this.runnersByTask.get(taskId);
+    if (runners) {
+      for (const runner of runners) {
+        try { runner.kill(); } catch (e) { log.error(`failed to kill runner: ${e}`); }
+        this.activeRunners.delete(runner);
+      }
+      this.runnersByTask.delete(taskId);
+    }
+    this.runningTasks.delete(taskId);
+    this.stateManager.clearTask(taskId);
+    this.stateManager.persist();
+    return this.updateTask(taskId, {
+      status: 'idea',
+      failed_pipeline: null,
+      pr_url: null,
+    });
   }
 }

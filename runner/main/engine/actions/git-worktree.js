@@ -50,5 +50,20 @@ export const gitWorktreeAction = {
     context._runtime.cwd = worktreePath;
 
     log.info(`created worktree at ${worktreePath}`);
+
+    try {
+      execSync(`git commit --allow-empty -m "chore(${task.id}): kickoff"`, {
+        cwd: worktreePath, stdio: 'pipe',
+      });
+    } catch (err) {
+      log.warn(`kickoff commit skipped: ${err.message}`);
+    }
+
+    try {
+      execSync(`git push -u origin ${branch}`, { cwd: worktreePath, stdio: 'pipe' });
+      log.info(`pushed branch ${branch} to origin`);
+    } catch (err) {
+      log.warn(`failed to push branch ${branch}: ${err.message}`);
+    }
   },
 };
