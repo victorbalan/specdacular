@@ -5,7 +5,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stdout } from 'node:process';
 import { loadConfig, defaultGlobalDir } from './src/config.js';
-import { assertCleanTree, resolveBase, getDiff, commitRound, checkoutPR } from './src/git.js';
+import {
+  assertCleanTree, resolveBase, getDiff, commitRound, checkoutPR, hasUncommittedChanges,
+} from './src/git.js';
 import { runAgent } from './src/agent-runner.js';
 import { runReview } from './src/orchestrator.js';
 import { createPlainView } from './src/ui/plain-view.js';
@@ -26,8 +28,10 @@ export function runInit(globalDir) {
 // Adapter: bridges agent-runner.js to the orchestrator's `runner` interface.
 function makeRunner(cwd, view) {
   return {
-    async runReviewer(agent, { diff, round, base }) {
-      const res = await runAgent(agent, { diff, round, base }, {
+    async runReviewer(agent, { diff, round, base, priorWork }) {
+      const res = await runAgent(agent, {
+        diff, round, base, prior_work: priorWork || '(none)',
+      }, {
         cwd,
         onStatus: (s) => view.updateAgent?.(agent.name, { status: s, done: false }),
       });
@@ -41,15 +45,18 @@ function makeRunner(cwd, view) {
         findings: JSON.stringify(findings, null, 2),
         user_feedback: feedback || '(none)',
       }, { cwd });
-      return { changed: !!res.result };
+      // "Changed" means the fixer actually edited files — emitting a result
+      // block is not enough. A no-op fixer must not trigger an empty commit.
+      return { changed: await hasUncommittedChanges(cwd), summary: res.result?.summary || '' };
     },
   };
 }
 
 async function review(prNumber, opts) {
   const cwd = process.cwd();
-  if (prNumber) checkoutPR(cwd, prNumber);
+  // Refuse a dirty tree before touching anything — including before a PR checkout.
   await assertCleanTree(cwd);
+  if (prNumber) checkoutPR(cwd, prNumber);
 
   const config = loadConfig({
     globalDir: opts.config || defaultGlobalDir(),
@@ -62,11 +69,17 @@ async function review(prNumber, opts) {
   const interactive = !!opts.interactive;
   const view = (interactive && stdout.isTTY) ? createInkView() : createPlainView();
 
-  const result = await runReview({
-    config, base, cwd, interactive, ui: view,
-    git: { getDiff, commitRound },
-    runner: makeRunner(cwd, view),
-  });
+  let result;
+  try {
+    result = await runReview({
+      config, base, cwd, interactive, ui: view,
+      git: { getDiff, commitRound },
+      runner: makeRunner(cwd, view),
+    });
+  } catch (err) {
+    process.stderr.write(`specd-review failed: ${err.message}\n`);
+    process.exit(1);
+  }
 
   const reportPath = join(cwd, 'specd-review-report.md');
   writeReport(reportPath, result);

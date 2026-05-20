@@ -4,15 +4,17 @@ export async function runReview({
   config, base, cwd, interactive, ui, git, runner,
 }) {
   const rounds = [];
+  const priorFixes = [];
   let diff = await git.getDiff(cwd, base);
 
   for (let round = 1; round <= config.maxRounds; round++) {
     await ui.showRound({ round, reviewers: config.reviewers, base });
 
     // Reviewers in parallel; a rejected reviewer is treated as skipped.
+    const priorWork = priorFixes.length ? priorFixes.join('\n') : '(none)';
     const settled = await Promise.allSettled(
       config.reviewers.map((agent) =>
-        runner.runReviewer(agent, { diff, round, base })),
+        runner.runReviewer(agent, { diff, round, base, priorWork })),
     );
     const reviewerOutputs = [];
     const skipped = [];
@@ -53,6 +55,7 @@ export async function runReview({
 
     const commit = await git.commitRound(cwd, round, blocking.length);
     rounds.push({ round, findings, summaries, feedback, commit, skipped });
+    if (fix.summary) priorFixes.push(`Round ${round}: ${fix.summary}`);
     diff = await git.getDiff(cwd, base);
   }
 

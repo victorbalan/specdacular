@@ -5,7 +5,9 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { assertCleanTree, resolveBase, getDiff, commitRound } from '../src/git.js';
+import {
+  assertCleanTree, resolveBase, getDiff, commitRound, hasUncommittedChanges,
+} from '../src/git.js';
 
 let repo;
 const git = (...args) => execFileSync('git', args, { cwd: repo }).toString();
@@ -49,5 +51,11 @@ describe('git helpers', () => {
     const hash = await commitRound(repo, 1, 3);
     a.ok(hash && hash.length >= 7);
     a.match(git('log', '-1', '--pretty=%s'), /round 1.*3 issue/);
+  });
+
+  it('hasUncommittedChanges reflects whether the tree is dirty', async () => {
+    a.equal(await hasUncommittedChanges(repo), false);
+    writeFileSync(join(repo, 'f.txt'), 'dirty\n');
+    a.equal(await hasUncommittedChanges(repo), true);
   });
 });

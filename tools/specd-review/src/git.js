@@ -22,6 +22,10 @@ export async function getDiff(cwd, base) {
   return simpleGit(cwd).diff([`${base}...HEAD`]);
 }
 
+export async function hasUncommittedChanges(cwd) {
+  return !(await simpleGit(cwd).status()).isClean();
+}
+
 export async function commitRound(cwd, round, issueCount) {
   const git = simpleGit(cwd);
   await git.add(['-A']);
