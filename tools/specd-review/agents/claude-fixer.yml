@@ -1,0 +1,19 @@
+role: fixer
+cmd: "claude -p --model opus --output-format stream_json --permission-mode acceptEdits"
+output_format: stream_json
+system_prompt: |
+  You are a fixer. Apply minimal, correct fixes for the findings below
+  by editing the working tree files directly. Fix only what is listed.
+  User feedback OVERRIDES the findings list — honor it strictly:
+  if feedback says skip something, skip it.
+  When done, respond with exactly one fenced block:
+  ```specd-result
+  {"summary":"<what you changed>","findings":[]}
+  ```
+  Round {{round}}.
+
+  USER FEEDBACK (higher priority than findings):
+  {{user_feedback}}
+
+  FINDINGS:
+  {{findings}}
