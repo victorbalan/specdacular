@@ -362,6 +362,27 @@ function TaskCard({ task, action, onClick, onAction, onRefresh }) {
               ×
             </span>
           )}
+          {(task.status === 'in_progress' || task.status === 'planning') && (
+            <span
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!confirm(`Stop "${task.name}" and move to backlog?`)) return;
+                await window.specd.invoke('stop-task', task.projectId, task.id);
+                if (onRefresh) onRefresh();
+              }}
+              title="Stop and move to backlog"
+              style={{
+                fontSize: 10, cursor: 'pointer', padding: '1px 5px', borderRadius: 3,
+                color: colors.danger, border: `1px solid ${colors.danger}`,
+                fontWeight: 600,
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.danger; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = colors.danger; }}
+            >
+              STOP
+            </span>
+          )}
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

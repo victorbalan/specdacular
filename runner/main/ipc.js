@@ -148,6 +148,13 @@ export function setupIpc(getContext) {
     return orch.advanceTask(taskId, action, feedback);
   });
 
+  ipcMain.handle('stop-task', (event, projectId, taskId) => {
+    const { orchestrators } = getContext();
+    const orch = orchestrators.get(projectId);
+    if (!orch) return null;
+    return orch.stopTask(taskId);
+  });
+
   ipcMain.handle('get-pipeline-files', () => {
     const { paths } = getContext();
     return readTemplateDir(paths.pipelineTemplatesDir);
