@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { cpSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { cpSync, mkdirSync, writeFileSync, existsSync, realpathSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stdout } from 'node:process';
@@ -106,6 +106,18 @@ program.argument('[pr]', 'GitHub PR number to review (omit to review the current
   .option('--config <dir>', 'alternate global config directory')
   .action((pr, opts) => review(pr, opts));
 
-if (process.argv[1] && process.argv[1].endsWith('cli.js')) {
+// Parse args only when run as the entry point — not when imported (e.g. by
+// tests). realpathSync resolves the bin symlink so the installed
+// `specd-review` command matches this file.
+function isEntryPoint() {
+  try {
+    return Boolean(process.argv[1])
+      && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (isEntryPoint()) {
   program.parse();
 }
