@@ -1,11 +1,12 @@
 import { writeFileSync } from 'node:fs';
+import { SEVERITY_ORDER } from './findings.js';
 
-function renderFinding(f) {
+function renderFinding(f, n) {
   const loc = f.line != null ? `${f.file}:${f.line}` : f.file;
   return [
-    `- **[${f.severity}]** \`${loc}\` _(${f.category}, ${f.source})_`,
-    `  - ${f.description}`,
-    f.suggestion ? `  - suggestion: ${f.suggestion}` : null,
+    `${n}. \`${loc}\` _(${f.category} — found by ${f.source})_`,
+    `   - ${f.description}`,
+    f.suggestion ? `   - **fix:** ${f.suggestion}` : null,
   ].filter(Boolean).join('\n');
 }
 
@@ -18,7 +19,17 @@ function renderRound(r) {
     lines.push(`**${agent}:** ${summary}`, '');
   }
   if (r.findings.length) {
-    lines.push('### Findings', '', ...r.findings.map(renderFinding), '');
+    lines.push('### Findings', '');
+    let n = 0;
+    for (const sev of SEVERITY_ORDER) {
+      const group = r.findings.filter((f) => f.severity === sev);
+      if (group.length === 0) continue;
+      lines.push(`#### ${sev} (${group.length})`, '');
+      for (const f of group) {
+        n += 1;
+        lines.push(renderFinding(f, n), '');
+      }
+    }
   } else {
     lines.push('No findings.', '');
   }

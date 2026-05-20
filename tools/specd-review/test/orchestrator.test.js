@@ -36,7 +36,7 @@ describe('runReview', () => {
   it('converges when no blocking findings remain', async () => {
     const deps = makeDeps({
       reviewerFindingsByRound: {
-        0: [{ file: 'a', line: 1, severity: 'blocking', category: 'c', description: 'd' }],
+        0: [{ file: 'a', line: 1, severity: 'P0', category: 'c', description: 'd' }],
         1: [],
       },
     });
@@ -49,7 +49,7 @@ describe('runReview', () => {
   });
 
   it('stops at maxRounds when blocking findings persist', async () => {
-    const blocking = [{ file: 'a', line: 1, severity: 'blocking', category: 'c', description: 'd' }];
+    const blocking = [{ file: 'a', line: 1, severity: 'P0', category: 'c', description: 'd' }];
     const deps = makeDeps({ reviewerFindingsByRound: { 0: blocking, 1: blocking, 2: blocking } });
     const res = await runReview({
       config: { maxRounds: 2, reviewers, fixer }, base: 'B',
@@ -60,7 +60,7 @@ describe('runReview', () => {
   });
 
   it('stops when the fixer makes no changes', async () => {
-    const blocking = [{ file: 'a', line: 1, severity: 'blocking', category: 'c', description: 'd' }];
+    const blocking = [{ file: 'a', line: 1, severity: 'P0', category: 'c', description: 'd' }];
     const deps = makeDeps({ reviewerFindingsByRound: { 0: blocking }, fixerOk: false });
     const res = await runReview({
       config: { maxRounds: 5, reviewers, fixer }, base: 'B',

@@ -12,7 +12,7 @@ describe('renderReport', () => {
         {
           round: 1,
           findings: [
-            { file: 'a.js', line: 4, severity: 'blocking', category: 'logic',
+            { file: 'a.js', line: 4, severity: 'P1', category: 'logic',
               description: 'off-by-one', suggestion: 'fix it', source: 'codex-perf' },
           ],
           summaries: { 'codex-perf': 'looked ok overall' },

@@ -34,17 +34,21 @@ system_prompt: |
   When completely finished, end your response with EXACTLY one fenced block:
   ```specd-result
   {"summary":"<one-paragraph overall assessment>","findings":[
-    {"file":"<path>","line":<int or null>,"severity":"blocking|nice-to-have",
+    {"file":"<path>","line":<int or null>,"severity":"P0|P1|P2|P3",
      "category":"<short>","description":"<the risk and how it is exploited>",
      "suggestion":"<concrete fix>"}]}
   ```
 
-  SEVERITY: "blocking" = a real, exploitable security defect that should
-  block merge. "nice-to-have" = hardening or defense-in-depth that is not a
-  concrete vulnerability. Be skeptical but fair: report concrete,
-  evidence-backed findings with file:line; distinguish real vulnerabilities
-  from theoretical ones; do not pad with generic advice. If the change is
-  sound, say so honestly.
+  SEVERITY — rate every finding P0–P3:
+    P0 — critical: a severe, exploitable vulnerability (auth bypass, data
+         exposure, injection). Must be fixed before merge.
+    P1 — high: a real security defect that will bite in production.
+    P2 — medium: a genuine weakness worth fixing, not merge-blocking.
+    P3 — low: hardening or defense-in-depth, not a concrete vulnerability.
+  P0 and P1 block the review loop; P2 and P3 are reported only. Be skeptical
+  but fair: report concrete, evidence-backed findings with file:line;
+  distinguish real vulnerabilities from theoretical ones; do not pad with
+  generic advice. If the change is sound, say so honestly.
 
   Round {{round}}, base {{base}}.
 

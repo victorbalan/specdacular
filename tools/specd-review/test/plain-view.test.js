@@ -3,15 +3,15 @@ import { strict as a } from 'node:assert';
 import { formatFindings, parseGateInput } from '../src/ui/plain-view.js';
 
 describe('formatFindings', () => {
-  it('groups findings by file with severity markers', () => {
+  it('renders findings grouped by severity', () => {
     const text = formatFindings([
-      { file: 'a.js', line: 3, severity: 'blocking', category: 'logic',
+      { file: 'a.js', line: 3, severity: 'P0', category: 'logic',
         description: 'bug', suggestion: '', source: 'r1' },
-      { file: 'a.js', line: 9, severity: 'nice-to-have', category: 'style',
+      { file: 'a.js', line: 9, severity: 'P3', category: 'style',
         description: 'nit', suggestion: '', source: 'r2' },
     ]);
     a.match(text, /a\.js/);
-    a.match(text, /blocking/);
+    a.match(text, /P0 · CRITICAL/);
     a.match(text, /bug/);
   });
 

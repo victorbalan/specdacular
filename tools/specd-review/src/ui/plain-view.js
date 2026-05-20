@@ -5,24 +5,11 @@ import { execSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import chalk from 'chalk';
+import { renderFindingsDoc } from '../findings.js';
 
-export function formatFindings(findings) {
-  if (!findings.length) return chalk.green('No findings.');
-  const byFile = {};
-  for (const f of findings) (byFile[f.file] ||= []).push(f);
-  const lines = [];
-  for (const [file, fs] of Object.entries(byFile)) {
-    lines.push(chalk.bold(file));
-    for (const f of fs) {
-      const tag = f.severity === 'blocking'
-        ? chalk.red('[blocking]') : chalk.yellow('[nice-to-have]');
-      const loc = f.line != null ? `:${f.line}` : '';
-      lines.push(`  ${tag} ${file}${loc} (${f.category}, ${f.source})`);
-      lines.push(`    ${f.description}`);
-      if (f.suggestion) lines.push(chalk.dim(`    → ${f.suggestion}`));
-    }
-  }
-  return lines.join('\n');
+// Renders the merged findings as the consolidated, severity-grouped summary.
+export function formatFindings(findings, summaries = {}) {
+  return renderFindingsDoc(findings, summaries);
 }
 
 export function parseGateInput(raw) {
@@ -50,12 +37,12 @@ export function createPlainView() {
       stdout.write(chalk.dim(`reviewers: ${reviewers.map((r) => r.name).join(', ')}\n`));
     },
 
-    async findingsGate({ round, findings }) {
+    async findingsGate({ findings, summaries }) {
       let current = findings;
       const rl = readline.createInterface({ input: stdin, output: stdout });
       try {
         for (;;) {
-          stdout.write(`\n${formatFindings(current)}\n`);
+          stdout.write(`\n${formatFindings(current, summaries)}\n`);
           const raw = await rl.question(
             chalk.bold('\n[enter]=continue  /edit  /accept  /quit  or type feedback > '),
           );
