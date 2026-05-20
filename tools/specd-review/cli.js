@@ -29,22 +29,30 @@ export function runInit(globalDir) {
 function makeRunner(cwd, view) {
   return {
     async runReviewer(agent, { diff, round, base, priorWork }) {
+      view.updateAgent?.(agent.name, { role: 'reviewer', done: false });
       const res = await runAgent(agent, {
         diff, round, base, prior_work: priorWork || '(none)',
       }, {
         cwd,
         onStatus: (s) => view.updateAgent?.(agent.name, { status: s, done: false }),
+        onOutput: (line) => view.appendOutput?.(agent.name, line),
       });
       const count = res.result?.findings?.length || 0;
       view.updateAgent?.(agent.name, { done: true, findingCount: count, skipped: !res.result });
       return { agent: agent.name, output: res.result };
     },
     async runFixer(agent, { diff, findings, feedback, round }) {
+      view.updateAgent?.(agent.name, { role: 'fixer', done: false });
       const res = await runAgent(agent, {
         diff, round,
         findings: JSON.stringify(findings, null, 2),
         user_feedback: feedback || '(none)',
-      }, { cwd });
+      }, {
+        cwd,
+        onStatus: (s) => view.updateAgent?.(agent.name, { status: s, done: false }),
+        onOutput: (line) => view.appendOutput?.(agent.name, line),
+      });
+      view.updateAgent?.(agent.name, { done: true });
       // "Changed" means the fixer actually edited files — emitting a result
       // block is not enough. A no-op fixer must not trigger an empty commit.
       return { changed: await hasUncommittedChanges(cwd), summary: res.result?.summary || '' };
@@ -72,6 +80,7 @@ async function review(prNumber, opts) {
   stdout.write(`Reviewing changes since ${base.slice(0, 7)} (${source})\n`);
   const interactive = !!opts.interactive;
   const view = (interactive && stdout.isTTY) ? createInkView() : createPlainView();
+  view.setHeader?.({ baseLabel: source, maxRounds: config.maxRounds });
 
   let result;
   try {

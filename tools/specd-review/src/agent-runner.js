@@ -23,7 +23,7 @@ function streamJsonLines(line) {
   return [line];
 }
 
-function spawnOnce(agent, prompt, { cwd, onStatus, timeout = 1800_000 }) {
+function spawnOnce(agent, prompt, { cwd, onStatus, onOutput, timeout = 1800_000 }) {
   return new Promise((resolve) => {
     const proc = spawn(agent.cmd, { cwd, shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
 
@@ -32,7 +32,10 @@ function spawnOnce(agent, prompt, { cwd, onStatus, timeout = 1800_000 }) {
     const outputLines = [];
     parser.on('result', (r) => { result = r; });
     parser.on('status', (s) => onStatus && onStatus(s));
-    parser.on('output', (l) => outputLines.push(l));
+    parser.on('output', (l) => {
+      outputLines.push(l);
+      if (onOutput) onOutput(l);
+    });
 
     const timer = setTimeout(() => proc.kill('SIGKILL'), timeout);
 
