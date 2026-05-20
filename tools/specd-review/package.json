@@ -4,6 +4,7 @@
   "description": "Iterative multi-agent code review CLI",
   "type": "module",
   "bin": { "specd-review": "./cli.js" },
+  "files": ["cli.js", "src", "agents"],
   "scripts": { "test": "node --test" },
   "dependencies": {
     "chalk": "^5.3.0",
