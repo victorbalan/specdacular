@@ -17,8 +17,10 @@ const FRAME_MS = 100;
 const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 const ESC = '\x1b';
-const ALT_ON = `${ESC}[?1049h${ESC}[2J${ESC}[?25l`;
-const ALT_OFF = `${ESC}[?25h${ESC}[?1049l`;
+// ?1049h alternate screen · ?7l disable auto-wrap (so a full-width write to
+// the bottom-right cell does not scroll the screen) · ?25l hide cursor.
+const ALT_ON = `${ESC}[?1049h${ESC}[?7l${ESC}[2J${ESC}[?25l`;
+const ALT_OFF = `${ESC}[?7h${ESC}[?25h${ESC}[?1049l`;
 const dim = (s) => `${ESC}[2m${s}${ESC}[0m`;
 const bold = (s) => `${ESC}[1m${s}${ESC}[0m`;
 const inverse = (s) => `${ESC}[7m${s}${ESC}[0m`;
@@ -158,6 +160,8 @@ export function createInkView() {
   function start() {
     if (running) return;
     running = true;
+    // Restore the terminal even if the process exits unexpectedly.
+    process.once('exit', () => { if (running) stdout.write(ALT_OFF); });
     stdout.write(ALT_ON);
     if (stdin.isTTY) stdin.setRawMode(true);
     stdin.resume();
