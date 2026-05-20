@@ -1,21 +1,27 @@
 // src/ui/ink-view.js
 //
-// Full-height Ink (React-for-terminal) TUI. Runs in the alternate screen
-// buffer: a status bar, a selectable list of agents, and a scrollable pane
-// showing the selected agent's live output. At the findings gate the pane
-// shows the findings and the footer becomes an input box.
+// Full-screen terminal UI for interactive reviews. Implemented as a direct
+// renderer (no ink): every frame positions each line absolutely with cursor
+// moves and never emits a newline, so the terminal cannot scroll — only the
+// output pane's contents page with PgUp/PgDn. Runs in the alternate screen
+// buffer; the shell scrollback is untouched and restored on exit.
 //
-// Implements the same `ui` interface as plain-view.js. Build-free — no JSX;
-// components are created with React.createElement.
+// Exposes the same `ui` interface as plain-view.js.
 
-import React from 'react';
-import { render, Box, Text, useInput } from 'ink';
-import Spinner from 'ink-spinner';
+import { stdin, stdout } from 'node:process';
 import { formatFindings, parseGateInput, editFindingsInEditor } from './plain-view.js';
 
-const h = React.createElement;
 const MAX_OUTPUT_LINES = 5000;
 const SCROLL_STEP = 5;
+const FRAME_MS = 100;
+const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+const ESC = '\x1b';
+const ALT_ON = `${ESC}[?1049h${ESC}[2J${ESC}[?25l`;
+const ALT_OFF = `${ESC}[?25h${ESC}[?1049l`;
+const dim = (s) => `${ESC}[2m${s}${ESC}[0m`;
+const bold = (s) => `${ESC}[1m${s}${ESC}[0m`;
+const inverse = (s) => `${ESC}[7m${s}${ESC}[0m`;
 
 // Pure: derives the display icon + text for one agent row. Pinned by tests.
 export function agentLineState({ name, status, done, findingCount = 0, skipped = false }) {
@@ -31,83 +37,39 @@ function fmtElapsed(ms) {
   return `${mm}:${ss}`;
 }
 
-function stripAnsi(str) {
-  return str.replace(/\x1b\[[0-9;]*m/g, '');
+// Strips control sequences and forces a string to exactly `w` columns.
+function fit(str, w) {
+  let s = String(str ?? '')
+    .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
+    .replace(/\t/g, ' ')
+    .replace(/[\x00-\x08\x0b-\x1f\x7f]/g, '');
+  if (s.length > w) return s.slice(0, w);
+  return s + ' '.repeat(w - s.length);
 }
 
-function Icon({ kind }) {
-  if (kind === 'spinner') return h(Text, { color: 'cyan' }, h(Spinner, { type: 'dots' }));
-  if (kind === 'check') return h(Text, { color: 'green' }, '✔');
-  return h(Text, { color: 'red' }, '✖');
+function iconChar(kind, frame) {
+  if (kind === 'spinner') return SPINNER[frame % SPINNER.length];
+  if (kind === 'check') return '✔';
+  return '✖';
 }
 
-function AgentRow({ agent, selected }) {
-  const ls = agentLineState(agent);
-  const name = `${agent.name} `.padEnd(24).slice(0, 24);
-  return h(
-    Box,
-    null,
-    h(Text, { color: 'cyan' }, selected ? '▸ ' : '  '),
-    h(Icon, { kind: ls.icon }),
-    h(Text, { bold: selected }, ` ${name}`),
-    h(Text, { dimColor: true, wrap: 'truncate' }, ls.text),
-  );
-}
-
-// The whole screen. Pure render driven by `snap`; all state lives outside.
-function App({ snap, onKey }) {
-  useInput((input, key) => onKey(input, key));
-
-  const { rows, cols, agents, selected, mode } = snap;
-  const listRows = Math.max(1, agents.length);
-  let outputRows = rows - 4 - listRows; // status, separator, pane label, footer
-  if (outputRows < 3) outputRows = 3;
-
-  const selectedAgent = agents[selected];
-  const sourceLines = mode === 'gate'
-    ? snap.findingsLines
-    : (selectedAgent ? selectedAgent.output : []);
-  const end = Math.max(0, sourceLines.length - snap.scroll);
-  const start = Math.max(0, end - outputRows);
-  const windowLines = sourceLines.slice(start, end);
-  while (windowLines.length < outputRows) windowLines.push('');
-
-  const running = agents.filter((a) => !a.done).length;
-  const roundLabel = snap.maxRounds ? `${snap.round}/${snap.maxRounds}` : `${snap.round}`;
-  const statusText = ` specd-review · round ${roundLabel} · ${snap.baseLabel} `
-    + `· ${fmtElapsed(snap.now - snap.startedAt)} · ${running} running`;
-
-  const paneLabel = mode === 'gate'
-    ? ' findings — type feedback · /edit · /continue · /accept · /quit '
-    : ` ${selectedAgent ? selectedAgent.name : '—'} · output `;
-
-  const footer = mode === 'gate'
-    ? h(Text, null, h(Text, { color: 'cyan' }, '> '), snap.gateValue, h(Text, { inverse: true }, ' '))
-    : h(Text, { dimColor: true }, ' ↑↓ select agent · PgUp/PgDn scroll · q quit ');
-
-  return h(
-    Box,
-    { flexDirection: 'column', width: cols, height: rows },
-    h(Text, { backgroundColor: 'cyan', color: 'black', wrap: 'truncate' },
-      (statusText + ' '.repeat(cols)).slice(0, cols)),
-    h(Text, { dimColor: true }, '─'.repeat(cols)),
-    ...agents.map((agent, i) => h(AgentRow, { key: agent.name, agent, selected: i === selected })),
-    h(Text, { dimColor: true, wrap: 'truncate' },
-      (`─ ${paneLabel} ` + '─'.repeat(cols)).slice(0, cols)),
-    ...windowLines.map((line, i) => h(Text, { key: i, wrap: 'truncate' }, line || ' ')),
-    footer,
-  );
+function windowLines(lines, height, scroll) {
+  const end = Math.max(0, lines.length - scroll);
+  const start = Math.max(0, end - height);
+  const win = lines.slice(start, end);
+  while (win.length < height) win.push('');
+  return win;
 }
 
 export function createInkView() {
-  let instance = null;
-  let timer = null;
+  let running = false;
+  let loop = null;
   let onResize = null;
+  let frame = 0;
 
   const state = {
     round: 0,
     maxRounds: 0,
-    base: '',
     baseLabel: '',
     startedAt: Date.now(),
     agents: [],
@@ -120,67 +82,133 @@ export function createInkView() {
     onGateSubmit: null,
   };
 
-  function snapshot() {
-    return {
-      ...state,
-      now: Date.now(),
-      rows: process.stdout.rows || 24,
-      cols: process.stdout.columns || 80,
-    };
-  }
-
-  function draw() {
-    if (instance) instance.rerender(h(App, { snap: snapshot(), onKey }));
-  }
-
-  function enterAltScreen() {
-    process.stdout.write('\x1b[?1049h\x1b[H');
-  }
-  function exitAltScreen() {
-    process.stdout.write('\x1b[?1049l');
-  }
-
-  function ensureInstance() {
-    if (instance) return;
-    enterAltScreen();
-    instance = render(h(App, { snap: snapshot(), onKey }));
-    timer = setInterval(draw, 1000);
-    onResize = () => draw();
-    process.stdout.on('resize', onResize);
-  }
-
-  function teardown() {
-    if (timer) { clearInterval(timer); timer = null; }
-    if (onResize) { process.stdout.removeListener('resize', onResize); onResize = null; }
-    if (instance) { instance.unmount(); instance = null; }
-    exitAltScreen();
-  }
-
   function findAgent(name) {
     return state.agents.find((a) => a.name === name);
   }
 
-  function scrollPane(delta) {
+  function animating() {
+    return state.mode === 'gate' || state.agents.some((a) => !a.done);
+  }
+
+  // ---- rendering -----------------------------------------------------------
+
+  function buildFrame() {
+    const rows = stdout.rows || 24;
+    const cols = stdout.columns || 80;
+    const lines = [];
+
+    const runningCount = state.agents.filter((a) => !a.done).length;
+    const roundLabel = state.maxRounds ? `${state.round}/${state.maxRounds}` : `${state.round}`;
+    lines.push(inverse(fit(
+      ` specd-review · round ${roundLabel} · ${state.baseLabel}`
+      + ` · ${fmtElapsed(Date.now() - state.startedAt)} · ${runningCount} running`,
+      cols,
+    )));
+    lines.push(dim('─'.repeat(cols)));
+
+    const room = Math.max(1, rows - 4 - 3); // keep >= 3 lines for the pane
+    const shown = state.agents.slice(0, room);
+    shown.forEach((agent, i) => {
+      const ls = agentLineState(agent);
+      const selected = i === state.selected;
+      const row = `${selected ? '▸' : ' '} ${iconChar(ls.icon, frame)} `
+        + `${agent.name.padEnd(22).slice(0, 22)} ${ls.text}`;
+      lines.push(selected ? bold(fit(row, cols)) : fit(row, cols));
+    });
+
+    const selectedAgent = state.agents[state.selected];
+    const paneLabel = state.mode === 'gate'
+      ? '─ findings — /edit · /continue · /accept · /quit · or type feedback '
+      : `─ ${selectedAgent ? selectedAgent.name : '—'} · output `;
+    lines.push(dim(fit(paneLabel.padEnd(cols, '─'), cols)));
+
+    const source = state.mode === 'gate'
+      ? state.findingsLines
+      : (selectedAgent ? selectedAgent.output : []);
+    const paneHeight = Math.max(1, rows - lines.length - 1);
+    for (const line of windowLines(source, paneHeight, state.scroll)) {
+      lines.push(fit(line, cols));
+    }
+
+    const footer = state.mode === 'gate'
+      ? `> ${state.gateValue}█`
+      : ' ↑↓ select agent · PgUp/PgDn scroll · q quit ';
+    lines.push(state.mode === 'gate' ? fit(footer, cols) : dim(fit(footer, cols)));
+
+    return lines.slice(0, rows);
+  }
+
+  function paint() {
+    const rows = stdout.rows || 24;
+    const lines = buildFrame();
+    let out = '';
+    for (let i = 0; i < rows; i++) {
+      out += `${ESC}[${i + 1};1H${ESC}[2K${lines[i] || ''}`;
+    }
+    stdout.write(out);
+  }
+
+  function tick() {
+    if (animating()) frame += 1;
+    paint();
+  }
+
+  // ---- lifecycle -----------------------------------------------------------
+
+  function start() {
+    if (running) return;
+    running = true;
+    stdout.write(ALT_ON);
+    if (stdin.isTTY) stdin.setRawMode(true);
+    stdin.resume();
+    stdin.setEncoding('utf8');
+    stdin.on('data', onData);
+    onResize = () => paint();
+    stdout.on('resize', onResize);
+    loop = setInterval(tick, FRAME_MS);
+    paint();
+  }
+
+  function stop() {
+    if (!running) return;
+    running = false;
+    if (loop) { clearInterval(loop); loop = null; }
+    if (onResize) { stdout.removeListener('resize', onResize); onResize = null; }
+    stdin.removeListener('data', onData);
+    if (stdin.isTTY) stdin.setRawMode(false);
+    stdin.pause();
+    stdout.write(ALT_OFF);
+  }
+
+  // ---- input ---------------------------------------------------------------
+
+  function scrollBy(delta) {
     state.scroll = Math.max(0, state.scroll + delta);
+  }
+
+  function selectBy(delta) {
+    state.selected = Math.min(
+      Math.max(0, state.agents.length - 1),
+      Math.max(0, state.selected + delta),
+    );
+    state.scroll = 0;
   }
 
   function submitGate() {
     const parsed = parseGateInput(state.gateValue);
     if (parsed.action === 'edit') {
-      // Suspend the TUI so $EDITOR gets a clean terminal, then resume.
-      teardown();
+      stop(); // give $EDITOR a clean terminal
       let edited = state.gateFindings;
       try {
         edited = editFindingsInEditor(state.gateFindings);
       } catch {
-        // editor failed or was aborted — keep the findings as they were
+        // editor aborted/failed — keep findings unchanged
       }
       state.gateFindings = edited;
-      state.findingsLines = stripAnsi(formatFindings(edited)).split('\n');
+      state.findingsLines = formatFindings(edited).split('\n');
       state.gateValue = '';
       state.scroll = 0;
-      ensureInstance();
-      draw();
+      start();
       return;
     }
     const submit = state.onGateSubmit;
@@ -194,38 +222,51 @@ export function createInkView() {
     }
   }
 
-  function onKey(input, key) {
-    if (key.upArrow) {
-      if (state.mode === 'running') {
-        state.selected = Math.max(0, state.selected - 1);
-        state.scroll = 0;
-      } else {
-        scrollPane(1);
-      }
-    } else if (key.downArrow) {
-      if (state.mode === 'running') {
-        state.selected = Math.min(state.agents.length - 1, state.selected + 1);
-        state.scroll = 0;
-      } else {
-        scrollPane(-1);
-      }
-    } else if (key.pageUp) {
-      scrollPane(SCROLL_STEP);
-    } else if (key.pageDown) {
-      scrollPane(-SCROLL_STEP);
-    } else if (state.mode === 'gate' && key.return) {
-      submitGate();
+  function handleKey(key) {
+    if (key.ctrlC) { stop(); process.exit(130); }
+
+    if (state.mode === 'running') {
+      if (key.up) selectBy(-1);
+      else if (key.down) selectBy(1);
+      else if (key.pageUp) scrollBy(SCROLL_STEP);
+      else if (key.pageDown) scrollBy(-SCROLL_STEP);
+      else if (key.char === 'q') { stop(); process.exit(130); }
+      paint();
       return;
-    } else if (state.mode === 'gate' && (key.backspace || key.delete)) {
-      state.gateValue = state.gateValue.slice(0, -1);
-    } else if (state.mode === 'gate' && input && !key.ctrl && !key.meta) {
-      state.gateValue += input;
-    } else if (state.mode === 'running' && input === 'q') {
-      teardown();
-      process.exit(130);
     }
-    draw();
+
+    // gate mode
+    if (key.up) scrollBy(1);
+    else if (key.down) scrollBy(-1);
+    else if (key.pageUp) scrollBy(SCROLL_STEP);
+    else if (key.pageDown) scrollBy(-SCROLL_STEP);
+    else if (key.enter) { submitGate(); return; }
+    else if (key.backspace) state.gateValue = state.gateValue.slice(0, -1);
+    else if (key.char) state.gateValue += key.char;
+    paint();
   }
+
+  function onData(data) {
+    let i = 0;
+    while (i < data.length) {
+      const rest = data.slice(i);
+      const ch = data[i];
+      if (ch === '\x03') { handleKey({ ctrlC: true }); i += 1; }
+      else if (ch === '\r' || ch === '\n') { handleKey({ enter: true }); i += 1; }
+      else if (ch === '\x7f' || ch === '\x08') { handleKey({ backspace: true }); i += 1; }
+      else if (ch === '\x1b') {
+        if (rest.startsWith(`${ESC}[A`)) { handleKey({ up: true }); i += 3; }
+        else if (rest.startsWith(`${ESC}[B`)) { handleKey({ down: true }); i += 3; }
+        else if (rest.startsWith(`${ESC}[5~`)) { handleKey({ pageUp: true }); i += 4; }
+        else if (rest.startsWith(`${ESC}[6~`)) { handleKey({ pageDown: true }); i += 4; }
+        else if (rest.startsWith(`${ESC}[`)) { i += 3; } // other CSI — skip
+        else i += 1;
+      } else if (ch >= ' ') { handleKey({ char: ch }); i += 1; }
+      else i += 1; // other control char — ignore
+    }
+  }
+
+  // ---- ui interface --------------------------------------------------------
 
   return {
     setHeader({ baseLabel, maxRounds } = {}) {
@@ -235,7 +276,6 @@ export function createInkView() {
 
     async showRound({ round, reviewers, base }) {
       state.round = round;
-      state.base = base;
       if (!state.baseLabel) state.baseLabel = (base || '').slice(0, 7);
       state.agents = reviewers.map((r) => ({
         name: r.name,
@@ -249,8 +289,8 @@ export function createInkView() {
       state.selected = 0;
       state.scroll = 0;
       state.mode = 'running';
-      ensureInstance();
-      draw();
+      start();
+      paint();
     },
 
     // Updates an agent row, adding it if unknown (e.g. the fixer mid-round).
@@ -269,7 +309,6 @@ export function createInkView() {
         state.agents.push(agent);
       }
       Object.assign(agent, patch);
-      draw();
     },
 
     appendOutput(name, line) {
@@ -280,26 +319,24 @@ export function createInkView() {
       }
       agent.output.push(line);
       if (agent.output.length > MAX_OUTPUT_LINES) agent.output.shift();
-      draw();
     },
 
     async findingsGate({ findings }) {
       return new Promise((resolve) => {
         state.mode = 'gate';
         state.gateFindings = findings;
-        state.findingsLines = stripAnsi(formatFindings(findings)).split('\n');
+        state.findingsLines = formatFindings(findings).split('\n');
         state.gateValue = '';
         state.scroll = 0;
         state.onGateSubmit = resolve;
-        ensureInstance();
-        draw();
+        start();
+        paint();
       });
     },
 
     async showResult({ outcome, reportPath }) {
-      teardown();
-      process.stdout.write(`\nspecd-review: ${outcome}\n`);
-      process.stdout.write(`report: ${reportPath}\n`);
+      stop();
+      stdout.write(`\nspecd-review: ${outcome}\nreport: ${reportPath}\n`);
     },
   };
 }
