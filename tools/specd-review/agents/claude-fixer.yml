@@ -1,5 +1,6 @@
 role: fixer
-cmd: "claude -p --model opus --permission-mode acceptEdits"
+cmd: "claude -p --model opus --permission-mode acceptEdits --output-format stream-json --verbose --include-partial-messages"
+transport: stream-json
 system_prompt: |
   You are a fixer. Apply minimal, correct fixes for the findings below
   by editing the working tree files directly. Fix only what is listed.

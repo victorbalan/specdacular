@@ -7,22 +7,6 @@ export function renderPrompt(template, vars) {
   );
 }
 
-// Unwrap a Claude `--output-format stream_json` line into its text lines.
-function streamJsonLines(line) {
-  try {
-    const event = JSON.parse(line);
-    const content = event?.message?.content || event?.result;
-    if (Array.isArray(content)) {
-      return content
-        .filter((b) => b.type === 'text')
-        .flatMap((b) => b.text.split('\n'));
-    }
-  } catch {
-    // not JSON — fall through
-  }
-  return [line];
-}
-
 function spawnOnce(agent, prompt, { cwd, onStatus, onOutput, timeout = 1800_000 }) {
   return new Promise((resolve) => {
     const proc = spawn(agent.cmd, { cwd, shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -46,21 +30,79 @@ function spawnOnce(agent, prompt, { cwd, onStatus, onOutput, timeout = 1800_000 
     proc.stdout.on('error', () => {});
     proc.stderr.on('error', () => {});
 
-    let buf = '';
+    const isJson = agent.transport === 'stream_json';
+    let usingDeltas = false; // true once token deltas are seen (claude partials)
+    let rawBuf = '';  // raw stdout buffered into newline-delimited event lines
+    let textBuf = ''; // extracted agent text buffered into display lines
+
+    // Feeds extracted agent text to the parser, split on real newlines so the
+    // fenced ```specd-result``` block is detected even across delta chunks.
+    function feedText(text) {
+      textBuf += text;
+      const lines = textBuf.split('\n');
+      textBuf = lines.pop();
+      for (const l of lines) parser.feed(l);
+    }
+
+    // Pulls human-readable text out of one Claude stream-json event line and
+    // surfaces tool use as a status. Returns a text chunk ('' if none).
+    function jsonEventText(line) {
+      let ev;
+      try {
+        ev = JSON.parse(line);
+      } catch {
+        return `${line}\n`; // not a JSON event — treat as a plain text line
+      }
+      // Streaming token deltas (claude --include-partial-messages).
+      if (ev.type === 'stream_event') {
+        // End each content block with a newline so the next block (e.g. the
+        // fenced result) starts on its own line rather than fusing onto text.
+        if (ev.event?.type === 'content_block_stop') return '\n';
+        const delta = ev.event?.delta;
+        if (delta?.type === 'text_delta' || delta?.type === 'thinking_delta') {
+          usingDeltas = true;
+          return delta.text || delta.thinking || '';
+        }
+        return '';
+      }
+      // Aggregate assistant message: surface tool use as a status, and show
+      // its text + reasoning (skipped when deltas already stream them).
+      if (ev.type === 'assistant' && Array.isArray(ev.message?.content)) {
+        let text = '';
+        for (const block of ev.message.content) {
+          if (block.type === 'tool_use' && onStatus) {
+            onStatus({ progress: `${block.name}…` });
+          }
+          if (usingDeltas) continue;
+          if (block.type === 'text' && typeof block.text === 'string') text += block.text;
+          if (block.type === 'thinking' && typeof block.thinking === 'string') {
+            text += block.thinking;
+          }
+        }
+        return text;
+      }
+      return ''; // system / result / rate_limit — nothing to show
+    }
+
     proc.stdout.on('data', (chunk) => {
-      buf += chunk.toString();
-      const lines = buf.split('\n');
-      buf = lines.pop();
+      rawBuf += chunk.toString();
+      const lines = rawBuf.split('\n');
+      rawBuf = lines.pop();
       for (const line of lines) {
-        const fed = agent.transport === 'stream_json' ? streamJsonLines(line) : [line];
-        for (const f of fed) parser.feed(f);
+        if (isJson) feedText(jsonEventText(line));
+        else parser.feed(line);
       }
     });
 
     proc.stdin.end(prompt);
     proc.on('close', () => {
       clearTimeout(timer);
-      if (buf) parser.feed(buf);
+      if (isJson) {
+        if (rawBuf) feedText(jsonEventText(rawBuf));
+        if (textBuf) parser.feed(textBuf);
+      } else if (rawBuf) {
+        parser.feed(rawBuf);
+      }
       resolve({ result, output: outputLines });
     });
     proc.on('error', () => {

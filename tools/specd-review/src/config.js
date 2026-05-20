@@ -17,7 +17,7 @@ function parseAgentFile(path, name) {
     name,
     role: raw.role,
     cmd: raw.cmd,
-    transport: raw.output_format === 'stream_json' ? 'stream_json' : 'plain',
+    transport: raw.transport === 'stream-json' ? 'stream_json' : 'plain',
     systemPrompt: raw.system_prompt || '',
   };
 }
