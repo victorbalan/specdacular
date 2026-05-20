@@ -1,29 +1,25 @@
 // src/ui/ink-view.js
 //
-// Full-screen terminal UI for interactive reviews. Implemented as a direct
-// renderer (no ink): every frame positions each line absolutely with cursor
-// moves and never emits a newline, so the terminal cannot scroll — only the
-// output pane's contents page with PgUp/PgDn. Runs in the alternate screen
-// buffer; the shell scrollback is untouched and restored on exit.
+// Interactive live view: agent output streams as a normal, infinite log at
+// the top of the screen (native terminal scroll and scrollback work), and the
+// agent list is pinned in a footer at the bottom.
 //
-// Exposes the same `ui` interface as plain-view.js.
+// It works by setting a terminal scroll region (DECSTBM) covering everything
+// above the footer: printed output scrolls within that region as usual, while
+// the footer — drawn below the region with absolute cursor moves — stays put.
+// No alternate screen, no raw mode. Exposes the same `ui` interface as
+// plain-view.js. (Historically an Ink view; the export name is kept.)
 
 import { stdin, stdout } from 'node:process';
+import readline from 'node:readline';
 import { formatFindings, parseGateInput, editFindingsInEditor } from './plain-view.js';
 
-const MAX_OUTPUT_LINES = 5000;
-const SCROLL_STEP = 5;
-const FRAME_MS = 100;
-const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-
 const ESC = '\x1b';
-// ?1049h alternate screen · ?7l disable auto-wrap (so a full-width write to
-// the bottom-right cell does not scroll the screen) · ?25l hide cursor.
-const ALT_ON = `${ESC}[?1049h${ESC}[?7l${ESC}[2J${ESC}[?25l`;
-const ALT_OFF = `${ESC}[?7h${ESC}[?25h${ESC}[?1049l`;
+const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+const FRAME_MS = 250;
+
 const dim = (s) => `${ESC}[2m${s}${ESC}[0m`;
-const bold = (s) => `${ESC}[1m${s}${ESC}[0m`;
-const inverse = (s) => `${ESC}[7m${s}${ESC}[0m`;
+const cyan = (s) => `${ESC}[36m${s}${ESC}[0m`;
 
 // Pure: derives the display icon + text for one agent row. Pinned by tests.
 export function agentLineState({ name, status, done, findingCount = 0, skipped = false }) {
@@ -49,23 +45,11 @@ function fit(str, w) {
   return s + ' '.repeat(w - s.length);
 }
 
-function iconChar(kind, frame) {
-  if (kind === 'spinner') return SPINNER[frame % SPINNER.length];
-  if (kind === 'check') return '✔';
-  return '✖';
-}
-
-function windowLines(lines, height, scroll) {
-  const end = Math.max(0, lines.length - scroll);
-  const start = Math.max(0, end - height);
-  const win = lines.slice(start, end);
-  while (win.length < height) win.push('');
-  return win;
-}
-
 export function createInkView() {
-  let running = false;
-  let loop = null;
+  let started = false;
+  let footerH = 0;
+  let footerTop = 1; // first screen row of the footer (1-based)
+  let timer = null;
   let onResize = null;
   let frame = 0;
 
@@ -75,199 +59,80 @@ export function createInkView() {
     baseLabel: '',
     startedAt: Date.now(),
     agents: [],
-    selected: 0,
-    scroll: 0,
-    mode: 'running', // 'running' | 'gate'
-    findingsLines: [],
-    gateFindings: [],
-    gateValue: '',
-    onGateSubmit: null,
   };
+
+  const rows = () => stdout.rows || 24;
+  const cols = () => stdout.columns || 80;
 
   function findAgent(name) {
     return state.agents.find((a) => a.name === name);
   }
 
-  function animating() {
-    return state.mode === 'gate' || state.agents.some((a) => !a.done);
-  }
+  // ---- footer --------------------------------------------------------------
 
-  // ---- rendering -----------------------------------------------------------
-
-  function buildFrame() {
-    const rows = stdout.rows || 24;
-    const cols = stdout.columns || 80;
-    const lines = [];
-
+  function footerLines() {
+    const w = cols() - 1; // stop short of the last column to avoid auto-wrap
+    const lines = [dim(fit('── agents ', w).replace(/ +$/, (m) => '─'.repeat(m.length)))];
+    for (const agent of state.agents) {
+      const ls = agentLineState(agent);
+      const icon = ls.icon === 'spinner'
+        ? SPINNER[frame % SPINNER.length]
+        : (ls.icon === 'check' ? '✔' : '✖');
+      lines.push(fit(` ${icon} ${agent.name.padEnd(22).slice(0, 22)} ${ls.text}`, w));
+    }
+    while (lines.length < footerH - 1) lines.push('');
     const runningCount = state.agents.filter((a) => !a.done).length;
     const roundLabel = state.maxRounds ? `${state.round}/${state.maxRounds}` : `${state.round}`;
-    lines.push(inverse(fit(
-      ` specd-review · round ${roundLabel} · ${state.baseLabel}`
-      + ` · ${fmtElapsed(Date.now() - state.startedAt)} · ${runningCount} running`,
-      cols,
+    lines.push(cyan(fit(
+      ` round ${roundLabel} · ${state.baseLabel} · ${fmtElapsed(Date.now() - state.startedAt)}`
+      + ` · ${runningCount} running`,
+      w,
     )));
-    lines.push(dim('─'.repeat(cols)));
-
-    const room = Math.max(1, rows - 4 - 3); // keep >= 3 lines for the pane
-    const shown = state.agents.slice(0, room);
-    shown.forEach((agent, i) => {
-      const ls = agentLineState(agent);
-      const selected = i === state.selected;
-      const row = `${selected ? '▸' : ' '} ${iconChar(ls.icon, frame)} `
-        + `${agent.name.padEnd(22).slice(0, 22)} ${ls.text}`;
-      lines.push(selected ? bold(fit(row, cols)) : fit(row, cols));
-    });
-
-    const selectedAgent = state.agents[state.selected];
-    const paneLabel = state.mode === 'gate'
-      ? '─ findings — /edit · /continue · /accept · /quit · or type feedback '
-      : `─ ${selectedAgent ? selectedAgent.name : '—'} · output `;
-    lines.push(dim(fit(paneLabel.padEnd(cols, '─'), cols)));
-
-    const source = state.mode === 'gate'
-      ? state.findingsLines
-      : (selectedAgent ? selectedAgent.output : []);
-    const paneHeight = Math.max(1, rows - lines.length - 1);
-    for (const line of windowLines(source, paneHeight, state.scroll)) {
-      lines.push(fit(line, cols));
-    }
-
-    const footer = state.mode === 'gate'
-      ? `> ${state.gateValue}█`
-      : ' ↑↓ select agent · PgUp/PgDn scroll · q quit ';
-    lines.push(state.mode === 'gate' ? fit(footer, cols) : dim(fit(footer, cols)));
-
-    return lines.slice(0, rows);
+    return lines.slice(0, footerH);
   }
 
-  function paint() {
-    const rows = stdout.rows || 24;
-    const lines = buildFrame();
-    let out = '';
-    for (let i = 0; i < rows; i++) {
-      out += `${ESC}[${i + 1};1H${ESC}[2K${lines[i] || ''}`;
+  function drawFooter() {
+    if (!started) return;
+    const lines = footerLines();
+    let out = `${ESC}7`; // save cursor
+    for (let i = 0; i < footerH; i++) {
+      out += `${ESC}[${footerTop + i};1H${ESC}[2K${lines[i] || ''}`;
     }
+    out += `${ESC}8`; // restore cursor
     stdout.write(out);
   }
 
-  function tick() {
-    if (animating()) frame += 1;
-    paint();
+  // ---- screen setup --------------------------------------------------------
+
+  function applyScrollRegion() {
+    footerTop = Math.max(2, rows() - footerH + 1);
+    // scroll region = everything above the footer
+    stdout.write(`${ESC}[1;${footerTop - 1}r`);
+    // park the cursor at the bottom of the scrolling region
+    stdout.write(`${ESC}[${footerTop - 1};1H`);
   }
 
-  // ---- lifecycle -----------------------------------------------------------
-
   function start() {
-    if (running) return;
-    running = true;
-    // Restore the terminal even if the process exits unexpectedly.
-    process.once('exit', () => { if (running) stdout.write(ALT_OFF); });
-    stdout.write(ALT_ON);
-    if (stdin.isTTY) stdin.setRawMode(true);
-    stdin.resume();
-    stdin.setEncoding('utf8');
-    stdin.on('data', onData);
-    onResize = () => paint();
+    if (started) return;
+    started = true;
+    // Footer = separator + one row per reviewer + a slot for the fixer + status.
+    footerH = state.agents.length + 3;
+    stdout.write(`${ESC}[2J${ESC}[H`); // clear the screen
+    applyScrollRegion();
+    drawFooter();
+    timer = setInterval(() => { frame += 1; drawFooter(); }, FRAME_MS);
+    onResize = () => { applyScrollRegion(); drawFooter(); };
     stdout.on('resize', onResize);
-    loop = setInterval(tick, FRAME_MS);
-    paint();
+    process.once('exit', () => { if (started) stdout.write(`${ESC}[r`); });
   }
 
   function stop() {
-    if (!running) return;
-    running = false;
-    if (loop) { clearInterval(loop); loop = null; }
+    if (!started) return;
+    started = false;
+    if (timer) { clearInterval(timer); timer = null; }
     if (onResize) { stdout.removeListener('resize', onResize); onResize = null; }
-    stdin.removeListener('data', onData);
-    if (stdin.isTTY) stdin.setRawMode(false);
-    stdin.pause();
-    stdout.write(ALT_OFF);
-  }
-
-  // ---- input ---------------------------------------------------------------
-
-  function scrollBy(delta) {
-    state.scroll = Math.max(0, state.scroll + delta);
-  }
-
-  function selectBy(delta) {
-    state.selected = Math.min(
-      Math.max(0, state.agents.length - 1),
-      Math.max(0, state.selected + delta),
-    );
-    state.scroll = 0;
-  }
-
-  function submitGate() {
-    const parsed = parseGateInput(state.gateValue);
-    if (parsed.action === 'edit') {
-      stop(); // give $EDITOR a clean terminal
-      let edited = state.gateFindings;
-      try {
-        edited = editFindingsInEditor(state.gateFindings);
-      } catch {
-        // editor aborted/failed — keep findings unchanged
-      }
-      state.gateFindings = edited;
-      state.findingsLines = formatFindings(edited).split('\n');
-      state.gateValue = '';
-      state.scroll = 0;
-      start();
-      return;
-    }
-    const submit = state.onGateSubmit;
-    state.onGateSubmit = null;
-    state.mode = 'running';
-    state.gateValue = '';
-    if (parsed.action === 'feedback') {
-      submit({ action: 'continue', findings: state.gateFindings, feedback: parsed.feedback });
-    } else {
-      submit({ action: parsed.action, findings: state.gateFindings, feedback: '' });
-    }
-  }
-
-  function handleKey(key) {
-    if (key.ctrlC) { stop(); process.exit(130); }
-
-    if (state.mode === 'running') {
-      if (key.up) selectBy(-1);
-      else if (key.down) selectBy(1);
-      else if (key.pageUp) scrollBy(SCROLL_STEP);
-      else if (key.pageDown) scrollBy(-SCROLL_STEP);
-      else if (key.char === 'q') { stop(); process.exit(130); }
-      paint();
-      return;
-    }
-
-    // gate mode
-    if (key.up) scrollBy(1);
-    else if (key.down) scrollBy(-1);
-    else if (key.pageUp) scrollBy(SCROLL_STEP);
-    else if (key.pageDown) scrollBy(-SCROLL_STEP);
-    else if (key.enter) { submitGate(); return; }
-    else if (key.backspace) state.gateValue = state.gateValue.slice(0, -1);
-    else if (key.char) state.gateValue += key.char;
-    paint();
-  }
-
-  function onData(data) {
-    let i = 0;
-    while (i < data.length) {
-      const rest = data.slice(i);
-      const ch = data[i];
-      if (ch === '\x03') { handleKey({ ctrlC: true }); i += 1; }
-      else if (ch === '\r' || ch === '\n') { handleKey({ enter: true }); i += 1; }
-      else if (ch === '\x7f' || ch === '\x08') { handleKey({ backspace: true }); i += 1; }
-      else if (ch === '\x1b') {
-        if (rest.startsWith(`${ESC}[A`)) { handleKey({ up: true }); i += 3; }
-        else if (rest.startsWith(`${ESC}[B`)) { handleKey({ down: true }); i += 3; }
-        else if (rest.startsWith(`${ESC}[5~`)) { handleKey({ pageUp: true }); i += 4; }
-        else if (rest.startsWith(`${ESC}[6~`)) { handleKey({ pageDown: true }); i += 4; }
-        else if (rest.startsWith(`${ESC}[`)) { i += 3; } // other CSI — skip
-        else i += 1;
-      } else if (ch >= ' ') { handleKey({ char: ch }); i += 1; }
-      else i += 1; // other control char — ignore
-    }
+    stdout.write(`${ESC}[r`);              // reset scroll region to full screen
+    stdout.write(`${ESC}[${rows()};1H\n`); // move below the footer
   }
 
   // ---- ui interface --------------------------------------------------------
@@ -288,13 +153,10 @@ export function createInkView() {
         done: false,
         findingCount: 0,
         skipped: false,
-        output: [],
       }));
-      state.selected = 0;
-      state.scroll = 0;
-      state.mode = 'running';
       start();
-      paint();
+      if (round > 1) stdout.write(`\n${dim(`── round ${round} ──`)}\n`);
+      drawFooter();
     },
 
     // Updates an agent row, adding it if unknown (e.g. the fixer mid-round).
@@ -308,39 +170,56 @@ export function createInkView() {
           done: false,
           findingCount: 0,
           skipped: false,
-          output: [],
         };
         state.agents.push(agent);
       }
       Object.assign(agent, patch);
+      drawFooter();
     },
 
+    // Streams one output line into the scrolling log, tagged with its agent.
     appendOutput(name, line) {
-      let agent = findAgent(name);
-      if (!agent) {
-        this.updateAgent(name, {});
-        agent = findAgent(name);
-      }
-      agent.output.push(line);
-      if (agent.output.length > MAX_OUTPUT_LINES) agent.output.shift();
+      if (!started) return;
+      const tag = name.padEnd(20).slice(0, 20);
+      // Strip control sequences so a noisy agent cannot corrupt the layout.
+      const clean = String(line ?? '')
+        .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
+        .replace(/[\x00-\x08\x0b-\x1f\x7f]/g, '');
+      stdout.write(`${dim(tag)} │ ${clean}\n`);
     },
 
     async findingsGate({ findings }) {
-      return new Promise((resolve) => {
-        state.mode = 'gate';
-        state.gateFindings = findings;
-        state.findingsLines = formatFindings(findings).split('\n');
-        state.gateValue = '';
-        state.scroll = 0;
-        state.onGateSubmit = resolve;
-        start();
-        paint();
+      let current = findings;
+      const ask = () => new Promise((resolve) => {
+        stdout.write(`\n${formatFindings(current)}\n`);
+        const rl = readline.createInterface({ input: stdin, output: stdout });
+        rl.question(
+          `\n[enter]=continue  /edit  /accept  /quit  or type feedback > `,
+          (answer) => { rl.close(); resolve(answer); },
+        );
       });
+      for (;;) {
+        const parsed = parseGateInput(await ask());
+        if (parsed.action === 'edit') {
+          try {
+            current = editFindingsInEditor(current);
+          } catch {
+            // editor aborted/failed — keep findings unchanged
+          }
+          applyScrollRegion();
+          drawFooter();
+          continue;
+        }
+        if (parsed.action === 'feedback') {
+          return { action: 'continue', findings: current, feedback: parsed.feedback };
+        }
+        return { action: parsed.action, findings: current, feedback: '' };
+      }
     },
 
     async showResult({ outcome, reportPath }) {
       stop();
-      stdout.write(`\nspecd-review: ${outcome}\nreport: ${reportPath}\n`);
+      stdout.write(`specd-review: ${outcome}\nreport: ${reportPath}\n`);
     },
   };
 }
