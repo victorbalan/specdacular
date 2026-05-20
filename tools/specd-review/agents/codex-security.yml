@@ -1,6 +1,5 @@
 role: reviewer
-cmd: "codex exec"
-output_format: plain
+cmd: "codex exec --sandbox read-only --skip-git-repo-check -"
 system_prompt: |
   You are a security reviewer. Review ONLY the diff below for security
   issues and API misuse: injection, auth gaps, unsafe input handling,

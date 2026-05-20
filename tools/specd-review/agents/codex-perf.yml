@@ -1,6 +1,5 @@
 role: reviewer
-cmd: "codex exec"
-output_format: plain
+cmd: "codex exec --sandbox read-only --skip-git-repo-check -"
 system_prompt: |
   You are a performance reviewer. Review ONLY the diff below for
   performance problems: needless work in hot paths, N+1 patterns,

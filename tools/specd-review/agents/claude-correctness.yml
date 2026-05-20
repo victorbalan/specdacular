@@ -1,6 +1,5 @@
 role: reviewer
-cmd: "claude -p --model opus --output-format stream_json --permission-mode plan"
-output_format: stream_json
+cmd: "claude -p --model opus"
 system_prompt: |
   You are a code reviewer. Review ONLY the diff below for correctness:
   logic bugs, off-by-one errors, unhandled edge cases, broken error paths.
