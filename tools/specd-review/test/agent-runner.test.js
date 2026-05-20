@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { renderPrompt, runAgent } from '../src/agent-runner.js';
 
 const fixture = (name) =>
-  fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url));
+  fileURLToPath(new URL(`../test-fixtures/${name}`, import.meta.url));
 
 describe('renderPrompt', () => {
   it('substitutes {{vars}} and leaves unknown ones blank', () => {
