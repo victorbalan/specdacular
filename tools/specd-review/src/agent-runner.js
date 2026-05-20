@@ -36,6 +36,13 @@ function spawnOnce(agent, prompt, { cwd, onStatus, timeout = 1800_000 }) {
 
     const timer = setTimeout(() => proc.kill('SIGKILL'), timeout);
 
+    // The child may exit before reading stdin (bad command, missing CLI),
+    // which makes writing the prompt fail with EPIPE. Swallow stream errors
+    // here — `error`/`close` below resolve the promise gracefully.
+    proc.stdin.on('error', () => {});
+    proc.stdout.on('error', () => {});
+    proc.stderr.on('error', () => {});
+
     let buf = '';
     proc.stdout.on('data', (chunk) => {
       buf += chunk.toString();

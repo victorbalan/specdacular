@@ -28,14 +28,21 @@ beforeEach(() => {
 afterEach(() => rmSync(repo, { recursive: true, force: true }));
 
 describe('git helpers', () => {
-  it('resolveBase finds the merge-base with main', async () => {
-    const base = await resolveBase(repo);
+  it('resolveBase falls back to a local base branch with no remote', async () => {
+    const { base, source } = await resolveBase(repo);
     a.equal(typeof base, 'string');
     a.ok(base.length > 0);
+    a.match(source, /local branch "main"/);
+  });
+
+  it('resolveBase honors an explicit base override', async () => {
+    const { base, source } = await resolveBase(repo, { baseOverride: 'main' });
+    a.ok(base.length > 0);
+    a.match(source, /--base main/);
   });
 
   it('getDiff returns the branch diff against the base', async () => {
-    const base = await resolveBase(repo);
+    const { base } = await resolveBase(repo);
     const diff = await getDiff(repo, base);
     a.match(diff, /changed/);
   });

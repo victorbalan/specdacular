@@ -65,7 +65,11 @@ async function review(prNumber, opts) {
   });
   if (opts.maxRounds) config.maxRounds = Number(opts.maxRounds);
 
-  const base = await resolveBase(cwd);
+  const { base, source } = await resolveBase(cwd, {
+    prNumber,
+    baseOverride: opts.base,
+  });
+  stdout.write(`Reviewing changes since ${base.slice(0, 7)} (${source})\n`);
   const interactive = !!opts.interactive;
   const view = (interactive && stdout.isTTY) ? createInkView() : createPlainView();
 
@@ -103,6 +107,7 @@ program.argument('[pr]', 'GitHub PR number to review (omit to review the current
   .option('-i, --interactive', 'pause at the findings gate for human input')
   .option('--agents <list>', 'comma-separated agent selection override')
   .option('--max-rounds <n>', 'override max_rounds')
+  .option('--base <ref>', 'branch/ref to review against (overrides auto-detection)')
   .option('--config <dir>', 'alternate global config directory')
   .action((pr, opts) => review(pr, opts));
 
