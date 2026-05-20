@@ -1,6 +1,10 @@
 import { describe, it } from 'node:test';
 import { strict as a } from 'node:assert';
+import { fileURLToPath } from 'node:url';
 import { renderPrompt, runAgent } from '../src/agent-runner.js';
+
+const fixture = (name) =>
+  fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url));
 
 describe('renderPrompt', () => {
   it('substitutes {{vars}} and leaves unknown ones blank', () => {
@@ -11,11 +15,10 @@ describe('renderPrompt', () => {
 
 describe('runAgent', () => {
   it('captures a specd-result block from a plain-transport agent', async () => {
-    const block = '```specd-result\\n{"summary":"ok","findings":[]}\\n```';
     const agent = {
       name: 'stub',
       transport: 'plain',
-      cmd: `node -e "console.log('${block}')"`,
+      cmd: `node ${fixture('stub-result.mjs')}`,
       systemPrompt: 'review {{diff}}',
     };
     const res = await runAgent(agent, { diff: 'D' }, { cwd: process.cwd() });
@@ -26,7 +29,7 @@ describe('runAgent', () => {
     const agent = {
       name: 'stub',
       transport: 'plain',
-      cmd: `node -e "console.log('nothing here')"`,
+      cmd: `node ${fixture('stub-noresult.mjs')}`,
       systemPrompt: 'x',
     };
     const res = await runAgent(agent, {}, { cwd: process.cwd() });

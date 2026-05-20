@@ -7,61 +7,6 @@ export function renderPrompt(template, vars) {
   );
 }
 
-// Parse a shell command string into [bin, ...args] without invoking a shell.
-// Handles double-quoted tokens (stripping outer quotes, preserving inner
-// single-quoted sub-strings) and bare tokens.
-function parseCmd(cmd) {
-  const tokens = [];
-  let i = 0;
-
-  while (i < cmd.length) {
-    // skip whitespace
-    while (i < cmd.length && (cmd[i] === ' ' || cmd[i] === '\t')) i++;
-    if (i >= cmd.length) break;
-
-    let token = '';
-
-    while (i < cmd.length) {
-      const ch = cmd[i];
-      if (ch === ' ' || ch === '\t') {
-        break;
-      } else if (ch === "'") {
-        // single-quoted: content is literal (preserve quotes for code strings)
-        token += "'";
-        i++;
-        while (i < cmd.length && cmd[i] !== "'") token += cmd[i++];
-        if (i < cmd.length) { token += "'"; i++; }
-      } else if (ch === '"') {
-        // double-quoted: strip outer quotes; preserve inner single-quoted sections
-        i++;
-        while (i < cmd.length && cmd[i] !== '"') {
-          if (cmd[i] === "'") {
-            token += "'";
-            i++;
-            while (i < cmd.length && cmd[i] !== "'") token += cmd[i++];
-            if (i < cmd.length) { token += "'"; i++; }
-          } else if (cmd[i] === '\\') {
-            i++;
-            if (i < cmd.length) token += cmd[i++];
-          } else {
-            token += cmd[i++];
-          }
-        }
-        if (i < cmd.length) i++; // skip closing "
-      } else if (ch === '\\') {
-        i++;
-        if (i < cmd.length) token += cmd[i++];
-      } else {
-        token += cmd[i++];
-      }
-    }
-
-    tokens.push(token);
-  }
-
-  return tokens;
-}
-
 // Unwrap a Claude `--output-format stream_json` line into its text lines.
 function streamJsonLines(line) {
   try {
@@ -80,8 +25,7 @@ function streamJsonLines(line) {
 
 function spawnOnce(agent, prompt, { cwd, onStatus, timeout = 1800_000 }) {
   return new Promise((resolve) => {
-    const [bin, ...args] = parseCmd(agent.cmd);
-    const proc = spawn(bin, args, { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
+    const proc = spawn(agent.cmd, { cwd, shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
 
     const parser = new StreamParser();
     let result = null;
